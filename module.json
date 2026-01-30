@@ -10,6 +10,6 @@
   "styles": ["style.css", "nexus-hud.css"],
   "url": "https://multiversusrpg.forge-vtt.com",
 "url": "https://github.com/hicarositi-pixel/multiversus-rpg",
-"manifest": "https://raw.githubusercontent.com/hicarositi-pixel/multiversus-rpg/refs/heads/main/module.json?token=GHSAT0AAAAAADUMWTZ3TNZGNJQCLQPJGAZS2L4TG2Q",
+"manifest": "https://raw.githubusercontent.com/hicarositi-pixel/multiversus-rpg/refs/heads/main/module.json",
 "download": "https://github.com/hicarositi-pixel/multiversus-rpg/archive/refs/heads/main.zip"
 }
