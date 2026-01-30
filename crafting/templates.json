@@ -1,0 +1,253 @@
+{
+  "_CONFIG": {
+    "BALANCE_POINTS": {
+      "1": 1,
+      "2": 2,
+      "3": 4,
+      "4": 6,
+      "5": 8,
+      "6": 16
+    },
+    "DESCRIPTION": "Tabela de conversão de Raridade para Pontos de Balanceamento (BP) usados para comprar qualidades Wild Talents."
+  },
+
+  "ESTRUTURAS": {
+    "PAREDE": {
+      "label": "Segmento de Parede",
+      "icon": "fas fa-square",
+      "type": "building",
+      "discipline": "Engenharia",
+      "base_cost_units": 20,
+      "description": "Uma barreira física estacionária. A resistência depende puramente da densidade do material.",
+      "derivatives": {
+        "hp": "unit_amount * mat_hp_mod",
+        "har": "mat_har",
+        "power": 0,
+        "sustento": 0,
+        "instability": 0,
+        "volatility": 0
+      }
+    },
+    "BANCADA_PROCESSAMENTO": {
+      "label": "Estação de Trabalho",
+      "icon": "fas fa-industry",
+      "type": "building",
+      "discipline": "Engenharia",
+      "base_cost_units": 50,
+      "description": "Estrutura complexa necessária para processar materiais de tiers superiores ou fornecer tags de ambiente.",
+      "derivatives": {
+        "hp": "(unit_amount * mat_hp_mod) * 0.5",
+        "har": "mat_har",
+        "power": "energy_tier * 2",
+        "sustento": 0,
+        "instability": 0,
+        "volatility": "energy_volatility"
+      }
+    },
+    "GERADOR": {
+      "label": "Gerador de Energia",
+      "icon": "fas fa-charging-station",
+      "type": "building",
+      "discipline": "Engenharia",
+      "base_cost_units": 40,
+      "description": "Converte combustível ou fluxo ambiente em energia utilizável para a base.",
+      "derivatives": {
+        "hp": "unit_amount * mat_hp_mod",
+        "har": "mat_har - 1",
+        "power": "energy_tier * 5",
+        "sustento": 0,
+        "instability": "nucleo_instability",
+        "volatility": "energy_volatility"
+      }
+    }
+  },
+
+  "ARMAS": {
+    "ARMA_CORPO": {
+      "label": "Arma Corpo-a-Corpo",
+      "icon": "fas fa-gavel",
+      "type": "item",
+      "discipline": "Engenharia",
+      "base_cost_units": 3,
+      "wt_stats": { "qualities": "Attacks", "base_damage": "Width + 1" },
+      "description": "Lâmina, porrete ou ferramenta ofensiva. O dano escala com a qualidade da matéria.",
+      "derivatives": {
+        "hp": "mat_hp_mod * 0.1",
+        "har": "mat_har",
+        "power": 0,
+        "sustento": 0,
+        "instability": "nucleo_instability",
+        "volatility": 0
+      }
+    },
+    "ARMA_DISTANCIA": {
+      "label": "Arma de Disparo",
+      "icon": "fas fa-crosshairs",
+      "type": "item",
+      "discipline": "Engenharia",
+      "base_cost_units": 4,
+      "wt_stats": { "qualities": "Attacks", "base_damage": "Width", "extras": "Range" },
+      "description": "Dispositivo balístico ou de energia. Requer munição ou bateria.",
+      "derivatives": {
+        "hp": "mat_hp_mod * 0.05",
+        "har": "mat_har - 1",
+        "power": "energy_tier * 1",
+        "sustento": 0,
+        "instability": 0,
+        "volatility": "energy_volatility"
+      }
+    }
+  },
+
+  "ARMADURAS": {
+    "TRAJE_LEVE": {
+      "label": "Traje Leve / Roupa",
+      "icon": "fas fa-tshirt",
+      "type": "item",
+      "discipline": "Engenharia",
+      "base_cost_units": 3,
+      "wt_stats": { "qualities": "Defends", "locations": "Torso, Arms" },
+      "description": "Proteção flexível focada em mobilidade. Adiciona LAR (Light Armor).",
+      "derivatives": {
+        "hp": "mat_hp_mod * 0.2",
+        "har": 0,
+        "lar": "mat_har",
+        "power": 0,
+        "sustento": 0,
+        "instability": 0,
+        "volatility": 0
+      }
+    },
+    "ARMADURA_PESADA": {
+      "label": "Blindagem Pesada",
+      "icon": "fas fa-shield-alt",
+      "type": "item",
+      "discipline": "Engenharia",
+      "base_cost_units": 10,
+      "wt_stats": { "qualities": "Defends", "locations": "All" },
+      "description": "Placas rígidas. Converte a dureza do material em HAR (Hard Armor).",
+      "derivatives": {
+        "hp": "mat_hp_mod * 0.5",
+        "har": "mat_har",
+        "power": 0,
+        "sustento": 0,
+        "instability": 0,
+        "volatility": 0
+      }
+    }
+  },
+
+  "ACESSORIOS": {
+    "UTILITARIO": {
+      "label": "Acessório Utilitário",
+      "icon": "fas fa-ring",
+      "type": "item",
+      "discipline": "Sintética",
+      "base_cost_units": 2,
+      "wt_stats": { "qualities": "Useful" },
+      "description": "Pequenos objetos que conferem bônus passivos ou habilidades menores.",
+      "derivatives": {
+        "hp": "mat_hp_mod * 0.01",
+        "har": 0,
+        "power": "energy_tier * 0.5",
+        "sustento": 0,
+        "instability": "nucleo_instability",
+        "volatility": 0
+      }
+    }
+  },
+
+  "ITENS_GERAIS": {
+    "COMPONENTE": {
+      "label": "Componente/Peça",
+      "icon": "fas fa-cogs",
+      "type": "item",
+      "discipline": "Engenharia",
+      "base_cost_units": 1,
+      "description": "Item intermediário usado para reparos ou quests.",
+      "derivatives": {
+        "hp": "mat_hp_mod * 0.1",
+        "har": 0,
+        "power": 0,
+        "sustento": 0,
+        "instability": 0,
+        "volatility": 0
+      }
+    }
+  },
+
+  "CONSUMIVEIS": {
+    "ALIMENTO": {
+      "label": "Ração/Comida",
+      "icon": "fas fa-utensils",
+      "type": "consumable",
+      "discipline": "Sobrevivência",
+      "base_cost_units": 1,
+      "description": "Recupera Fome e Sede baseados no tier do organismo.",
+      "derivatives": {
+        "hp": 0,
+        "har": 0,
+        "power": 0,
+        "sustento": "organismo_tier * 2",
+        "instability": 0,
+        "volatility": 0
+      }
+    },
+    "MEDICAMENTO": {
+      "label": "Kit Médico/Injetor",
+      "icon": "fas fa-syringe",
+      "type": "consumable",
+      "discipline": "Sintética",
+      "base_cost_units": 2,
+      "description": "Cura dano (HP) ou remove condições negativas.",
+      "derivatives": {
+        "hp": 0,
+        "har": 0,
+        "power": 0,
+        "sustento": 0,
+        "heal_power": "organismo_tier * 1",
+        "instability": "nucleo_instability",
+        "volatility": "energy_volatility"
+      }
+    }
+  },
+
+  "FERRAMENTAS": {
+    "KIT_TECNICO": {
+      "label": "Kit de Ferramentas",
+      "icon": "fas fa-toolbox",
+      "type": "item",
+      "discipline": "Engenharia",
+      "base_cost_units": 5,
+      "wt_stats": { "qualities": "Useful", "bonus": "+1d" },
+      "description": "Permite realizar testes de perícia com bônus ou habilita ações complexas.",
+      "derivatives": {
+        "hp": "mat_hp_mod * 0.2",
+        "har": "mat_har * 0.5",
+        "power": 0,
+        "sustento": 0,
+        "instability": 0,
+        "volatility": 0
+      }
+    }
+  },
+
+  "VEICULOS": {
+    "VEICULO_TERRESTRE": {
+      "label": "Veículo Terrestre",
+      "icon": "fas fa-truck-pickup",
+      "type": "vehicle",
+      "discipline": "Engenharia",
+      "base_cost_units": 100,
+      "description": "Meio de transporte motorizado. Requer combustível constante.",
+      "derivatives": {
+        "hp": "unit_amount * mat_hp_mod",
+        "har": "mat_har + 2",
+        "power": "energy_tier * 10",
+        "sustento": 0,
+        "instability": 0,
+        "volatility": "energy_volatility"
+      }
+    }
+  }
+}

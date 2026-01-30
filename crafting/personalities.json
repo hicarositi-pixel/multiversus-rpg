@@ -1,0 +1,152 @@
+{
+  "_METADATA": {
+    "version": "1.1",
+    "description": "Base de dados consolidada de arquétipos para NPCs da Divisão Gama. Efeitos mecânicos fixos para suporte a Ativos e Jogadores.",
+    "system_ref": "Multiversus RPG / ORE"
+  },
+
+  "MENTOR": {
+    "label": "O Mentor",
+    "archetype_ref": "The Sage / Old Man",
+    "description": "Possui conhecimento antigo ou técnico. Age como conselheiro e evita que o grupo cometa erros estúpidos.",
+    "narrative_hook": "Passa o ciclo ensinando outros ou revisando planos táticos.",
+    "effect": {
+      "label": "Sabedoria Compartilhada",
+      "desc": "Uma vez por sessão, permite que um Jogador refaça um teste de Perícia Mental (Engenharia ou Sintética) que tenha falhado.",
+      "type": "reroll_mechanic",
+      "value": 1
+    }
+  },
+
+  "HEROI": {
+    "label": "O Herói",
+    "archetype_ref": "The Hero / Protagonist",
+    "description": "Corajoso, altruísta e inspirador. Tende a se colocar em risco para proteger a integridade da base.",
+    "narrative_hook": "Voluntaria-se para as tarefas mais perigosas ou discursa para elevar o moral do pelotão.",
+    "effect": {
+      "label": "Presença Inspiradora",
+      "desc": "No início de cada ciclo, remove 1 ponto de Exaustão ou restaura 1 WP de um Jogador à escolha.",
+      "type": "recovery_mechanic",
+      "value": 2
+    }
+  },
+
+  "ALIEN": {
+    "label": "O Alien",
+    "archetype_ref": "The Outsider / Weirdo",
+    "description": "Estranho, desconectado ou literalmente não-humano. Vê o mundo de forma diferente e encontra coisas que ninguém mais vê.",
+    "narrative_hook": "Fica encarando o vazio ou coletando sucata que parece inútil, mas pulsa com energia residual.",
+    "effect": {
+      "label": "Sintonia do Vazio",
+      "desc": "Gera automaticamente +1 Unidade de NÚCLEO (Tier respectivo ao do NPC) por ciclo, encontrado em locais improváveis.",
+      "type": "resource_gen",
+      "resource": "NUCLEO",
+      "value": 1
+    }
+  },
+
+  "SLASHER": {
+    "label": "O Executor",
+    "archetype_ref": "The Slasher / Anti-Hero",
+    "description": "Frio, eficiente e levemente perturbador. Resolve problemas com violência extrema ou pragmatismo cruel.",
+    "narrative_hook": "Afia lâminas compulsivamente ou vigia o perímetro em silêncio absoluto, emanando intenção assassina.",
+    "effect": {
+      "label": "Solução Final",
+      "desc": "Em combate, o primeiro ataque bem-sucedido de um aliado apoiado por este NPC causa +2 de dano SK.",
+      "type": "combat_buff",
+      "value": 2
+    }
+  },
+
+  "COLETOR": {
+    "label": "O Coletor",
+    "archetype_ref": "The Scavenger / Mad Max",
+    "description": "Especialista em detritos. Consegue identificar metais raros e componentes úteis em pilhas de lixo inerte.",
+    "narrative_hook": "Sempre retorna de explorações carregando fardos pesados de metal e componentes eletrônicos.",
+    "effect": {
+      "label": "Olho para Sucata",
+      "desc": "Ao realizar uma coleta de MATÉRIA, o grupo recebe +2 Unidades adicionais de recursos comuns (Gravetos, Sucata ou Pedra).",
+      "type": "resource_gen",
+      "resource": "MATERIA",
+      "value": 2
+    }
+  },
+
+  "ZELADOR": {
+    "label": "O Zelador",
+    "archetype_ref": "The Caretaker / Alfred",
+    "description": "Responsável pela manutenção física e emocional da base. Garante que as necessidades básicas de todos sejam supridas.",
+    "narrative_hook": "Prepara a fornalha, organiza as camas e garante que o estoque de água não seja corrompido.",
+    "effect": {
+      "label": "Conforto da Base",
+      "desc": "Jogadores descansando na presença deste NPC recuperam +1 ponto adicional de Sanidade e ignoram 1 nível de Sede.",
+      "type": "survival_buff",
+      "value": 1
+    }
+  },
+
+  "ESPECIALISTA": {
+    "label": "O Armeiro",
+    "archetype_ref": "The Tech Wizard / Q",
+    "description": "Gênio da engenharia de gambiarra. Sabe como extrair o máximo de energia com o mínimo de instabilidade.",
+    "narrative_hook": "Vive desmontando as armas dos jogadores para 'melhorar o fluxo de mana'.",
+    "effect": {
+      "label": "Calibragem Geta",
+      "desc": "Ao criar itens que usam ENERGIA, reduz o valor de INSTABILIDADE (Flaws) em -1 ponto (Mínimo 0).",
+      "type": "crafting_buff",
+      "value": -1
+    }
+  },
+
+  "FANTASMA": {
+    "label": "O Fantasma",
+    "archetype_ref": "The Scout / Solid Snake",
+    "description": "Especialista em infiltração. Sua presença é tão sutil que ele pode estar na mesma sala sem ser notado por sensores.",
+    "narrative_hook": "Relata rastro de inimigos e Bosses antes mesmo de serem detectados pelo radar da base.",
+    "effect": {
+      "label": "Previsão Tática",
+      "desc": "Na fase de Declaração de combate, permite que um Ativo mude sua ação após o inimigo ter declarado a dele.",
+      "type": "tactical_buff",
+      "value": "reaction_priority"
+    }
+  },
+
+  "SORTUDO": {
+    "label": "O Sortudo",
+    "archetype_ref": "The Fool / Jack Sparrow",
+    "description": "Um sobrevivente improvável. A realidade parece cometer erros favoráveis sempre que ele está em perigo.",
+    "narrative_hook": "Encontra recursos raros 'tropeçando' neles ou escapa de execuções por puro azar do carrasco.",
+    "effect": {
+      "label": "Aura Probabilística",
+      "desc": "Uma vez por sessão, permite que um Jogador ignore os efeitos de uma Falha Crítica (Botch) e a transforme em erro comum.",
+      "type": "luck_mechanic",
+      "value": 1
+    }
+  },
+
+  "BRUTO": {
+    "label": "O Protetor",
+    "archetype_ref": "The Wall / Muscle",
+    "description": "Uma fortaleza de carne ou metal. Sua única diretriz é ser o escudo final entre a ameaça e o grupo.",
+    "narrative_hook": "Bloqueia entradas durante alertas ou carrega aliados feridos para fora da zona de morte.",
+    "effect": {
+      "label": "Interposição Absoluta",
+      "desc": "Pode absorver 1 hit de dano físico direcionado a um Ativo por combate, sem necessidade de rolagem de defesa.",
+      "type": "defense_buff",
+      "value": 1
+    }
+  },
+
+  "PROFETA": {
+    "label": "O Profeta",
+    "archetype_ref": "The Zealot / Morpheus",
+    "description": "Enxerga os padrões do Lobby. Sua obsessão pelo Núcleo permite extrair potências que outros temem tocar.",
+    "narrative_hook": "Medita diante de cristais Nexus e fala sobre a 'grande síntese' que está por vir.",
+    "effect": {
+      "label": "Vontade Catalisadora",
+      "desc": "Ao usar um NÚCLEO no sintetizador, aumenta a VOLATILIDADE (PB) em +1 ponto, permitindo itens de Tier superior.",
+      "type": "core_buff",
+      "value": 1
+    }
+  }
+}

@@ -1,0 +1,445 @@
+/* src/styles/global.css */
+
+:root {
+  --c-primary: #00ff41; 
+  --bg-black: #050505;
+  --f-radius: 4px;
+}
+
+/* ============================================================
+   1. JANELAS DE SISTEMA (OPENING & LOADING) - TELA CHEIA FORÇADA
+   Alvo: Classes definidas no main.js
+============================================================ */
+
+/* Aplica as regras para AMBAS as janelas de uma vez */
+.window-app.nexus-opening-window,
+.window-app.nexus-loading-window {
+    background: #000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    
+    /* FORÇA BRUTA DE POSICIONAMENTO */
+    position: fixed !important; /* Garante que ignore o container relativo */
+    top: 0px !important;
+    left: 0px !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    max-width: none !important;
+    max-height: none !important;
+    
+    /* Z-INDEX SUPREMO */
+    z-index: 999999 !important; 
+}
+
+/* O Miolo das Janelas (Conteúdo) */
+.window-app.nexus-opening-window .window-content,
+.window-app.nexus-loading-window .window-content {
+    background: #000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Esconde o Header do Foundry nessas janelas especificamente */
+.window-app.nexus-opening-window .window-header,
+.window-app.nexus-loading-window .window-header {
+    display: none !important;
+}
+
+/* ============================================================
+   2. FICHA DE PERSONAGEM (MULTIVERSUS OS)
+============================================================ */
+/* ... (Mantenha o resto do seu CSS da ficha igual estava) ... */
+
+.window-app.multiversus-os {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    font-family: 'Courier New', monospace;
+}
+
+.window-app.multiversus-os::before {
+    content: "";
+    position: absolute;
+    inset: var(--f-inset, 0px); 
+    background: var(--f-bg, var(--bg-black));
+    border: var(--f-border, 1px solid var(--c-primary));
+    border-radius: var(--f-radius, 4px);
+    box-shadow: var(--f-shadow, 0 0 15px rgba(0, 255, 65, 0.2));
+    z-index: -1;
+    transition: all 0.4s ease;
+    clip-path: var(--f-clip, none);
+}
+
+.window-app.multiversus-os .window-header {
+    background: var(--f-header-bg, #020202) !important;
+    border-bottom: var(--f-header-border, 1px solid var(--c-primary)) !important;
+    color: var(--f-header-text, var(--c-primary)) !important;
+    flex: 0 0 30px;
+    align-items: center;
+    padding: 0 10px !important;
+    border-radius: var(--f-radius, 4px) var(--f-radius, 4px) 0 0;
+    z-index: 100;
+    transition: 0.4s;
+}
+
+.window-app.multiversus-os .window-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    text-shadow: 0 0 5px currentColor;
+    font-size: 14px;
+    flex: 1;
+}
+
+.window-app.multiversus-os .window-header .window-control {
+    color: currentColor !important;
+    background: transparent !important;
+    border: none !important;
+    opacity: 0.7;
+    margin-left: 5px;
+}
+.window-app.multiversus-os .window-header .window-control:hover {
+    opacity: 1;
+    text-shadow: 0 0 8px currentColor;
+    transform: scale(1.1);
+}
+
+.window-app.multiversus-os .window-content {
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    color: var(--c-primary);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+}
+
+/* ============================================================
+   3. UTILITÁRIOS GLOBAIS
+============================================================ */
+.root-terminal {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background-color: transparent;
+}
+
+.wallpaper-layer { 
+    position: absolute; inset: 0; 
+    background-size: cover; background-position: center; 
+    opacity: 0.4; z-index: 0; pointer-events: none;
+    backface-visibility: hidden; perspective: 1000; transform: translate3d(0,0,0);
+}
+
+.window-app.multiversus-os ::-webkit-scrollbar { width: 8px; }
+.window-app.multiversus-os ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); }
+.window-app.multiversus-os ::-webkit-scrollbar-thumb { background: var(--c-primary); border-radius: 4px; }
+
+:global(.root-terminal *) { border-color: var(--c-primary); box-sizing: border-box; }
+:global(.root-terminal button:hover) { cursor: pointer; }
+
+/* FORÇA SUPREMA DE TELA CHEIA */
+:global(#nexus-opening) {
+    position: fixed !important; /* Essencial */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    background: black !important;
+}
+
+#nexus-opening {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    margin: 0 !important;
+    transform: none !important; /* Anula centralização automática */
+    background: black !important;
+    border: 0 !important;
+}
+
+#nexus-opening .window-content {
+    width: 100% !important;
+    height: 100% !important;
+    background: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+
+#nexus-opening {
+    position: fixed !important; /* Ignora o layout relativo do Foundry */
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 999999 !important; /* Fica na frente de tudo */
+    background: black !important;
+    transform: none !important; /* Remove centralização automática do Foundry */
+    max-width: none !important;
+    max-height: none !important;
+}
+
+/* Garante que o conteúdo interno acompanhe */
+#nexus-opening .window-content {
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: black !important;
+    overflow: hidden !important;
+}
+
+/* Esconde o cabeçalho se o JS falhar em esconder */
+#nexus-opening .window-header {
+    display: none !important;
+}
+
+/* ============================================================
+   ESTILIZAÇÃO DO CHAT (NEXUS OS STYLE)
+============================================================ */
+
+/* 1. O Container do Chat */
+#chat-log {
+    background: rgba(5, 5, 10, 0.8) !important;
+    backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(0, 191, 255, 0.2);
+}
+
+/* 2. As Mensagens Individuais */
+#chat-log .chat-message {
+    background: rgba(20, 20, 30, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-left: 3px solid #00bfff !important; /* Neon Azul */
+    color: #e0f7ff !important;
+    margin: 5px 10px !important;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+}
+
+/* Efeito de Hover na mensagem */
+#chat-log .chat-message:hover {
+    border-left: 3px solid #ffffff !important;
+    background: rgba(30, 30, 45, 0.8) !important;
+    box-shadow: 0 0 10px rgba(0, 191, 255, 0.2);
+    transform: translateX(2px);
+}
+
+/* 3. Cabeçalho da Mensagem (Nome do Personagem/Jogador) */
+#chat-log .chat-message .message-header {
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(0, 191, 255, 0.2);
+    padding-bottom: 3px;
+    margin-bottom: 5px;
+}
+
+#chat-log .chat-message .message-sender {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 11px;
+    color: #00bfff; /* Nome em Azul Neon */
+}
+
+/* 4. Estilo dos Dados (Rolls) */
+.dice-roll .dice-formula, 
+.dice-roll .dice-total {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid #00bfff !important;
+    color: #fff !important;
+    text-shadow: 0 0 5px #00bfff;
+    border-radius: 4px !important;
+}
+
+.dice-total.critical {
+    color: #00ff41 !important;
+    text-shadow: 0 0 10px #00ff41 !important;
+}
+
+.dice-total.fumble {
+    color: #ff3333 !important;
+    text-shadow: 0 0 10px #ff3333 !important;
+}
+
+/* 5. Área de Texto do Chat (Input) */
+#chat-form {
+    background: rgba(0, 0, 0, 0.8) !important;
+    border-top: 1px solid #00bfff !important;
+    padding: 5px !important;
+}
+
+#chat-form textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff !important;
+    border: 1px solid rgba(0, 191, 255, 0.3) !important;
+    font-family: 'Share Tech Mono', monospace;
+}
+
+#chat-form textarea:focus {
+    border-color: #00bfff !important;
+    box-shadow: 0 0 5px #00bfff;
+}
+
+/* ============================================================
+   ANIMAÇÕES E ÍCONES DO FOUNDRY
+============================================================ */
+
+/* Ícones das Abas Laterais (Chat, Combate, Diário...) */
+#sidebar-tabs > .item {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+#sidebar-tabs > .item.active {
+    color: #00bfff !important;
+    text-shadow: 0 0 10px #00bfff;
+    border-bottom: 2px solid #00bfff;
+    box-shadow: none !important;
+}
+
+/* Animação nos ícones ao passar o mouse */
+#sidebar-tabs > .item:hover i {
+    animation: icon-pulse 1s infinite alternate;
+    color: #fff;
+}
+
+/* Botões do Topo das Janelas (Fechar, Minimizar) */
+.window-app .window-header .window-control i {
+    transition: transform 0.2s ease;
+}
+
+.window-app .window-header .window-control:hover i {
+    transform: rotate(90deg) scale(1.2);
+    color: #00bfff !important;
+}
+
+/* Animação de Pulsar */
+@keyframes icon-pulse {
+    from {
+        transform: scale(1);
+        text-shadow: 0 0 0px #00bfff;
+    }
+    to {
+        transform: scale(1.2);
+        text-shadow: 0 0 8px #00bfff;
+    }
+}
+
+/* Pequeno detalhe: Scrollbar Estilizada para o Chat */
+#chat-log::-webkit-scrollbar { width: 4px; }
+#chat-log::-webkit-scrollbar-track { background: transparent; }
+#chat-log::-webkit-scrollbar-thumb { 
+    background: #00bfff; 
+    border-radius: 10px;
+    box-shadow: 0 0 5px #00bfff;
+}
+
+/* ============================================================
+   CHAT LOG - TUNING EXTREMO (GRADIENTE + NEON BRANCO)
+============================================================ */
+
+/* 1. O Container Principal do Chat */
+#chat-log {
+    /* Gradiente Cinza Profundo (Cinza Espacial para Grafite) */
+    background: linear-gradient(180deg, #1a1a1c 0%, #0d0d0e 100%) !important;
+    border-left: 2px solid #00bfff; /* Borda Neon Azul constante */
+    box-shadow: inset 10px 0 20px rgba(0,0,0,0.5);
+    padding: 5px !important;
+}
+
+/* 2. As Mensagens (Células de Dados) */
+#chat-log .chat-message {
+    background: rgba(45, 45, 50, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    margin: 8px 5px !important;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    /* Efeito de vidro jateado */
+    backdrop-filter: blur(5px);
+}
+
+/* 3. Estilo do Texto (Branco Neon) */
+#chat-log .chat-message .message-content,
+#chat-log .chat-message .message-header {
+    color: #ffffff !important;
+    /* O Segredo do Branco Neon: múltiplas camadas de glow */
+    text-shadow: 
+        0 0 2px #fff,
+        0 0 8px rgba(255, 255, 255, 0.5) !important;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: 400;
+}
+
+/* 4. Nome do Personagem/Sender */
+#chat-log .chat-message .message-sender {
+    color: #00bfff !important; /* Azul Neon para destacar quem fala */
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 10px rgba(0, 191, 255, 0.6);
+}
+
+/* 5. Hover na Mensagem - Ativação de Célula */
+#chat-log .chat-message:hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: #00bfff !important;
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.2) !important;
+    transform: scale(1.01);
+}
+
+/* 6. Estilização de Rolls (Dados) */
+.dice-roll .dice-formula, 
+.dice-roll .dice-total {
+    background: rgba(0, 0, 0, 0.6) !important;
+    border: 1px solid #fff !important;
+    color: #fff !important;
+    /* Brilho neon branco nos números */
+    text-shadow: 0 0 10px #fff, 0 0 20px #00bfff !important;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+}
+
+/* 7. Input de Chat (Área de Digitação) */
+#chat-form {
+    background: #0d0d0e !important;
+    border-top: 2px solid #00bfff !important;
+    padding: 10px !important;
+}
+
+#chat-form textarea {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(0, 191, 255, 0.4) !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 5px #fff;
+    border-radius: 4px;
+}
+
+/* 8. Scanlines Overlay (Efeito de Monitor Antigo no Chat) */
+#chat-log::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+    background-size: 100% 3px, 3px 100%;
+    pointer-events: none;
+    z-index: 100;
+}

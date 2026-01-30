@@ -1,0 +1,117 @@
+{
+  "_METADATA": {
+    "version": "FINAL",
+    "description": "Definições estáticas das estruturas da Base e seus upgrades."
+  },
+
+  "STRUCTURES": {
+    "REFINARIA": {
+      "label": "Refinaria de Matéria",
+      "icon": "fas fa-burn",
+      "description": "Processa recursos brutos e converte quantidade em qualidade.",
+      "base_mechanic": "conversion_cap",
+      "tiers": {
+        "1": { "desc": "Permite processar Matéria Comum.", "cap": 1 },
+        "2": { "desc": "Permite processar Matéria Rara.", "cap": 2 },
+        "3": { "desc": "Permite processar Matéria Lendária.", "cap": 3 },
+        "4": { "desc": "Permite processar Matéria Mítica.", "cap": 4 },
+        "5": { "desc": "Permite processar Matéria Universal.", "cap": 5 },
+        "6": { "desc": "Permite processar Matéria Multiversal.", "cap": 6 }
+      },
+      "upgrades_template": {
+        "COMPRESSOR": {
+          "label": "Compressor de Matéria",
+          "cost": { "MATERIA": { "2": 20 }, "ENERGIA": { "1": 10 } },
+          "effect_key": "refinery_cost_reduction",
+          "effect_val": 0.1,
+          "desc": "Reduz o custo de conversão de materiais em 10%."
+        },
+        "RECICLADORA": {
+          "label": "Recicladora Automática",
+          "cost": { "MATERIA": { "1": 100 }, "ENERGIA": { "1": 20 } },
+          "effect_key": "passive_scrap",
+          "effect_val": 5,
+          "desc": "Gera 5 unidades de Matéria Comum por ciclo (Lixo processado)."
+        }
+      }
+    },
+
+    "OFICINA": {
+      "label": "Oficina de Engenharia",
+      "icon": "fas fa-wrench",
+      "description": "Centro de fabricação de itens, veículos e estruturas de defesa.",
+      "base_mechanic": "crafting_unlock",
+      "tiers": {
+        "1": { "desc": "Ferramentas básicas. Habilita 'Engenharia' Tier 1.", "cap": 1 },
+        "2": { "desc": "Maquinário pesado. Habilita craft de Itens Raros.", "cap": 2 },
+        "3": { "desc": "Montagem molecular. Habilita craft de Itens Lendários.", "cap": 3 },
+        "4": { "desc": "Forja de Realidade. Habilita craft de Itens Míticos.", "cap": 4 }
+      },
+      "upgrades_template": {
+        "GUINDASTE": {
+          "label": "Guindaste Hidráulico",
+          "cost": { "MATERIA": { "2": 50 } },
+          "effect_key": "building_discount",
+          "effect_val": 0.2,
+          "desc": "Reduz o custo de construção de Paredes/Portões em 20%."
+        },
+        "CNC": {
+          "label": "Torno de Precisão CNC",
+          "cost": { "MATERIA": { "2": 30 }, "ENERGIA": { "2": 5 } },
+          "effect_key": "quality_bonus",
+          "effect_val": 1,
+          "desc": "Adiciona +1 de Qualidade (Height) em rolagens de craft."
+        }
+      }
+    },
+
+    "LABORATORIO": {
+      "label": "Laboratório Sintético",
+      "icon": "fas fa-flask",
+      "description": "Desenvolvimento de químicos, medicinas e manipulação de energia.",
+      "base_mechanic": "synthesis_unlock",
+      "tiers": {
+        "1": { "desc": "Química básica e primeiros socorros.", "cap": 1 },
+        "2": { "desc": "Refino de combustível e drogas de combate.", "cap": 2 },
+        "3": { "desc": "Bioengenharia e manipulação de Núcleos.", "cap": 3 }
+      },
+      "upgrades_template": {
+        "HIDROPONIA": {
+          "label": "Jardim Hidropônico",
+          "cost": { "MATERIA": { "1": 50 }, "ORGANISMO": { "1": 20 } },
+          "effect_key": "passive_food",
+          "effect_val": 10,
+          "desc": "Gera 10 unidades de Organismo (Comida) por ciclo."
+        },
+        "ESTABILIZADOR": {
+          "label": "Campo de Estase",
+          "cost": { "ENERGIA": { "2": 10 }, "NUCLEO": { "1": 1 } },
+          "effect_key": "spoilage_prevent",
+          "effect_val": true,
+          "desc": "Impede que organismos estraguem no inventário da base."
+        }
+      }
+    },
+
+    "TERMINAL": {
+      "label": "Terminal Nexus",
+      "icon": "fas fa-satellite-dish",
+      "description": "Pesquisa, comunicação e gerenciamento de anomalias.",
+      "base_mechanic": "research_speed",
+      "tiers": {
+        "1": { "desc": "Acesso ao banco de dados local.", "cap": 1 },
+        "2": { "desc": "Radar de curto alcance. Detecta anomalias.", "cap": 2 },
+        "3": { "desc": "Uplink Multiversal. Permite salvar Blueprints Complexos.", "cap": 3 }
+      },
+      "upgrades_template": {
+        "IA_ASSISTENTE": {
+          "label": "Núcleo de I.A.",
+          "cost": { "ENERGIA": { "2": 20 }, "NUCLEO": { "1": 5 } },
+          "effect_key": "blueprint_discount",
+          "effect_val": 0.15,
+          "desc": "Reduz o custo de Pontos de Pesquisa para novos Blueprints em 15%."
+        }
+      }
+    }
+  }
+}

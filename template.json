@@ -1,0 +1,45 @@
+{
+  "Actor": {
+    "types": ["character"],
+    "character": {
+      "templates": [],
+      
+      "xp": 0,
+      "level": 1,
+      "spentXP": 0,
+      "points": {
+        "statsCost": 0,
+        "powersSpent": 0,
+        "bioSpent": 0
+      },
+
+      "survival": {
+        "bio": {
+          "fome": 10,
+          "sede": 10,
+          "exaustao": 10,
+          "wp": 10
+        },
+        "session": {
+          "actions_max": 2,
+          "actions_used": 0,
+          "stress_counter": 0,
+          "day_state": "DIA",
+          "notes": ""
+        },
+        "disciplines": {
+          "extracao": 0,
+          "engenharia": 0,
+          "sintetica": 0,
+          "sobrevivencia": 0
+        },
+        "pockets": {
+          "MATERIA":   { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0 },
+          "ORGANISMO": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0 },
+          "ENERGIA":   { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0 },
+          "NUCLEO":    { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0 }
+        }
+      }
+    }
+  }
+}

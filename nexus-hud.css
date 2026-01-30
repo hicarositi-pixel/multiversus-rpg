@@ -1,0 +1,94 @@
+/* --- NEXUS HUD: OVERRIDE TOTAL --- */
+
+/* 1. Limpa o estilo nativo (Remove o bege feio) */
+#token-hud {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+/* 2. Estiliza as colunas laterais originais (Elevation/Status) */
+#token-hud .col.left,
+#token-hud .col.right {
+    background: rgba(10, 10, 15, 0.9) !important;
+    border: 1px solid #00ff41 !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.2) !important;
+    gap: 5px;
+}
+
+/* 3. Estiliza os botões nativos e os nossos */
+#token-hud .control-icon {
+    width: 40px !important;
+    height: 40px !important;
+    margin: 2px 0 !important;
+    border-radius: 6px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid #333 !important;
+    color: #ccc !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#token-hud .control-icon:hover,
+#token-hud .control-icon.active {
+    background: rgba(0, 255, 65, 0.2) !important;
+    color: #00ff41 !important;
+    border-color: #00ff41 !important;
+    box-shadow: 0 0 10px #00ff41 !important;
+}
+
+/* 4. NOSSA BARRA INFERIOR (Nexus Bar) */
+.nexus-bar {
+    position: absolute;
+    top: 100%; /* Cola embaixo do token */
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 15px; /* Espaço do token */
+    
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    
+    background: rgba(0, 0, 0, 0.85);
+    border: 1px solid #eab308; /* Amarelo */
+    border-radius: 50px;
+    padding: 6px 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+    pointer-events: all;
+    z-index: 999;
+}
+
+/* Ícones da Barra Nexus */
+.nexus-bar .control-icon {
+    border-radius: 50% !important; /* Redondos */
+    background: rgba(0,0,0,0.5) !important;
+    margin: 0 !important;
+}
+
+.nexus-bar .control-icon:hover {
+    background: #eab308 !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px #eab308 !important;
+    transform: translateY(-2px);
+}
+
+/* Divisor */
+.nexus-divider {
+    width: 1px;
+    height: 25px;
+    background: #555;
+    margin: 0 4px;
+}
+
+/* Placeholders */
+.nexus-placeholder {
+    opacity: 0.3;
+    border: 1px dashed #666 !important;
+    cursor: not-allowed;
+}

@@ -1,0 +1,66 @@
+{
+  "MATERIA": {
+    "label": "Matéria",
+    "description": "Recursos estruturais para construção e fabricação de equipamentos físicos.",
+    "color": "#a1a1aa",
+    "icon": "fas fa-cube",
+    "base_mechanic": "structure",
+    "tiers": {
+      "1": { "label": "Comum", "har": 0, "hp_mod": 1, "desc": "Sucata, madeira simples, pedra bruta." },
+      "2": { "label": "Raro", "har": 1, "hp_mod": 2, "desc": "Aço reforçado, polímeros industriais." },
+      "3": { "label": "Lendário", "har": 2, "hp_mod": 4, "desc": "Ligas espaciais, titânio enriquecido." },
+      "4": { "label": "Mítico", "har": 3, "hp_mod": 6, "desc": "Materiais com propriedades anômalas latentes." },
+      "5": { "label": "Universal", "har": 5, "hp_mod": 10, "desc": "Matéria densa de estrelas de nêutrons ou metais divinos." },
+      "6": { "label": "Multiversal", "har": 10, "hp_mod": 20, "desc": "Fragmentos da muralha da realidade. Indestrutível por meios convencionais." },
+      "7": { "label": "Onipotente", "har": 20, "hp_mod": 40, "desc": "Matéria conceitual pura." }
+    }
+  },
+  "ORGANISMO": {
+    "label": "Organismo",
+    "description": "Recursos biológicos. Consumíveis para sobrevivência ou insumos genéticos.",
+    "color": "#4ade80",
+    "icon": "fas fa-leaf",
+    "base_mechanic": "consumable_bio",
+    "tiers": {
+      "1": { "label": "Comum", "sustento": 1, "heal": 1, "sede": 2, "desc": "Ração padrão, água filtrada, carne de caça." },
+      "2": { "label": "Raro", "sustento": 2, "heal": 2, "sede": 4, "desc": "Nutrientes concentrados, ervas medicinais." },
+      "3": { "label": "Lendário", "sustento": 3, "heal": 3, "sede": 6, "desc": "Néctar vital, carne de bestas alpha." },
+      "4": { "label": "Mítico", "sustento": 4, "heal": 4, "sede": 8, "desc": "Ambrósia, frutas de árvores sagradas." },
+      "5": { "label": "Universal", "sustento": 5, "heal": 5, "sede": 10, "desc": "Essência vital pura." },
+      "6": { "label": "Multiversal", "sustento": 6, "heal": 6, "sede": 12, "desc": "Biomassa eterna. Não apodrece." },
+      "7": { "label": "Onipotente", "sustento": 7, "heal": 10, "sede": 20, "desc": "Vida em estado líquido." }
+    }
+  },
+  "ENERGIA": {
+    "label": "Energia",
+    "description": "Combustível para máquinas e munição para armas energéticas.",
+    "color": "#facc15",
+    "icon": "fas fa-bolt",
+    "base_mechanic": "fuel",
+    "tiers": {
+      "1": { "label": "Comum", "power": 1, "volatility": "Baixa", "desc": "Baterias AA, Carvão, Gasolina." },
+      "2": { "label": "Raro", "power": 2, "volatility": "Média", "desc": "Células de Hidrogênio, Plutônio Civil." },
+      "3": { "label": "Lendário", "power": 3, "volatility": "Alta", "desc": "Reatores Arc, Plasma Instável." },
+      "4": { "label": "Mítico", "power": 4, "volatility": "Perigosa", "desc": "Energia de Ponto Zero." },
+      "5": { "label": "Universal", "power": 5, "volatility": "Extrema", "desc": "Fissão de buraco negro." },
+      "6": { "label": "Multiversal", "power": 6, "volatility": "Crítica", "desc": "Entropia reversa." },
+      "7": { "label": "Onipotente", "power": 7, "volatility": "Máxima", "desc": "O próprio Big Bang engarrafado." }
+    }
+  },
+  "NUCLEO": {
+    "label": "Núcleo",
+    "description": "Anomalias cristalizadas. Restauram Willpower (WP) e alteram a realidade.",
+    "color": "#c084fc",
+    "icon": "fas fa-atom",
+    "base_mechanic": "consumable_will",
+    "tiers": {
+      "1": { "label": "Comum", "wp_restore": 2, "instability": 1, "desc": "Poeira de Nexus residual." },
+      "2": { "label": "Raro", "wp_restore": 4, "instability": 2, "desc": "Fragmento de cristal brilhante." },
+      "3": { "label": "Lendário", "wp_restore": 6, "instability": 3, "desc": "Geodo pulsante de realidade." },
+      "4": { "label": "Mítico", "wp_restore": 8, "instability": 4, "desc": "Coração de uma anomalia viva." },
+      "5": { "label": "Universal", "wp_restore": 10, "instability": 5, "desc": "Tesseract estável." },
+      "6": { "label": "Multiversal", "wp_restore": 12, "instability": 6, "desc": "Fragmento do código-fonte do universo." },
+      "7": { "label": "Onipotente", "wp_restore": 20, "instability": 7, "desc": "A Singularidade." }
+    }
+  }
+}

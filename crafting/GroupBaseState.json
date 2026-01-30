@@ -1,0 +1,89 @@
+{
+  "_METADATA": {
+    "version": "FINAL",
+    "description": "Definição de cargos e escala de poder dos NPCs da Base."
+  },
+
+  "ROLES": {
+    "COLETOR": {
+      "label": "Coletor / Minerador",
+      "description": "Responsável pela extração de recursos físicos.",
+      "output_resource": "MATERIA",
+      "icon": "fas fa-hammer",
+      "behavior": "Gera unidades de Matéria do Tier 1 (Comum) por Ciclo. A quantidade depende da raridade."
+    },
+    "PROVIDENT": {
+      "label": "Agricultor / Caçador",
+      "description": "Responsável por comida, água e biologia.",
+      "output_resource": "ORGANISMO",
+      "icon": "fas fa-seedling",
+      "behavior": "Gera unidades de Organismo do Tier 1 (Comum) por Ciclo."
+    },
+    "TECNICO": {
+      "label": "Engenheiro / Técnico",
+      "description": "Responsável pela manutenção de energia e fluxo.",
+      "output_resource": "ENERGIA",
+      "icon": "fas fa-plug",
+      "behavior": "Gera unidades de Energia do Tier 1 (Comum) por Ciclo."
+    },
+    "GUARDA": {
+      "label": "Segurança / Soldado",
+      "description": "Responsável pela defesa da base e apoio tático.",
+      "output_resource": "DEFESA",
+      "icon": "fas fa-shield-alt",
+      "behavior": "Não gera recursos. Fornece Bônus de Dados (+d) para combate ou aumenta o HAR da Base."
+    }
+  },
+
+  "RARITY_SCALE": {
+    "COMUM": {
+      "tier": 1,
+      "label": "Comum",
+      "production_val": 2,
+      "combat_dice": 1,
+      "desc": "Um trabalhador ou civil treinado."
+    },
+    "RARO": {
+      "tier": 2,
+      "label": "Raro",
+      "production_val": 4,
+      "combat_dice": 2,
+      "desc": "Especialista veterano com ferramentas melhores."
+    },
+    "LENDARIO": {
+      "tier": 3,
+      "label": "Lendário",
+      "production_val": 8,
+      "combat_dice": 3,
+      "desc": "Mestre de ofício. Um em um milhão."
+    },
+    "MITICO": {
+      "tier": 4,
+      "label": "Mítico",
+      "production_val": 16,
+      "combat_dice": 4,
+      "desc": "Herói de lendas ou ser biologicamente aprimorado."
+    },
+    "UNIVERSAL": {
+      "tier": 5,
+      "label": "Universal",
+      "production_val": 32,
+      "combat_dice": 6,
+      "desc": "Entidade capaz de alterar o ambiente local com a mente."
+    },
+    "MULTIVERSAL": {
+      "tier": 6,
+      "label": "Multiversal",
+      "production_val": 64,
+      "combat_dice": 8,
+      "desc": "Realidade distorcida para gerar recursos infinitos."
+    },
+    "ONIPOTENTE": {
+      "tier": 7,
+      "label": "Onipotente",
+      "production_val": 132,
+      "combat_dice": 10,
+      "desc": "Deus Ex Machina. Produção narrativa."
+    }
+  }
+}

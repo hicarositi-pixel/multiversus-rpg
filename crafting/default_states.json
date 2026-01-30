@@ -1,0 +1,74 @@
+{
+  "_METADATA": {
+    "version": "FINAL",
+    "description": "Estados padrão unificados para criação de Base, NPCs e Sobreviventes."
+  },
+
+  "BASE": {
+    "name": "Novo Assentamento",
+    "active": true,
+    "inventory": {
+      "MATERIA":   { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 },
+      "ORGANISMO": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 },
+      "ENERGIA":   { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 },
+      "NUCLEO":    { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 }
+    },
+    "population": {
+      "count": 0,
+      "sustenance_cost": 0,
+      "morale": 10
+    },
+    "npcs": [],
+    "structures": {
+      "REFINARIA":   { "label": "Refinaria de Matéria",  "active": true,  "tier": 1, "upgrades": [] },
+      "OFICINA":     { "label": "Oficina de Engenharia", "active": true,  "tier": 1, "upgrades": [] },
+      "LABORATORIO": { "label": "Laboratório Sintético", "active": false, "tier": 0, "upgrades": [] },
+      "TERMINAL":    { "label": "Terminal Nexus",        "active": false, "tier": 0, "upgrades": [] }
+    }
+  },
+
+  "NPC": {
+    "id": "", 
+    "name": "Sobrevivente Desconhecido",
+    "role": "COLETOR",
+    "rarity": "COMUM",
+    "personality": "HEROI",
+    "assigned": true,
+    "status": {
+      "hp_current": 5,
+      "state": "ACTIVE" 
+    },
+    "stats": {
+      "production_bonus": 2,
+      "combat_dice": 1,
+      "personality_effect": "Presença Inspiradora"
+    }
+  },
+
+  "SURVIVOR": {
+    "bio": {
+      "fome":      { "value": 0, "max": 10, "label": "Nível de Fome" },
+      "sede":      { "value": 0, "max": 10, "label": "Nível de Sede" },
+      "exaustao":  { "value": 0, "max": 10, "label": "Nível de Exaustão" },
+      "wp":        { "value": 10, "max": 10, "label": "Willpower (Sanidade)" }
+    },
+    "session": {
+      "actions_max": 2,
+      "actions_used": 0,
+      "last_rest": "NONE"
+    },
+    "disciplines": {
+      "extracao":      { "value": 0, "label": "Extração", "dice_mod": 0 },
+      "engenharia":    { "value": 0, "label": "Engenharia", "dice_mod": 0 },
+      "sintetica":     { "value": 0, "label": "Sintética", "dice_mod": 0 },
+      "sobrevivencia": { "value": 0, "label": "Sobrevivência", "dice_mod": 0 }
+    },
+    "pockets": {
+      "MATERIA":   { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 },
+      "ORGANISMO": { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 },
+      "ENERGIA":   { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 },
+      "NUCLEO":    { "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0 }
+    },
+    "gear": []
+  }
+}
