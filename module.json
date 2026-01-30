@@ -1,14 +1,10 @@
 {
   "id": "multiversus-rpg",
   "title": "Multiversus RPG",
-  "version": "1.0.0",
-  "compatibility": {
-    "minimum": "11",
-    "verified": "12"
-  },
+  "version": "1.0.1",
   "esmodules": ["index.js"],
   "styles": ["style.css", "nexus-hud.css"],
-  "url": "http://seusite.com",
-  "manifest": "http://seusite.com/module.json",
-  "download": "http://seusite.com/module.zip"
+  "url": "https://github.com/hicarositi-pixel/multiversus-rpg",
+  "manifest": "https://raw.githubusercontent.com/hicarositi-pixel/multiversus-rpg/main/module.json",
+  "download": "https://github.com/hicarositi-pixel/multiversus-rpg/archive/refs/heads/main.zip"
 }

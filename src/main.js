@@ -117,17 +117,6 @@ game.settings.register("multiversus-rpg", "menuTheme", {
     PassSystem.init();    
     AuxiliarSystem.init(); 
 
-    // --- C. REGISTRO DE FICHAS ---
-    Items.unregisterSheet("wildtalents", ItemSheet);
-    Items.registerSheet("wildtalents", MultiversusItemSheet, {
-        types: ["power"], makeDefault: true, label: "Multiversus Power Sheet"
-    });
-
-    CONFIG.Actor.sheetClasses.character = {}; 
-    Actors.registerSheet("core", FichaSvelte, {
-        types: ["character"], makeDefault: true, label: "Multiversus RPG"
-    });
-
     // --- D. PROTOTIPO ---
     const ActorClass = CONFIG.Actor.documentClass;
     ActorClass.prototype.save = function(path, value, force = false) {
