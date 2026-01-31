@@ -8,13 +8,16 @@
   export let actor;
   export let isGM = false;
 
+  const MODULE_ID = "multiversus-rpg";
+
   onMount(() => {
     loadPowerThemes();
     syncLocalVars();
   });
 
-  $: system = item?.system || {};
-  $: flags = item?.flags?.["multiversus-rpg"] || {};
+  // --- LÊ DOS FLAGS AGORA ---
+  $: flags = item?.flags?.[MODULE_ID] || {};
+  $: system = item?.system || {}; // Mantemos para fallback visual se necessário
   $: img = item?.img || "icons/svg/item-bag.svg";
   $: realName = item?.name || "Desconhecido";
 
@@ -44,9 +47,12 @@
   const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
   $: baseCost = XP_RULES[category] || 8;
   
-  $: dNormal = system.dice?.normal || 0;
-  $: dHard = system.dice?.hard || 0;
-  $: dWiggle = system.dice?.wiggle || 0;
+  // LEITURA DOS DADOS (FLAGS > SYSTEM > 0)
+  $: diceData = flags.dice || {};
+  $: dNormal = diceData.normal || 0;
+  $: dHard = diceData.hard || 0;
+  $: dWiggle = diceData.wiggle || 0;
+  
   $: totalDice = dNormal + dHard + dWiggle;
   $: currentCost = (dNormal * baseCost) + (dHard * baseCost * 2) + (dWiggle * baseCost * 4);
   $: availableXP = (150 + (actor?.system?.xp || 0)) - (actor?.system?.spentXP || 0);
@@ -56,33 +62,37 @@
 
   async function saveSettings() {
     await item.update({
-      'flags.multiversus-rpg.customAlias': editAlias,
-      'flags.multiversus-rpg.customColor': editColor, 
-      'flags.multiversus-rpg.animationTheme': editTheme
+      [`flags.${MODULE_ID}.customAlias`]: editAlias,
+      [`flags.${MODULE_ID}.customColor`]: editColor, 
+      [`flags.${MODULE_ID}.animationTheme`]: editTheme
     }, { render: false });
     isConfiguring = false;
     ui.notifications.info(`Visual salvo!`);
   }
 
-async function upgradeDice(type) {
+  // --- CORREÇÃO DA COMPRA DE DADOS ---
+  async function upgradeDice(type) {
     if (!item) return;
     
     // 1. Calcula custos
     let cost = (type === 'wiggle') ? baseCost * 4 : (type === 'hard') ? baseCost * 2 : baseCost;
     
-    // 2. Prepara dados para o Log
-    const oldVal = system.dice?.[type] || 0;
+    // 2. Prepara dados para o Log (LENDO DAS FLAGS)
+    const oldVal = diceData[type] || 0;
     const newVal = oldVal + 1;
     const remaining = availableXP - cost;
 
-    // 3. Executa a compra
-    let path = `system.dice.${type}`;
+    // 3. Executa a compra (SALVANDO NAS FLAGS)
     if (availableXP >= cost) {
-      // --- AVISO PARA O DISCORD (ANTES DE SALVAR) ---
+      // Aviso
       Hooks.call("nexusPointSpent", actor.name, "Poder", `${displayName} (${type}): ${oldVal} ➔ ${newVal}`, cost, remaining);
-      // ----------------------------------------------
+      
+      // Update Seguro
+      // Criamos um novo objeto dice para não sobrescrever os outros tipos
+      let newDiceData = { ...diceData };
+      newDiceData[type] = newVal;
 
-      await item.update({ [path]: newVal }, { render: false });
+      await item.update({ [`flags.${MODULE_ID}.dice`]: newDiceData }, { render: false });
     }
   }
 
@@ -221,14 +231,12 @@ async function upgradeDice(type) {
 {/if}
 
 <style>
-  /* --- CSS BASE (Otimizado) --- */
-  .power-card { background: #050505; border: 1px solid #333; border-left: 4px solid var(--glow); border-radius: 6px; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: 0.3s; }
+/* ... (Seu CSS original aqui) ... */
+ .power-card { background: #050505; border: 1px solid #333; border-left: 4px solid var(--glow); border-radius: 6px; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: 0.3s; }
   .power-card:hover { box-shadow: 0 0 15px var(--glow); border-color: var(--glow); }
-
   .card-front { display: flex; align-items: center; padding: 8px; height: 72px; background: linear-gradient(90deg, #111 0%, #080808 100%); position: relative; z-index: 10; }
   .icon-box { width: 52px; height: 52px; margin-right: 12px; cursor: pointer; border: 1px solid #444; border-radius: 8px; overflow: hidden; position: relative; }
   .power-img { width: 100%; height: 100%; object-fit: cover; }
-  
   .info-box { flex: 1; cursor: pointer; }
   .header-row { display: flex; justify-content: space-between; align-items: center; padding-right: 10px; }
   .power-name { font-weight: 800; color: #fff; text-transform: uppercase; text-shadow: 0 0 5px rgba(0,0,0,0.8); }
@@ -236,21 +244,16 @@ async function upgradeDice(type) {
   .meta-row { display: flex; gap: 10px; margin-top: 4px; font-size: 0.75em; color: #777; align-items: center; }
   .meta-tag { background: #222; padding: 2px 6px; border-radius: 4px; border: 1px solid #333; }
   .dice-count strong { color: #fff; font-size: 1.1em; }
-
   .action-box { display: flex; flex-direction: column; gap: 6px; padding-left: 10px; border-left: 1px solid #222; }
   .btn-icon { background: transparent; border: none; color: #444; cursor: pointer; font-size: 1.1em; transition: 0.2s; }
   .btn-icon:hover { color: #fff; }
   .btn-icon.active { color: var(--glow); }
-
   .panel-drawer { background: #0c0c0c; border-top: 1px solid var(--glow); padding: 12px; position: relative; }
   .drawer-header { font-size: 0.7em; color: var(--glow); font-weight: bold; margin-bottom: 12px; }
-
-  /* Seletor Grid */
   .theme-selector-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; padding: 2px; background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 4px; }
   .theme-option { background: #1a1a1a; border: 1px solid #333; border-left: 3px solid var(--theme-preview-color); color: #888; padding: 6px; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
   .theme-option:hover, .theme-option.selected { background: #000; border-color: var(--glow); color: var(--glow); box-shadow: 0 0 5px var(--glow); }
   .theme-icon { font-size: 1.2em; } .theme-label { font-size: 0.6em; font-weight: bold; text-align: center; }
-
   .config-grid { display: flex; flex-direction: column; gap: 10px; }
   .field-group label { font-size: 0.7em; color: #aaa; margin-bottom: 4px; display: block; font-weight: bold; }
   .interactive-input { background: #111; border: 1px solid #444; color: #fff; padding: 8px; width: 100%; border-radius: 4px; }
@@ -259,27 +262,20 @@ async function upgradeDice(type) {
   .color-picker { padding: 0; width: 50px; height: 32px; cursor: pointer; }
   .btn-reset { flex: 1; background: #222; border: 1px solid #444; color: #aaa; cursor: pointer; border-radius: 4px; }
   .btn-save-cfg { width: 100%; margin-top: 15px; background: var(--glow); color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; }
-
-  /* Dice Matrix */
   .xp-hud { background: #000; border: 1px solid #333; border-radius: 6px; padding: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
   .xp-hud.broke { border-color: #500; } .xp-hud.broke .xp-value { color: #f55; }
   .xp-label { font-size: 0.7em; color: #888; font-weight: bold; } .xp-value { font-size: 1.2em; color: var(--glow); font-weight: bold; font-family: monospace; }
-
   .dice-matrix { display: flex; gap: 8px; }
   .die-card { flex: 1; background: #151515; border: 1px solid #333; border-radius: 6px; display: flex; flex-direction: column; align-items: center; padding: 8px 4px; transition: 0.3s; }
   .die-card.affordable:hover { border-color: var(--glow); transform: translateY(-2px); }
-
   .die-header { width: 100%; text-align: center; border-bottom: 1px dashed #333; padding-bottom: 4px; margin-bottom: 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  /* Ícones Base (Tamanho e cor padrão) */
   .die-icon { font-size: 1.8em; margin-bottom: 2px; height: 32px; display: flex; align-items: center; justify-content: center; transition: 0.3s; }
   .die-icon i { color: #888; transition: 0.3s; } 
   .die-text { font-size: 0.65em; font-weight: bold; color: #888; }
   .die-screen { font-size: 2em; font-weight: 900; color: #fff; margin-bottom: 8px; text-shadow: 0 2px 4px #000; line-height: 1; }
-
   .btn-buy { width: 90%; border: none; background: #222; color: #555; border-radius: 4px; padding: 6px 2px; cursor: not-allowed; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: 0.2s; }
   .die-card.affordable .btn-buy { background: #333; color: #fff; cursor: pointer; border: 1px solid #555; }
   .die-card.affordable .btn-buy:hover { background: var(--glow); border-color: var(--glow); color: #000; box-shadow: 0 0 10px var(--glow); }
   .btn-buy .lbl { font-size: 0.6em; font-weight: bold; } .btn-buy .cost { font-size: 0.75em; font-weight: bold; }
-  
   .gm-delete { width: 100%; margin-top: 15px; background: #110000; border: 1px solid #300; color: #844; font-size: 0.7em; padding: 8px; cursor: pointer; border-radius: 4px; }
 </style>

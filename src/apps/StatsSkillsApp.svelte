@@ -4,9 +4,12 @@
     import { cubicOut } from 'svelte/easing';
 
     export let actor;
-    export let system;
-    export let themeColor;
+    
+    // Fallback para evitar erro se 'system' vier nulo, mas o foco agora são as FLAGS
+    export let system = actor.system || {}; 
+    export let themeColor = "#00ff41"; // Cor padrão Matrix se não vier nada
 
+    const MODULE_ID = "multiversus-rpg";
     const isGM = game.user.isGM;
 
     // --- CONFIGURAÇÃO ---
@@ -43,7 +46,7 @@
         return "fa-dice-d20";
     }
 
-    // --- ESTADO ---
+    // --- ESTADO LOCAL ---
     let stats = {};
     let skills = {};
     let expandedStats = {}; 
@@ -54,28 +57,31 @@
     let iconEditTarget = { key: null, index: null };
     let tempIconUrl = "";
 
-    // --- DADOS REATIVOS ---
-    $: xpEarned = system.xp || 0;
-    $: powersCost = system.points?.powersSpent || 0; 
+    // --- LEITURA DE DADOS (DAS FLAGS!) ---
+    // Acessa flags.multiversus-rpg com segurança
+    $: actorFlags = actor.flags?.[MODULE_ID] || {};
+    
+    // XP e Pontos (Ainda lemos do system se o sistema original tiver XP, senão flags)
+    $: xpEarned = system.xp || actorFlags.xp || 0; 
+    $: powersCost = system.points?.powersSpent || actorFlags.powersSpent || 0; 
+    
     $: pointsCap = BASE_POINTS_CAP + xpEarned;
     $: totalSpent = localCost + powersCost;
     $: pointsAvailable = pointsCap - totalSpent;
 
     // --- INICIALIZAÇÃO BLINDADA ---
     function initData() {
-        const sysStats = system.stats ? JSON.parse(JSON.stringify(system.stats)) : {};
-        const sysSkills = system.skills ? JSON.parse(JSON.stringify(system.skills)) : {};
+        // Tenta ler das flags primeiro. Se não existir, cria a estrutura padrão.
+        const savedStats = actorFlags.stats ? JSON.parse(JSON.stringify(actorFlags.stats)) : {};
+        const savedSkills = actorFlags.skills ? JSON.parse(JSON.stringify(actorFlags.skills)) : {};
 
         statKeys.forEach(key => {
-            // CORREÇÃO CRÍTICA: Se for número, converte para objeto
-            if (typeof sysStats[key] === 'number') {
-                sysStats[key] = { normal: sysStats[key], hard: 0, wiggle: 0 };
-            }
-            // Se não existir, cria padrão
-            if (!sysStats[key]) sysStats[key] = { normal: 1, hard: 0, wiggle: 0 };
+            // Inicializa Stat se não existir
+            if (!savedStats[key]) savedStats[key] = { normal: 1, hard: 0, wiggle: 0 };
             
-            if (!sysSkills[key] || sysSkills[key].length === 0) {
-                sysSkills[key] = DEFAULT_SKILLS[key].map(name => ({
+            // Inicializa Skill se não existir ou estiver vazia
+            if (!savedSkills[key] || savedSkills[key].length === 0) {
+                savedSkills[key] = DEFAULT_SKILLS[key].map(name => ({
                     name: name,
                     normal: 0, hard: 0, wiggle: 0,
                     isCustom: false,
@@ -85,78 +91,62 @@
             if (expandedStats[key] === undefined) expandedStats[key] = false;
         });
 
-        stats = sysStats;
-        skills = sysSkills;
+        stats = savedStats;
+        skills = savedSkills;
         recalcCost();
     }
 
-    // --- LÓGICA DE UPDATE ---
+    // --- CÁLCULO DE CUSTO ---
     function recalcCost() {
         let total = 0;
         statKeys.forEach(key => {
             if (!stats[key]) return;
-            // Proteção extra
             const s = stats[key];
-            if (typeof s !== 'object') return; 
-
-            const sCost = (Math.max(0, (s.normal || 0) - 1) * STAT_COSTS.normal) + 
-                          ((s.hard || 0) * STAT_COSTS.hard) + 
-                          ((s.wiggle || 0) * STAT_COSTS.wiggle);
+            // Custo de Atributo (primeiro dado é grátis no Wild Talents, geralmente)
+            const sCost = (Math.max(0, s.normal - 1) * STAT_COSTS.normal) + 
+                          (s.hard * STAT_COSTS.hard) + 
+                          (s.wiggle * STAT_COSTS.wiggle);
             total += sCost;
 
             if (skills[key]) {
                 skills[key].forEach(sk => {
-                    total += ((sk.normal || 0) * SKILL_COSTS.normal) + 
-                             ((sk.hard || 0) * SKILL_COSTS.hard) + 
-                             ((sk.wiggle || 0) * SKILL_COSTS.wiggle);
+                    total += (sk.normal * SKILL_COSTS.normal) + 
+                             (sk.hard * SKILL_COSTS.hard) + 
+                             (sk.wiggle * SKILL_COSTS.wiggle);
                 });
             }
         });
         localCost = total; 
     }
 
+    // --- SALVAMENTO SEGURO (FLAGS) ---
     async function saveToServer() {
+        // Salva tudo dentro de flags.multiversus-rpg
+        // Isso ignora completamente as regras do sistema original
         await actor.update({
-            'system.stats': stats,
-            'system.skills': skills,
-            'system.points.statsCost': localCost
+            [`flags.${MODULE_ID}.stats`]: stats,
+            [`flags.${MODULE_ID}.skills`]: skills,
+            [`flags.${MODULE_ID}.statsCost`]: localCost
         }, { render: false });
     }
 
-    // AÇÃO DE COMPRA (INSTANTÂNEA)
-// AÇÃO DE COMPRA (INSTANTÂNEA)
+    // --- AÇÕES ---
     function buyDie(obj, type, cost) {
         if (!isGM && pointsAvailable < cost) {
             ui.notifications.warn(`XP Insuficiente (${cost} necessário).`);
             return;
         }
         
-        // Guarda o valor antigo para o log
-        const oldVal = obj[type] || 0;
-
-        // Garante que é número e aumenta
-        obj[type] = (obj[type] || 0) + 1;
+        obj[type]++;
         
-        // --- NOVO: AVISAR O DISCORD IMEDIATAMENTE ---
-        // Calcula quanto vai sobrar
-        const newVal = obj[type];
-        const newBalance = pointsAvailable - cost; 
-        
-        // Define se é Atributo ou Skill baseado no contexto (ou manda genérico)
-        // Dica: Você pode passar o nome se tiver acesso a variável 'key' ou 'skill.name'
-        const nameLog = obj.name ? obj.name : "Atributo"; 
-        
-        Hooks.call("nexusPointSpent", actor.name, "Atributos/Perícias", `${nameLog} (${type}): ${oldVal} ➔ ${newVal}`, cost, newBalance);
-        // --------------------------------------------
-        
-        // Reatividade Svelte
+        // Força atualização Svelte
         stats = stats;
         skills = skills;
-        recalcCost(); 
+        
+        recalcCost();
         saveToServer();
     }
 
-    // AÇÃO DE MESTRE (EDITAR VALOR)
     function gmUpdate() {
         stats = stats;
         skills = skills;
@@ -167,7 +157,7 @@
     function addSkill(key) {
         skills[key] = [...skills[key], { name: "Nova Perícia", normal: 0, hard: 0, wiggle: 0, isCustom: true, img: "" }];
         expandedStats[key] = true;
-        recalcCost(); 
+        recalcCost();
         saveToServer();
     }
 
@@ -203,10 +193,12 @@
 
     onMount(() => {
         initData();
+        // Hook para atualizar XP em tempo real se o mestre mudar
         const hookId = Hooks.on("updateActor", (doc, changes) => {
             if (doc.id === actor.id) {
-                if (changes.system?.xp !== undefined) xpEarned = doc.system.xp;
-                if (changes.system?.points?.powersSpent !== undefined) powersCost = doc.system.points.powersSpent;
+                // Tenta pegar XP do sistema ou das flags
+                const newXp = changes.system?.xp ?? changes.flags?.[MODULE_ID]?.xp;
+                if (newXp !== undefined) xpEarned = newXp;
             }
         });
         return () => Hooks.off("updateActor", hookId);
@@ -221,11 +213,11 @@
                 <h3>ALTERAR ÍCONE</h3>
                 <div class="input-row">
                     <input type="text" bind:value={tempIconUrl} placeholder="Cole a URL da imagem..." />
-                    <button type="button" on:click={openFilePicker}><i class="fas fa-folder-open"></i></button>
+                    <button on:click={openFilePicker}><i class="fas fa-folder-open"></i></button>
                 </div>
                 <div class="modal-actions">
-                    <button type="button" class="cancel" on:click={() => iconModalOpen = false}>CANCELAR</button>
-                    <button type="button" class="save" on:click={saveIcon}>SALVAR</button>
+                    <button class="cancel" on:click={() => iconModalOpen = false}>CANCELAR</button>
+                    <button class="save" on:click={saveIcon}>SALVAR</button>
                 </div>
             </div>
         </div>
@@ -263,36 +255,28 @@
                             <div class="die-group normal">
                                 <i class="fas fa-cube"></i>
                                 {#if isGM} 
-                                    <input class="gm-input" type="number" 
-                                           value={stats[key].normal} 
-                                           on:change={(e) => { stats[key].normal = parseInt(e.target.value); gmUpdate(); }}>
+                                    <input class="gm-input" type="number" bind:value={stats[key].normal} on:change={gmUpdate}>
                                 {:else} 
                                     <span class="die-val">{stats[key].normal}</span>
-                                    <button type="button" class="btn-buy" on:click={() => buyDie(stats[key], 'normal', 5)}>+</button>
+                                    <button class="btn-buy" on:click={() => buyDie(stats[key], 'normal', 5)}>+</button>
                                 {/if}
                             </div>
-                            
                             <div class="die-group hard" class:active={stats[key].hard > 0}>
                                 <i class="fas fa-square"></i>
                                 {#if isGM} 
-                                    <input class="gm-input" type="number" 
-                                           value={stats[key].hard} 
-                                           on:change={(e) => { stats[key].hard = parseInt(e.target.value); gmUpdate(); }}>
+                                    <input class="gm-input" type="number" bind:value={stats[key].hard} on:change={gmUpdate}>
                                 {:else} 
                                     <span class="die-val">{stats[key].hard}</span>
-                                    <button type="button" class="btn-buy" on:click={() => buyDie(stats[key], 'hard', 10)}>+</button>
+                                    <button class="btn-buy" on:click={() => buyDie(stats[key], 'hard', 10)}>+</button>
                                 {/if}
                             </div>
-
                             <div class="die-group wiggle" class:active={stats[key].wiggle > 0}>
                                 <i class="fas fa-star"></i>
                                 {#if isGM} 
-                                    <input class="gm-input" type="number" 
-                                           value={stats[key].wiggle} 
-                                           on:change={(e) => { stats[key].wiggle = parseInt(e.target.value); gmUpdate(); }}>
+                                    <input class="gm-input" type="number" bind:value={stats[key].wiggle} on:change={gmUpdate}>
                                 {:else} 
                                     <span class="die-val">{stats[key].wiggle}</span>
-                                    <button type="button" class="btn-buy" on:click={() => buyDie(stats[key], 'wiggle', 20)}>+</button>
+                                    <button class="btn-buy" on:click={() => buyDie(stats[key], 'wiggle', 20)}>+</button>
                                 {/if}
                             </div>
                         </div>
@@ -329,38 +313,35 @@
                                             <div class="ctrl-box">
                                                 <span class="lbl-d">N</span>
                                                 {#if isGM} 
-                                                    <input class="gm-input mini" type="number" value={skill.normal} on:change={(e) => { skill.normal = parseInt(e.target.value); gmUpdate(); }}>
+                                                    <input class="gm-input mini" type="number" bind:value={skill.normal} on:change={gmUpdate}>
                                                 {:else} 
                                                     <span class="val-d">{skill.normal}</span> 
-                                                    <button type="button" class="btn-up" on:click={() => buyDie(skill, 'normal', 2)}></button> 
+                                                    <button class="btn-up" on:click={() => buyDie(skill, 'normal', 2)}></button> 
                                                 {/if}
                                             </div>
-                                            
                                             <div class="ctrl-box h">
                                                 <span class="lbl-d">H</span>
                                                 {#if isGM} 
-                                                    <input class="gm-input mini" type="number" value={skill.hard} on:change={(e) => { skill.hard = parseInt(e.target.value); gmUpdate(); }}>
+                                                    <input class="gm-input mini" type="number" bind:value={skill.hard} on:change={gmUpdate}>
                                                 {:else} 
                                                     <span class="val-d" class:on={skill.hard > 0}>{skill.hard}</span> 
-                                                    <button type="button" class="btn-up" on:click={() => buyDie(skill, 'hard', 4)}></button> 
+                                                    <button class="btn-up" on:click={() => buyDie(skill, 'hard', 4)}></button> 
                                                 {/if}
                                             </div>
-
                                             <div class="ctrl-box w">
                                                 <span class="lbl-d">W</span>
                                                 {#if isGM} 
-                                                    <input class="gm-input mini" type="number" value={skill.wiggle} on:change={(e) => { skill.wiggle = parseInt(e.target.value); gmUpdate(); }}>
+                                                    <input class="gm-input mini" type="number" bind:value={skill.wiggle} on:change={gmUpdate}>
                                                 {:else} 
                                                     <span class="val-d" class:on={skill.wiggle > 0}>{skill.wiggle}</span> 
-                                                    <button type="button" class="btn-up" on:click={() => buyDie(skill, 'wiggle', 8)}></button> 
+                                                    <button class="btn-up" on:click={() => buyDie(skill, 'wiggle', 8)}></button> 
                                                 {/if}
                                             </div>
-                                            
-                                            <button type="button" class="btn-trash" on:click={() => removeSkill(key, i)}><i class="fas fa-trash"></i></button>
+                                            <button class="btn-trash" on:click={() => removeSkill(key, i)}><i class="fas fa-trash"></i></button>
                                         </div>
                                     </div>
                                 {/each}
-                                <button type="button" class="btn-add-skill" on:click={() => addSkill(key)}>
+                                <button class="btn-add-skill" on:click={() => addSkill(key)}>
                                     <i class="fas fa-plus"></i> NOVA PERÍCIA
                                 </button>
                             </div>
@@ -373,28 +354,11 @@
 </div>
 
 <style>
-    .app-container {
-        display: flex; flex-direction: column; height: 100%; gap: 15px;
-        color: #eee; font-family: 'Segoe UI', sans-serif;
-        --bg-panel: rgba(10, 10, 10, 0.5);
-        --border: rgba(255, 255, 255, 0.1);
-    }
-
-    /* --- CAMPO DO GM (VISIBILIDADE TOTAL) --- */
-    .gm-input {
-        background: rgba(255,255,255,0.15); /* Fundo mais claro */
-        border: 1px solid #999; /* Borda visível */
-        color: #fff;
-        font-weight: bold;
-        text-align: center;
-        width: 100%; height: 100%;
-        border-radius: 4px;
-        font-size: 1.1rem;
-    }
+/* ... (Seu CSS original aqui, não precisa mudar nada no visual) ... */
+    .app-container { display: flex; flex-direction: column; height: 100%; gap: 15px; color: #eee; font-family: 'Segoe UI', sans-serif; --bg-panel: rgba(10, 10, 10, 0.5); --border: rgba(255, 255, 255, 0.1); }
+    .gm-input { background: rgba(255,255,255,0.15); border: 1px solid #999; color: #fff; font-weight: bold; text-align: center; width: 100%; height: 100%; border-radius: 4px; font-size: 1.1rem; }
     .gm-input:focus { background: rgba(255,255,255,0.3); border-color: var(--theme); outline: none; }
     .gm-input.mini { width: 35px; height: 25px; font-size: 0.9rem; }
-
-    /* MODAL */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
     .modal-box { background: #111; border: 1px solid var(--theme); padding: 20px; width: 300px; border-radius: 8px; box-shadow: 0 0 20px rgba(0,0,0,0.8); }
     .modal-box h3 { color: var(--theme); margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; }
@@ -405,8 +369,6 @@
     .modal-actions button { padding: 5px 15px; cursor: pointer; font-weight: bold; border-radius: 3px; border: none; }
     .modal-actions .cancel { background: #333; color: #fff; }
     .modal-actions .save { background: var(--theme); color: #000; }
-
-    /* XP HUD */
     .xp-header { flex-shrink: 0; background: var(--bg-panel); border: 1px solid var(--theme); border-radius: 6px; padding: 12px 20px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.3); }
     .xp-info { display: flex; justify-content: space-around; align-items: center; }
     .xp-col { display: flex; flex-direction: column; align-items: center; }
@@ -417,60 +379,39 @@
     .val.debt { color: #ff4444; text-shadow: 0 0 10px #ff0000; }
     .xp-bar-track { width: 100%; height: 4px; background: #222; border-radius: 2px; overflow: hidden; }
     .xp-fill { height: 100%; background: var(--theme); box-shadow: 0 0 10px var(--theme); transition: width 0.3s; }
-
-    /* SCROLL */
     .scroll-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 5px; }
-    
-    /* STAT BLOCK */
     .stat-block { background: rgba(30, 30, 30, 0.4); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: 0.2s; min-height: 60px; display: flex; flex-direction: column; }
     .stat-block.open { border-color: var(--theme); background: rgba(20, 20, 20, 0.9); flex: 1 0 auto; max-height: 100%; }
-
     .stat-head { padding: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; background: linear-gradient(90deg, rgba(255,255,255,0.03), transparent); border-bottom: 1px solid transparent; height: 60px; flex-shrink: 0; }
     .open .stat-head { border-bottom-color: var(--border); }
     .head-title { display: flex; align-items: center; gap: 15px; flex: 1; }
     .icon-box { width: 40px; height: 40px; background: rgba(0,0,0,0.3); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--theme); font-size: 1.2rem; border: 1px solid var(--border); }
     .label { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; color: #ccc; }
     .open .label { color: #fff; text-shadow: 0 0 5px var(--theme); }
-
-    /* DADOS NO HEADER */
     .head-dice { display: flex; gap: 10px; margin-right: 20px; }
     .die-group { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 45px; height: 45px; background: #151515; border: 1px solid #333; border-radius: 6px; position: relative; }
     .die-group i { position: absolute; font-size: 0.8rem; opacity: 0.1; top: 2px; right: 2px; }
     .die-val { font-size: 1.1rem; font-weight: bold; line-height: 1; margin-top: 2px; }
-    
-    /* BOTÃO DE COMPRA MAIS SEGURO */
-    .btn-buy { 
-        width: 100%; height: 16px; border: none; border-top: 1px solid #333;
-        background: rgba(255,255,255,0.05); color: var(--theme); font-weight: bold;
-        font-size: 0.8rem; cursor: pointer; margin-top: 0px; transition: 0.1s;
-        border-radius: 0 0 6px 6px;
-    }
+    .btn-buy { width: 100%; height: 16px; border: none; border-top: 1px solid #333; background: rgba(255,255,255,0.05); color: var(--theme); font-weight: bold; font-size: 0.8rem; cursor: pointer; margin-top: 0px; transition: 0.1s; border-radius: 0 0 6px 6px; }
     .btn-buy:hover { background: var(--theme); color: #000; }
     .btn-buy:active { transform: scale(0.95); }
-
     .die-group.hard.active { border-color: #ffaa00; color: #ffaa00; }
     .die-group.wiggle.active { border-color: #ff4444; color: #ff4444; }
     .arrow { transition: 0.3s; color: #555; }
     .rot { transform: rotate(180deg); color: var(--theme); }
-
-    /* SKILLS BODY */
     .stat-body { background: rgba(0,0,0,0.2); padding: 15px; max-height: 400px; overflow-y: auto; }
     .skills-grid { display: flex; flex-direction: column; gap: 8px; }
-
     .skill-card { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); padding: 8px 15px; border-radius: 4px; border-left: 3px solid transparent; transition: 0.2s; }
     .skill-card:hover { background: rgba(255,255,255,0.06); border-left-color: var(--theme); }
-
     .skill-icon-area { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; margin-right: 10px; border-radius: 4px; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid #333; }
     .custom-icon { width: 100%; height: 100%; object-fit: cover; }
     .skill-fa { font-size: 1.2rem; color: #555; }
     .edit-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; color: var(--theme); font-size: 0.8rem; }
     .skill-icon-area:hover .edit-overlay { opacity: 1; }
-
     .skill-main { display: flex; align-items: center; gap: 10px; flex: 1; }
     .skill-name { font-size: 1rem; font-weight: 500; color: #ddd; }
     .skill-name-edit { background: transparent; border: none; border-bottom: 1px solid #555; color: #fff; font-size: 1rem; padding: 2px; }
     .skill-cost-badge { font-size: 0.7rem; background: #222; padding: 2px 6px; border-radius: 10px; color: #777; margin-left: auto; margin-right: 10px; }
-
     .skill-controls { display: flex; gap: 15px; align-items: center; }
     .ctrl-box { display: flex; align-items: center; gap: 5px; background: #111; padding: 4px 8px; border-radius: 4px; border: 1px solid #333; }
     .lbl-d { font-size: 0.7rem; color: #666; font-weight: bold; }
@@ -478,20 +419,15 @@
     .val-d.on { color: #fff; }
     .ctrl-box.h .val-d.on { color: #ffaa00; }
     .ctrl-box.w .val-d.on { color: #ff4444; }
-
-    /* BOTÃO DE UP SKILL - DISTINCT */
     .btn-up { width: 20px; height: 20px; border-radius: 50%; border: 1px solid #444; background: rgba(255,255,255,0.05); cursor: pointer; position: relative; transition: 0.1s; }
     .btn-up::after { content: '+'; font-size: 12px; color: var(--theme); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
     .btn-up:hover { background: var(--theme); border-color: var(--theme); }
     .btn-up:hover::after { color: #000; }
     .btn-up:active { transform: scale(0.9); }
-
     .btn-trash { background: transparent; border: none; color: #444; cursor: pointer; margin-left: 10px; }
     .btn-trash:hover { color: #f00; }
-
     .btn-add-skill { margin-top: 10px; width: 100%; padding: 10px; background: rgba(255,255,255,0.02); border: 1px dashed #444; color: #888; cursor: pointer; border-radius: 6px; font-size: 0.8rem; letter-spacing: 1px; transition: 0.2s; }
     .btn-add-skill:hover { border-color: var(--theme); color: var(--theme); background: rgba(var(--theme), 0.05); }
-
     .scroll-area::-webkit-scrollbar { width: 6px; }
     .scroll-area::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
     .scroll-area::-webkit-scrollbar-thumb { background: var(--theme); border-radius: 3px; }
