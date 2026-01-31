@@ -1,8 +1,11 @@
 <script>
+  import { onMount } from 'svelte';
+  import { fade, slide, scale } from 'svelte/transition';
+  
+  // Imports de Lógica
   import ExtraFlawApp from './ExtraFlawApp.js';
   import { THEME_DB } from './PowerSheetThemeDB.js'; 
   import { calculateCapacity, CAPACITY_TYPES } from '../data/capacities-data.js';
-  import { fade, slide, scale } from 'svelte/transition';
 
   export let item;
   export let application;
@@ -21,14 +24,10 @@
     {id: 'util', label: 'UTILIDADE'}
   ];
 
-  // --- REATIVIDADE (DATA LAYER) ---
-  // Acessamos 'flags' para leitura e escrita dos dados customizados
-  // Se flags não existirem, iniciamos um objeto vazio para não quebrar
+  // --- 1. REATIVIDADE DE DADOS (VIA FLAGS) ---
+  // Se a flag não existir, cria o objeto vazio para não quebrar a UI
   $: flags = item.flags?.[MODULE_ID] || {};
   
-  // Mantemos 'system' apenas para leitura de legado (caso existam notas antigas), mas não gravamos nele
-  $: system = item.system || {}; 
-
   // TEMA
   $: currentThemeKey = flags.themeKey || "neon-operator";
   $: activeTheme = THEME_DB[currentThemeKey] || THEME_DB["neon-operator"];
@@ -38,49 +37,54 @@
   $: customUrl = flags.customUrl || "";
   $: displayImg = customUrl || libraryImg;
 
-  // DADOS DO PODER (Lendo das Flags agora!)
+  // DADOS PRINCIPAIS
   $: name = item.name;
-  $: qualities = flags.qualities || []; 
+  $: qualities = flags.qualities || []; // Lista de Sub-rotinas
   $: rarity = flags.rarity || "Comum";
   $: category = flags.category || "principal";
   $: isInitial = flags.isInitial || false;
   
-  // DADOS (DICE) - Lendo das Flags
+  // DADOS (DICE)
   $: diceData = flags.dice || {};
   $: diceNormal = diceData.normal || 0;
   $: diceHard = diceData.hard || 0;
   $: diceWiggle = diceData.wiggle || 0;
-  
   $: totalDice = diceNormal + diceHard + diceWiggle;
 
-  $: description = flags.notes || ""; // Salva notas nas flags agora
+  $: description = flags.notes || ""; 
   
   // UI State
   let activeTab = 'geral';
   let showThemeSelector = false;
 
-  // --- CÁLCULOS ---
+  // --- 2. CÁLCULOS AUTOMÁTICOS ---
+  
+  // Custo de XP
   $: baseCost = XP_RULES[category] || 8;
   $: rawXpCost = (diceNormal * baseCost) + (diceHard * baseCost * 2) + (diceWiggle * baseCost * 4);
   $: discount = isInitial ? (4 * baseCost) : 0;
   $: xpCost = Math.max(0, rawXpCost - discount);
 
+  // Pontos de Balanceamento (PB)
   $: maxPB = Math.floor((PB_BASE_VALUES[rarity]||2) * (PB_MULTIPLIERS[category]||1));
+  
   $: usedPB = qualities.reduce((total, q) => {
+    // Soma custo dos Extras dentro de cada qualidade
     const extrasCost = (q.extras || []).reduce((sum, e) => sum + ((e.cost || 0) * (e.qty || 1)), 0);
+    // Base 2 + Nível + Extras
     return total + 2 + (q.level || 0) + extrasCost;
   }, 0);
 
-  // --- AÇÕES (Salvando nas Flags) ---
+  // --- 3. AÇÕES DE ATUALIZAÇÃO SEGURA (RENDER: FALSE) ---
   
-  // Função auxiliar para atualizar flags com segurança
+  // Helper Genérico
   async function updateFlag(key, value) {
-      await item.update({ [`flags.${MODULE_ID}.${key}`]: value });
+      await item.update({ [`flags.${MODULE_ID}.${key}`]: value }, { render: false });
   }
 
-  // Atualização Específica de Dados (Dice)
+  // Atualiza Dados (Dice) preservando objeto
   async function updateDice(type, value) {
-      let newDice = { ...diceData }; // Copia o objeto atual
+      let newDice = { ...diceData }; 
       newDice[type] = parseInt(value) || 0;
       await updateFlag('dice', newDice);
   }
@@ -91,7 +95,7 @@
       new FilePicker({ 
           type: "image", 
           current: item.img, 
-          callback: path => item.update({ img: path }) // Imagem base do item pode ser atualizada normal
+          callback: path => item.update({ img: path }) // Imagem nativa pode atualizar renderizando
       }).render(true); 
   }
   
@@ -100,7 +104,7 @@
     showThemeSelector = false;
   }
 
-  // Lógica de Sub-rotinas (Qualidades) - SALVANDO EM FLAGS
+  // --- LÓGICA DE QUALIDADES (SUB-ROTINAS) ---
   async function addQuality() {
     const newQ = { 
       name: "Nova Sub-rotina", type: "atk", level: 0, 
@@ -112,42 +116,49 @@
   }
 
   async function removeQuality(index) { 
-      await updateFlag('qualities', qualities.filter((_, i) => i !== index)); 
+      // Filtra e atualiza
+      const newQs = qualities.filter((_, i) => i !== index);
+      await updateFlag('qualities', newQs); 
   }
 
   async function updateQuality(index, field, value) {
-    const newQs = [...qualities]; 
+    // Cria cópia profunda para garantir reatividade
+    const newQs = JSON.parse(JSON.stringify(qualities)); 
     newQs[index][field] = value; 
     await updateFlag('qualities', newQs);
   }
 
-  // Lógica de Capacidades
+  // --- LÓGICA DE CAPACIDADES ---
   async function addCapacity(qIndex) {
-    const newQs = [...qualities]; 
+    const newQs = JSON.parse(JSON.stringify(qualities));
     if (!newQs[qIndex].capacities) newQs[qIndex].capacities = [];
+    
     newQs[qIndex].capacities.push({ type: 'mass', nul: 0, booster: 0, collapsed: false }); 
     await updateFlag('qualities', newQs);
   }
 
   async function removeCapacity(qIndex, cIndex) {
-    const newQs = [...qualities]; 
+    const newQs = JSON.parse(JSON.stringify(qualities));
     newQs[qIndex].capacities.splice(cIndex, 1); 
     await updateFlag('qualities', newQs);
   }
 
   async function updateCapacity(qIndex, cIndex, field, value) {
-    const newQs = [...qualities]; 
+    const newQs = JSON.parse(JSON.stringify(qualities));
     newQs[qIndex].capacities[cIndex][field] = value; 
     await updateFlag('qualities', newQs);
   }
 
   async function toggleCapCollapse(qIndex, cIndex) {
-    const newQs = [...qualities]; 
+    const newQs = JSON.parse(JSON.stringify(qualities));
     newQs[qIndex].capacities[cIndex].collapsed = !newQs[qIndex].capacities[cIndex].collapsed; 
     await updateFlag('qualities', newQs);
   }
   
-  function openExtraSelector(index) { new ExtraFlawApp(item, index).render(true); }
+  // Abre o App de Extras (que deve saber lidar com flags pelo índice)
+  function openExtraSelector(index) { 
+      new ExtraFlawApp(item, index).render(true); 
+  }
 </script>
 
 <div class="rpg-sheet-root" style="{Object.entries(activeTheme.vars).map(([k,v]) => `${k}:${v}`).join(';')}">
@@ -327,7 +338,9 @@
                       <div class="cap-main" on:click={() => toggleCapCollapse(i, cIndex)}>
                         <i class="fas fa-chevron-{cap.collapsed ? 'right' : 'down'} chevron"></i>
                         <span class="cap-label">{CAPACITY_TYPES.find(t=>t.id === cap.type)?.name || '...'}</span>
+                        
                         <span class="cap-result">{capResult}</span>
+                        
                         <button class="btn-icon small" on:click|stopPropagation={() => removeCapacity(i, cIndex)}>×</button>
                       </div>
 
@@ -382,7 +395,12 @@
 </div>
 
 <style>
-/* CSS Mantido (está perfeito) */
+/* CSS ORIGINAL PRESERVADO E RESTAURADO */
+  @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
+
   .rpg-sheet-root { width: 100%; height: 100%; background-color: var(--bg-base); color: var(--text-main); font-family: var(--font); display: flex; flex-direction: column; overflow: hidden; font-size: 13px; transition: background-color 0.3s ease, color 0.3s ease; }
   .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; display: flex; justify-content: center; align-items: center; }
   .theme-modal { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--accent); box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 300px; }

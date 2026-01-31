@@ -26,14 +26,51 @@
     };
     const statKeys = Object.keys(ATTR_CONFIG);
 
-    // Perícias Padrão (Sugestão inicial)
+// Perícias Padrão Completas (Copie e cole isto no lugar do antigo DEFAULT_SKILLS)
     const DEFAULT_SKILLS = {
-        body: [{name: "Atletismo", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Briga", normal: 0, hard: 0, wiggle: 0, img: ""}],
-        coordination: [{name: "Esquiva", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Furtividade", normal: 0, hard: 0, wiggle: 0, img: ""}],
-        sense: [{name: "Percepção", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Empatia", normal: 0, hard: 0, wiggle: 0, img: ""}],
-        mind: [{name: "Investigar", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Medicina", normal: 0, hard: 0, wiggle: 0, img: ""}],
-        charm: [{name: "Persuasão", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Mentir", normal: 0, hard: 0, wiggle: 0, img: ""}],
-        command: [{name: "Intimidar", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Liderar", normal: 0, hard: 0, wiggle: 0, img: ""}]
+        body: [
+            {name: "Atletismo", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Briga", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Resistência", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Bloqueio", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Arma Corpo a Corpo", normal: 0, hard: 0, wiggle: 0, img: ""}
+        ],
+        coordination: [
+            {name: "Esquiva", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Furtividade", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Acrobacias", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Prestidigitação", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Pilotagem", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Arma a Distância", normal: 0, hard: 0, wiggle: 0, img: ""}
+        ],
+        sense: [
+            {name: "Empatia", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Percepção", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Intuição", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Procura", normal: 0, hard: 0, wiggle: 0, img: ""}
+        ],
+        mind: [
+            {name: "Primeiros Socorros", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Conhecimento", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Cultura", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Linguagem", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Medicina", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Navegação", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Investigar", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Sobrevivência", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Tática", normal: 0, hard: 0, wiggle: 0, img: ""}
+        ],
+        charm: [
+            {name: "Mentir", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Persuasão", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Performance", normal: 0, hard: 0, wiggle: 0, img: ""}
+        ],
+        command: [
+            {name: "Interrogar", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Intimidar", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Liderar", normal: 0, hard: 0, wiggle: 0, img: ""},
+            {name: "Estabilidade", normal: 0, hard: 0, wiggle: 0, img: ""}
+        ]
     };
 
     function getSkillIcon(name) {
