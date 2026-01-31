@@ -1,62 +1,71 @@
-import MultiversusComponent from '../components/MultiversusPower.svelte';
+import MultiversusComponent from '../components/PowerSheet.svelte'; // Ajuste o caminho se necessário
 
 export default class MultiversusItemSheet extends ItemSheet {
-  /** @override */
+  constructor(object, options = {}) {
+    super(object, options);
+    this.component = null;
+  }
+
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["multiversus", "sheet", "item"],
-      width: 850, // Aumentei um pouco para caber o novo layout bonito
+      width: 850,
       height: 750,
       resizable: true,
-      // O template vazio que criamos antes
-      template: "modules/multiversus-rpg/templates/power-sheet.html", 
-      
-      // --- CORREÇÃO DO BUG DE FECHAR ---
-      submitOnClose: false, // Impede o erro "no registered form element" ao fechar
-      submitOnChange: false, // Impede o Foundry de tentar ler o HTML ao digitar
+      template: "modules/multiversus-rpg/templates/power-sheet.html",
+      submitOnClose: false,
+      submitOnChange: false,
       closeOnSubmit: false
     });
   }
 
   /** @override */
   async _render(force, options) {
-    if (!this.isEditable && !force) return;
-
-    // Se a ficha já existe, apenas atualiza a prop 'item' para o Svelte reagir
-    if (this.component) {
-      this.component.$set({ item: this.document });
-      return;
+    // 1. LIVE UPDATE (AQUI ESTÁ A CORREÇÃO DE RENDER)
+    if (!force && this.component) {
+      // Pega as flags atuais
+      const currentFlags = this.document.flags["multiversus-rpg"] || {};
+      
+      this.component.$set({ 
+        item: this.document,
+        // O PULO DO GATO: {...currentFlags} cria um NOVO objeto na memória.
+        // O Svelte detecta isso como "mudança real" e atualiza a tela.
+        flags: { ...currentFlags },
+        application: this
+      });
+      
+      this.element.find(".window-title").text(this.title);
+      return; 
     }
 
-    // Renderiza o esqueleto HTML
+    // 2. CRIAÇÃO INICIAL
     await super._render(force, options);
 
-    // Injeta o Svelte
     const target = this.element.find(".window-content")[0];
     if (target) {
       target.innerHTML = ""; 
       target.style.padding = "0";
-      target.style.overflow = "hidden"; // Remove scroll duplo
+      target.style.overflow = "hidden";
+      target.style.height = "100%";
+
+      if (this.component) this.component.$destroy();
+
+      const initialFlags = this.document.flags["multiversus-rpg"] || {};
 
       this.component = new MultiversusComponent({
         target: target,
         props: {
           item: this.document,
+          // Passamos a cópia aqui também
+          flags: { ...initialFlags },
           application: this
         }
       });
     }
   }
 
-  /** * BLOQUEIO DE SEGURANÇA 
-   * Se por algum motivo o Foundry tentar salvar, retornamos vazio 
-   * para ele não quebrar procurando um <form> que não existe.
-   */
-  _getSubmitData(updateData = {}) {
-    return {};
-  }
+  _getSubmitData(updateData = {}) { return {}; }
 
-  /** @override */
   async close(options = {}) {
     if (this.component) {
       this.component.$destroy();
@@ -64,4 +73,4 @@ export default class MultiversusItemSheet extends ItemSheet {
     }
     return super.close(options);
   }
-} 
+}

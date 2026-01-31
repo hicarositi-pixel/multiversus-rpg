@@ -9,6 +9,11 @@
 
   export let item;
   export let application;
+  
+  // --- MUDANÇA CRUCIAL AQUI ---
+  // Transformamos flags em uma Propriedade.
+  // Agora o arquivo JS pode atualizar essa variável de fora usando $set().
+  export let flags = item.flags?.["multiversus-rpg"] || {};
 
   const isGM = game.user.isGM;
   const MODULE_ID = "multiversus-rpg";
@@ -24,11 +29,7 @@
     {id: 'util', label: 'UTILIDADE'}
   ];
 
-  // --- 1. REATIVIDADE DE DADOS (VIA FLAGS) ---
-  // Se a flag não existir, cria o objeto vazio para não quebrar a UI
-  $: flags = item.flags?.[MODULE_ID] || {};
-  
-  // TEMA
+  // TEMA (Reativo às flags que chegam)
   $: currentThemeKey = flags.themeKey || "neon-operator";
   $: activeTheme = THEME_DB[currentThemeKey] || THEME_DB["neon-operator"];
   

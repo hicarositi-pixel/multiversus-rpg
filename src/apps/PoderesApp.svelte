@@ -1,12 +1,14 @@
 <script>
-  import { onMount, onDestroy, tick } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { slide, fade } from 'svelte/transition';
   import PowerInventoryCard from '../components/PowerInventoryCard.svelte';
   import PoderesManager from './PoderesManager.js'; 
 
   export let actor;
-  export let flags = {}; // Recebe as flags do pai
-  export let themeColor = "#00ff41";
+  export let themeColor;
+  
+  // Recebe as flags do pai (Ficha.svelte)
+  export let flags = {}; 
 
   const isGM = game.user.isGM;
   const MODULE_ID = "multiversus-rpg";
@@ -18,88 +20,92 @@
   // Variáveis para atualização visual instantânea
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
-  let isCalculating = false; // Trava de segurança contra loops
 
-  // --- ENGINE DE CÁLCULO E ATUALIZAÇÃO ---
+  // --- CONTROLE DE ATUALIZAÇÃO (DEBOUNCE) ---
+  // Isso impede que a ficha pisque quando você arrasta um item
+  let updateTimer = null;
+
+  function scheduleRefresh() {
+      if (updateTimer) clearTimeout(updateTimer);
+      updateTimer = setTimeout(() => {
+          refreshData();
+      }, 50); // Espera 50ms para garantir que o Foundry terminou de criar o item
+  }
+
+  // --- FUNÇÃO DE BUSCA E CÁLCULO ---
   async function refreshData() {
-    if (isCalculating) return; // Evita chamadas duplicadas rápidas demais
-    isCalculating = true;
-
-    // 1. Filtra itens válidos e cria uma cópia leve para o Svelte
+    // 1. Filtra itens válidos e garante nova referência de array (para o Svelte reagir)
     const rawPowers = actor.items.filter(i => i && i.type === "power");
     
     // 2. Ordena alfabeticamente
-    // Usamos [...rawPowers] para garantir que o Svelte detecte a mudança de array
     powers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
     activePowerCount = powers.length;
 
-    // 3. Recalcula XP Total (LENDO DAS FLAGS PARA PRECISÃO)
+    // 3. Recalcula XP Total (LENDO DAS FLAGS AGORA)
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
-    const newTotalCost = powers.reduce((acc, item) => {
+    calculatedTotalCost = powers.reduce((acc, item) => {
+        // LEITURA CORRIGIDA: Lendo das flags do item
         const itemFlags = item.flags?.[MODULE_ID] || {};
-        const itemSystem = item.system || {}; 
+        const itemSystem = item.system || {}; // Fallback legado
 
         const cat = itemFlags.category || "principal";
         const base = XP_RULES[cat] || 8;
         
-        // Desconto de Poder Inicial
+        // Lógica de Poder Inicial (Desconto)
         const isInitial = itemFlags.isInitial || false;
         const discount = isInitial ? (4 * base) : 0;
         
-        // Dados
+        // Lê os dados das flags (onde a ficha de poder salva agora)
         const diceData = itemFlags.dice || itemSystem.dice || {};
-        const dN = diceData.normal || 0;
-        const dH = diceData.hard || 0;
-        const dW = diceData.wiggle || 0;
+        
+        const dN = Number(diceData.normal) || 0;
+        const dH = Number(diceData.hard) || 0;
+        const dW = Number(diceData.wiggle) || 0;
         
         const cost = (dN * base) + (dH * base * 2) + (dW * base * 4);
         
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // Atualiza visualmente na hora
-    calculatedTotalCost = newTotalCost;
+    // 4. Sincroniza com o Ator (CORREÇÃO CRÍTICA COM RENDER: FALSE)
+    // Usamos Number() para garantir comparação exata e evitar loop infinito
+    const currentSavedCost = Number(actor.flags?.[MODULE_ID]?.powersSpent) || 0;
 
-    // 4. Sincroniza com o Banco de Dados (SOMENTE SE MUDOU)
-    const currentSavedCost = actor.flags?.[MODULE_ID]?.powersSpent || 0;
-
-    if (newTotalCost !== currentSavedCost) {
-        // O segredo do "não travar": { render: false }
+    if (currentSavedCost !== calculatedTotalCost) {
+        // O segredo para não travar ao arrastar: { render: false }
         await actor.update({ 
-            [`flags.${MODULE_ID}.powersSpent`]: newTotalCost 
+            [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost 
         }, { render: false });
         
-        console.log(`[Nexus OS] Custo de Poderes Sincronizado: ${newTotalCost} XP`);
+        console.log(`[Nexus] Poder adicionado/editado. Novo custo: ${calculatedTotalCost}`);
     }
-
-    await tick(); // Espera o Svelte desenhar
-    isCalculating = false;
+    
+    await tick(); // Força o Svelte a desenhar a lista nova
   }
 
-  // --- HOOKS INTELIGENTES ---
+  // --- HOOKS DE REATIVIDADE TOTAL ---
   onMount(() => {
     refreshData(); 
 
-    // Hook no Ator (mas filtramos para não rodar se fomos nós que salvamos as flags)
+    // Hook de Atualização do Ator
     const hookId = Hooks.on("updateActor", (doc, changes, options) => {
-        if (doc.id === actor.id) {
-            // Se a atualização veio de uma flag nossa, não precisamos recalcular tudo,
-            // mas se veio do sistema (XP ganho), talvez precisemos.
-            // Por segurança, rodamos o refresh, mas o 'isCalculating' protege loops.
-            refreshData();
+        // Só atualiza se for este ator E se a mudança não foi feita por nós mesmos (render: false)
+        if (doc.id === actor.id && options.render !== false) {
+            scheduleRefresh();
         }
     });
     
-    // Hooks nos Itens (Adicionar/Remover/Editar Poder)
+    // Hooks de Itens (Criar, Deletar, Editar)
+    // Usamos scheduleRefresh para agrupar as chamadas
     const hookUpdateItem = Hooks.on("updateItem", (item) => { 
-        if(item.parent?.id === actor.id && item.type === "power") refreshData(); 
+        if(item.parent?.id === actor.id) scheduleRefresh(); 
     });
     const hookDeleteItem = Hooks.on("deleteItem", (item) => { 
-        if(item.parent?.id === actor.id && item.type === "power") refreshData(); 
+        if(item.parent?.id === actor.id) scheduleRefresh(); 
     });
     const hookCreateItem = Hooks.on("createItem", (item) => { 
-        if(item.parent?.id === actor.id && item.type === "power") refreshData(); 
+        if(item.parent?.id === actor.id) scheduleRefresh(); 
     });
 
     return () => {
@@ -110,7 +116,7 @@
     };
   });
 
-  // Filtro Visual (Reativo puro do Svelte)
+  // Filtro Visual
   $: filteredPowers = powers.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Ações
@@ -122,7 +128,6 @@
 <div class="powers-terminal">
   
   <header class="term-header">
-    
     <div class="hud-module main">
       <div class="hud-top">
         <span class="hud-label"><i class="fas fa-bolt"></i> DRENAGEM DE SISTEMA (XP)</span>
@@ -137,7 +142,6 @@
       <div class="hud-label">MÓDULOS</div>
       <div class="hud-value">{activePowerCount}</div>
     </div>
-
   </header>
 
   <div class="toolbar">
@@ -157,11 +161,11 @@
       {#if filteredPowers.length > 0}
         {#each filteredPowers as power (power.id)}
           <div transition:slide|local={{duration: 200}}>
-            <PowerInventoryCard 
+             <PowerInventoryCard 
                 item={power} 
                 actor={actor} 
                 isGM={isGM} 
-            />
+             />
           </div>
         {/each}
       {:else}
@@ -184,10 +188,8 @@
 </div>
 
 <style>
-  /* --- LAYOUT GLOBAL --- */
+/* ... (Seu CSS original aqui, não alterado) ... */
   .powers-terminal { height: 100%; display: flex; flex-direction: column; gap: 12px; background: transparent; color: var(--c-text); font-family: var(--font-body); padding: 5px; position: relative; overflow: hidden; }
-  
-  /* --- HUD HEADER --- */
   .term-header { display: flex; gap: 10px; z-index: 1; height: 60px; flex-shrink: 0; }
   .hud-module { background: rgba(0, 0, 0, 0.6); border: 1px solid #333; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; padding: 0 15px; position: relative; overflow: hidden; }
   .hud-module.main { flex: 3; border-left: 4px solid var(--c-primary); }
@@ -199,8 +201,6 @@
   .hud-bar-bg { width: 100%; height: 4px; background: #1a1a1a; margin-top: 8px; border-radius: 2px; overflow: hidden; position: relative; }
   .hud-bar-fill { height: 100%; background: var(--c-primary); box-shadow: 0 0 8px var(--c-primary); width: 100%; }
   .scanning-anim { background: linear-gradient(90deg, transparent, var(--c-primary), transparent); background-size: 50% 100%; background-repeat: no-repeat; animation: scan-bar 2s infinite linear; }
-
-  /* --- TOOLBAR --- */
   .toolbar { display: flex; gap: 10px; z-index: 1; height: 38px; flex-shrink: 0; }
   .search-box { flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(0, 0, 0, 0.5); border: 1px solid #333; padding: 0 12px; border-radius: var(--border-radius); transition: border-color 0.2s; }
   .search-box:focus-within { border-color: var(--c-primary); box-shadow: 0 0 10px rgba(0,0,0,0.3); }
@@ -211,24 +211,17 @@
   .btn-db { background: rgba(0,0,0,0.6); border: 1px solid var(--c-primary); color: var(--c-primary); padding: 0 15px; border-radius: var(--border-radius); cursor: pointer; display: flex; align-items: center; gap: 8px; font-family: var(--font-head); font-weight: bold; transition: all 0.2s; }
   .btn-db:hover { background: var(--c-primary); color: #000; box-shadow: 0 0 15px var(--c-primary); }
   .btn-text { font-size: 0.8em; }
-
-  /* --- LIST AREA --- */
   .list-container { flex: 1; overflow-y: auto; padding-right: 5px; z-index: 1; border-top: 1px solid rgba(255,255,255,0.1); border-bottom: 1px solid rgba(255,255,255,0.1); }
   .powers-grid { display: flex; flex-direction: column; gap: 8px; padding-top: 5px; }
   .list-container::-webkit-scrollbar { width: 6px; }
   .list-container::-webkit-scrollbar-track { background: transparent; }
   .list-container::-webkit-scrollbar-thumb { background: #333; border: 1px solid #000; border-radius: 3px; }
   .list-container::-webkit-scrollbar-thumb:hover { background: var(--c-primary); }
-
-  /* --- EMPTY STATE --- */
   .empty-state { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #666; border: 1px dashed #333; border-radius: var(--border-radius); margin-top: 20px; background: rgba(0,0,0,0.2); }
   .glitch-wrapper { font-size: 3em; opacity: 0.5; position: relative; animation: glitch 3s infinite; color: var(--c-primary); }
   .empty-title { font-weight: bold; color: #888; font-size: 1em; letter-spacing: 1px; font-family: var(--font-head); }
   .empty-sub { font-size: 0.7em; }
-
-  /* --- FOOTER --- */
   .term-footer { display: flex; justify-content: space-between; font-size: 0.6em; color: #555; z-index: 1; padding: 0 5px; font-family: var(--font-head); margin-top: auto; }
-
   @keyframes scan-bar { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
   @keyframes glitch { 0% { transform: translate(0); } 2% { transform: translate(-2px, 2px); } 4% { transform: translate(2px, -2px); } 6% { transform: translate(0); } 100% { transform: translate(0); } }
 </style>
