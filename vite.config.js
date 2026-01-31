@@ -1,22 +1,20 @@
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import path from 'path';
 
 export default defineConfig({
   plugins: [svelte()],
   build: {
-    outDir: '.', // Joga na raiz do módulo
-    emptyOutDir: false, // Não deleta seus outros arquivos
     lib: {
-      entry: './src/main.js', // <--- AQUI: Pega do seu SRC
+      entry: './src/main.js', // Onde o build começa
       name: 'MultiversusRPG',
-      fileName: () => 'index.js', // <--- AQUI: Salva como index.js na raiz
+      fileName: 'index',
       formats: ['es']
     },
     rollupOptions: {
       output: {
-        assetFileNames: 'style.css', // Salva o CSS na raiz também
+        assetFileNames: 'style.css', // Garante que o CSS vá para style.css
+        dir: './' // Joga o index.js e style.css na raiz do módulo
       }
     }
   }
-});
+}); 

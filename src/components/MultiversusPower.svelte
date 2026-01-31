@@ -1,43 +1,56 @@
 <script>
   import ExtraFlawApp from './ExtraFlawApp.js';
+  import { THEME_DB } from './PowerSheetThemeDB.js'; // <--- IMPORTAÇÃO DO TEMA
   import { calculateCapacity, CAPACITY_TYPES } from '../data/capacities-data.js';
+  import { fade, slide, scale } from 'svelte/transition';
 
   export let item;
   export let application;
 
-  // --- ACESSO AO JOGO (Para verificar GM) ---
   const isGM = game.user.isGM;
 
-  // --- CONFIGURAÇÕES ---
+  // --- CONFIGURAÇÕES DE REGRAS ---
   const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
   const PB_BASE_VALUES = { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 };
   const PB_MULTIPLIERS = { "principal": 1, "secundario": 0.5, "habilidade": 0.25 };
-  const RARITY_COLORS = { "Comum": "#b0b0b0", "Raro": "#00bfff", "Lendário": "#ffa500", "Mítico": "#ff4500", "Universal": "#e0e0e0", "Multiversal": "#d000ff" };
+  
+  const QUALITY_MODES = [
+    {id: 'atk', label: 'ATAQUE'},
+    {id: 'def', label: 'DEFESA'},
+    {id: 'util', label: 'UTILIDADE'}
+  ];
 
   // --- REATIVIDADE ---
   $: system = item.system || {};
   $: flags = item.flags?.["multiversus-rpg"] || {};
   
-  // Imagens: Foundry (Library) vs Custom (URL)
+  // TEMA: Se não tiver um salvo, usa o primeiro do banco de dados
+  $: currentThemeKey = flags.themeKey || "neon-operator";
+  $: activeTheme = THEME_DB[currentThemeKey] || THEME_DB["neon-operator"];
+  
+  // IMAGENS
   $: libraryImg = item.img;
   $: customUrl = flags.customUrl || "";
-  $: displayImg = customUrl || libraryImg; // Prioriza URL na ficha
+  $: displayImg = customUrl || libraryImg;
 
+  // DADOS PRINCIPAIS
   $: qualities = system.qualities || [];
   $: name = item.name;
-  
-  // FLAGS
   $: rarity = flags.rarity || "Comum";
   $: category = flags.category || "principal";
   $: isInitial = flags.isInitial || false;
   
+  // DADOS
   $: diceNormal = system.dice?.normal || 0;
   $: diceHard = system.dice?.hard || 0;
   $: diceWiggle = system.dice?.wiggle || 0;
   $: totalDice = diceNormal + diceHard + diceWiggle;
 
   $: description = system.notes || "";
+  
+  // UI State
   let activeTab = 'geral';
+  let showThemeSelector = false;
 
   // --- CÁLCULOS ---
   $: baseCost = XP_RULES[category] || 8;
@@ -47,246 +60,258 @@
 
   $: maxPB = Math.floor((PB_BASE_VALUES[rarity]||2) * (PB_MULTIPLIERS[category]||1));
   $: usedPB = qualities.reduce((total, q) => {
-    const extrasCost = (q.extras || []).reduce((sum, e) => {
-      const qty = e.qty || 1; 
-      return sum + ((e.cost || 0) * qty);
-    }, 0);
+    const extrasCost = (q.extras || []).reduce((sum, e) => sum + ((e.cost || 0) * (e.qty || 1)), 0);
     return total + 2 + (q.level || 0) + extrasCost;
   }, 0);
 
-  $: themeColor = item.actor?.flags?.themeColor || RARITY_COLORS[rarity] || "#00ff41";
-
-  // --- FUNÇÕES DE IMAGEM ---
+  // --- AÇÕES ---
+  async function updateCustomUrl() { await item.update({'flags.multiversus-rpg.customUrl': customUrl}); }
+  function pickLibraryImage() { new FilePicker({ type: "image", current: item.img, callback: path => item.update({ img: path }) }).render(true); }
   
-  // 1. Atualiza a URL customizada (Apenas visual da ficha)
-  async function updateCustomUrl() {
-    await item.update({'flags.multiversus-rpg.customUrl': customUrl});
+  // Troca de Tema
+  async function setTheme(key) {
+    await item.update({'flags.multiversus-rpg.themeKey': key});
+    showThemeSelector = false;
   }
 
-  // 2. Abre o FilePicker do Foundry (Imagem do Item na Biblioteca)
-  function pickLibraryImage() {
-    new FilePicker({
-      type: "image",
-      current: item.img,
-      callback: path => item.update({ img: path })
-    }).render(true);
-  }
-
-  // --- GERENCIAMENTO ---
-  function roll() { item.roll(); }
-
+  // Lógica de Sub-rotinas (Qualidades)
   async function addQuality() {
     const newQ = { 
-      name: "NOVA SUB-ROTINA", 
-      level: 0, 
-      description: "", 
-      extras: [],
-      capacities: [{ type: 'mass', nul: 0, booster: 0, collapsed: false }] 
+      name: "Nova Sub-rotina", type: "atk", level: 0, 
+      description: "", extras: [], 
+      capacities: [{ type: 'mass', nul: 0, booster: 0, collapsed: false }],
+      collapsed: false 
     };
     await item.update({ "system.qualities": [...qualities, newQ] });
   }
-
-  async function removeQuality(index) {
-    const newQ = qualities.filter((_, i) => i !== index);
-    await item.update({ "system.qualities": newQ });
-  }
-
+  async function removeQuality(index) { await item.update({ "system.qualities": qualities.filter((_, i) => i !== index) }); }
   async function updateQuality(index, field, value) {
-    const newQ = [...qualities];
-    newQ[index][field] = value;
-    await item.update({ "system.qualities": newQ });
+    const newQ = [...qualities]; newQ[index][field] = value; await item.update({ "system.qualities": newQ });
   }
 
+  // Lógica de Capacidades
   async function addCapacity(qIndex) {
-    const newQ = [...qualities];
-    if (!newQ[qIndex].capacities) newQ[qIndex].capacities = [];
-    newQ[qIndex].capacities.push({ type: 'mass', nul: 0, booster: 0, collapsed: false });
-    await item.update({ "system.qualities": newQ });
+    const newQ = [...qualities]; if (!newQ[qIndex].capacities) newQ[qIndex].capacities = [];
+    newQ[qIndex].capacities.push({ type: 'mass', nul: 0, booster: 0, collapsed: false }); await item.update({ "system.qualities": newQ });
   }
-
   async function removeCapacity(qIndex, cIndex) {
-    const newQ = [...qualities];
-    newQ[qIndex].capacities.splice(cIndex, 1);
-    await item.update({ "system.qualities": newQ });
+    const newQ = [...qualities]; newQ[qIndex].capacities.splice(cIndex, 1); await item.update({ "system.qualities": newQ });
   }
-
   async function updateCapacity(qIndex, cIndex, field, value) {
-    const newQ = [...qualities];
-    newQ[qIndex].capacities[cIndex][field] = value;
-    await item.update({ "system.qualities": newQ });
+    const newQ = [...qualities]; newQ[qIndex].capacities[cIndex][field] = value; await item.update({ "system.qualities": newQ });
   }
-
   async function toggleCapCollapse(qIndex, cIndex) {
-    const newQ = [...qualities];
-    newQ[qIndex].capacities[cIndex].collapsed = !newQ[qIndex].capacities[cIndex].collapsed;
-    await item.update({ "system.qualities": newQ });
+    const newQ = [...qualities]; newQ[qIndex].capacities[cIndex].collapsed = !newQ[qIndex].capacities[cIndex].collapsed; await item.update({ "system.qualities": newQ });
   }
-
-  function openExtraSelector(index) {
-    new ExtraFlawApp(item, index).render(true);
-  }
+  
+  function openExtraSelector(index) { new ExtraFlawApp(item, index).render(true); }
 </script>
 
-<div class="terminal-frame" style="--c-primary: {themeColor}">
-  <div class="scanlines"></div>
+<div class="rpg-sheet-root" style="
+  {Object.entries(activeTheme.vars).map(([k,v]) => `${k}:${v}`).join(';')}
+">
   
-  <header class="header-grid">
-    
-    <div class="image-module">
-      <div class="image-wrapper">
-        <img src={displayImg} alt={name} class="display-img" />
-        <button class="btn-library-picker" on:click={pickLibraryImage} title="Alterar Ícone da Biblioteca (FilePicker)">
-          <i class="fas fa-folder-open"></i>
-        </button>
+  {#if showThemeSelector}
+    <div class="modal-backdrop" on:click|self={() => showThemeSelector = false} transition:fade={{duration:150}}>
+      <div class="theme-modal" transition:scale={{start:0.95}}>
+        <h3>SELECIONAR TEMA VISUAL</h3>
+        <div class="theme-grid">
+          {#each Object.entries(THEME_DB) as [key, theme]}
+            <button class="theme-btn {currentThemeKey === key ? 'active' : ''}" 
+                    style="border-left: 4px solid {theme.vars['--accent']}"
+                    on:click={() => setTheme(key)}>
+              {theme.label}
+            </button>
+          {/each}
+        </div>
       </div>
-      <input type="text" bind:value={customUrl} on:change={updateCustomUrl} class="url-input" placeholder="HTTPS://IMG-URL..." />
+    </div>
+  {/if}
+
+  <header class="sheet-header">
+    <div class="profile-section">
+      <div class="avatar-frame">
+        <img src={displayImg} alt={name} />
+        <div class="avatar-overlay" on:click={pickLibraryImage}>
+          <i class="fas fa-edit"></i>
+        </div>
+      </div>
     </div>
 
-    <div class="main-data-module">
-      <div class="title-bar">
-        <span class="prompt">&gt;</span>
-        <input type="text" value={name} on:change={(e)=>item.update({name: e.target.value})} class="input-name" placeholder="NOME DO ARQUIVO..."/>
+    <div class="info-section">
+      <div class="title-row">
+        <div class="input-group grow">
+          <input type="text" value={name} on:change={(e)=>item.update({name: e.target.value})} placeholder=" " />
+          <label>NOME DO PODER</label>
+          <span class="bar"></span>
+        </div>
         
+        <button class="icon-btn" on:click={() => showThemeSelector = !showThemeSelector} title="Configurar Tema">
+          <i class="fas fa-cog"></i>
+        </button>
+
         {#if isGM}
-          <button 
-            class="btn-gm-initial {isInitial ? 'active' : ''}" 
-            on:click={() => item.update({'flags.multiversus-rpg.isInitial': !isInitial})}
-            title="[GM ONLY] Define como Poder Inicial (Desconto de XP)"
-          >
-            <i class="fas fa-star"></i> INIT_PWR
+          <button class="icon-btn {isInitial ? 'active-star' : ''}" on:click={() => item.update({'flags.multiversus-rpg.isInitial': !isInitial})}>
+            <i class="fas fa-star"></i>
           </button>
         {/if}
       </div>
 
-      <div class="meta-grid">
-        <div class="meta-field">
-          <label>CLASSE</label>
+      <div class="meta-row">
+        <div class="custom-select grow">
+          <label>CATEGORIA</label>
           <select value={category} on:change={(e)=>item.update({'flags.multiversus-rpg.category': e.target.value})}>
-            <option value="principal">PRINCIPAL [8xp]</option>
-            <option value="secundario">SECUNDÁRIO [4xp]</option>
-            <option value="habilidade">HABILIDADE [2xp]</option>
+            <option value="principal">PRINCIPAL (8xp)</option>
+            <option value="secundario">SECUNDÁRIO (4xp)</option>
+            <option value="habilidade">HABILIDADE (2xp)</option>
           </select>
+          <i class="fas fa-chevron-down arrow"></i>
         </div>
-        <div class="meta-field">
+
+        <div class="custom-select grow">
           <label>RARIDADE</label>
-          <select value={rarity} on:change={(e)=>item.update({'flags.multiversus-rpg.rarity': e.target.value})} class="rarity-hl">
+          <select value={rarity} on:change={(e)=>item.update({'flags.multiversus-rpg.rarity': e.target.value})}>
             {#each Object.keys(PB_BASE_VALUES) as r} <option value={r}>{r.toUpperCase()}</option> {/each}
           </select>
+          <i class="fas fa-chevron-down arrow"></i>
         </div>
       </div>
     </div>
   </header>
 
-  <nav class="nav-terminal">
-    <button class:active={activeTab === 'geral'} on:click={() => activeTab = 'geral'}>
-      [1] DADOS_GERAIS
-    </button>
-    <button class:active={activeTab === 'balanceamento'} on:click={() => activeTab = 'balanceamento'}>
-      [2] MATRIZ_BALANCEAMENTO
-    </button>
+  <nav class="sheet-nav">
+    <button class:active={activeTab === 'geral'} on:click={() => activeTab = 'geral'}>VISÃO GERAL</button>
+    <button class:active={activeTab === 'balanceamento'} on:click={() => activeTab = 'balanceamento'}>ENGENHARIA</button>
   </nav>
 
-  <div class="viewport">
+  <main class="sheet-content">
     
     {#if activeTab === 'geral'}
-      <div class="pane fade-in">
+      <div class="tab-pane" in:fade={{duration:200}}>
         
-        <div class="hud-grid">
-          <div class="hud-box">
-            <span class="hud-label">CUSTO_XP</span>
-            <div class="hud-value xp">
-              {#if isInitial}<span class="strike">{rawXpCost}</span> <i class="fas fa-chevron-right"></i>{/if}
-              {xpCost}
+        <div class="hud-container">
+          <div class="hud-card">
+            <span class="hud-lbl">CUSTO TOTAL (XP)</span>
+            <div class="hud-val accent-text">
+              {#if isInitial}<span class="strike">{rawXpCost}</span>{/if} {xpCost}
             </div>
           </div>
-          <div class="hud-box">
-            <span class="hud-label">BALANCEAMENTO (PB)</span>
-            <div class="hud-value pb" class:warning={usedPB > maxPB}>
-              {usedPB} <span class="sep">/</span> {maxPB}
+          <div class="hud-card">
+            <span class="hud-lbl">BALANCEAMENTO (PB)</span>
+            <div class="hud-val {usedPB > maxPB ? 'danger-text' : ''}">
+              {usedPB} <span class="dim">/ {maxPB}</span>
             </div>
           </div>
         </div>
 
-        <div class="dice-module">
-          <div class="dice-slot normal">
-            <input type="number" value={diceNormal} on:change={(e)=>item.update({'system.dice.normal': +e.target.value})}>
-            <label>NORMAL</label>
+        <div class="dice-matrix">
+          <div class="dice-input normal">
+            <input type="number" min="0" value={diceNormal} on:change={(e)=>item.update({'system.dice.normal': +e.target.value})}>
+            <span class="lbl">NORMAL (1x)</span>
           </div>
-          <div class="dice-slot hard">
-            <input type="number" value={diceHard} on:change={(e)=>item.update({'system.dice.hard': +e.target.value})}>
-            <label>HARD</label>
+          <div class="dice-input hard">
+            <input type="number" min="0" value={diceHard} on:change={(e)=>item.update({'system.dice.hard': +e.target.value})}>
+            <span class="lbl">DURO (2x)</span>
           </div>
-          <div class="dice-slot wiggle">
-            <input type="number" value={diceWiggle} on:change={(e)=>item.update({'system.dice.wiggle': +e.target.value})}>
-            <label>WIGGLE</label>
+          <div class="dice-input wiggle">
+            <input type="number" min="0" value={diceWiggle} on:change={(e)=>item.update({'system.dice.wiggle': +e.target.value})}>
+            <span class="lbl">MOLE (4x)</span>
           </div>
         </div>
 
-        <div class="terminal-text">
-          <div class="term-head">DESCRIÇÃO.LOG</div>
-          <textarea value={description} on:change={(e)=>item.update({'system.notes': e.target.value})} placeholder="Insira dados descritivos..."></textarea>
+        <div class="text-editor-container">
+          <div class="editor-label">NOTAS DE SISTEMA</div>
+          <textarea value={description} on:change={(e)=>item.update({'system.notes': e.target.value})} placeholder="Insira a descrição narrativa e mecânica aqui..."></textarea>
         </div>
+
       </div>
     {/if}
 
     {#if activeTab === 'balanceamento'}
-      <div class="pane fade-in">
-        <div class="tools-bar">
-          <span class="pb-status" class:blink={usedPB > maxPB}>STATUS: {usedPB > maxPB ? 'SOBRECARGA' : 'ESTÁVEL'} [{usedPB}/{maxPB}]</span>
-          <button class="btn-add-module" on:click={addQuality}>+ ADD_SUBROTINA</button>
+      <div class="tab-pane" in:fade={{duration:200}}>
+        
+        <div class="toolbar">
+          <div class="status-pill {usedPB > maxPB ? 'danger' : 'success'}">
+            <i class="fas fa-circle"></i> {usedPB > maxPB ? 'SOBRECARGA' : 'ESTÁVEL'}
+          </div>
+          <button class="btn-new" on:click={addQuality}>
+            <i class="fas fa-plus"></i> NOVA SUB-ROTINA
+          </button>
         </div>
 
-        <div class="modules-container">
+        <div class="cards-list">
           {#each qualities as q, i}
-            <div class="data-module">
-              <div class="dm-header">
-                <span class="dm-id">#{i+1}</span>
-                <input type="text" class="dm-name" value={q.name} on:change={(e)=>updateQuality(i, 'name', e.target.value)} placeholder="NOME_MODULO">
-                <div class="dm-lvl">
-                  <label>LVL</label>
-                  <input type="number" value={q.level} on:change={(e)=>updateQuality(i, 'level', +e.target.value)}>
+            <div class="quality-card" transition:slide|local>
+              
+              <div class="card-header">
+                <div class="header-left">
+                  <span class="index-badge">#{i+1}</span>
+                  
+                  <div class="input-inline">
+                    <input type="text" value={q.name} on:change={(e)=>updateQuality(i, 'name', e.target.value)} placeholder="Nome..." />
+                    <span class="underline"></span>
+                  </div>
                 </div>
-                <button class="btn-kill" on:click={() => removeQuality(i)} title="Deletar Módulo">X</button>
+
+                <div class="header-right">
+                  <div class="mini-select">
+                    <select value={q.type || 'atk'} on:change={(e)=>updateQuality(i, 'type', e.target.value)}>
+                      {#each QUALITY_MODES as mode}
+                        <option value={mode.id}>{mode.label}</option>
+                      {/each}
+                    </select>
+                  </div>
+
+                  <div class="lvl-control">
+                    <span>NVL</span>
+                    <input type="number" value={q.level} on:change={(e)=>updateQuality(i, 'level', +e.target.value)}>
+                  </div>
+
+                  <button class="btn-icon delete" on:click={() => removeQuality(i)}><i class="fas fa-times"></i></button>
+                </div>
               </div>
 
-              <textarea class="dm-desc" on:change={(e)=>updateQuality(i, 'description', e.target.value)} placeholder="Parâmetros de funcionamento...">{q.description || ""}</textarea>
+              <div class="card-body">
+                <textarea rows="1" class="mini-desc" on:change={(e)=>updateQuality(i, 'description', e.target.value)} placeholder="Descrição curta do efeito...">{q.description || ""}</textarea>
 
-              <div class="cap-grid-frame">
-                <div class="cg-title">
-                  CAPACIDADES
-                  <button class="btn-tiny-add" on:click={() => addCapacity(i)}>+</button>
-                </div>
+                <div class="caps-list">
+                  <div class="caps-header">
+                    <span>CAPACIDADES</span>
+                    <button class="btn-text" on:click={() => addCapacity(i)}>+ Adicionar</button>
+                  </div>
 
-                {#if q.capacities && q.capacities.length > 0}
-                  {#each q.capacities as cap, cIndex}
+                  {#each (q.capacities || []) as cap, cIndex}
                     {@const capResult = calculateCapacity(totalDice, cap.type, cap.nul, cap.booster)}
                     
-                    <div class="cap-row {cap.collapsed ? 'minimized' : ''}">
-                      <div class="cap-bar" on:click={() => toggleCapCollapse(i, cIndex)}>
-                        <i class="fas fa-caret-{cap.collapsed ? 'right' : 'down'} icon"></i>
-                        <span class="cap-type">{CAPACITY_TYPES.find(t=>t.id === cap.type)?.name.split(' ')[0] || 'DATA'}</span>
-                        <span class="cap-result">>> {capResult}</span>
-                        <button class="btn-kill-tiny" on:click|stopPropagation={() => removeCapacity(i, cIndex)}>x</button>
+                    <div class="cap-row {cap.collapsed ? 'collapsed' : ''}">
+                      <div class="cap-main" on:click={() => toggleCapCollapse(i, cIndex)}>
+                        <i class="fas fa-chevron-{cap.collapsed ? 'right' : 'down'} chevron"></i>
+                        <span class="cap-label">{CAPACITY_TYPES.find(t=>t.id === cap.type)?.name || '...'}</span>
+                        <span class="cap-result">{capResult}</span>
+                        <button class="btn-icon small" on:click|stopPropagation={() => removeCapacity(i, cIndex)}>×</button>
                       </div>
 
                       {#if !cap.collapsed}
-                        <div class="cap-details">
-                          <select class="cyber-select" value={cap.type || 'mass'} on:change={(e) => updateCapacity(i, cIndex, 'type', e.target.value)}>
-                             {#each CAPACITY_TYPES as type} <option value={type.id}>{type.name}</option> {/each}
-                          </select>
+                        <div class="cap-tools" transition:slide>
+                          <div class="custom-select full">
+                            <select value={cap.type || 'mass'} on:change={(e) => updateCapacity(i, cIndex, 'type', e.target.value)}>
+                                {#each CAPACITY_TYPES as type} <option value={type.id}>{type.name}</option> {/each}
+                            </select>
+                            <i class="fas fa-caret-down arrow"></i>
+                          </div>
                           
-                          <div class="cap-mods">
-                            <div class="mod-unit">
-                              <label>NO_LIMIT (x2)</label>
-                              <div class="cyber-stepper">
+                          <div class="steppers">
+                            <div class="stepper">
+                              <label>Sem Limite (x2)</label>
+                              <div class="step-ctrl">
                                 <button on:click={() => updateCapacity(i, cIndex, 'nul', Math.max(0, (cap.nul||0)-1))}>-</button>
                                 <span>{cap.nul || 0}</span>
                                 <button on:click={() => updateCapacity(i, cIndex, 'nul', (cap.nul||0)+1)}>+</button>
                               </div>
                             </div>
-                            <div class="mod-unit">
-                              <label>BOOSTER (x10)</label>
-                              <div class="cyber-stepper">
+                            <div class="stepper">
+                              <label>Booster (x10)</label>
+                              <div class="step-ctrl">
                                 <button on:click={() => updateCapacity(i, cIndex, 'booster', Math.max(0, (cap.booster||0)-1))}>-</button>
                                 <span>{cap.booster || 0}</span>
                                 <button on:click={() => updateCapacity(i, cIndex, 'booster', (cap.booster||0)+1)}>+</button>
@@ -297,222 +322,191 @@
                       {/if}
                     </div>
                   {/each}
-                {:else}
-                  <div class="empty-slot" on:click={() => addCapacity(i)}>SLOT VAZIO - CLIQUE PARA INICIAR</div>
-                {/if}
-              </div>
+                </div>
 
-              <div class="dm-footer">
-                <span class="dm-cost">CUSTO: <span class="hl">{2 + (q.level || 0)} PB + EXTRAS</span></span>
-                <button class="btn-config" on:click={() => openExtraSelector(i)}>
-                  CONFIGURAR EXTRAS
-                </button>
+                <div class="card-footer">
+                  <div class="cost-badge">CUSTO: <strong>{2 + (q.level || 0)} PB</strong></div>
+                  <button class="btn-extra" on:click={() => openExtraSelector(i)}>
+                    <i class="fas fa-sliders-h"></i> CONFIGURAR EXTRAS
+                  </button>
+                </div>
               </div>
             </div>
           {/each}
         </div>
+
       </div>
     {/if}
-  </div>
+
+  </main>
 </div>
 
 <style>
-  /* --- CYBERPUNK THEME VARIABLES --- */
-  .terminal-frame {
-    --bg-dark: #050505;
-    --bg-panel: #0a0a0a;
-    --border-color: #333;
-    --text-primary: #eee;
-    --text-dim: #666;
-    --font-mono: 'Courier New', Courier, monospace;
-    
-    background-color: var(--bg-dark);
-    color: var(--text-primary);
-    font-family: var(--font-mono);
-    height: 100%;
+  @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
+
+  /* --- ROOT & THEME DEFAULTS --- */
+  .rpg-sheet-root {
+    width: 100%; height: 100%;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    font-family: var(--font);
     display: flex; flex-direction: column;
-    padding: 15px;
-    gap: 15px;
-    border: 1px solid var(--c-primary);
-    box-shadow: 0 0 15px rgba(0,0,0,0.8) inset;
-    position: relative;
     overflow: hidden;
+    font-size: 13px;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
-  /* Scanlines Effect */
-  .scanlines {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    background-size: 100% 2px, 3px 100%;
-    pointer-events: none; z-index: 0;
-  }
+  /* --- MODAL DE TEMA --- */
+  .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; display: flex; justify-content: center; align-items: center; }
+  .theme-modal { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--accent); box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 300px; }
+  .theme-modal h3 { margin: 0 0 15px 0; color: var(--accent); text-align: center; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  .theme-grid { display: flex; flex-direction: column; gap: 8px; }
+  .theme-btn { background: rgba(255,255,255,0.05); border: none; padding: 10px; color: #fff; cursor: pointer; text-align: left; transition: 0.2s; font-family: inherit; }
+  .theme-btn:hover { background: rgba(255,255,255,0.1); padding-left: 15px; }
+  .theme-btn.active { background: var(--accent); color: #000; font-weight: bold; }
 
   /* --- HEADER --- */
-  .header-grid { display: flex; gap: 15px; position: relative; z-index: 1; }
+  .sheet-header { padding: 20px; background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent); display: flex; gap: 20px; border-bottom: 1px solid var(--border); }
   
-  /* Image Module */
-  .image-module { display: flex; flex-direction: column; gap: 5px; width: 80px; }
-  .image-wrapper { position: relative; width: 80px; height: 80px; border: 2px solid var(--c-primary); border-radius: 4px; padding: 2px; }
-  .display-img { width: 100%; height: 100%; object-fit: cover; background: #000; }
-  
-  .btn-library-picker {
-    position: absolute; bottom: -5px; right: -5px;
-    background: #111; color: var(--c-primary); border: 1px solid var(--c-primary);
-    width: 24px; height: 24px; border-radius: 50%;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 0.8em; z-index: 10;
-  }
-  .btn-library-picker:hover { background: var(--c-primary); color: #000; }
-  
-  .url-input { 
-    background: transparent; border: none; border-bottom: 1px solid #333; 
-    color: var(--text-dim); font-size: 9px; text-align: center; font-family: inherit; 
-  }
-  .url-input:focus { border-color: var(--c-primary); outline: none; color: var(--c-primary); }
+  .profile-section { width: 80px; flex-shrink: 0; }
+  .avatar-frame { width: 80px; height: 80px; border-radius: var(--radius); overflow: hidden; position: relative; border: 2px solid var(--border); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; opacity: 0; transition: 0.2s; cursor: pointer; color: #fff; font-size: 1.5em; }
+  .avatar-frame:hover .avatar-overlay { opacity: 1; }
 
-  /* Main Data */
-  .main-data-module { flex: 1; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+  .info-section { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 15px; }
   
-  .title-bar { display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #222; padding-bottom: 5px; }
-  .prompt { color: var(--c-primary); font-weight: bold; }
-  .input-name { 
-    flex: 1; background: transparent; border: none; 
-    font-family: var(--font-mono); font-size: 1.6em; color: #fff; font-weight: bold; text-transform: uppercase; 
+  .title-row { display: flex; gap: 10px; align-items: center; }
+  .input-group { position: relative; display: flex; flex-direction: column; }
+  .input-group.grow { flex: 1; }
+  .input-group input { 
+    background: transparent; border: none; font-family: inherit; color: #fff; 
+    font-size: 1.5em; font-weight: 700; padding: 5px 0; width: 100%; z-index: 1;
   }
-  .input-name:focus { outline: none; text-shadow: 0 0 5px var(--c-primary); }
+  .input-group input:focus { outline: none; }
+  .input-group label { position: absolute; top: -8px; left: 0; font-size: 0.7em; color: var(--accent); opacity: 0; transition: 0.2s; font-weight: 600; }
+  .input-group input:not(:placeholder-shown) + label, .input-group input:focus + label { opacity: 1; top: -12px; }
+  .input-group .bar { height: 2px; width: 100%; background: var(--border); position: absolute; bottom: 0; transition: 0.3s; }
+  .input-group input:focus ~ .bar { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
-  /* GM Button */
-  .btn-gm-initial {
-    background: #111; border: 1px solid #444; color: #444; padding: 4px 8px;
-    font-size: 0.7em; cursor: pointer; display: flex; align-items: center; gap: 5px;
-    border-radius: 2px;
-  }
-  .btn-gm-initial.active { border-color: var(--c-primary); color: var(--c-primary); background: rgba(0,0,0,0.5); box-shadow: 0 0 5px var(--c-primary); }
+  .icon-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+  .icon-btn:hover { color: #fff; border-color: #fff; }
+  .icon-btn.active-star { color: #ffd700; border-color: #ffd700; background: rgba(255, 215, 0, 0.1); box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); }
 
-  .meta-grid { display: flex; gap: 10px; }
-  .meta-field { flex: 1; display: flex; flex-direction: column; }
-  .meta-field label { font-size: 0.6em; color: var(--text-dim); letter-spacing: 2px; margin-bottom: 2px; }
-  select { 
-    background: #000; color: #eee; border: 1px solid #333; 
-    padding: 4px; font-family: var(--font-mono); font-size: 0.9em; 
-  }
-  .rarity-hl { color: var(--c-primary); border-color: var(--c-primary); }
+  .meta-row { display: flex; gap: 15px; }
+  .custom-select { position: relative; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); display: flex; flex-direction: column; padding: 2px 10px; transition: 0.2s; }
+  .custom-select.grow { flex: 1; }
+  .custom-select:hover { border-color: var(--accent); }
+  .custom-select label { font-size: 0.65em; color: var(--text-muted); font-weight: 700; margin-bottom: -2px; }
+  .custom-select select { background: transparent; border: none; color: #fff; font-family: inherit; font-weight: 600; font-size: 0.95em; cursor: pointer; appearance: none; width: 100%; z-index: 2; padding: 2px 0; }
+  .custom-select .arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-20%); font-size: 0.8em; color: var(--text-muted); pointer-events: none; }
 
   /* --- NAVIGATION --- */
-  .nav-terminal { display: flex; border-bottom: 1px solid #333; margin-bottom: 10px; position: relative; z-index: 1; }
-  .nav-terminal button {
-    flex: 1; background: transparent; border: none; color: #555;
-    padding: 10px; font-family: var(--font-mono); font-weight: bold; cursor: pointer;
-    transition: 0.2s; border-bottom: 2px solid transparent;
-  }
-  .nav-terminal button:hover { color: #aaa; background: rgba(255,255,255,0.02); }
-  .nav-terminal button.active { color: var(--c-primary); border-color: var(--c-primary); text-shadow: 0 0 3px var(--c-primary); }
+  .sheet-nav { display: flex; padding: 0 20px; border-bottom: 1px solid var(--border); gap: 30px; }
+  .sheet-nav button { background: transparent; border: none; padding: 15px 0; color: var(--text-muted); font-family: inherit; font-weight: 700; font-size: 1.1em; cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; }
+  .sheet-nav button:hover { color: #fff; }
+  .sheet-nav button.active { color: var(--accent); border-color: var(--accent); }
 
-  /* --- VIEWPORT --- */
-  .viewport { flex: 1; overflow: hidden; position: relative; z-index: 1; }
-  .pane { height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 5px; }
+  /* --- CONTENT --- */
+  .sheet-content { flex: 1; overflow-y: auto; padding: 20px; position: relative; }
+  .tab-pane { display: flex; flex-direction: column; gap: 20px; }
 
-  /* HUD Metrics */
-  .hud-grid { display: flex; gap: 10px; }
-  .hud-box { 
-    flex: 1; background: rgba(0,0,0,0.3); border: 1px solid #333; 
-    padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-  }
-  .hud-label { font-size: 0.6em; color: #555; letter-spacing: 2px; margin-bottom: 5px; }
-  .hud-value { font-size: 1.8em; font-weight: bold; }
-  .hud-value.xp { color: var(--c-primary); text-shadow: 0 0 5px var(--c-primary); }
-  .hud-value.pb.warning { color: #ff003c; text-shadow: 0 0 5px #ff003c; animation: blink 2s infinite; }
-  .strike { text-decoration: line-through; color: #444; font-size: 0.6em; margin-right: 5px; }
-  .sep { color: #444; font-size: 0.5em; vertical-align: middle; }
+  /* HUD Stats */
+  .hud-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+  .hud-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; text-align: center; }
+  .hud-lbl { display: block; font-size: 0.7em; color: var(--text-muted); letter-spacing: 1px; font-weight: 700; margin-bottom: 5px; }
+  .hud-val { font-size: 2em; font-weight: 700; color: #fff; line-height: 1; }
+  .accent-text { color: var(--accent); text-shadow: 0 0 15px var(--accent); }
+  .danger-text { color: var(--danger); text-shadow: 0 0 15px var(--danger); }
+  .strike { text-decoration: line-through; color: var(--text-muted); font-size: 0.5em; margin-right: 5px; }
+  .dim { color: var(--text-muted); font-size: 0.5em; }
 
-  /* Dice Module */
-  .dice-module { display: flex; gap: 10px; background: #080808; padding: 10px; border: 1px solid #222; }
-  .dice-slot { flex: 1; position: relative; }
-  .dice-slot input { 
-    width: 100%; background: #000; border: 1px solid #333; color: #fff; 
-    text-align: center; font-size: 1.4em; padding: 10px 0; font-family: var(--font-mono); 
-  }
-  .dice-slot input:focus { border-color: var(--c-primary); outline: none; }
-  .dice-slot label { position: absolute; bottom: -5px; left: 0; width: 100%; text-align: center; background: #080808; color: #555; font-size: 0.6em; }
-  .dice-slot.hard input { color: #ffca28; border-color: #ffca28; }
-  .dice-slot.wiggle input { color: #ff5252; border-color: #ff5252; }
+  /* Dice Matrix */
+  .dice-matrix { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+  .dice-input { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px; display: flex; flex-direction: column; align-items: center; position: relative; }
+  .dice-input input { width: 100%; background: transparent; border: none; text-align: center; font-size: 1.8em; color: #fff; font-family: inherit; font-weight: 700; }
+  .dice-input input:focus { outline: none; }
+  .dice-input .lbl { font-size: 0.7em; color: var(--text-muted); font-weight: 700; }
+  .dice-input.hard input { color: #fbbf24; }
+  .dice-input.wiggle input { color: #ef4444; }
 
-  /* Terminal Text */
-  .terminal-text { flex: 1; display: flex; flex-direction: column; border: 1px solid #333; background: #000; }
-  .term-head { background: #111; color: #555; padding: 4px; font-size: 0.7em; border-bottom: 1px solid #333; }
-  .terminal-text textarea { flex: 1; background: transparent; color: #ccc; border: none; padding: 10px; font-family: var(--font-mono); resize: none; }
-  .terminal-text textarea:focus { outline: none; }
+  /* Editor */
+  .text-editor-container { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; min-height: 200px; display: flex; flex-direction: column; }
+  .editor-label { font-size: 0.75em; color: var(--accent); font-weight: 700; margin-bottom: 10px; border-bottom: 1px dashed var(--border); padding-bottom: 5px; }
+  textarea { background: transparent; border: none; color: var(--text-main); font-family: inherit; font-size: 1em; resize: none; flex: 1; line-height: 1.6; }
+  textarea:focus { outline: none; }
 
-  /* --- BALANCE TOOLS --- */
-  .tools-bar { display: flex; justify-content: space-between; align-items: center; }
-  .pb-status { font-size: 0.8em; color: #555; }
-  .pb-status.blink { color: #ff003c; animation: blink 1s infinite; }
-  .btn-add-module { 
-    background: transparent; border: 1px solid var(--c-primary); color: var(--c-primary); 
-    padding: 6px 12px; cursor: pointer; font-family: var(--font-mono); font-size: 0.8em; 
-    transition: 0.2s; 
-  }
-  .btn-add-module:hover { background: var(--c-primary); color: #000; box-shadow: 0 0 10px var(--c-primary); }
+  /* --- BALANCE TAB --- */
+  .toolbar { display: flex; justify-content: space-between; align-items: center; }
+  .status-pill { font-weight: 700; font-size: 0.8em; padding: 5px 10px; border-radius: 20px; display: flex; align-items: center; gap: 5px; }
+  .status-pill.success { background: rgba(0,255,65,0.1); color: var(--accent); border: 1px solid var(--accent); }
+  .status-pill.danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid var(--danger); animation: pulse 1s infinite; }
+  .btn-new { background: var(--accent); color: #000; border: none; padding: 8px 15px; border-radius: var(--radius); font-weight: 700; cursor: pointer; font-family: inherit; display: flex; gap: 5px; align-items: center; transition: 0.2s; }
+  .btn-new:hover { box-shadow: 0 0 15px var(--accent); transform: translateY(-2px); }
 
-  /* Data Modules (Quality) */
-  .modules-container { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
-  .data-module { 
-    background: #0a0a0a; border: 1px solid #333; padding: 10px; 
-    display: flex; flex-direction: column; gap: 10px; position: relative; 
-  }
-  .data-module:hover { border-color: #555; }
-  .data-module::before { 
-    content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; 
-    border-top: 2px solid var(--c-primary); border-left: 2px solid var(--c-primary); 
-  }
+  /* Quality Cards */
+  .cards-list { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+  .quality-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; transition: 0.2s; }
+  .quality-card:hover { border-color: #555; }
 
-  .dm-header { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; }
-  .dm-id { color: #444; font-size: 0.8em; }
-  .dm-name { flex: 1; background: transparent; border: none; color: var(--c-primary); font-weight: bold; font-family: var(--font-mono); font-size: 1.1em; }
-  .dm-name:focus { outline: none; text-decoration: underline; }
-  .dm-lvl { display: flex; align-items: center; gap: 5px; background: #000; border: 1px solid #333; padding: 2px 6px; }
-  .dm-lvl label { font-size: 0.6em; color: #555; }
-  .dm-lvl input { width: 30px; background: transparent; border: none; color: #fff; text-align: center; }
-  .btn-kill { background: #111; color: #555; border: 1px solid #333; width: 24px; cursor: pointer; }
-  .btn-kill:hover { color: #ff003c; border-color: #ff003c; }
-
-  .dm-desc { background: #050505; border: 1px solid #222; color: #888; padding: 8px; font-family: var(--font-mono); font-size: 0.8em; min-height: 40px; resize: vertical; }
-
-  /* Capacity Grid */
-  .cap-grid-frame { border: 1px dashed #333; padding: 5px; background: rgba(255,255,255,0.01); }
-  .cg-title { font-size: 0.7em; color: #555; margin-bottom: 5px; display: flex; justify-content: space-between; }
-  .btn-tiny-add { background: #222; color: #aaa; border: none; cursor: pointer; padding: 0 6px; }
-  .btn-tiny-add:hover { color: #fff; background: #444; }
-
-  .cap-row { border: 1px solid #222; margin-bottom: 5px; background: #000; }
-  .cap-bar { display: flex; align-items: center; padding: 4px; cursor: pointer; gap: 8px; }
-  .cap-bar:hover { background: #111; }
-  .cap-type { color: #aaa; font-size: 0.8em; width: 50px; }
-  .cap-result { color: var(--c-primary); font-weight: bold; font-size: 0.85em; flex: 1; }
-  .btn-kill-tiny { background: transparent; border: none; color: #444; cursor: pointer; }
-  .btn-kill-tiny:hover { color: #ff003c; }
+  .card-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+  .header-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .index-badge { font-size: 0.7em; color: var(--text-muted); font-weight: 700; opacity: 0.5; }
   
-  .cap-details { padding: 8px; border-top: 1px solid #222; animation: slideDown 0.2s; }
-  .cyber-select { width: 100%; margin-bottom: 8px; background: #111; color: #ccc; border: 1px solid #333; }
+  .input-inline { position: relative; flex: 1; }
+  .input-inline input { width: 100%; background: transparent; border: none; color: #fff; font-size: 1.1em; font-weight: 700; font-family: inherit; }
+  .input-inline input:focus { outline: none; }
+  .input-inline .underline { position: absolute; bottom: 0; left: 0; width: 0; height: 1px; background: var(--accent); transition: 0.3s; }
+  .input-inline input:focus + .underline { width: 100%; }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
   
-  .cap-mods { display: flex; gap: 10px; }
-  .mod-unit { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .mod-unit label { font-size: 0.6em; color: #555; }
-  .cyber-stepper { display: flex; background: #111; border: 1px solid #333; }
-  .cyber-stepper button { width: 20px; background: #222; color: #fff; border: none; cursor: pointer; }
-  .cyber-stepper button:hover { background: var(--c-primary); color: #000; }
-  .cyber-stepper span { flex: 1; text-align: center; color: #fff; font-size: 0.9em; }
+  /* Mini Select (Type) */
+  .mini-select select { background: #000; border: 1px solid var(--border); color: #ccc; padding: 2px 5px; border-radius: 4px; font-size: 0.8em; cursor: pointer; }
+  .mini-select select:hover { border-color: var(--accent); }
 
-  .empty-slot { text-align: center; font-size: 0.7em; color: #444; padding: 10px; cursor: pointer; }
-  .empty-slot:hover { color: var(--c-primary); }
+  .lvl-control { display: flex; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 4px; padding: 0 5px; }
+  .lvl-control span { font-size: 0.6em; color: var(--text-muted); font-weight: 700; margin-right: 5px; }
+  .lvl-control input { width: 25px; background: transparent; border: none; color: #fff; text-align: center; font-weight: 700; font-size: 0.9em; }
+  
+  .btn-icon.delete { width: 24px; height: 24px; border-radius: 4px; background: transparent; border: 1px solid transparent; color: var(--text-muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+  .btn-icon.delete:hover { background: rgba(239, 68, 68, 0.2); color: var(--danger); border-color: var(--danger); }
 
-  .dm-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-  .dm-cost { font-size: 0.8em; color: #666; }
-  .hl { color: var(--c-primary); }
-  .btn-config { background: #111; color: #aaa; border: 1px solid #333; padding: 4px 10px; font-family: var(--font-mono); cursor: pointer; font-size: 0.8em; }
-  .btn-config:hover { border-color: var(--c-primary); color: var(--c-primary); }
+  .card-body { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+  .mini-desc { width: 100%; background: transparent; border: none; border-bottom: 1px dashed var(--border); color: var(--text-muted); font-family: inherit; resize: none; font-size: 0.9em; }
+  .mini-desc:focus { outline: none; border-color: var(--text-main); color: var(--text-main); }
 
-  @keyframes blink { 50% { opacity: 0.5; } }
-  @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
-  .fade-in { animation: slideDown 0.3s ease-out; }
+  .caps-list { background: rgba(0,0,0,0.2); border-radius: var(--radius); padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
+  .caps-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.7em; color: var(--text-muted); font-weight: 700; }
+  .btn-text { background: none; border: none; color: var(--accent); font-weight: 700; cursor: pointer; font-size: 1em; }
+  .btn-text:hover { text-decoration: underline; }
+
+  .cap-row { margin-bottom: 5px; border-radius: 4px; overflow: hidden; background: rgba(255,255,255,0.02); border: 1px solid transparent; transition: 0.2s; }
+  .cap-row:hover { border-color: var(--border); }
+  .cap-main { display: flex; align-items: center; padding: 6px 10px; cursor: pointer; gap: 10px; }
+  .chevron { font-size: 0.7em; color: var(--text-muted); width: 10px; }
+  .cap-label { flex: 1; font-weight: 600; font-size: 0.9em; }
+  .cap-result { color: var(--accent); font-weight: 700; font-size: 0.9em; margin-right: 10px; }
+  .btn-icon.small { width: 18px; height: 18px; font-size: 0.8em; }
+
+  .cap-tools { padding: 10px; background: rgba(0,0,0,0.3); border-top: 1px solid var(--border); }
+  .custom-select.full { background: #000; margin-bottom: 10px; }
+  .steppers { display: flex; gap: 10px; }
+  .stepper { flex: 1; background: #000; border: 1px solid var(--border); border-radius: 4px; padding: 5px; display: flex; flex-direction: column; align-items: center; }
+  .stepper label { font-size: 0.6em; color: var(--text-muted); margin-bottom: 2px; }
+  .step-ctrl { display: flex; width: 100%; align-items: center; }
+  .step-ctrl button { width: 20px; background: #222; color: #fff; border: none; cursor: pointer; border-radius: 2px; }
+  .step-ctrl button:hover { background: var(--accent); color: #000; }
+  .step-ctrl span { flex: 1; text-align: center; font-weight: 700; font-size: 0.9em; }
+
+  .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+  .cost-badge { font-size: 0.8em; color: var(--text-muted); }
+  .cost-badge strong { color: var(--text-main); }
+  .btn-extra { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; border-radius: 4px; font-size: 0.8em; cursor: pointer; transition: 0.2s; }
+  .btn-extra:hover { border-color: #fff; }
+
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 </style>

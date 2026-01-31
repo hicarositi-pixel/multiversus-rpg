@@ -50,7 +50,7 @@ import BattlePassApp from './BattlePassApp.svelte'; // Ajuste o caminho se neces
         .join(' ');
 
     // Extrai a cor primária para passar para componentes filhos (CombatApp, etc) que pedem 'themeColor'
-    $: themeColor = currentThemeData.vars['--c-primary']; 
+    $: themeColor = currentThemeData.vars['--c-primary'];
 
     // Wallpaper customizado (prioridade: flag > padrão)
     $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';

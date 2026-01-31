@@ -1,64 +1,59 @@
 import MultiversusComponent from '../components/MultiversusPower.svelte';
 
 export default class MultiversusItemSheet extends ItemSheet {
-  constructor(object, options = {}) {
-    super(object, options);
-    this.component = null;
-  }
-
+  /** @override */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      classes: ["multiversus-rpg", "sheet", "item", "nexus-window"],
-      width: 800,
-      height: 600,
+      classes: ["multiversus", "sheet", "item"],
+      width: 850, // Aumentei um pouco para caber o novo layout bonito
+      height: 750,
       resizable: true,
-      template: "modules/multiversus-rpg/templates/power-sheet.html", // O HTML vazio tem que existir
+      // O template vazio que criamos antes
+      template: "modules/multiversus-rpg/templates/power-sheet.html", 
       
-      // --- CRÍTICO: ISSO FAZ A EDIÇÃO FUNCIONAR ---
-      submitOnClose: false,
-      submitOnChange: false,
+      // --- CORREÇÃO DO BUG DE FECHAR ---
+      submitOnClose: false, // Impede o erro "no registered form element" ao fechar
+      submitOnChange: false, // Impede o Foundry de tentar ler o HTML ao digitar
       closeOnSubmit: false
     });
   }
 
-  // --- CRÍTICO: ISSO EVITA O ERRO DE VALIDAÇÃO ---
-  _getSubmitData(updateData = {}) {
-    return null; 
-  }
-
   /** @override */
   async _render(force, options) {
-    if (!force && this.component) {
-      this.component.$set({ 
-        item: this.document,
-        application: this,
-        system: this.document.system, // Garante dados frescos
-        updateTick: Date.now()
-      });
-      return; 
+    if (!this.isEditable && !force) return;
+
+    // Se a ficha já existe, apenas atualiza a prop 'item' para o Svelte reagir
+    if (this.component) {
+      this.component.$set({ item: this.document });
+      return;
     }
 
+    // Renderiza o esqueleto HTML
     await super._render(force, options);
 
+    // Injeta o Svelte
     const target = this.element.find(".window-content")[0];
     if (target) {
       target.innerHTML = ""; 
-      Object.assign(target.style, {
-          padding: "0", background: "transparent", overflow: "hidden", height: "100%", display: "flex", flexDirection: "column"
-      });
-
-      if (this.component) this.component.$destroy();
+      target.style.padding = "0";
+      target.style.overflow = "hidden"; // Remove scroll duplo
 
       this.component = new MultiversusComponent({
         target: target,
         props: {
           item: this.document,
-          application: this,
-          system: this.document.system,
-          updateTick: Date.now()
+          application: this
         }
       });
     }
+  }
+
+  /** * BLOQUEIO DE SEGURANÇA 
+   * Se por algum motivo o Foundry tentar salvar, retornamos vazio 
+   * para ele não quebrar procurando um <form> que não existe.
+   */
+  _getSubmitData(updateData = {}) {
+    return {};
   }
 
   /** @override */
