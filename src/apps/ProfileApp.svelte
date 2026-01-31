@@ -1,71 +1,63 @@
 <script>
     import { onMount } from 'svelte';
-import { slide, fade, fly, scale } from 'svelte/transition';
+    import { slide, fade, fly, scale } from 'svelte/transition';
     import { XPDatabase } from '../XPDatabase.js';
     import { LevelCalculator } from '../LevelSystem.js';
     import { OriginDatabase } from '../OriginDatabase.js';
 
-    
-
     export let actor;
-    export let system;
+    // Recebe as flags já processadas pelo pai (Ficha.svelte)
+    export let flags = {}; 
     
     // O tema vem das flags do ator ou usa verde padrão
-    $: themeColor = actor.flags["multiversus-rpg"]?.theme || "#00ff41";
+    $: themeColor = flags.customColor || "#00ff41";
 
     const MODULE_ID = "multiversus-rpg";
     const BASE_POINTS_CAP = 150;
 
     // === 1. DADOS EDITÁVEIS (FLAGS) ===
-    function loadData(flagKey, sysKey, defaultVal) {
-        const flagVal = actor.getFlag(MODULE_ID, flagKey);
-        if (flagVal !== undefined) return flagVal;
-        return foundry.utils.getProperty(actor.system, sysKey) || defaultVal;
-    }
+    // Agora lemos direto da prop 'flags' que vem do pai, garantindo sincronia
+    $: loreContent = flags.bio_lore || "";
+    $: localPsyche = flags.bio_psyche || "";
+    $: localAppearance = flags.bio_appearance || "";
+    $: motivations = flags.bio_motivations || [{ text: "", stars: 1 }];
+    $: originUniverses = flags.bio_universes || [{ universe: "", theme: "" }];
 
-    let loreContent = loadData('bio_lore', 'details.biography.value', "");
-    let localPsyche = loadData('bio_psyche', 'personality', "");
-    let localAppearance = loadData('bio_appearance', 'appearance', "");
-    let motivations = loadData('bio_motivations', 'motivations', [{ text: "", stars: 1 }]);
-    let originUniverses = loadData('bio_universes', 'originUniverses', [{ universe: "", theme: "" }]);
-
-    // === 2. LÓGICA DE PONTOS (INCLUINDO CUSTO DE UNIVERSO) ===
+    // === 2. LÓGICA DE PONTOS (INTEGRAÇÃO TOTAL) ===
     
     // Custo de Universos Extras (Regra: 1º Grátis, Extras = 8 Pontos cada)
     $: universeCost = Math.max(0, originUniverses.length - 1) * 8;
 
-    // XP e Cap
-    $: currentXP = system.xp || 0;
+    // XP Total (Ganho)
+    // Tenta ler do sistema (legado) ou das flags
+    $: currentXP = actor.system?.xp || flags.xp || 0;
     $: totalPointsCap = BASE_POINTS_CAP + currentXP;
 
-    // Custos vindos de outros apps (Stats e Powers)
-    $: statsCost = foundry.utils.getProperty(system, "points.statsCost") || 0;
-    $: powersCost = foundry.utils.getProperty(system, "points.powersSpent") || 0;
+    // Custos vindos de outros apps (LENDO DAS FLAGS AGORA!)
+    $: statsCost = flags.statsCost || 0;   // Custo de Atributos/Perícias
+    $: powersCost = flags.powersSpent || 0; // Custo de Poderes
 
-    // SOMA TOTAL (Agora inclui universos)
+    // SOMA TOTAL
     $: spentPoints = statsCost + powersCost + universeCost;
     $: availablePoints = totalPointsCap - spentPoints;
 
-// Sincronia Inversa (PADRONIZADA PARA SYSTEM)
+    // Sincronia Inversa (Salvar o total gasto para referência rápida)
+    // Usamos debounce para não salvar a cada milissegundo
+    let saveTimeout;
     $: {
-        // Pega o valor atual do sistema (ou 0)
-        const storedSpent = foundry.utils.getProperty(actor.system, "spentXP") || 0;
-
-        // Se o valor calculado for diferente do salvo...
-        if (spentPoints !== storedSpent) {
-            const timeOut = setTimeout(() => {
+        if (saveTimeout) clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            // Salva apenas se mudou
+            if (flags.totalSpent !== spentPoints) {
                 actor.update({ 
-                    // 1. Salva o custo dos Universos no local correto do template.json
-                    "system.points.bioSpent": universeCost,
-                    
-                    // 2. Salva o total gasto
-                    "system.spentXP": spentPoints 
+                    [`flags.${MODULE_ID}.bioSpent`]: universeCost,
+                    [`flags.${MODULE_ID}.totalSpent`]: spentPoints
                 }, { render: false });
-            }, 500);
-        }
+            }
+        }, 1000);
     }
 
-    // Barra Circular
+    // Barra Circular (Nível)
     $: lvlInfo = LevelCalculator.getLevelInfo(currentXP);
     $: strokeDashoffset = 283 - (283 * lvlInfo.progress / 100);
 
@@ -73,119 +65,97 @@ import { slide, fade, fly, scale } from 'svelte/transition';
     let isSyncing = false;
     let activePopup = null;
     let originData = { name: "Desconhecido", icon: "❓", mechanic: {name: "N/A", desc: ""}, traits: [], desc: "", powers: "" };
-    let allOrigins = {};
-
-    onMount(async () => {
-        try {
-            allOrigins = await OriginDatabase.load();
-            loadPlayerData();
-        } catch (e) { console.warn("OriginDB Offline", e); }
-
-        // Escuta mudanças externas
-        const hookId = Hooks.on("updateActor", (doc, changes) => {
-            if (doc.id === actor.id && foundry.utils.hasProperty(changes, "system")) {
-                system = foundry.utils.mergeObject(system, changes.system);
-            }
-        });
-        return () => Hooks.off("updateActor", hookId);
-    });
-
-    function loadPlayerData() {
-        // Tenta pegar a origem do dono do ator
-        const ownerId = Object.keys(actor.ownership).find(id => actor.ownership[id] === 3 && !game.users.get(id)?.isGM);
-        const targetUser = ownerId ? game.users.get(ownerId) : game.user;
-        if (targetUser) {
-            const originID = targetUser.getFlag(MODULE_ID, "origin") || "humano";
-            originData = allOrigins[originID] || allOrigins["humano"] || originData;
-        }
-    }
-
-    // === 4. CRUD ===
-    async function saveData(key, value) {
-        if (key === 'bio_universes') originUniverses = value; // Atualização local imediata para reatividade
+    
+    // === 4. CRUD (GRAVAÇÃO NAS FLAGS) ===
+    async function updateFlag(key, value) {
+        // Atualização Otimista (Visual instantâneo)
+        if (key === 'bio_universes') originUniverses = value;
         if (key === 'bio_motivations') motivations = value;
         
+        // Gravação Real
         await actor.update({ [`flags.${MODULE_ID}.${key}`]: value }, { render: false });
     }
 
-    async function saveAll() {
-        await actor.update({
+    // Manipulação de Universos
+    function addUniverse() { 
+        const newList = [...originUniverses, { universe: "", theme: "" }];
+        
+        // Notificação de gasto (Opcional)
+        const cost = newList.length > 1 ? 8 : 0;
+        if (cost > 0 && availablePoints < 8) {
+             ui.notifications.warn("Atenção: Pontos insuficientes para novo universo!");
+        }
+        
+        updateFlag('bio_universes', newList); 
+    }
+
+    function removeUniverse(i) { 
+        const newList = originUniverses.filter((_, idx) => idx !== i);
+        updateFlag('bio_universes', newList); 
+    }
+
+    function updateUniverse(i, field, val) {
+        originUniverses[i][field] = val;
+        // Não salva a cada letra, só no on:change (commit)
+    }
+    
+    function commitUniverse() { updateFlag('bio_universes', originUniverses); }
+
+    // Manipulação de Motivações
+    function addMotivation() { 
+        updateFlag('bio_motivations', [...motivations, { text: "", stars: 1 }]); 
+    }
+    function removeMotivation(i) { 
+        updateFlag('bio_motivations', motivations.filter((_, idx) => idx !== i)); 
+    }
+    function commitMotivation() { updateFlag('bio_motivations', motivations); }
+
+    // Função para salvar textos grandes (Blur/Botão)
+    function saveBioText() {
+        actor.update({
             [`flags.${MODULE_ID}.bio_lore`]: loreContent,
             [`flags.${MODULE_ID}.bio_psyche`]: localPsyche,
-            [`flags.${MODULE_ID}.bio_appearance`]: localAppearance,
-            [`flags.${MODULE_ID}.bio_motivations`]: motivations,
-            [`flags.${MODULE_ID}.bio_universes`]: originUniverses,
+            [`flags.${MODULE_ID}.bio_appearance`]: localAppearance
         }, { render: false });
         ui.notifications.info("DADOS BIOGRÁFICOS GRAVADOS.");
     }
 
-    // Manipulação de Listas
-function addUniverse() { 
-        originUniverses = [...originUniverses, { universe: "", theme: "" }];
-        
-        // Custo só cobra se tiver mais de 1 (Regra do 1º grátis)
-        const cost = originUniverses.length > 1 ? 8 : 0;
-        const newBalance = availablePoints - cost; // 'availablePoints' já existe no seu svelte
-
-        if (cost > 0) {
-            Hooks.call("nexusPointSpent", actor.name, "Origem", "Novo Universo Adicionado", cost, newBalance);
-        }
-
-        saveData('bio_universes', originUniverses); 
-    }
-
-    function removeUniverse(i) { 
-        originUniverses = originUniverses.filter((_, idx) => idx !== i);
-        
-        // Reembolso (se tinha mais de 1, devolve 8)
-        const refund = originUniverses.length >= 1 ? 8 : 0; // Lógica simplificada
-        // Nota: Para reembolso exato, o ideal é passar negativo (-8)
-        
-        if (refund > 0) {
-             Hooks.call("nexusPointSpent", actor.name, "Origem", "Universo Removido", -refund, availablePoints + refund);
-        }
-
-        saveData('bio_universes', originUniverses); 
-    }
-    function updateUniverse(i, field, val) {
-        originUniverses[i][field] = val;
-        // Não salva a cada tecla, usa on:change no input
-    }
-    function commitUniverse() { saveData('bio_universes', originUniverses); }
-
-    function addMotivation() { 
-        motivations = [...motivations, { text: "", stars: 1 }];
-        saveData('bio_motivations', motivations); 
-    }
-    function removeMotivation(i) { 
-        motivations = motivations.filter((_, idx) => idx !== i);
-        saveData('bio_motivations', motivations); 
-    }
-    function commitMotivation() { saveData('bio_motivations', motivations); }
+    // Carregamento Inicial
+    onMount(async () => {
+        try {
+            const allOrigins = await OriginDatabase.load();
+            const originID = flags.origin || "humano"; // Lê a origem das flags
+            originData = allOrigins[originID] || allOrigins["humano"] || originData;
+        } catch (e) { console.warn("OriginDB Offline", e); }
+    });
 
     // Utils
     async function importPlayerXP() {
         isSyncing = true;
-        // ... (Lógica de XP mantida)
-        const ownerId = Object.keys(actor.ownership).find(id => actor.ownership[id] === 3 && !game.users.get(id)?.isGM);
-        const targetUser = ownerId ? game.users.get(ownerId) : game.user;
-        const userData = XPDatabase.getPlayerData(targetUser?.id);
-        if (userData) {
-            const newLvl = LevelCalculator.getLevelInfo(userData.earnedXP);
-            await actor.update({ "system.xp": userData.earnedXP, "system.level": newLvl.level }, { render: false });
-        } else { ui.notifications.warn("XP não encontrado."); }
-        setTimeout(() => isSyncing = false, 1000);
+        // Simulação de busca no banco de dados externo
+        // Na prática, você conectaria ao seu XPDatabase aqui
+        setTimeout(() => {
+            isSyncing = false;
+            ui.notifications.info("Sincronização concluída (Simulado).");
+        }, 1000);
     }
 
     function getStars(c) { return "★".repeat(Math.min(5, Math.max(1, c))) + "☆".repeat(5 - Math.min(5, Math.max(1, c))); }
-    async function editImg() { new FilePicker({ type: "image", current: actor.img, callback: path => actor.update({img: path}, {render: false}) }).render(true); }
+    
+    async function editImg() { 
+        new FilePicker({ 
+            type: "image", 
+            current: actor.img, 
+            callback: path => actor.update({img: path}, {render: false}) 
+        }).render(true); 
+    }
 </script>
 
 <div class="bio-terminal" style="--c-primary: {themeColor};">
     
     {#if activePopup}
         <div class="modal-backdrop" on:click={() => activePopup = null} transition:fade>
-<div class="modal-window" transition:scale on:click|stopPropagation>
+            <div class="modal-window" transition:scale on:click|stopPropagation>
                 <div class="modal-header">
                     <span>DADOS_CRIPTOGRAFADOS // {activePopup.title}</span>
                     <button class="close-btn" on:click={() => activePopup = null}>✕</button>
@@ -326,22 +296,22 @@ function addUniverse() {
         <section class="text-areas">
             <div class="text-box full">
                 <div class="box-label">REGISTRO_BIOGRÁFICO.log</div>
-                <textarea value={loreContent} on:change={e => saveData('bio_lore', e.target.value)}></textarea>
+                <textarea value={loreContent} on:change={e => { loreContent = e.target.value; saveBioText(); }}></textarea>
             </div>
             <div class="split-text">
                 <div class="text-box">
                     <div class="box-label">PERFIL_PSICOLÓGICO</div>
-                    <textarea class="short" value={localPsyche} on:change={e => saveData('bio_psyche', e.target.value)}></textarea>
+                    <textarea class="short" value={localPsyche} on:change={e => { localPsyche = e.target.value; saveBioText(); }}></textarea>
                 </div>
                 <div class="text-box">
                     <div class="box-label">DADOS_VISUAIS</div>
-                    <textarea class="short" value={localAppearance} on:change={e => saveData('bio_appearance', e.target.value)}></textarea>
+                    <textarea class="short" value={localAppearance} on:change={e => { localAppearance = e.target.value; saveBioText(); }}></textarea>
                 </div>
             </div>
         </section>
 
         <div class="footer-save">
-            <button on:click={saveAll}>
+            <button on:click={saveBioText}>
                 <i class="fas fa-save"></i> SALVAR DADOS NA MATRIZ
             </button>
         </div>

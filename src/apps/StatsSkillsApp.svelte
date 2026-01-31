@@ -4,15 +4,14 @@
     import { cubicOut } from 'svelte/easing';
 
     export let actor;
-    
-    // Fallback para evitar erro se 'system' vier nulo, mas o foco agora são as FLAGS
-    export let system = actor.system || {}; 
-    export let themeColor = "#00ff41"; // Cor padrão Matrix se não vier nada
+    // Recebe as flags do pai (Ficha.svelte) para garantir sincronia
+    export let flags = {}; 
+    export let themeColor = "#00ff41";
 
     const MODULE_ID = "multiversus-rpg";
     const isGM = game.user.isGM;
 
-    // --- CONFIGURAÇÃO ---
+    // --- CONFIGURAÇÃO DE CUSTOS ---
     const STAT_COSTS = { normal: 5, hard: 10, wiggle: 20 };
     const SKILL_COSTS = { normal: 2, hard: 4, wiggle: 8 };
     const BASE_POINTS_CAP = 150;
@@ -27,13 +26,14 @@
     };
     const statKeys = Object.keys(ATTR_CONFIG);
 
+    // Perícias Padrão (Sugestão inicial)
     const DEFAULT_SKILLS = {
-        body: ["Atletismo", "Briga", "Resistência", "Bloqueio", "Arma Corpo a Corpo (Type X)"],
-        coordination: ["Esquiva", "Furtividade", "Acrobacias", "Prestidigitação", "Pilotagem (Type)", "Arma a Distância (Type)"],
-        sense: ["Empatia", "Percepção", "Intuição", "Procura"],
-        mind: ["Primeiros Socorros", "Conhecimento (Tipo)", "Cultura (Tipo)", "Linguagem (Tipo)", "Medicina", "Navegação", "Investigar", "Sobrevivência", "Tática"],
-        charm: ["Mentir", "Persuasão", "Performance (Tipo)"],
-        command: ["Interrogar", "Intimidar", "Liderar", "Estabilidade"]
+        body: [{name: "Atletismo", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Briga", normal: 0, hard: 0, wiggle: 0, img: ""}],
+        coordination: [{name: "Esquiva", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Furtividade", normal: 0, hard: 0, wiggle: 0, img: ""}],
+        sense: [{name: "Percepção", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Empatia", normal: 0, hard: 0, wiggle: 0, img: ""}],
+        mind: [{name: "Investigar", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Medicina", normal: 0, hard: 0, wiggle: 0, img: ""}],
+        charm: [{name: "Persuasão", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Mentir", normal: 0, hard: 0, wiggle: 0, img: ""}],
+        command: [{name: "Intimidar", normal: 0, hard: 0, wiggle: 0, img: ""}, {name: "Liderar", normal: 0, hard: 0, wiggle: 0, img: ""}]
     };
 
     function getSkillIcon(name) {
@@ -47,52 +47,44 @@
     }
 
     // --- ESTADO LOCAL ---
-    let stats = {};
-    let skills = {};
+    // Inicializa com dados das flags OU cria estrutura virgem com 1 em tudo
+    let stats = flags.stats || {};
+    let skills = flags.skills || {};
     let expandedStats = {}; 
-    let localCost = 0;
+    let localCost = flags.statsCost || 0;
 
     // Estado do Modal de Ícone
     let iconModalOpen = false;
     let iconEditTarget = { key: null, index: null };
     let tempIconUrl = "";
 
-    // --- LEITURA DE DADOS (DAS FLAGS!) ---
-    // Acessa flags.multiversus-rpg com segurança
-    $: actorFlags = actor.flags?.[MODULE_ID] || {};
+    // --- DADOS REATIVOS (XP) ---
+    // O XP total vem do ator (pode ser system.xp se o mestre usar a ficha antiga pra dar xp, ou flags)
+    $: xpEarned = actor.system?.xp || flags.xp || 0; 
     
-    // XP e Pontos (Ainda lemos do system se o sistema original tiver XP, senão flags)
-    $: xpEarned = system.xp || actorFlags.xp || 0; 
-    $: powersCost = system.points?.powersSpent || actorFlags.powersSpent || 0; 
+    // O custo de poderes vem das flags (calculado no PoderesApp)
+    $: powersCost = flags.powersSpent || 0; 
     
     $: pointsCap = BASE_POINTS_CAP + xpEarned;
-    $: totalSpent = localCost + powersCost;
+    // O total gasto é a soma do custo local (stats) + custo externo (poderes) + custo bio (se houver)
+    $: totalSpent = localCost + powersCost + (flags.bioSpent || 0);
     $: pointsAvailable = pointsCap - totalSpent;
 
     // --- INICIALIZAÇÃO BLINDADA ---
     function initData() {
-        // Tenta ler das flags primeiro. Se não existir, cria a estrutura padrão.
-        const savedStats = actorFlags.stats ? JSON.parse(JSON.stringify(actorFlags.stats)) : {};
-        const savedSkills = actorFlags.skills ? JSON.parse(JSON.stringify(actorFlags.skills)) : {};
-
+        // Garante que stats tenha todas as chaves com valor mínimo 1
         statKeys.forEach(key => {
-            // Inicializa Stat se não existir
-            if (!savedStats[key]) savedStats[key] = { normal: 1, hard: 0, wiggle: 0 };
-            
-            // Inicializa Skill se não existir ou estiver vazia
-            if (!savedSkills[key] || savedSkills[key].length === 0) {
-                savedSkills[key] = DEFAULT_SKILLS[key].map(name => ({
-                    name: name,
-                    normal: 0, hard: 0, wiggle: 0,
-                    isCustom: false,
-                    img: ""
-                }));
+            if (!stats[key]) {
+                stats[key] = { normal: 1, hard: 0, wiggle: 0 };
+            }
+            // Garante que skills tenha a estrutura básica se estiver vazio
+            if (!skills[key]) {
+                skills[key] = JSON.parse(JSON.stringify(DEFAULT_SKILLS[key] || []));
             }
             if (expandedStats[key] === undefined) expandedStats[key] = false;
         });
-
-        stats = savedStats;
-        skills = savedSkills;
+        
+        // Recalcula custo inicial para garantir consistência
         recalcCost();
     }
 
@@ -102,14 +94,19 @@
         statKeys.forEach(key => {
             if (!stats[key]) return;
             const s = stats[key];
-            // Custo de Atributo (primeiro dado é grátis no Wild Talents, geralmente)
-            const sCost = (Math.max(0, s.normal - 1) * STAT_COSTS.normal) + 
-                          (s.hard * STAT_COSTS.hard) + 
-                          (s.wiggle * STAT_COSTS.wiggle);
-            total += sCost;
+            
+            // CUSTO DE ATRIBUTO:
+            // O primeiro dado (normal=1) é a base humana, custa 0.
+            // Qualquer coisa acima disso custa.
+            const costNormal = Math.max(0, s.normal - 1) * STAT_COSTS.normal;
+            const costHard = s.hard * STAT_COSTS.hard;
+            const costWiggle = s.wiggle * STAT_COSTS.wiggle;
+            
+            total += costNormal + costHard + costWiggle;
 
             if (skills[key]) {
                 skills[key].forEach(sk => {
+                    // Perícias custam desde o primeiro dado
                     total += (sk.normal * SKILL_COSTS.normal) + 
                              (sk.hard * SKILL_COSTS.hard) + 
                              (sk.wiggle * SKILL_COSTS.wiggle);
@@ -121,8 +118,7 @@
 
     // --- SALVAMENTO SEGURO (FLAGS) ---
     async function saveToServer() {
-        // Salva tudo dentro de flags.multiversus-rpg
-        // Isso ignora completamente as regras do sistema original
+        // Salva TUDO nas flags. Isso é o que o ProfileApp vai ler.
         await actor.update({
             [`flags.${MODULE_ID}.stats`]: stats,
             [`flags.${MODULE_ID}.skills`]: skills,
@@ -139,7 +135,7 @@
         
         obj[type]++;
         
-        // Força atualização Svelte
+        // Força reatividade do Svelte
         stats = stats;
         skills = skills;
         
@@ -193,15 +189,10 @@
 
     onMount(() => {
         initData();
-        // Hook para atualizar XP em tempo real se o mestre mudar
-        const hookId = Hooks.on("updateActor", (doc, changes) => {
-            if (doc.id === actor.id) {
-                // Tenta pegar XP do sistema ou das flags
-                const newXp = changes.system?.xp ?? changes.flags?.[MODULE_ID]?.xp;
-                if (newXp !== undefined) xpEarned = newXp;
-            }
-        });
-        return () => Hooks.off("updateActor", hookId);
+        // Se for a primeira vez (custo 0 mas tem stats > 1), salva para corrigir o XP
+        if (localCost > 0 && flags.statsCost === undefined) {
+            saveToServer();
+        }
     });
 </script>
 
@@ -354,7 +345,7 @@
 </div>
 
 <style>
-/* ... (Seu CSS original aqui, não precisa mudar nada no visual) ... */
+/* CSS Mantido (sem alterações visuais, apenas funcional) */
     .app-container { display: flex; flex-direction: column; height: 100%; gap: 15px; color: #eee; font-family: 'Segoe UI', sans-serif; --bg-panel: rgba(10, 10, 10, 0.5); --border: rgba(255, 255, 255, 0.1); }
     .gm-input { background: rgba(255,255,255,0.15); border: 1px solid #999; color: #fff; font-weight: bold; text-align: center; width: 100%; height: 100%; border-radius: 4px; font-size: 1.1rem; }
     .gm-input:focus { background: rgba(255,255,255,0.3); border-color: var(--theme); outline: none; }

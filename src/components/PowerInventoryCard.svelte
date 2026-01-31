@@ -15,15 +15,51 @@
     syncLocalVars();
   });
 
-  // --- LÊ DOS FLAGS AGORA ---
+  // --- 1. LEITURA DE DADOS (VIA FLAGS) ---
   $: flags = item?.flags?.[MODULE_ID] || {};
-  $: system = item?.system || {}; // Mantemos para fallback visual se necessário
+  
+  // Fallback visual (ícone e nome)
   $: img = item?.img || "icons/svg/item-bag.svg";
   $: realName = item?.name || "Desconhecido";
 
+  // --- 2. DADOS DO PODER (BLINDADOS) ---
+  // Lê os dados das flags. Se não existir, assume 0.
+  $: diceData = flags.dice || {};
+  $: dNormal = diceData.normal || 0;
+  $: dHard = diceData.hard || 0;
+  $: dWiggle = diceData.wiggle || 0;
+  
+  $: totalDice = dNormal + dHard + dWiggle;
+
+  // --- 3. CÁLCULO DE CUSTO ---
+  $: category = flags.category || "principal";
+  $: rarity = flags.rarity || "Comum";
+  $: isInitial = flags.isInitial || false;
+
+  const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
+  $: baseCost = XP_RULES[category] || 8;
+
+  // Custo Bruto
+  $: rawCost = (dNormal * baseCost) + (dHard * baseCost * 2) + (dWiggle * baseCost * 4);
+  // Desconto inicial (apenas se for marcado)
+  $: discount = isInitial ? (4 * baseCost) : 0;
+  // Custo Final (não pode ser negativo)
+  $: currentCost = Math.max(0, rawCost - discount);
+
+  // --- 4. CÁLCULO DE XP DISPONÍVEL ---
+  // Lê o XP total do ator e o quanto já foi gasto (sincronizado pelo ProfileApp)
+  $: xpEarned = actor.system?.xp || actor.flags?.[MODULE_ID]?.xp || 0;
+  $: totalCap = 150 + xpEarned;
+  $: totalSpent = actor.flags?.[MODULE_ID]?.totalSpent || 0;
+  
+  $: availableXP = totalCap - totalSpent;
+
+  // --- 5. VISUAL (TEMA) ---
   let editAlias = "";
   let editTheme = "default";
   let editColor = "#ffffff";
+  let isExpanded = false;
+  let isConfiguring = false;
 
   $: if (flags && !isConfiguring) syncLocalVars();
 
@@ -37,28 +73,10 @@
   $: currentThemeData = THEME_DB[activeDisplayTheme] || THEME_DB['default'];
   
   $: displayName = flags.customAlias || realName;
-  $: rarity = flags.rarity || "Comum";
-  $: category = flags.category || "principal";
-  
   const RARITY_COLORS = { "Comum": "#a0a0a0", "Raro": "#00bfff", "Lendário": "#ffa500", "Mítico": "#ff4500", "Universal": "#ffffff", "Multiversal": "#d000ff" };
-  
   $: glowColor = (isConfiguring ? editColor : flags.customColor) || currentThemeData.color || RARITY_COLORS[rarity] || "#00ff41";
 
-  const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
-  $: baseCost = XP_RULES[category] || 8;
-  
-  // LEITURA DOS DADOS (FLAGS > SYSTEM > 0)
-  $: diceData = flags.dice || {};
-  $: dNormal = diceData.normal || 0;
-  $: dHard = diceData.hard || 0;
-  $: dWiggle = diceData.wiggle || 0;
-  
-  $: totalDice = dNormal + dHard + dWiggle;
-  $: currentCost = (dNormal * baseCost) + (dHard * baseCost * 2) + (dWiggle * baseCost * 4);
-  $: availableXP = (150 + (actor?.system?.xp || 0)) - (actor?.system?.spentXP || 0);
-
-  let isExpanded = false;
-  let isConfiguring = false;
+  // --- 6. AÇÕES DE SALVAMENTO ---
 
   async function saveSettings() {
     await item.update({
@@ -70,30 +88,38 @@
     ui.notifications.info(`Visual salvo!`);
   }
 
-  // --- CORREÇÃO DA COMPRA DE DADOS ---
+  // --- 7. COMPRA DE DADOS (ENGINE PRINCIPAL) ---
   async function upgradeDice(type) {
     if (!item) return;
     
-    // 1. Calcula custos
+    // Calcula custo do próximo dado
     let cost = (type === 'wiggle') ? baseCost * 4 : (type === 'hard') ? baseCost * 2 : baseCost;
     
-    // 2. Prepara dados para o Log (LENDO DAS FLAGS)
-    const oldVal = diceData[type] || 0;
-    const newVal = oldVal + 1;
+    // Verifica se tem saldo
+    if (!isGM && availableXP < cost) {
+        ui.notifications.warn(`XP Insuficiente! Precisa de ${cost}, tem ${availableXP}.`);
+        return;
+    }
+
+    // Prepara novos dados
+    const currentVal = diceData[type] || 0;
+    const newVal = currentVal + 1;
     const remaining = availableXP - cost;
 
-    // 3. Executa a compra (SALVANDO NAS FLAGS)
-    if (availableXP >= cost) {
-      // Aviso
-      Hooks.call("nexusPointSpent", actor.name, "Poder", `${displayName} (${type}): ${oldVal} ➔ ${newVal}`, cost, remaining);
+    // Aviso no chat/Discord
+    Hooks.call("nexusPointSpent", actor.name, "Poder", `${displayName} (${type}): ${currentVal} ➔ ${newVal}`, cost, remaining);
       
-      // Update Seguro
-      // Criamos um novo objeto dice para não sobrescrever os outros tipos
-      let newDiceData = { ...diceData };
-      newDiceData[type] = newVal;
+    // ATUALIZAÇÃO SEGURA (Cria objeto novo para não perder os outros dados)
+    let newDiceData = { 
+        normal: dNormal,
+        hard: dHard,
+        wiggle: dWiggle,
+        ...diceData 
+    };
+    newDiceData[type] = newVal;
 
-      await item.update({ [`flags.${MODULE_ID}.dice`]: newDiceData }, { render: false });
-    }
+    // Salva na Flag. Isso vai disparar o 'updateItem' que o PoderesApp.svelte está ouvindo.
+    await item.update({ [`flags.${MODULE_ID}.dice`]: newDiceData }, { render: false });
   }
 
   function resetColor() { editColor = ""; }
@@ -191,7 +217,7 @@
             <span class="die-text">NORMAL</span>
           </div>
           <div class="die-screen">{dNormal}</div>
-          <button class="btn-buy" disabled={availableXP < baseCost} on:click={() => upgradeDice('normal')}>
+          <button class="btn-buy" disabled={!isGM && availableXP < baseCost} on:click={() => upgradeDice('normal')}>
             <span class="lbl">UPGRADE</span>
             <span class="cost">{baseCost} XP</span>
           </button>
@@ -203,7 +229,7 @@
             <span class="die-text">HARD</span>
           </div>
           <div class="die-screen">{dHard}</div>
-          <button class="btn-buy" disabled={availableXP < baseCost*2} on:click={() => upgradeDice('hard')}>
+          <button class="btn-buy" disabled={!isGM && availableXP < baseCost*2} on:click={() => upgradeDice('hard')}>
             <span class="lbl">UPGRADE</span>
             <span class="cost">{baseCost*2} XP</span>
           </button>
@@ -215,7 +241,7 @@
             <span class="die-text">WIGGLE</span>
           </div>
           <div class="die-screen">{dWiggle}</div>
-          <button class="btn-buy" disabled={availableXP < baseCost*4} on:click={() => upgradeDice('wiggle')}>
+          <button class="btn-buy" disabled={!isGM && availableXP < baseCost*4} on:click={() => upgradeDice('wiggle')}>
             <span class="lbl">UPGRADE</span>
             <span class="cost">{baseCost*4} XP</span>
           </button>
@@ -231,7 +257,7 @@
 {/if}
 
 <style>
-/* ... (Seu CSS original aqui) ... */
+/* CSS Mantido - Visual inalterado */
  .power-card { background: #050505; border: 1px solid #333; border-left: 4px solid var(--glow); border-radius: 6px; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: 0.3s; }
   .power-card:hover { box-shadow: 0 0 15px var(--glow); border-color: var(--glow); }
   .card-front { display: flex; align-items: center; padding: 8px; height: 72px; background: linear-gradient(90deg, #111 0%, #080808 100%); position: relative; z-index: 10; }

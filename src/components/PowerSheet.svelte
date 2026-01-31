@@ -8,7 +8,7 @@
   export let application;
 
   const isGM = game.user.isGM;
-  const MODULE_ID = "multiversus-rpg"; // Constante para evitar erros de digitação
+  const MODULE_ID = "multiversus-rpg";
 
   // --- CONFIGURAÇÕES DE REGRAS ---
   const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
@@ -22,9 +22,12 @@
   ];
 
   // --- REATIVIDADE (DATA LAYER) ---
-  // Agora lemos TUDO das flags. Se não existir na flag, tenta ler do system (legado), senão default.
+  // Acessamos 'flags' para leitura e escrita dos dados customizados
+  // Se flags não existirem, iniciamos um objeto vazio para não quebrar
   $: flags = item.flags?.[MODULE_ID] || {};
-  $: system = item.system || {};
+  
+  // Mantemos 'system' apenas para leitura de legado (caso existam notas antigas), mas não gravamos nele
+  $: system = item.system || {}; 
 
   // TEMA
   $: currentThemeKey = flags.themeKey || "neon-operator";
@@ -35,21 +38,21 @@
   $: customUrl = flags.customUrl || "";
   $: displayImg = customUrl || libraryImg;
 
-  // DADOS PRINCIPAIS (Blindados)
+  // DADOS DO PODER (Lendo das Flags agora!)
   $: name = item.name;
+  $: qualities = flags.qualities || []; 
   $: rarity = flags.rarity || "Comum";
   $: category = flags.category || "principal";
   $: isInitial = flags.isInitial || false;
   
-  // DADOS (DICE) - Lendo de flags.dice ou criando objeto vazio
+  // DADOS (DICE) - Lendo das Flags
   $: diceData = flags.dice || {};
   $: diceNormal = diceData.normal || 0;
   $: diceHard = diceData.hard || 0;
   $: diceWiggle = diceData.wiggle || 0;
+  
   $: totalDice = diceNormal + diceHard + diceWiggle;
 
-  // QUALIDADES & DESCRIÇÃO
-  $: qualities = flags.qualities || [];
   $: description = flags.notes || ""; // Salva notas nas flags agora
   
   // UI State
@@ -68,30 +71,36 @@
     return total + 2 + (q.level || 0) + extrasCost;
   }, 0);
 
-  // --- HELPER DE UPDATE SEGURO ---
-  // Essa função garante que salvamos sempre no lugar certo sem erro de validação
+  // --- AÇÕES (Salvando nas Flags) ---
+  
+  // Função auxiliar para atualizar flags com segurança
   async function updateFlag(key, value) {
-    await item.update({ [`flags.${MODULE_ID}.${key}`]: value });
+      await item.update({ [`flags.${MODULE_ID}.${key}`]: value });
   }
 
-  // --- AÇÕES ---
+  // Atualização Específica de Dados (Dice)
+  async function updateDice(type, value) {
+      let newDice = { ...diceData }; // Copia o objeto atual
+      newDice[type] = parseInt(value) || 0;
+      await updateFlag('dice', newDice);
+  }
+
   async function updateCustomUrl() { await updateFlag('customUrl', customUrl); }
-  function pickLibraryImage() { new FilePicker({ type: "image", current: item.img, callback: path => item.update({ img: path }) }).render(true); }
+  
+  function pickLibraryImage() { 
+      new FilePicker({ 
+          type: "image", 
+          current: item.img, 
+          callback: path => item.update({ img: path }) // Imagem base do item pode ser atualizada normal
+      }).render(true); 
+  }
   
   async function setTheme(key) {
     await updateFlag('themeKey', key);
     showThemeSelector = false;
   }
 
-  // ATUALIZAÇÃO DE DADOS (DICE)
-  async function updateDice(type, value) {
-      // Cria uma cópia do objeto atual para não perder os outros dados
-      let newDice = { ...diceData };
-      newDice[type] = parseInt(value) || 0;
-      await updateFlag('dice', newDice);
-  }
-
-  // Lógica de Sub-rotinas (Qualidades)
+  // Lógica de Sub-rotinas (Qualidades) - SALVANDO EM FLAGS
   async function addQuality() {
     const newQ = { 
       name: "Nova Sub-rotina", type: "atk", level: 0, 
@@ -373,13 +382,7 @@
 </div>
 
 <style>
-  /* --- (Cole o seu CSS original aqui, ele está perfeito) --- */
-  @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap');
-  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap');
-
-  /* ... restante do CSS original ... */
+/* CSS Mantido (está perfeito) */
   .rpg-sheet-root { width: 100%; height: 100%; background-color: var(--bg-base); color: var(--text-main); font-family: var(--font); display: flex; flex-direction: column; overflow: hidden; font-size: 13px; transition: background-color 0.3s ease, color 0.3s ease; }
   .modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; display: flex; justify-content: center; align-items: center; }
   .theme-modal { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--accent); box-shadow: 0 0 30px rgba(0,0,0,0.5); width: 300px; }

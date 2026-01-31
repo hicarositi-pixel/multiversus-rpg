@@ -1,10 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    
-    // Transições ficam aqui
     import { fade, fly } from 'svelte/transition';
-    
-    // Suavização (Easing) fica aqui (CORREÇÃO)
     import { cubicIn, cubicOut } from 'svelte/easing';
     
     // --- IMPORTAÇÃO DOS APPS ---
@@ -15,63 +11,56 @@
     import BaseApp from './BaseApp.svelte';
     import PoderesApp from './PoderesApp.svelte'; 
     import InventoryApp from './InventoryApp.svelte';
-    import StatsSkillsApp from './StatsSkillsApp.svelte';
-import OraclePlayerApp from './OraclePlayerApp.svelte'; // <--- NOVO
-import PlayerNexus from '../database/PlayerNexus.svelte'; // <--- NOVO (O "Archives")
-import CommsApp from './CommsApp.svelte'; // <--- ADICIONE ESTE
-import TestamentoApp from './TestamentoApp.svelte'; // Verifique se o caminho está correto
-import { ThemeEngine } from '../database/ThemeEngine.js';
-import BattlePassApp from './BattlePassApp.svelte'; // Ajuste o caminho se necessário
-
-// No seu estado de navegação (exemplo):
-
+    import StatsSkillsApp from './StatsSkillsApp.svelte'; // <--- O arquivo anterior vai aqui
+    import OraclePlayerApp from './OraclePlayerApp.svelte';
+    import PlayerNexus from '../database/PlayerNexus.svelte';
+    import CommsApp from './CommsApp.svelte';
+    import TestamentoApp from './TestamentoApp.svelte';
+    import BattlePassApp from './BattlePassApp.svelte';
 
     // --- IMPORTAÇÃO DO BANCO DE TEMAS ---
     import { SHEET_THEMES } from '../data/SheetThemeDB.js';
+    import { ThemeEngine } from '../database/ThemeEngine.js';
 
     export let actor;
-    export let system;
     
     const MODULE_ID = "multiversus-rpg";
 
     // --- 1. DADOS REATIVOS (FLAGS) ---
-    // Monitora mudanças no banco de dados do Foundry
+    // A fonte da verdade agora são as FLAGS
     $: flags = actor?.flags?.[MODULE_ID] || {};
+    // Mantemos system apenas para leitura de legado, se necessário
+    $: system = actor?.system || {}; 
     
     // --- 2. SISTEMA DE TEMAS (ENGINE) ---
-    // Lê o tema salvo em 'sheetConfig.theme' (onde o SettingsApp salva)
-    
-    // Carrega os dados do tema (com fallback para terminal se der erro)
+    $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
     $: currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal'];
     
-    // Converte o objeto de vars em uma string CSS para injetar no HTML
+    // Converte vars para CSS
     $: cssString = Object.entries(currentThemeData.vars)
         .map(([key, value]) => `${key}: ${value};`)
         .join(' ');
 
-    // Extrai a cor primária para passar para componentes filhos (CombatApp, etc) que pedem 'themeColor'
     $: themeColor = currentThemeData.vars['--c-primary'];
+    $: wallpaperURL = flags.sheetConfig?.wallpaper || "https://mir-s3-cdn-cf.behance.net/project_modules/hd/e4316a93890387.5e70ade47b737.gif";
 
-    // Wallpaper customizado (prioridade: flag > padrão)
-    $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
-// ANTES: flags.wallpaper
-// DEPOIS: flags.sheetConfig?.wallpaper
-$: wallpaperURL = flags.sheetConfig?.wallpaper || "https://mir-s3-cdn-cf.behance.net/project_modules/hd/e4316a93890387.5e70ade47b737.gif";
-$: {
+    // Aplica o tema globalmente (com proteção para não rodar desnecessariamente)
+    $: {
         if (typeof ThemeEngine !== 'undefined' && SHEET_THEMES[activeThemeKey]) {
-            ThemeEngine.apply(activeThemeKey, SHEET_THEMES[activeThemeKey]);
+            // Pequeno delay para garantir que o DOM existe
+            setTimeout(() => ThemeEngine.apply(activeThemeKey, SHEET_THEMES[activeThemeKey]), 10);
         }
     }
 
-    
-
-    // --- 3. REATIVIDADE MANUAL DO FOUNDRY ---
-onMount(() => {
+    // --- 3. REATIVIDADE MANUAL DO FOUNDRY (CRUCIAL) ---
+    onMount(() => {
         const hookId = Hooks.on("updateActor", (doc, changes) => {
             if (doc.id === actor.id) {
-                // O segredo está aqui: criamos uma cópia nova para forçar o Svelte a reagir
-                flags = { ...actor.flags[MODULE_ID] };
-                console.log("Sincronizando Wallpaper:", flags.sheetConfig?.wallpaper);
+                // Força o Svelte a perceber que as flags mudaram criando um novo objeto
+                // Isso conserta o bug de "comprei e não apareceu"
+                if (doc.flags[MODULE_ID]) {
+                    flags = { ...doc.flags[MODULE_ID] };
+                }
             }
         });
         return () => Hooks.off("updateActor", hookId);
@@ -83,11 +72,9 @@ onMount(() => {
     let activeApp = null; 
     let inputBuffer = ""; 
 
-    // Fast Boot (Pula login se ativado)
+    // Fast Boot
     $: if (loginState === 'idle' && (flags.fastBoot)) {
         loginState = 'logged_in';
-        // Desliga o fastboot para a próxima vez (opcional)
-        // setTimeout(() => actor.setFlag(MODULE_ID, 'fastBoot', false), 1000);
     }
 
     function closeSystem() { actor.sheet.close(); }
@@ -121,7 +108,6 @@ onMount(() => {
         }
     }
 
-    // Ícones do Desktop
     const desktopIcons = [
         { id: 'combat', icon: 'fa-crosshairs', label: 'COMBATE' },
         { id: 'profile', icon: 'fa-id-card', label: 'PERFIL' },
@@ -129,10 +115,10 @@ onMount(() => {
         { id: 'inv', icon: 'fa-box-open', label: 'INVENTÁRIO' },
         { id: 'powers', icon: 'fa-bolt', label: 'PODERES' },
         { id: 'survival', icon: 'fa-heartbeat', label: 'SOBREVIVENTE' },
-        { id: 'oracle', icon: 'fa-terminal', label: 'ORACLE LINK' },  // <--- NOVO
-        { id: 'archives', icon: 'fa-book-dead', label: 'THE ARCHIVES' }, // <--- NOVO
-        { id: 'testamento', icon: 'fa-file-signature', label: 'MEMORIAL' }, // <--- ADICIONE ESTA LINHA
-        { id: 'comms', icon: 'fa-comments', label: 'ZAP_NET' },      // <--- NOVO
+        { id: 'oracle', icon: 'fa-terminal', label: 'ORACLE LINK' },
+        { id: 'archives', icon: 'fa-book-dead', label: 'THE ARCHIVES' },
+        { id: 'testamento', icon: 'fa-file-signature', label: 'MEMORIAL' },
+        { id: 'comms', icon: 'fa-comments', label: 'ZAP_NET' },
         { id: 'base', icon: 'fa-warehouse', label: 'BASE / GRUPO' },
         { id: 'battlepass', icon: 'fa-trophy', label: 'BATTLE PASS' },
         { id: 'settings', icon: 'fa-cogs', label: 'SISTEMA' },
@@ -231,24 +217,32 @@ onMount(() => {
                             </div>
                             
                             <div class="window-content-area">
-                                {#if activeApp === 'combat'} <CombatApp {actor} {system} themeColor={themeColor} />
-                                {:else if activeApp === 'profile'} <ProfileApp {actor} {system} themeColor={themeColor} />
-                                {:else if activeApp === 'settings'} <SettingsApp {actor} on:close={() => activeApp = null} />
-                                {:else if activeApp === 'survival'} <SurvivalApp {actor} />
+                                {#if activeApp === 'combat'} 
+                                    <CombatApp {actor} {system} {flags} themeColor={themeColor} />
+                                {:else if activeApp === 'profile'} 
+                                    <ProfileApp {actor} {system} {flags} themeColor={themeColor} />
+                                {:else if activeApp === 'settings'} 
+                                    <SettingsApp {actor} {flags} on:close={() => activeApp = null} />
+                                {:else if activeApp === 'survival'} 
+                                    <SurvivalApp {actor} {flags} />
                                 {:else if activeApp === 'comms'} 
-        <CommsApp {actor} themeStyle={cssString} />
-        {:else if activeApp === 'testamento'}
-        <TestamentoApp {actor} themeStyle={cssString} />
-{:else if activeApp === 'oracle'} <OraclePlayerApp {actor} themeStyle={cssString} />
-{:else if activeApp === 'archives'} 
-    <PlayerNexus themeStyle={cssString} />
-                                {:else if activeApp === 'base'} <BaseApp {actor} />
-                                {:else if activeApp === 'powers'} <PoderesApp {actor} themeColor={themeColor} />
-                                {:else if activeApp === 'inv'} <InventoryApp {actor} themeColor={themeColor} />
+                                    <CommsApp {actor} {flags} themeStyle={cssString} />
+                                {:else if activeApp === 'testamento'}
+                                    <TestamentoApp {actor} {flags} themeStyle={cssString} />
+                                {:else if activeApp === 'oracle'} 
+                                    <OraclePlayerApp {actor} {flags} themeStyle={cssString} />
+                                {:else if activeApp === 'archives'} 
+                                    <PlayerNexus themeStyle={cssString} />
+                                {:else if activeApp === 'base'} 
+                                    <BaseApp {actor} {flags} />
+                                {:else if activeApp === 'powers'} 
+                                    <PoderesApp {actor} {flags} themeColor={themeColor} />
+                                {:else if activeApp === 'inv'} 
+                                    <InventoryApp {actor} {flags} themeColor={themeColor} />
                                 {:else if activeApp === 'stats'} 
-             <StatsSkillsApp {actor} {system} themeColor={themeColor} />
-             {:else if activeApp === 'battlepass'} 
-        <BattlePassApp {actor} />
+                                    <StatsSkillsApp {actor} {system} {flags} themeColor={themeColor} />
+                                {:else if activeApp === 'battlepass'} 
+                                    <BattlePassApp {actor} {flags} />
                                 {:else}
                                     <div class="wip-msg">
                                         <i class="fas fa-exclamation-triangle"></i>
@@ -265,178 +259,353 @@ onMount(() => {
 </div>
 
 <style>
+
     /* =========================================================================
+
        CSS CORRIGIDO E BLINDADO (CLIQUE GARANTIDO)
+
        ========================================================================= */
 
+
+
     /* A Classe ROOT recebe as variáveis injetadas */
+
     .root-terminal {
+
         position: absolute; inset: 0;
+
         
+
         /* Variáveis do Tema */
+
         background: var(--c-bg);
+
         color: var(--c-text); 
+
         font-family: var(--font-body);
+
         border: var(--border-style);
+
         border-radius: var(--border-radius);
+
         box-shadow: var(--box-shadow);
+
         backdrop-filter: var(--backdrop);
 
+
+
         overflow: hidden; display: flex; flex-direction: column;
+
         padding: 5px;
+
     }
+
+
 
     /* Elementos Internos */
+
     .inner-terminal-screen {
+
         flex: 1; position: relative; overflow: hidden;
+
         border: 1px solid rgba(var(--c-primary), 0.2);
+
         border-color: var(--c-primary);
+
         background: rgba(0,0,0,0.2);
+
         /* IMPORTANTE: Deixa o mouse passar pelo container base */
+
         pointer-events: none; 
+
     }
+
+
 
     /* --- DECORAÇÃO (CLIQUE TRANSPARENTE) --- */
+
     /* Adicionado pointer-events: none em TUDO que é decoração */
+
     
+
     .code-border {
+
         position: absolute; z-index: 90; pointer-events: none; opacity: 0.4;
+
         filter: drop-shadow(0 0 2px var(--c-primary)); 
+
         background-color: var(--c-primary);
+
     }
+
     .code-top { top: 0; left: 0; right: 0; height: 2px; }
+
     .code-bottom { bottom: 0; left: 0; right: 0; height: 2px; }
+
     .corner-decor { 
+
         position: absolute; width: 15px; height: 15px; 
+
         border: 2px solid var(--c-primary); z-index: 95; 
+
         opacity: 0.7; pointer-events: none; /* CORREÇÃO AQUI */
+
     }
+
     .top-left { top: 0; left: 0; border-right: none; border-bottom: none; }
+
     .top-right { top: 0; right: 0; border-left: none; border-bottom: none; }
+
     .bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
+
     .bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
 
+
+
     /* --- LAYERS DE FUNDO (CLIQUE TRANSPARENTE) --- */
+
     .wallpaper-layer { 
+
         position: absolute; inset: 0; background-size: cover; background-position: center; 
+
         opacity: 0.4; z-index: 0; filter: contrast(1.1) brightness(0.8);
+
         pointer-events: none; /* CORREÇÃO */
+
     }
+
     .grid-layer { 
+
         position: absolute; inset: 0; 
+
         background-image: radial-gradient(var(--c-primary) 1px, transparent 1px); 
+
         background-size: 40px 40px; opacity: 0.1; z-index: 1;
+
         pointer-events: none; /* CORREÇÃO */
+
     }
+
     .scanlines { 
+
         position: absolute; inset: 0; 
+
         background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.2) 50%); 
+
         background-size: 100% 4px; z-index: 5; opacity: 0.5;
+
         pointer-events: none; /* CORREÇÃO */
+
     }
+
     .vignette {
+
         position: absolute; inset: 0; 
+
         background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.8) 100%);
+
         z-index: 6; pointer-events: none;
+
     }
+
+
 
     /* --- ÁREAS INTERATIVAS (CLIQUE ATIVADO) --- */
+
     
+
     /* Login */
+
     .login-layer { 
+
         position: absolute; inset: 0; z-index: 100; 
+
         background: var(--c-bg); 
+
         display: flex; align-items: center; justify-content: center; 
+
         pointer-events: auto; /* O mouse volta a funcionar aqui */
+
     }
+
     .login-container { display: flex; flex-direction: column; align-items: center; gap: 20px; width: 350px; }
+
     
+
     .bio-scanner { 
+
         width: 140px; height: 140px; position: relative; border-radius: 50%; overflow: hidden; 
+
         border: 3px solid var(--c-primary); box-shadow: 0 0 30px var(--c-primary); 
+
     }
+
     .bio-img { width: 100%; height: 100%; object-fit: cover; }
+
     .login-info h1 { 
+
         font-family: var(--font-head); font-size: 32px; margin: 0; 
+
         text-shadow: 0 0 15px var(--c-primary); color: var(--c-primary); text-align: center;
+
     }
+
     .pass-input-box { display: flex; gap: 10px; }
+
     .digit-box { 
+
         width: 40px; height: 50px; border: 2px solid var(--c-text); 
+
         display: flex; align-items: center; justify-content: center; 
+
         font-size: 20px; color: var(--c-primary); background: rgba(0,0,0,0.5); 
+
     }
+
     .digit-box.filled { border-color: var(--c-primary); box-shadow: 0 0 10px var(--c-primary); }
+
     .login-msg { color: var(--c-text); font-size: 12px; opacity: 0.7; letter-spacing: 1px; }
 
+
+
     /* OS & Desktop */
+
     .os-container {
+
         display: flex; flex-direction: column; width: 100%; height: 100%; 
+
         position: relative; z-index: 10; /* Acima das scanlines */
+
         pointer-events: auto; /* IMPORTANTE: Garante o clique no OS */
+
     }
+
+
 
     .status-bar { 
+
         height: 32px; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--c-primary); 
+
         display: flex; justify-content: space-between; align-items: center; padding: 0 15px; 
+
         font-size: 11px; font-weight: bold; font-family: var(--font-head); color: var(--c-primary); 
+
     }
+
     .led { display: inline-block; width: 6px; height: 6px; background: var(--c-primary); border-radius: 50%; margin-right: 6px; box-shadow: 0 0 5px var(--c-primary); }
+
     
+
     .viewport { flex: 1; position: relative; overflow: hidden; padding: 15px; }
+
     
+
     .desktop-grid { 
+
         height: 100%; overflow-y: auto; 
+
         display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+
         grid-auto-rows: 120px; gap: 15px; 
+
         align-content: start; justify-items: center; 
+
         position: relative; z-index: 20; /* Garante que os ícones fiquem bem no topo */
+
     }
+
     
+
     .icon-btn { 
+
         background: transparent; border: none; cursor: pointer; 
+
         display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; 
+
         transition: 0.2s; pointer-events: auto; 
+
     }
+
     .icon-btn:hover { transform: scale(1.05); }
+
     
+
     .icon-frame { 
+
         width: 64px; height: 64px; border: 2px solid var(--c-primary); 
+
         display: flex; align-items: center; justify-content: center; 
+
         font-size: 28px; background: rgba(0,0,0,0.4); color: var(--c-primary); 
+
         clip-path: polygon(15% 0, 100% 0, 100% 85%, 85% 100%, 0 100%, 0 15%); 
+
         transition: 0.2s; 
+
     }
+
     .icon-btn:hover .icon-frame { background: var(--c-primary); color: #000; box-shadow: 0 0 20px var(--c-primary); }
+
     
+
     .icon-label { 
+
         font-size: 10px; font-weight: bold; font-family: var(--font-head);
+
         background: rgba(0,0,0,0.8); border: 1px solid var(--c-primary); 
+
         padding: 3px 8px; border-radius: 2px; color: var(--c-primary); 
+
     }
+
+
 
     /* Janela de App Aberto */
+
     .window-frame { 
+
         position: absolute; inset: 0; display: flex; flex-direction: column; 
+
         background: var(--c-bg); border: 1px solid var(--c-primary); 
+
         box-shadow: 0 0 40px rgba(0,0,0,0.5); 
+
         pointer-events: auto; z-index: 50;
+
     }
+
     .window-header { 
+
         padding: 8px 15px; background: rgba(0,0,0,0.8); border-bottom: 1px solid var(--c-primary); 
+
         display: flex; justify-content: space-between; align-items: center; font-family: var(--font-head);
+
     }
+
     .header-left { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 12px; color: var(--c-primary); }
+
     .win-close { 
+
         background: transparent; border: 1px solid var(--c-primary); color: var(--c-primary); 
+
         padding: 4px 10px; font-size: 10px; cursor: pointer; transition: 0.2s; 
+
     }
+
     .win-close:hover { background: var(--c-primary); color: #000; }
+
     
+
     .window-content-area { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+
     .wip-msg { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.5; color: var(--c-primary); }
 
+
+
     /* Globais */
+
     :global(.root-terminal i) { text-shadow: 0 0 5px currentColor; }
+
     :global(::-webkit-scrollbar-thumb) { background: var(--c-primary) !important; }
+
 </style>

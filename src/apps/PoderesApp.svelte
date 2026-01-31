@@ -5,8 +5,12 @@
 
   export let actor;
   export let themeColor;
+  
+  // Recebe as flags do pai (Ficha.svelte) para sincronia perfeita
+  export let flags = {}; 
 
   const isGM = game.user.isGM;
+  const MODULE_ID = "multiversus-rpg";
 
   // --- DADOS REATIVOS ---
   let searchTerm = "";
@@ -18,41 +22,46 @@
 
   // --- FUNÇÃO DE BUSCA E CÁLCULO ---
   function refreshData() {
-    // 1. Filtra itens válidos
+    // 1. Filtra itens válidos (tipo power)
     const rawPowers = actor.items.filter(i => i && i.type === "power");
     
     // 2. Ordena alfabeticamente
     powers = rawPowers.sort((a, b) => a.name.localeCompare(b.name));
     activePowerCount = powers.length;
 
-    // 3. Recalcula XP Total na hora
+    // 3. Recalcula XP Total (LENDO DAS FLAGS AGORA)
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
     calculatedTotalCost = powers.reduce((acc, item) => {
-        const sys = item.system || {};
-        const flags = item.flags?.["multiversus-rpg"] || {};
-        
-        const cat = flags.category || "principal";
+        // LEITURA CORRIGIDA: Lendo das flags do item
+        const itemFlags = item.flags?.[MODULE_ID] || {};
+        const itemSystem = item.system || {}; // Fallback legado
+
+        const cat = itemFlags.category || "principal";
         const base = XP_RULES[cat] || 8;
+        
         // Lógica de Poder Inicial (Desconto)
-        const isInitial = flags.isInitial || false;
+        const isInitial = itemFlags.isInitial || false;
         const discount = isInitial ? (4 * base) : 0;
         
-        const dN = sys.dice?.normal || 0;
-        const dH = sys.dice?.hard || 0;
-        const dW = sys.dice?.wiggle || 0;
+        // Lê os dados das flags (onde a ficha de poder salva agora)
+        const diceData = itemFlags.dice || itemSystem.dice || {};
+        
+        const dN = diceData.normal || 0;
+        const dH = diceData.hard || 0;
+        const dW = diceData.wiggle || 0;
         
         const cost = (dN * base) + (dH * base * 2) + (dW * base * 4);
         
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // 4. Sincroniza com o Ator (CORREÇÃO CRÍTICA AQUI)
-    // Salvamos em 'points.powersSpent' para não sobrescrever os Atributos
-    const currentSavedCost = foundry.utils.getProperty(actor.system, "points.powersSpent") || 0;
+    // 4. Sincroniza com o Ator (CORREÇÃO CRÍTICA: SALVANDO NA FLAG)
+    // Antes salvava em system.points.powersSpent. Agora salva na flag global.
+    const currentSavedCost = actor.flags?.[MODULE_ID]?.powersSpent || 0;
 
     if (currentSavedCost !== calculatedTotalCost) {
-        actor.update({ "system.points.powersSpent": calculatedTotalCost }, { render: false });
+        actor.update({ [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost }, { render: false });
     }
   }
 
@@ -64,6 +73,7 @@
         if (doc.id === actor.id) refreshData();
     });
     
+    // Monitora mudanças nos itens para recalcular XP em tempo real
     const hookUpdateItem = Hooks.on("updateItem", (item) => { if(item.parent?.id === actor.id) refreshData(); });
     const hookDeleteItem = Hooks.on("deleteItem", (item) => { if(item.parent?.id === actor.id) refreshData(); });
     const hookCreateItem = Hooks.on("createItem", (item) => { if(item.parent?.id === actor.id) refreshData(); });
