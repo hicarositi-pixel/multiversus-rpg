@@ -122,37 +122,52 @@
   }
 
   async function updateQuality(index, field, value) {
-    // Cria cópia profunda para garantir reatividade
+    // Cria cópia profunda para garantir reatividade e evitar erros de referência
     const newQs = JSON.parse(JSON.stringify(qualities)); 
     newQs[index][field] = value; 
     await updateFlag('qualities', newQs);
   }
 
-  // --- LÓGICA DE CAPACIDADES ---
+  // --- LÓGICA DE CAPACIDADES (ONDE O ERRO ESTAVA) ---
   async function addCapacity(qIndex) {
+    // 1. Clona o array de qualidades para não mutar o estado diretamente
     const newQs = JSON.parse(JSON.stringify(qualities));
-    if (!newQs[qIndex].capacities) newQs[qIndex].capacities = [];
     
+    // 2. Garante que o array de capacidades existe nessa qualidade
+    if (!newQs[qIndex].capacities) {
+        newQs[qIndex].capacities = [];
+    }
+    
+    // 3. Adiciona a nova capacidade
     newQs[qIndex].capacities.push({ type: 'mass', nul: 0, booster: 0, collapsed: false }); 
+    
+    // 4. Salva tudo de volta
     await updateFlag('qualities', newQs);
   }
 
   async function removeCapacity(qIndex, cIndex) {
     const newQs = JSON.parse(JSON.stringify(qualities));
-    newQs[qIndex].capacities.splice(cIndex, 1); 
-    await updateFlag('qualities', newQs);
+    
+    if (newQs[qIndex].capacities && newQs[qIndex].capacities.length > cIndex) {
+        newQs[qIndex].capacities.splice(cIndex, 1); 
+        await updateFlag('qualities', newQs);
+    }
   }
 
   async function updateCapacity(qIndex, cIndex, field, value) {
     const newQs = JSON.parse(JSON.stringify(qualities));
-    newQs[qIndex].capacities[cIndex][field] = value; 
-    await updateFlag('qualities', newQs);
+    if (newQs[qIndex].capacities && newQs[qIndex].capacities[cIndex]) {
+        newQs[qIndex].capacities[cIndex][field] = value; 
+        await updateFlag('qualities', newQs);
+    }
   }
 
   async function toggleCapCollapse(qIndex, cIndex) {
     const newQs = JSON.parse(JSON.stringify(qualities));
-    newQs[qIndex].capacities[cIndex].collapsed = !newQs[qIndex].capacities[cIndex].collapsed; 
-    await updateFlag('qualities', newQs);
+    if (newQs[qIndex].capacities && newQs[qIndex].capacities[cIndex]) {
+        newQs[qIndex].capacities[cIndex].collapsed = !newQs[qIndex].capacities[cIndex].collapsed; 
+        await updateFlag('qualities', newQs);
+    }
   }
   
   // Abre o App de Extras (que deve saber lidar com flags pelo índice)
@@ -392,7 +407,7 @@
     {/if}
 
   </main>
-</div>
+</div> 
 
 <style>
 /* CSS ORIGINAL PRESERVADO E RESTAURADO */
