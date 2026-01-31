@@ -1,7 +1,7 @@
 {
   "id": "multiversus-rpg",
   "title": "Multiversus RPG",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "compatibility": {
     "minimum": "11",
     "verified": "12"
