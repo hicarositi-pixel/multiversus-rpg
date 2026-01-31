@@ -64,4 +64,4 @@ export default class MultiversusItemSheet extends ItemSheet {
     }
     return super.close(options);
   }
-}
+} 
