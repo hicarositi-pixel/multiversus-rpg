@@ -1,4 +1,4 @@
-import MultiversusComponent from '../components/PowerSheet.svelte'; // Ajuste o caminho se necessário
+import MultiversusComponent from '../components/PowerSheet.svelte'; 
 
 export default class MultiversusItemSheet extends ItemSheet {
   constructor(object, options = {}) {
@@ -21,51 +21,51 @@ export default class MultiversusItemSheet extends ItemSheet {
 
   /** @override */
   async _render(force, options) {
-    // 1. LIVE UPDATE (AQUI ESTÁ A CORREÇÃO DE RENDER)
+    // 1. LIVE UPDATE (O Segredo da Estabilidade)
     if (!force && this.component) {
-      // Pega as flags atuais
+      // Pega as flags atuais e clona para garantir reatividade
       const currentFlags = this.document.flags["multiversus-rpg"] || {};
       
       this.component.$set({ 
         item: this.document,
-        // O PULO DO GATO: {...currentFlags} cria um NOVO objeto na memória.
-        // O Svelte detecta isso como "mudança real" e atualiza a tela.
-        flags: { ...currentFlags },
+        flags: { ...currentFlags }, // Clona para forçar o Svelte a ver a mudança
         application: this
       });
-      
+
+      // Atualiza o título da janela (caso o nome mude)
       this.element.find(".window-title").text(this.title);
-      return; 
+
+      return; // <--- IMPEDE O FOUNDRY DE DESTRUIR O HTML
     }
 
     // 2. CRIAÇÃO INICIAL
     await super._render(force, options);
 
     const target = this.element.find(".window-content")[0];
+    
     if (target) {
       target.innerHTML = ""; 
       target.style.padding = "0";
       target.style.overflow = "hidden";
-      target.style.height = "100%";
+      target.style.height = "100%"; 
 
       if (this.component) this.component.$destroy();
 
+      // Pega flags iniciais
       const initialFlags = this.document.flags["multiversus-rpg"] || {};
 
       this.component = new MultiversusComponent({
         target: target,
         props: {
           item: this.document,
-          // Passamos a cópia aqui também
-          flags: { ...initialFlags },
+          flags: { ...initialFlags }, // Passa flags desde o início
           application: this
         }
       });
     }
   }
 
-  _getSubmitData(updateData = {}) { return {}; }
-
+  /** @override */
   async close(options = {}) {
     if (this.component) {
       this.component.$destroy();

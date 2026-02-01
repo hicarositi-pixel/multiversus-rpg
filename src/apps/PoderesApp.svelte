@@ -6,8 +6,6 @@
 
   export let actor;
   export let themeColor;
-  
-  // Recebe as flags do pai (Ficha.svelte)
   export let flags = {}; 
 
   const isGM = game.user.isGM;
@@ -17,46 +15,49 @@
   let searchTerm = "";
   let powers = [];
   
-  // Variáveis para atualização visual instantânea
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
 
   // --- CONTROLE DE ATUALIZAÇÃO (DEBOUNCE) ---
-  // Isso impede que a ficha pisque quando você arrasta um item
   let updateTimer = null;
 
   function scheduleRefresh() {
       if (updateTimer) clearTimeout(updateTimer);
+      // Aumentei levemente para 100ms para dar tempo do Foundry "entender" o Drag&Drop
       updateTimer = setTimeout(() => {
           refreshData();
-      }, 50); // Espera 50ms para garantir que o Foundry terminou de criar o item
+      }, 100); 
   }
 
-  // --- FUNÇÃO DE BUSCA E CÁLCULO ---
+  // --- FUNÇÃO DE BUSCA E CÁLCULO (A CORREÇÃO ESTÁ AQUI) ---
   async function refreshData() {
-    // 1. Filtra itens válidos e garante nova referência de array (para o Svelte reagir)
-    const rawPowers = actor.items.filter(i => i && i.type === "power");
+    // 1. BUSCA O ATOR "REAL" ATUALIZADO
+    // Em vez de usar a prop 'actor' (que pode estar velha), pegamos direto do jogo.
+    const realActor = game.actors.get(actor.id);
     
-    // 2. Ordena alfabeticamente
+    // Segurança: se não achar (muito raro), usa o actor da prop
+    const sourceActor = realActor || actor;
+
+    // 2. Filtra itens usando a FONTE ATUALIZADA
+    const rawPowers = sourceActor.items.filter(i => i && i.type === "power");
+    
+    // 3. Atualiza a lista (Svelte reage aqui)
     powers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
     activePowerCount = powers.length;
 
-    // 3. Recalcula XP Total (LENDO DAS FLAGS AGORA)
+    // 4. Recalcula XP
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
     calculatedTotalCost = powers.reduce((acc, item) => {
-        // LEITURA CORRIGIDA: Lendo das flags do item
         const itemFlags = item.flags?.[MODULE_ID] || {};
-        const itemSystem = item.system || {}; // Fallback legado
+        const itemSystem = item.system || {}; 
 
         const cat = itemFlags.category || "principal";
         const base = XP_RULES[cat] || 8;
         
-        // Lógica de Poder Inicial (Desconto)
         const isInitial = itemFlags.isInitial || false;
         const discount = isInitial ? (4 * base) : 0;
         
-        // Lê os dados das flags (onde a ficha de poder salva agora)
         const diceData = itemFlags.dice || itemSystem.dice || {};
         
         const dN = Number(diceData.normal) || 0;
@@ -68,58 +69,56 @@
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // 4. Sincroniza com o Ator (CORREÇÃO CRÍTICA COM RENDER: FALSE)
-    // Usamos Number() para garantir comparação exata e evitar loop infinito
-    const currentSavedCost = Number(actor.flags?.[MODULE_ID]?.powersSpent) || 0;
+    // 5. Salva no Ator se mudou (Render False para não piscar)
+    const currentSavedCost = Number(sourceActor.flags?.[MODULE_ID]?.powersSpent) || 0;
 
-    if (currentSavedCost !== calculatedTotalCost) {
-        // O segredo para não travar ao arrastar: { render: false }
-        await actor.update({ 
+    if (calculatedTotalCost !== currentSavedCost) {
+        await sourceActor.update({ 
             [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost 
         }, { render: false });
-        
-        console.log(`[Nexus] Poder adicionado/editado. Novo custo: ${calculatedTotalCost}`);
+        console.log(`[Nexus] XP Sincronizado: ${calculatedTotalCost}`);
     }
     
-    await tick(); // Força o Svelte a desenhar a lista nova
+    await tick();
   }
 
-  // --- HOOKS DE REATIVIDADE TOTAL ---
+  // --- HOOKS ---
   onMount(() => {
     refreshData(); 
 
-    // Hook de Atualização do Ator
-    const hookId = Hooks.on("updateActor", (doc, changes, options) => {
-        // Só atualiza se for este ator E se a mudança não foi feita por nós mesmos (render: false)
+    // Hook: Quando o Ator muda (XP, Atributos, etc)
+    const hookActor = Hooks.on("updateActor", (doc, changes, options) => {
         if (doc.id === actor.id && options.render !== false) {
             scheduleRefresh();
         }
     });
     
-    // Hooks de Itens (Criar, Deletar, Editar)
-    // Usamos scheduleRefresh para agrupar as chamadas
-    const hookUpdateItem = Hooks.on("updateItem", (item) => { 
+    // Hook CRÍTICO: Quando um item é CRIADO (Arrastar poder)
+    const hookCreate = Hooks.on("createItem", (item) => { 
+        if(item.parent?.id === actor.id) {
+            console.log("Detectado novo poder:", item.name);
+            scheduleRefresh(); 
+        }
+    });
+
+    const hookDelete = Hooks.on("deleteItem", (item) => { 
         if(item.parent?.id === actor.id) scheduleRefresh(); 
     });
-    const hookDeleteItem = Hooks.on("deleteItem", (item) => { 
-        if(item.parent?.id === actor.id) scheduleRefresh(); 
-    });
-    const hookCreateItem = Hooks.on("createItem", (item) => { 
-        if(item.parent?.id === actor.id) scheduleRefresh(); 
+
+    const hookUpdate = Hooks.on("updateItem", (item) => { 
+        if(item.parent?.id === actor.id && item.type === "power") scheduleRefresh(); 
     });
 
     return () => {
-      Hooks.off("updateActor", hookId);
-      Hooks.off("updateItem", hookUpdateItem);
-      Hooks.off("deleteItem", hookDeleteItem);
-      Hooks.off("createItem", hookCreateItem);
+      Hooks.off("updateActor", hookActor);
+      Hooks.off("createItem", hookCreate);
+      Hooks.off("deleteItem", hookDelete);
+      Hooks.off("updateItem", hookUpdate);
     };
   });
 
-  // Filtro Visual
   $: filteredPowers = powers.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  // Ações
   function openLibrary() {
     try { new PoderesManager().render(true); } catch (e) { console.error(e); }
   }
@@ -188,7 +187,7 @@
 </div>
 
 <style>
-/* ... (Seu CSS original aqui, não alterado) ... */
+  /* MANTENDO O SEU CSS EXATO */
   .powers-terminal { height: 100%; display: flex; flex-direction: column; gap: 12px; background: transparent; color: var(--c-text); font-family: var(--font-body); padding: 5px; position: relative; overflow: hidden; }
   .term-header { display: flex; gap: 10px; z-index: 1; height: 60px; flex-shrink: 0; }
   .hud-module { background: rgba(0, 0, 0, 0.6); border: 1px solid #333; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; padding: 0 15px; position: relative; overflow: hidden; }
