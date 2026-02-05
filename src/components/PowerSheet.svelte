@@ -3,12 +3,19 @@
   import { fade, slide, scale } from 'svelte/transition';
   
   // Imports de Lógica
-  import ExtraFlawApp from './ExtraFlawApp.js';
+  import ExtraFlawApp from './ExtraFlawApp.js'; // Ajuste o caminho se necessário
   import { THEME_DB } from './PowerSheetThemeDB.js'; 
   import { calculateCapacity, CAPACITY_TYPES } from '../data/capacities-data.js';
 
   export let item;
   export let application;
+  
+  // Recebe as flags e o system atualizados do JS
+  export let flags = item.flags?.["multiversus-rpg"] || {};
+  
+  // --- REATIVIDADE CRUCIAL ---
+  // Precisamos ler o system para a descrição
+  $: system = item.system || {};
 
   const isGM = game.user.isGM;
   const MODULE_ID = "multiversus-rpg";
@@ -24,10 +31,6 @@
     {id: 'util', label: 'UTILIDADE'}
   ];
 
-  // --- 1. REATIVIDADE DE DADOS (VIA FLAGS) ---
-  // Se a flag não existir, cria o objeto vazio para não quebrar a UI
-  $: flags = item.flags?.[MODULE_ID] || {};
-  
   // TEMA
   $: currentThemeKey = flags.themeKey || "neon-operator";
   $: activeTheme = THEME_DB[currentThemeKey] || THEME_DB["neon-operator"];
@@ -39,7 +42,7 @@
 
   // DADOS PRINCIPAIS
   $: name = item.name;
-  $: qualities = flags.qualities || []; // Lista de Sub-rotinas
+  $: qualities = flags.qualities || []; 
   $: rarity = flags.rarity || "Comum";
   $: category = flags.category || "principal";
   $: isInitial = flags.isInitial || false;
@@ -51,38 +54,43 @@
   $: diceWiggle = diceData.wiggle || 0;
   $: totalDice = diceNormal + diceHard + diceWiggle;
 
-  $: description = flags.notes || ""; 
-  
+  // --- MUDANÇA: DESCRIÇÃO PADRÃO DO FOUNDRY ---
+  // Tenta ler do system.description.value (padrão dnd5e/simple worldbuilding) ou fallback para string vazia
+$: description = system.notes || "";
+
   // UI State
   let activeTab = 'geral';
   let showThemeSelector = false;
 
-  // --- 2. CÁLCULOS AUTOMÁTICOS ---
-  
-  // Custo de XP
+  // --- CÁLCULOS AUTOMÁTICOS ---
   $: baseCost = XP_RULES[category] || 8;
   $: rawXpCost = (diceNormal * baseCost) + (diceHard * baseCost * 2) + (diceWiggle * baseCost * 4);
   $: discount = isInitial ? (4 * baseCost) : 0;
   $: xpCost = Math.max(0, rawXpCost - discount);
 
-  // Pontos de Balanceamento (PB)
   $: maxPB = Math.floor((PB_BASE_VALUES[rarity]||2) * (PB_MULTIPLIERS[category]||1));
   
   $: usedPB = qualities.reduce((total, q) => {
-    // Soma custo dos Extras dentro de cada qualidade
     const extrasCost = (q.extras || []).reduce((sum, e) => sum + ((e.cost || 0) * (e.qty || 1)), 0);
-    // Base 2 + Nível + Extras
     return total + 2 + (q.level || 0) + extrasCost;
   }, 0);
 
-  // --- 3. AÇÕES DE ATUALIZAÇÃO SEGURA (RENDER: FALSE) ---
+  // --- AÇÕES DE ATUALIZAÇÃO (CORRIGIDAS) ---
   
-  // Helper Genérico
+  // NOTA: Removemos { render: false }. 
+  // Isso faz o Foundry rodar o ciclo de render, nosso JS intercepta e atualiza o Svelte via props.
+  // Isso garante que a tela atualize visualmente.
+
   async function updateFlag(key, value) {
-      await item.update({ [`flags.${MODULE_ID}.${key}`]: value }, { render: false });
+      await item.update({ [`flags.${MODULE_ID}.${key}`]: value });
   }
 
-  // Atualiza Dados (Dice) preservando objeto
+  // Atualiza Descrição no padrão do Foundry
+async function updateDescription(value) {
+      // Grava direto no campo oficial do sistema
+      await item.update({ "system.notes": value });
+  }
+
   async function updateDice(type, value) {
       let newDice = { ...diceData }; 
       newDice[type] = parseInt(value) || 0;
@@ -95,7 +103,7 @@
       new FilePicker({ 
           type: "image", 
           current: item.img, 
-          callback: path => item.update({ img: path }) // Imagem nativa pode atualizar renderizando
+          callback: path => item.update({ img: path }) 
       }).render(true); 
   }
   
@@ -104,7 +112,7 @@
     showThemeSelector = false;
   }
 
-  // --- LÓGICA DE QUALIDADES (SUB-ROTINAS) ---
+  // --- LÓGICA DE QUALIDADES ---
   async function addQuality() {
     const newQ = { 
       name: "Nova Sub-rotina", type: "atk", level: 0, 
@@ -116,38 +124,26 @@
   }
 
   async function removeQuality(index) { 
-      // Filtra e atualiza
       const newQs = qualities.filter((_, i) => i !== index);
       await updateFlag('qualities', newQs); 
   }
 
   async function updateQuality(index, field, value) {
-    // Cria cópia profunda para garantir reatividade e evitar erros de referência
     const newQs = JSON.parse(JSON.stringify(qualities)); 
     newQs[index][field] = value; 
     await updateFlag('qualities', newQs);
   }
 
-  // --- LÓGICA DE CAPACIDADES (ONDE O ERRO ESTAVA) ---
+  // --- LÓGICA DE CAPACIDADES ---
   async function addCapacity(qIndex) {
-    // 1. Clona o array de qualidades para não mutar o estado diretamente
     const newQs = JSON.parse(JSON.stringify(qualities));
-    
-    // 2. Garante que o array de capacidades existe nessa qualidade
-    if (!newQs[qIndex].capacities) {
-        newQs[qIndex].capacities = [];
-    }
-    
-    // 3. Adiciona a nova capacidade
+    if (!newQs[qIndex].capacities) newQs[qIndex].capacities = [];
     newQs[qIndex].capacities.push({ type: 'mass', nul: 0, booster: 0, collapsed: false }); 
-    
-    // 4. Salva tudo de volta
     await updateFlag('qualities', newQs);
   }
 
   async function removeCapacity(qIndex, cIndex) {
     const newQs = JSON.parse(JSON.stringify(qualities));
-    
     if (newQs[qIndex].capacities && newQs[qIndex].capacities.length > cIndex) {
         newQs[qIndex].capacities.splice(cIndex, 1); 
         await updateFlag('qualities', newQs);
@@ -166,11 +162,10 @@
     const newQs = JSON.parse(JSON.stringify(qualities));
     if (newQs[qIndex].capacities && newQs[qIndex].capacities[cIndex]) {
         newQs[qIndex].capacities[cIndex].collapsed = !newQs[qIndex].capacities[cIndex].collapsed; 
-        await updateFlag('qualities', newQs);
+        await updateFlag('qualities', newQs); // Salvamos o estado colapsado para persistir
     }
   }
   
-  // Abre o App de Extras (que deve saber lidar com flags pelo índice)
   function openExtraSelector(index) { 
       new ExtraFlawApp(item, index).render(true); 
   }
@@ -286,11 +281,14 @@
           </div>
         </div>
 
-        <div class="text-editor-container">
-          <div class="editor-label">NOTAS DE SISTEMA</div>
-          <textarea value={description} on:change={(e)=>updateFlag('notes', e.target.value)} placeholder="Insira a descrição narrativa e mecânica aqui..."></textarea>
-        </div>
-
+<div class="text-editor-container">
+  <div class="editor-label">NOTAS DE SISTEMA (WILD TALENTS)</div>
+  
+  <textarea 
+    value={description} 
+    on:change={(e)=>updateDescription(e.target.value)} 
+    placeholder="Descrição do poder (Sincronizado com a ficha original)..."></textarea>
+</div>
       </div>
     {/if}
 
@@ -338,7 +336,12 @@
               </div>
 
               <div class="card-body">
-                <textarea rows="1" class="mini-desc" on:change={(e)=>updateQuality(i, 'description', e.target.value)} placeholder="Descrição curta do efeito...">{q.description || ""}</textarea>
+                <textarea 
+  rows="1" 
+  class="mini-desc" 
+  value={q.description || ""} 
+  on:change={(e)=>updateQuality(i, 'description', e.target.value)} 
+  placeholder="Descrição curta do efeito..."></textarea>
 
                 <div class="caps-list">
                   <div class="caps-header">
