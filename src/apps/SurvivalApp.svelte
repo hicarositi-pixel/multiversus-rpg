@@ -2,24 +2,29 @@
     import { slide, fade, scale } from 'svelte/transition';
 
     export let actor;
-    export let themeColor; 
+    export let themeColor;
+    export let flags = {}; // Recebe flags atualizadas do pai
 
     const MODULE_ID = "multiversus-rpg";
+    const isGM = game.user.isGM;
 
-    // === 1. CARREGAMENTO ===
-    let savedData = actor.getFlag(MODULE_ID, 'survival_data') || {};
+    // === 1. CARREGAMENTO REATIVO ===
+    // Prioriza as flags passadas via prop (mais atual), senão lê do ator
+    $: survivalData = (flags && flags.survival_data) ? flags.survival_data : (actor.flags?.[MODULE_ID]?.survival_data || {});
 
-    let bio = savedData.bio || { fome: 10, sede: 10, exaustao: 10, wp: 10 };
-    let session = savedData.session || { actions_max: 2, actions_used: 0, day_state: 'DIA', stress_counter: 0 };
-    let disciplines = savedData.disciplines || { extracao: 0, engenharia: 0, sintetica: 0, sobrevivencia: 0 };
-    let pockets = savedData.pockets || { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
+    // Inicialização com Fallback (Reativa)
+    $: bio = survivalData.bio || { fome: 10, sede: 10, exaustao: 10, wp: 10 };
+    $: session = survivalData.session || { actions_max: 2, actions_used: 0, day_state: 'DIA', stress_counter: 0 };
+    $: disciplines = survivalData.disciplines || { extracao: 0, engenharia: 0, sintetica: 0, sobrevivencia: 0 };
+    
+    // Pockets agora vem do SYSTEM (para consistência com o resto da ficha)
+    // Se não existir, cria vazio
+    $: pockets = actor.system.pockets || { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
 
     $: level = actor.system.level || 1;
     $: totalPoints = 10 + ((level - 1) * 2);
     $: spentPoints = Object.values(disciplines).reduce((a, b) => a + Number(b), 0);
     $: availablePoints = totalPoints - spentPoints;
-
-    const isGM = game.user.isGM;
 
     const RARITY_MAP = {
         1: { label: 'C', color: '#999' }, 2: { label: 'R', color: '#3b82f6' },
@@ -33,21 +38,27 @@
 
     // === 2. SAVE BLINDADO ===
     async function save() {
-        const dataToSave = { bio, session, disciplines, pockets };
-        // Trigger reatividade
-        bio = bio; session = session; disciplines = disciplines; pockets = pockets;
+        // Atualiza objeto local
+        const dataToSave = { bio, session, disciplines };
 
+        // Salva Survival Data nas Flags
         await actor.update({
             [`flags.${MODULE_ID}.survival_data`]: dataToSave
-        }, { render: false });
+        }, { render: false }); // Render false pois o Svelte já atualizou visualmente
+    }
+    
+    async function savePockets() {
+        // Atualiza o inventário no sistema
+        await actor.update({ "system.pockets": pockets }, { render: false });
     }
 
     async function manualSave() {
         await save();
+        await savePockets();
         ui.notifications.info("Dados de Sobrevivência Salvos!");
     }
 
-    // === 3. LÓGICA DE AÇÕES (ATUALIZADA) ===
+    // === 3. AÇÕES (COM FEEDBACK VISUAL IMEDIATO) ===
     async function performAction(type) {
         if (!isGM && session.actions_used >= session.actions_max) {
             return ui.notifications.warn("Sem ações disponíveis.");
@@ -56,120 +67,135 @@
         let msg = "";
         let costActions = 0;
 
-        // --- NOVA: AÇÃO NORMAL ---
+        // Clona objetos para reatividade
+        let newBio = { ...bio };
+        let newSession = { ...session };
+
         if (type === 'NORMAL_ACTION') {
             costActions = 1;
-            bio.fome = Math.max(-10, bio.fome - 1);
-            bio.sede = Math.max(-10, bio.sede - 1);
-            // Sem exaustão, sem stress
+            newBio.fome = Math.max(-10, newBio.fome - 1);
+            newBio.sede = Math.max(-10, newBio.sede - 1);
             msg = `🎲 <b>${actor.name}</b> realizou uma Ação Normal. (-1 Fome, -1 Sede)`;
         }
-        // -------------------------
-
         else if (type === 'EFFORT') {
             costActions = 1;
-            bio.fome = Math.max(-10, bio.fome - 1);
-            bio.sede = Math.max(-10, bio.sede - 1); // Ajustado para padrão 1 fome/1 sede ou mantem 2? Mantive 1 para alinhar com o pedido, ou volta para 2 se preferir.
-            // Nota: No prompt anterior dizia "tira 1 fome e 2 sede" para esforço. 
-            // Vou manter o padrão agressivo do esforço se desejar, mas vou deixar 1 e 2.
-            bio.sede = Math.max(-10, bio.sede - 1); // Extra cost for effort if needed
-            
-            bio.exaustao = Math.max(-10, bio.exaustao - 1); // O esforço tira exaustão direta ou so no stress?
-            // Pelo seu prompt: "esforço tira 1 fome e 2 sede... caso feito 4 vezes causa exaustao".
-            // Vou corrigir para a logica do contador:
-            
-            // CORREÇÃO PELA REGRA DO PROMPT:
-            // Esforço: 1 Energia. -1 Fome, -2 Sede.
-            bio.fome = Math.max(-10, bio.fome - 1); 
-            // Já tirei 1 sede acima, tirando mais 1 aqui para totalizar 2
-            
+            newBio.fome = Math.max(-10, newBio.fome - 1);
+            newBio.sede = Math.max(-10, newBio.sede - 2); 
             msg = `😤 <b>${actor.name}</b> realizou um Esforço Físico.`;
-        
-        } else if (type === 'REST_SIMPLE') {
+        } 
+        else if (type === 'REST_SIMPLE') {
             costActions = 1;
-            bio.exaustao = Math.min(10, bio.exaustao + 1);
-            bio.fome = Math.max(-10, bio.fome - 1); 
-            bio.sede = Math.max(-10, bio.sede - 1);
-            
-            // ATUALIZAÇÃO: Recupera 1 WP
-            bio.wp = Math.min(20, (bio.wp || 0) + 1);
-            
+            newBio.exaustao = Math.min(10, newBio.exaustao + 1);
+            newBio.fome = Math.max(-10, newBio.fome - 1); 
+            newBio.sede = Math.max(-10, newBio.sede - 1);
+            newBio.wp = Math.min(20, (newBio.wp || 0) + 1);
             msg = `☕ <b>${actor.name}</b> descansou (+1 WP).`;
-
-        } else if (type === 'REST_DEEP') {
-            if (!isGM && (session.actions_max - session.actions_used < 2)) {
+        } 
+        else if (type === 'REST_DEEP') {
+            if (!isGM && (newSession.actions_max - newSession.actions_used < 2)) {
                 return ui.notifications.warn("Precisa de 2 ações para Sono Profundo.");
             }
             costActions = 2;
-            bio.exaustao = Math.min(10, bio.exaustao + 2);
-            bio.fome = Math.max(-10, bio.fome - 2); 
-            bio.sede = Math.max(-10, bio.sede - 2);
-            
-            // ATUALIZAÇÃO: Recupera 2 WP
-            bio.wp = Math.min(20, (bio.wp || 0) + 2);
-
+            newBio.exaustao = Math.min(10, newBio.exaustao + 2);
+            newBio.fome = Math.max(-10, newBio.fome - 2); 
+            newBio.sede = Math.max(-10, newBio.sede - 2);
+            newBio.wp = Math.min(20, (newBio.wp || 0) + 2);
             msg = `💤 <b>${actor.name}</b> dormiu profundamente (+2 WP).`;
         }
 
-        if (!isGM) session.actions_used += costActions;
+        if (!isGM) newSession.actions_used += costActions;
 
-        if (bio.fome <= 0 || bio.sede <= 0 || bio.exaustao <= 0) {
+        if (newBio.fome <= 0 || newBio.sede <= 0 || newBio.exaustao <= 0) {
             msg += `<br><span style="color:red; font-weight:bold;">ALERTA: Sinais Vitais Críticos!</span>`;
         }
 
+        // Aplica mudanças locais
+        bio = newBio;
+        session = newSession;
+
         ChatMessage.create({ content: msg });
-        await save();
+        await save(); 
     }
 
     async function consumeOrganism(tier, mode) {
-        const currentQty = pockets?.ORGANISMO?.[tier] || 0;
+        if (!pockets.ORGANISMO) pockets.ORGANISMO = {};
+        const currentQty = pockets.ORGANISMO[tier] || 0;
+        
         if (currentQty <= 0 && !isGM) return ui.notifications.warn("Sem estoque.");
 
-        if (!isGM) { pockets.ORGANISMO[tier]--; }
+        // Atualiza Inventário Local
+        if (!isGM) { 
+            let newPockets = { ...pockets };
+            newPockets.ORGANISMO[tier]--; 
+            pockets = newPockets; // Dispara reatividade
+            await savePockets(); 
+        }
 
         const foodVal = tier;
         const waterVal = tier * 2;
+        let newBio = { ...bio };
         
         let msg = "";
         if (mode === 'EAT') {
-            bio.fome = Math.min(10, bio.fome + foodVal);
+            newBio.fome = Math.min(10, newBio.fome + foodVal);
             msg = `🍖 <b>${actor.name}</b> comeu T${tier} (+${foodVal} Fome).`;
         } else {
-            bio.sede = Math.min(10, bio.sede + waterVal);
+            newBio.sede = Math.min(10, newBio.sede + waterVal);
             msg = `💧 <b>${actor.name}</b> bebeu T${tier} (+${waterVal} Sede).`;
         }
 
+        bio = newBio; // Dispara reatividade
+
         ChatMessage.create({ content: msg });
         showConsumeModal = false;
-        await save();
+        await save(); 
     }
 
     // --- FUNÇÕES ADMIN ---
     async function gmModifyStat(stat, val) {
-        bio[stat] = Math.max(-10, Math.min(10, bio[stat] + val));
+        let newBio = { ...bio };
+        newBio[stat] = Math.max(-10, Math.min(10, newBio[stat] + val));
+        bio = newBio;
         await save();
     }
+    
     async function gmAddItem(type, tier, qty) {
         if (!pockets[type]) pockets[type] = {};
-        const current = pockets[type][tier] || 0;
-        pockets[type][tier] = Math.max(0, current + qty);
-        await save();
+        
+        let newPockets = { ...pockets };
+        const current = newPockets[type][tier] || 0;
+        newPockets[type][tier] = Math.max(0, current + qty);
+        
+        pockets = newPockets; // Força reatividade
+        await savePockets();
         ui.notifications.info(`Estoque atualizado.`);
     }
+    
     async function gmResetSession() {
         session.actions_used = 0;
+        session = { ...session }; // Reatividade
         await save();
         ui.notifications.info("Ações resetadas.");
     }
+    
     async function upgradeSkill(key) {
         if (!isGM && availablePoints <= 0) return ui.notifications.warn("Sem pontos.");
-        disciplines[key]++;
+        
+        let newDisc = { ...disciplines };
+        newDisc[key]++;
+        disciplines = newDisc;
+        
         await save();
     }
+    
     async function downgradeSkill(key) {
         if (!isGM) return;
-        if (disciplines[key] > 0) disciplines[key]--;
-        await save();
+        if (disciplines[key] > 0) {
+            let newDisc = { ...disciplines };
+            newDisc[key]--;
+            disciplines = newDisc;
+            await save();
+        }
     }
 
     // --- REQUEST ---
@@ -201,7 +227,12 @@
         </div>
         
         <div class="session-mini">
-            <div class="cycle-icon" on:click={() => { if(isGM) { session.day_state = session.day_state === 'DIA' ? 'NOITE' : 'DIA'; save(); } }}>
+            <div class="cycle-icon" on:click={() => { 
+                if(isGM) { 
+                    session.day_state = session.day_state === 'DIA' ? 'NOITE' : 'DIA'; 
+                    save(); 
+                } 
+            }}>
                 <i class="fas {session.day_state === 'DIA' ? 'fa-sun' : 'fa-moon'}"></i>
             </div>
             <div class="actions-track">
@@ -338,7 +369,7 @@
                 <div class="type-name">{type}</div>
                 {#each [1, 2, 3, 4, 5, 6] as tier}
                     <div class="inv-slot" 
-                         class:has-item={pockets?.[type]?.[tier] > 0}
+                         class:has-item={(pockets?.[type]?.[tier] || 0) > 0}
                          title="{isGM ? 'GM: Clique esquerdo para add, direito para remover' : ''}"
                          on:click={() => isGM ? gmAddItem(type, tier, 1) : null}
                          on:contextmenu|preventDefault={() => isGM ? gmAddItem(type, tier, -1) : null}>

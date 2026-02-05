@@ -1,116 +1,188 @@
 <script>
     import { onMount } from 'svelte';
-    import { slide, fade, fly, scale } from 'svelte/transition';
-    import { XPDatabase } from '../XPDatabase.js';
+    import { slide, fade } from 'svelte/transition';
+    import { XPDatabase } from '../XPDatabase.js'; // Certifique-se que o caminho está certo
     import { LevelCalculator } from '../LevelSystem.js';
     import { OriginDatabase } from '../OriginDatabase.js';
 
     export let actor;
-    // Recebe as flags já processadas pelo pai (Ficha.svelte)
     export let flags = {}; 
-    
+    export let system = {}; // Recebe o system para ler atributos
+
     // O tema vem das flags do ator ou usa verde padrão
     $: themeColor = flags.customColor || "#00ff41";
 
     const MODULE_ID = "multiversus-rpg";
     const BASE_POINTS_CAP = 150;
 
-    // === 1. DADOS EDITÁVEIS (FLAGS) ===
-    // Agora lemos direto da prop 'flags' que vem do pai, garantindo sincronia
+    // === 1. DADOS DE BIOGRAFIA ===
     $: loreContent = flags.bio_lore || "";
     $: localPsyche = flags.bio_psyche || "";
     $: localAppearance = flags.bio_appearance || "";
     $: motivations = flags.bio_motivations || [{ text: "", stars: 1 }];
     $: originUniverses = flags.bio_universes || [{ universe: "", theme: "" }];
 
-    // === 2. LÓGICA DE PONTOS (INTEGRAÇÃO TOTAL) ===
+    // === 2. SISTEMA DE VONTADE (WILLPOWER & BASE WILL) ===
     
-    // Custo de Universos Extras (Regra: 1º Grátis, Extras = 8 Pontos cada)
+    // Leitura dos Stats do Sistema (Ajuste conforme a estrutura do seu system.json)
+    // Assumindo que Charm e Command estão em system.stats ou attributes
+    $: statCharm = Number(system.stats?.charm?.value || system.attributes?.charm?.value || 0);
+    $: statCommand = Number(system.stats?.command?.value || system.attributes?.command?.value || 0);
+    
+    // Pontos Comprados (Permanentes)
+    $: boughtBaseWill = flags.boughtBaseWill || 0;
+    $: boughtWillpower = flags.boughtWillpower || 0;
+
+    // Cálculos de Totais
+    // Base Will = (Charme + Comando) + Comprados
+    $: maxBaseWill = statCharm + statCommand + boughtBaseWill;
+    
+    // Max Willpower = Base Will Total + Comprados
+    $: maxWillpower = maxBaseWill + boughtWillpower;
+
+    // Valores Atuais (Editáveis para dano/recuperação)
+    $: currBaseWill = flags.currBaseWill !== undefined ? flags.currBaseWill : maxBaseWill;
+    $: currWillpower = flags.currWillpower !== undefined ? flags.currWillpower : maxWillpower;
+
+    // Custos de XP
+    $: costBaseWill = boughtBaseWill * 3;
+    $: costWillpower = boughtWillpower * 1;
+    $: totalWillCost = costBaseWill + costWillpower;
+
+    // === 3. LÓGICA DE PONTOS GERAIS ===
+    
+    // Custo de Universos
     $: universeCost = Math.max(0, originUniverses.length - 1) * 8;
 
-    // XP Total (Ganho)
-    // Tenta ler do sistema (legado) ou das flags
-    $: currentXP = actor.system?.xp || flags.xp || 0;
+    // XP Total
+    $: currentXP = flags.xp || 0; // Fonte de verdade é a flag sincronizada
     $: totalPointsCap = BASE_POINTS_CAP + currentXP;
 
-    // Custos vindos de outros apps (LENDO DAS FLAGS AGORA!)
-    $: statsCost = flags.statsCost || 0;   // Custo de Atributos/Perícias
-    $: powersCost = flags.powersSpent || 0; // Custo de Poderes
+    // Custos Totais
+    $: statsCost = flags.statsCost || 0;
+    $: powersCost = flags.powersSpent || 0;
 
-    // SOMA TOTAL
-    $: spentPoints = statsCost + powersCost + universeCost;
+    // SOMA TOTAL E SALDO
+    $: spentPoints = statsCost + powersCost + universeCost + totalWillCost;
     $: availablePoints = totalPointsCap - spentPoints;
 
-    // Sincronia Inversa (Salvar o total gasto para referência rápida)
-    // Usamos debounce para não salvar a cada milissegundo
+    // Sincronia Inversa (Salvar totais)
     let saveTimeout;
     $: {
         if (saveTimeout) clearTimeout(saveTimeout);
         saveTimeout = setTimeout(() => {
-            // Salva apenas se mudou
-            if (flags.totalSpent !== spentPoints) {
-                actor.update({ 
-                    [`flags.${MODULE_ID}.bioSpent`]: universeCost,
-                    [`flags.${MODULE_ID}.totalSpent`]: spentPoints
-                }, { render: false });
-            }
+            actor.update({ 
+                [`flags.${MODULE_ID}.bioSpent`]: universeCost,
+                [`flags.${MODULE_ID}.willSpent`]: totalWillCost,
+                [`flags.${MODULE_ID}.totalSpent`]: spentPoints
+            }, { render: false });
         }, 1000);
     }
 
-    // Barra Circular (Nível)
+    // Barra Circular
     $: lvlInfo = LevelCalculator.getLevelInfo(currentXP);
     $: strokeDashoffset = 283 - (283 * lvlInfo.progress / 100);
 
-    // === 3. ESTADOS DE UI ===
+    // === 4. ESTADOS DE UI ===
     let isSyncing = false;
     let activePopup = null;
     let originData = { name: "Desconhecido", icon: "❓", mechanic: {name: "N/A", desc: ""}, traits: [], desc: "", powers: "" };
     
-    // === 4. CRUD (GRAVAÇÃO NAS FLAGS) ===
+    // === 5. AÇÕES ===
+
     async function updateFlag(key, value) {
-        // Atualização Otimista (Visual instantâneo)
         if (key === 'bio_universes') originUniverses = value;
         if (key === 'bio_motivations') motivations = value;
-        
-        // Gravação Real
         await actor.update({ [`flags.${MODULE_ID}.${key}`]: value }, { render: false });
     }
 
-    // Manipulação de Universos
+    // SINCRONIZAÇÃO COM O GM (CORREÇÃO AQUI)
+    async function importPlayerXP() {
+        isSyncing = true;
+        try {
+            // 1. Pega ID do Usuário Dono (ou o atual se for dono)
+            // Se o ator tiver um permission default, tentamos achar o dono
+            const userId = game.user.id; 
+
+            // 2. Busca no XPDatabase
+            const xpData = await XPDatabase.getPlayerData(userId);
+            
+            // 3. Busca a Origem definida pelo GM na flag do Usuário
+            const userOrigin = game.users.get(userId)?.getFlag(MODULE_ID, "origin");
+
+            // 4. Atualiza o Ator
+            const updates = {
+                [`flags.${MODULE_ID}.xp`]: xpData.earnedXP || 0,
+                [`flags.${MODULE_ID}.bio_group`]: xpData.group || "Sem Grupo"
+            };
+
+            if (userOrigin) {
+                updates[`flags.${MODULE_ID}.origin`] = userOrigin;
+            }
+
+            await actor.update(updates, { render: false });
+            
+            // Recarrega dados visuais
+            currentXP = xpData.earnedXP || 0;
+            if (userOrigin) await loadOriginData(userOrigin);
+
+            ui.notifications.info(`Sincronização: ${currentXP} XP recebidos. Origem atualizada.`);
+
+        } catch (e) {
+            console.error(e);
+            ui.notifications.warn("Falha ao sincronizar com o Database. Verifique se o GM está online.");
+        }
+        isSyncing = false;
+    }
+
+    // Carregamento de Origem
+    async function loadOriginData(originID) {
+        try {
+            const allOrigins = await OriginDatabase.load();
+            originData = allOrigins[originID] || allOrigins["humano"] || originData;
+        } catch (e) { console.warn("OriginDB Offline", e); }
+    }
+
+    // Manipulação de Willpower
+    function buyStat(type, amount) {
+        // Verifica saldo
+        const cost = type === 'bw' ? 3 : 1;
+        if (availablePoints < cost && amount > 0) {
+            return ui.notifications.warn("XP Insuficiente para aprimoramento.");
+        }
+
+        if (type === 'bw') {
+            const newVal = Math.max(0, boughtBaseWill + amount);
+            actor.update({ [`flags.${MODULE_ID}.boughtBaseWill`]: newVal }, {render:false});
+        } else {
+            const newVal = Math.max(0, boughtWillpower + amount);
+            actor.update({ [`flags.${MODULE_ID}.boughtWillpower`]: newVal }, {render:false});
+        }
+    }
+
+    function updateCurrent(type, val) {
+        const num = parseInt(val) || 0;
+        if (type === 'bw') {
+            actor.update({ [`flags.${MODULE_ID}.currBaseWill`]: num }, {render:false});
+        } else {
+            actor.update({ [`flags.${MODULE_ID}.currWillpower`]: num }, {render:false});
+        }
+    }
+
+    // Manipulação de Universos e Motivações (Código Preservado)
     function addUniverse() { 
         const newList = [...originUniverses, { universe: "", theme: "" }];
-        
-        // Notificação de gasto (Opcional)
-        const cost = newList.length > 1 ? 8 : 0;
-        if (cost > 0 && availablePoints < 8) {
-             ui.notifications.warn("Atenção: Pontos insuficientes para novo universo!");
-        }
-        
+        if (newList.length > 1 && availablePoints < 8) ui.notifications.warn("Atenção: Custo de 8 XP pendente!");
         updateFlag('bio_universes', newList); 
     }
-
-    function removeUniverse(i) { 
-        const newList = originUniverses.filter((_, idx) => idx !== i);
-        updateFlag('bio_universes', newList); 
-    }
-
-    function updateUniverse(i, field, val) {
-        originUniverses[i][field] = val;
-        // Não salva a cada letra, só no on:change (commit)
-    }
-    
+    function removeUniverse(i) { updateFlag('bio_universes', originUniverses.filter((_, idx) => idx !== i)); }
+    function updateUniverse(i, field, val) { originUniverses[i][field] = val; }
     function commitUniverse() { updateFlag('bio_universes', originUniverses); }
 
-    // Manipulação de Motivações
-    function addMotivation() { 
-        updateFlag('bio_motivations', [...motivations, { text: "", stars: 1 }]); 
-    }
-    function removeMotivation(i) { 
-        updateFlag('bio_motivations', motivations.filter((_, idx) => idx !== i)); 
-    }
+    function addMotivation() { updateFlag('bio_motivations', [...motivations, { text: "", stars: 1 }]); }
+    function removeMotivation(i) { updateFlag('bio_motivations', motivations.filter((_, idx) => idx !== i)); }
     function commitMotivation() { updateFlag('bio_motivations', motivations); }
 
-    // Função para salvar textos grandes (Blur/Botão)
     function saveBioText() {
         actor.update({
             [`flags.${MODULE_ID}.bio_lore`]: loreContent,
@@ -120,32 +192,16 @@
         ui.notifications.info("DADOS BIOGRÁFICOS GRAVADOS.");
     }
 
-    // Carregamento Inicial
-    onMount(async () => {
-        try {
-            const allOrigins = await OriginDatabase.load();
-            const originID = flags.origin || "humano"; // Lê a origem das flags
-            originData = allOrigins[originID] || allOrigins["humano"] || originData;
-        } catch (e) { console.warn("OriginDB Offline", e); }
+    onMount(() => {
+        const originID = flags.origin || "humano";
+        loadOriginData(originID);
     });
-
-    // Utils
-    async function importPlayerXP() {
-        isSyncing = true;
-        // Simulação de busca no banco de dados externo
-        // Na prática, você conectaria ao seu XPDatabase aqui
-        setTimeout(() => {
-            isSyncing = false;
-            ui.notifications.info("Sincronização concluída (Simulado).");
-        }, 1000);
-    }
 
     function getStars(c) { return "★".repeat(Math.min(5, Math.max(1, c))) + "☆".repeat(5 - Math.min(5, Math.max(1, c))); }
     
     async function editImg() { 
         new FilePicker({ 
-            type: "image", 
-            current: actor.img, 
+            type: "image", current: actor.img, 
             callback: path => actor.update({img: path}, {render: false}) 
         }).render(true); 
     }
@@ -213,6 +269,53 @@
             </div>
         </header>
 
+        <section class="willpower-module">
+            <div class="will-row">
+                <div class="will-info">
+                    <span class="w-label">BASE WILL</span>
+                    <div class="w-calc">
+                        <span title="Charme">{statCharm}</span> + 
+                        <span title="Comando">{statCommand}</span> + 
+                        <span class="bought" title="Comprado">{boughtBaseWill}</span>
+                        = <strong>{maxBaseWill}</strong>
+                    </div>
+                </div>
+                <div class="will-controls">
+                    <div class="buyer">
+                        <button on:click={() => buyStat('bw', -1)}>-</button>
+                        <span>+3 XP</span>
+                        <button on:click={() => buyStat('bw', 1)}>+</button>
+                    </div>
+                    <div class="current-input-wrapper">
+                        <label>ATUAL</label>
+                        <input type="number" value={currBaseWill} on:change={e => updateCurrent('bw', e.target.value)}>
+                    </div>
+                </div>
+            </div>
+
+            <div class="will-row">
+                <div class="will-info">
+                    <span class="w-label">WILLPOWER</span>
+                    <div class="w-calc">
+                        <span title="Base Will">{maxBaseWill}</span> + 
+                        <span class="bought" title="Comprado">{boughtWillpower}</span>
+                        = <strong>{maxWillpower}</strong>
+                    </div>
+                </div>
+                <div class="will-controls">
+                    <div class="buyer">
+                        <button on:click={() => buyStat('wp', -1)}>-</button>
+                        <span>+1 XP</span>
+                        <button on:click={() => buyStat('wp', 1)}>+</button>
+                    </div>
+                    <div class="current-input-wrapper">
+                        <label>ATUAL</label>
+                        <input type="number" value={currWillpower} on:change={e => updateCurrent('wp', e.target.value)}>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="origin-display">
             <div class="origin-header">
                 <div class="origin-icon">{originData.icon}</div>
@@ -242,7 +345,6 @@
         </section>
 
         <section class="dual-lists">
-            
             <div class="cyber-list">
                 <div class="list-head">
                     <span>HISTÓRICO MULTIVERSAL</span>
@@ -259,9 +361,7 @@
                             
                             <div class="controls">
                                 {#if i > 0}
-                                    <span class="cost-badge" title="Custo de Multiverso Adicional">
-                                        -8 PT
-                                    </span>
+                                    <span class="cost-badge" title="Custo de Multiverso Adicional">-8 PT</span>
                                 {/if}
                                 <button class="del-btn" on:click={() => removeUniverse(i)}><i class="fas fa-trash"></i></button>
                             </div>
@@ -381,6 +481,34 @@
     .level-txt small { font-size: 8px; color: #666; }
     .level-txt strong { font-size: 20px; color: #fff; }
 
+    /* --- WILLPOWER MODULE --- */
+    .willpower-module {
+        background: rgba(0,0,0,0.3); border: var(--border); padding: 10px;
+        display: flex; flex-direction: column; gap: 10px;
+    }
+    .will-row {
+        display: flex; align-items: center; justify-content: space-between;
+        background: rgba(255,255,255,0.02); padding: 8px; border-radius: 4px;
+    }
+    .will-info { flex: 1; display: flex; flex-direction: column; }
+    .w-label { font-size: 10px; color: var(--c-primary); font-weight: bold; letter-spacing: 1px; }
+    .w-calc { font-size: 12px; color: #888; }
+    .w-calc strong { color: #fff; font-size: 14px; margin-left: 5px; }
+    .w-calc .bought { color: var(--c-primary); }
+
+    .will-controls { display: flex; align-items: center; gap: 15px; }
+    .buyer { display: flex; align-items: center; gap: 5px; border: 1px solid #333; padding: 2px; border-radius: 4px; }
+    .buyer button { width: 20px; background: #222; border: none; color: #fff; cursor: pointer; }
+    .buyer button:hover { background: var(--c-primary); color: #000; }
+    .buyer span { font-size: 9px; color: #666; width: 40px; text-align: center; }
+
+    .current-input-wrapper { display: flex; flex-direction: column; align-items: center; }
+    .current-input-wrapper label { font-size: 8px; color: #555; }
+    .current-input-wrapper input { 
+        width: 50px; background: #000; border: 1px solid var(--c-primary); 
+        color: #fff; text-align: center; padding: 5px; font-weight: bold; font-family: inherit;
+    }
+
     /* ORIGIN PANEL */
     .origin-display { border: var(--border); background: var(--glass); display: flex; flex-direction: column; }
     .origin-header { 
@@ -464,15 +592,15 @@
     .footer-save button:hover { background: var(--c-primary); color: #000; box-shadow: 0 0 20px var(--c-primary); }
 
     /* MODAL */
-.modal-backdrop { 
-    position: fixed; 
-    inset: 0; 
-    background: rgba(0,0,0,0.9); 
-    z-index: 9999; /* <--- MUDE DE 100 PARA 9999 */
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-}
+    .modal-backdrop { 
+        position: fixed; 
+        inset: 0; 
+        background: rgba(0,0,0,0.9); 
+        z-index: 9999; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+    }
     .modal-window { width: 500px; max-height: 80vh; background: #050505; border: 1px solid var(--c-primary); display: flex; flex-direction: column; }
     .modal-header { background: var(--c-primary); color: #000; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; }
     .modal-body { padding: 20px; overflow-y: auto; color: #ccc; line-height: 1.6; }

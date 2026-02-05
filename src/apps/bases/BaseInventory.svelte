@@ -3,14 +3,14 @@
     import { GroupDatabase } from '../../database/GroupDatabase.js';
     import materialsDB from '../../../crafting/materials.json';
 
-    export let group;
+    export let group; // Objeto reativo vindo do pai
     export let actor; 
     export let isLeader;
 
     // Constantes
     const matTypes = Object.keys(materialsDB);
     const tiers = [1, 2, 3, 4, 5, 6, 7];
-    const isGM = game.user.isGM; // Trava de segurança
+    const isGM = game.user.isGM; 
     const RARITY_COLORS = {
         1: '#9ca3af', 2: '#3b82f6', 3: '#f59e0b', 
         4: '#ef4444', 5: '#10b981', 6: '#7c3aed', 7: '#000000'
@@ -23,15 +23,24 @@
     let groupNotes = group.notes || "";
     let isSavingNotes = false;
 
+    // Reatividade para garantir que inventories existam
+    $: if (!group.inventory) group.inventory = { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
+
     // --- FUNÇÃO DO MESTRE (GOD MODE) ---
     async function modifyStock(type, tier, amount) {
-        // SEGURANÇA: Apenas GM pode criar matéria do nada
         if (!isGM) return ui.notifications.warn("Apenas o GM pode alterar a realidade.");
         
+        // Garante a estrutura
+        if (!group.inventory[type]) group.inventory[type] = {};
+
         let current = group.inventory[type][tier] || 0;
         let newVal = Math.max(0, current + amount);
         
         group.inventory[type][tier] = newVal;
+        
+        // Força reatividade local
+        group = group; 
+
         await GroupDatabase.updateGroupData(group.id, { inventory: group.inventory });
     }
 
@@ -39,37 +48,48 @@
     async function executeTransfer(type, tier, qty = null) {
         if (!actor) return ui.notifications.warn("Vincule um personagem para interagir com o cofre.");
 
+        // Referências
         const baseInv = group.inventory;
-        const charInv = actor.system.pockets || {};
-        const charUpdate = { [`system.pockets.${type}.${tier}`]: 0 }; 
-
-        let amount = qty || transferAmount;
+        // O inventário do personagem geralmente fica em system.pockets no seu sistema
+        // Se não existir, criamos um objeto vazio para leitura
+        const charPockets = actor.system.pockets || {}; 
+        
+        let amount = qty === 'ALL' ? 999999 : (qty || transferAmount);
         
         if (transferMode === 'DEPOSIT') {
-            const available = charInv[type]?.[tier] || 0;
-            if (available <= 0) return ui.notifications.warn("Você não possui este item para depositar.");
+            const available = charPockets[type]?.[tier] || 0;
+            if (available <= 0) return ui.notifications.warn("Você não possui este item.");
             
-            if (qty === 'ALL') amount = available;
-            else amount = Math.min(amount, available);
+            // Ajusta quantidade real
+            amount = Math.min(amount, available);
 
+            // Atualiza Base
+            if (!baseInv[type]) baseInv[type] = {};
             baseInv[type][tier] = (baseInv[type][tier] || 0) + amount;
-            charUpdate[`system.pockets.${type}.${tier}`] = available - amount;
-        } 
-        else { // WITHDRAW
+
+            // Atualiza Personagem
+            // Nota: Para atualizar um campo aninhado no Foundry, usamos a notação de ponto
+            await actor.update({ [`system.pockets.${type}.${tier}`]: available - amount });
+
+        } else { // WITHDRAW
             const available = baseInv[type]?.[tier] || 0;
             if (available <= 0) return ui.notifications.warn("Cofre vazio.");
 
-            if (qty === 'ALL') amount = available;
-            else amount = Math.min(amount, available);
+            amount = Math.min(amount, available);
 
+            // Atualiza Base
             baseInv[type][tier] = available - amount;
-            const currentActorQty = charInv[type]?.[tier] || 0;
-            charUpdate[`system.pockets.${type}.${tier}`] = currentActorQty + amount;
+
+            // Atualiza Personagem
+            const currentActorQty = charPockets[type]?.[tier] || 0;
+            await actor.update({ [`system.pockets.${type}.${tier}`]: currentActorQty + amount });
         }
 
-        await GroupDatabase.updateGroupData(group.id, { inventory: baseInv });
-        await actor.update(charUpdate);
+        // Salva Base e Força Reatividade
+        group.inventory = baseInv;
+        group = group; // Svelte update
         
+        await GroupDatabase.updateGroupData(group.id, { inventory: baseInv });
         ui.notifications.info(`${transferMode === 'DEPOSIT' ? 'Depositado' : 'Sacado'}: ${amount}x ${type} T${tier}`);
     }
 
@@ -115,7 +135,7 @@
 
     <div class="items-grid custom-scroll">
         {#each tiers as tier}
-            {@const baseQty = group.inventory[activeType][tier] || 0}
+            {@const baseQty = group.inventory?.[activeType]?.[tier] || 0}
             {@const charQty = actor?.system.pockets?.[activeType]?.[tier] || 0}
             {@const hasItem = baseQty > 0 || charQty > 0}
 
@@ -179,6 +199,7 @@
 </div>
 
 <style>
+/* CSS Mantido - Igual ao Original */
     .inventory-layout { height: 100%; display: flex; flex-direction: column; gap: 10px; color: #fff; font-family: 'Share Tech Mono', monospace; }
 
     /* HEADER & NAV */

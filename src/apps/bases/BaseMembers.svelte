@@ -6,26 +6,30 @@
     import personalities from '../../../crafting/personalities.json';
     import defaultStates from '../../../crafting/default_states.json';
 
+    // Props recebidas do BaseApp (reativas)
     export let group;
     export let isLeader;
     export let isGM;
 
     let activeTab = 'npcs'; 
     let editingNPC = null; 
-    
-    // --- ESTADO DE CRIAÇÃO MANUAL ---
     let isCreating = false;
     let draftNPC = null;
 
-    $: npcList = group.npcs || [];
-    $: playerList = group.members.map(id => game.users.get(id)).filter(u => u);
+    // --- REATIVIDADE CORRIGIDA (CRUCIAL) ---
+    // Recalcula listas sempre que 'group' mudar
+    $: npcList = group?.npcs || [];
+    
+    // Mapeia IDs para objetos de User do Foundry e filtra inválidos
+    $: playerList = (group?.members || [])
+        .map(id => game.users.get(id))
+        .filter(u => u !== undefined);
 
     const rolesList = Object.keys(groupState.ROLES);
     const rarityList = Object.keys(groupState.RARITY_SCALE);
     const personalityList = Object.keys(personalities);
 
-    // --- REATIVIDADE DO DRAFT ---
-    // Calcula stats e efeito para o PREVIEW em tempo real
+    // Preview em tempo real para o formulário de criação
     let previewEffect = { label: '', desc: '' };
 
     $: if (isCreating && draftNPC) {
@@ -36,7 +40,6 @@
         draftNPC.stats.combat_dice = rData?.combat_dice || 1;
         draftNPC.stats.personality_effect = pData?.effect?.label || "Nenhum";
 
-        // Prepara dados para o card de preview
         previewEffect = getEffectData(draftNPC.personality);
     }
 
@@ -50,9 +53,15 @@
 
     async function confirmCreation() {
         if (!draftNPC.name) return ui.notifications.warn("O NPC precisa de um nome.");
-        group.npcs.push(draftNPC);
-        group.population.count++;
-        await GroupDatabase.updateGroupData(group.id, { npcs: group.npcs, population: group.population });
+        
+        // Clona arrays para garantir que o Svelte detecte a mudança
+        const newNpcs = [...group.npcs, draftNPC];
+        // Incrementa contagem populacional
+        const newPop = { ...group.population, count: (group.population.count || 0) + 1 };
+
+        // Salva no banco (O BaseApp vai ouvir o evento e atualizar a prop 'group')
+        await GroupDatabase.updateGroupData(group.id, { npcs: newNpcs, population: newPop });
+        
         isCreating = false;
         draftNPC = null;
         ui.notifications.info("Habitante registrado.");
@@ -71,10 +80,11 @@
     }
 
     async function saveEdit(npc) {
-        const index = group.npcs.findIndex(n => n.id === npc.id);
+        const newNpcs = [...group.npcs];
+        const index = newNpcs.findIndex(n => n.id === npc.id);
         if (index !== -1) {
-            group.npcs[index] = npc;
-            await GroupDatabase.updateGroupData(group.id, { npcs: group.npcs });
+            newNpcs[index] = npc;
+            await GroupDatabase.updateGroupData(group.id, { npcs: newNpcs });
         }
         editingNPC = null;
     }
@@ -83,10 +93,8 @@
     function getRoleIcon(roleKey) { return groupState.ROLES[roleKey]?.icon || 'fas fa-user'; }
     function getRoleLabel(roleKey) { return groupState.ROLES[roleKey]?.label || roleKey; }
     function getRoleDesc(roleKey) { return groupState.ROLES[roleKey]?.description || ''; }
-    
     function getPersLabel(pKey) { return personalities[pKey]?.label || pKey; }
     
-    // Pega os dados completos do efeito (Label + Desc)
     function getEffectData(pKey) {
         const p = personalities[pKey];
         if (!p || !p.effect) return { label: 'Sem Efeito', desc: '' };
@@ -182,10 +190,10 @@
             </div>
 
             <div class="npc-grid">
-                {#each npcList as npc}
+                {#each npcList as npc (npc.id)}
                     {@const effect = getEffectData(npc.personality)}
                     
-                    <div class="npc-card rarity-{npc.rarity}">
+                    <div class="npc-card rarity-{npc.rarity}" transition:fade|local>
                         <div class="npc-head">
                             <div class="role-icon"><i class={getRoleIcon(npc.role)}></i></div>
                             <div class="npc-basic">
@@ -250,11 +258,13 @@
 
         {:else if activeTab === 'players'}
             <div class="player-grid">
-                {#each playerList as p}
-                    <div class="player-card">
-                        <img src={p.character?.img || p.avatar} alt="P">
+                {#each playerList as p (p.id)}
+                    <div class="player-card" transition:slide|local>
+                        <img src={p.character?.img || "icons/svg/mystery-man.svg"} alt="P">
                         <span>{p.name}</span>
-                        <span class="role">{p.id === group.leader ? 'LÍDER' : 'MEMBRO'}</span>
+                        <span class="role" style="background: {p.id === group.leader ? '#004400' : '#222'}; color: {p.id === group.leader ? '#00ff41' : '#aaa'}">
+                            {p.id === group.leader ? 'LÍDER' : 'MEMBRO'}
+                        </span>
                     </div>
                 {/each}
             </div>
@@ -263,20 +273,26 @@
 </div>
 
 <style>
+    /* CSS MANTIDO - Design Cyberpunk */
     .members-container { height: 100%; display: flex; flex-direction: column; gap: 10px; font-family: 'Share Tech Mono', monospace; color: #fff; }
     .tabs { display: flex; gap: 5px; border-bottom: 1px solid #333; }
-    .tabs button { background: transparent; border: none; color: #666; padding: 8px 15px; cursor: pointer; font-weight: bold; border-bottom: 2px solid transparent; }
+    .tabs button { background: transparent; border: none; color: #666; padding: 8px 15px; cursor: pointer; font-weight: bold; border-bottom: 2px solid transparent; transition: 0.2s; }
+    .tabs button:hover { color: #ccc; }
     .tabs button.active { color: #00ff41; border-color: #00ff41; background: rgba(0,255,65,0.05); }
     .content-scroll { flex: 1; overflow-y: auto; padding-right: 5px; }
     
     .npc-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
     .gm-actions { display: flex; gap: 5px; }
-    .add-btn, .manual-btn { border: 1px solid; padding: 5px 10px; cursor: pointer; font-size: 11px; }
+    .add-btn, .manual-btn { border: 1px solid; padding: 5px 10px; cursor: pointer; font-size: 11px; transition: 0.2s; }
     .add-btn { background: #004400; color: #00ff41; border-color: #00ff41; }
+    .add-btn:hover { background: #006600; color: #fff; }
     .manual-btn { background: #111; color: #ccc; border-color: #666; }
+    .manual-btn:hover { border-color: #fff; color: #fff; }
 
     .npc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
-    .npc-card { background: rgba(255,255,255,0.02); border: 1px solid #333; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; }
+    .npc-card { background: rgba(255,255,255,0.02); border: 1px solid #333; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; transition: 0.2s; }
+    .npc-card:hover { border-color: #555; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+    
     .npc-card.rarity-COMUM { border-left: 3px solid #999; }
     .npc-card.rarity-RARO { border-left: 3px solid #3b82f6; }
     .npc-card.rarity-LENDARIO { border-left: 3px solid #f59e0b; }
@@ -286,18 +302,18 @@
     .npc-head { background: rgba(0,0,0,0.3); padding: 8px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #222; }
     .role-icon { font-size: 18px; color: #00ff41; width: 30px; text-align: center; }
     .npc-basic { flex: 1; overflow: hidden; }
-    .name { font-weight: bold; font-size: 14px; }
+    .name { font-weight: bold; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .badges { display: flex; gap: 5px; margin-top: 2px; }
-    .badge { font-size: 9px; background: #222; padding: 1px 4px; border-radius: 2px; color: #aaa; }
+    .badge { font-size: 9px; background: #222; padding: 1px 4px; border-radius: 2px; color: #aaa; text-transform: uppercase; }
     .card-tools { display: flex; gap: 8px; font-size: 12px; cursor: pointer; }
     .edit { color: #facc15; } .del { color: #ef4444; } .save { color: #00ff41; }
 
     .npc-body { padding: 10px; display: flex; gap: 10px; }
-    .img-box { width: 60px; display: flex; flex-direction: column; gap: 5px; }
+    .img-box { width: 60px; display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
     .img-box img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #444; }
     .img-box input { width: 100%; font-size: 9px; background: #000; border: 1px solid #333; color: #fff; }
 
-    .details { flex: 1; font-size: 11px; display: flex; flex-direction: column; gap: 6px; }
+    .details { flex: 1; font-size: 11px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .trait strong { color: #fff; }
     
     .trait-effect { 
@@ -332,9 +348,10 @@
     .btn-confirm { background: #00ff41; color: #000; border: none; padding: 5px 15px; font-weight: bold; cursor: pointer; }
 
     .player-grid { display: flex; flex-direction: column; gap: 5px; }
-    .player-card { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 8px; border: 1px solid #333; }
-    .player-card img { width: 30px; height: 30px; border-radius: 50%; }
-    .player-card .role { margin-left: auto; font-size: 10px; background: #004400; color: #00ff41; padding: 2px 6px; }
+    .player-card { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); padding: 8px; border: 1px solid #333; transition: 0.2s; }
+    .player-card:hover { border-color: #00ff41; background: rgba(0,255,65,0.05); }
+    .player-card img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid #444; }
+    .player-card .role { margin-left: auto; font-size: 10px; padding: 2px 6px; border-radius: 2px; }
     
     .custom-scroll::-webkit-scrollbar { width: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #333; }

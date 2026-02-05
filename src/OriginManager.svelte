@@ -1,49 +1,32 @@
 <script>
     import { onMount } from 'svelte';
-    import { fade, slide, fly } from 'svelte/transition';
+    import { fade, slide } from 'svelte/transition';
     import { OriginDatabase } from './OriginDatabase.js';
     import { XPDatabase } from './XPDatabase.js'; 
 
-    // --- ESTADOS DO SISTEMA ---
     let users = [];
     let originList = [];
     let allOrigins = {};
-    let isLoading = true;
     let currentTab = 'manage'; 
-
-    // --- FILTRAGEM E EDIÇÃO ---
     let groupFilter = "Todos";
     let allGroups = ["Todos", "Sem Grupo"];
-    let editingGroupUser = null; // ID do usuário sendo editado
+    let editingGroupUser = null;
     let newGroupName = "";
 
-    // --- ARQUITETO (FORMULÁRIO) ---
+    // Formulário do Arquiteto
     let form = {
         name: "Nova Raça", icon: "🧬", type: "Mítico (80+)",
-        desc: "<p>História aqui...</p>", mechName: "Mecânica",
-        mechDesc: "<p>Regras aqui...</p>",
-        traits: [{ name: "Trait 1", effect: "Efeito..." }],
-        powers: "<h3>Poderes Aqui</h3>"
+        desc: "<p>História aqui...</p>", mechName: "Mecânica", mechDesc: "<p>Regras aqui...</p>",
+        traits: [{ name: "Trait 1", effect: "Efeito..." }], powers: "<h3>Poderes Aqui</h3>"
     };
 
-    // --- GERADOR DE CÓDIGO ---
     $: safeID = form.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-");
-    $: generatedCode = `    "${safeID}": {
-        id: "${safeID}",
-        name: "${form.name}",
-        icon: "${form.icon}",
-        type: "${form.type}",
-        desc: \`${form.desc}\`,
-        mechanic: { name: "${form.mechName}", desc: \`${form.mechDesc}\` },
-        traits: [
-${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }`).join(',\n')}
-        ],
-        powers: \`${form.powers}\`
-    },`;
+    $: generatedCode = `    "${safeID}": {\n        id: "${safeID}",\n        name: "${form.name}",\n        icon: "${form.icon}",\n        type: "${form.type}",\n        desc: \`${form.desc}\`,\n        mechanic: { name: "${form.mechName}", desc: \`${form.mechDesc}\` },\n        traits: [\n${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }`).join(',\n')}\n        ],\n        powers: \`${form.powers}\`\n    },`;
 
     onMount(async () => {
         await refreshData();
         Hooks.on("updateUser", refreshData);
+        Hooks.on("updateActor", refreshData); // Escuta atores também
     });
 
     async function refreshData() {
@@ -54,9 +37,17 @@ ${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }
         
         users = rawUsers.map(u => {
             const xpData = XPDatabase.getPlayerData(u.id);
-            const originID = u.getFlag("multiversus-rpg", "origin") || "humano";
+            // Tenta ler do Ator primeiro (fonte da verdade da ficha)
+            const actor = u.character;
+            const actorOrigin = actor?.getFlag("multiversus-rpg", "origin");
+            const userOrigin = u.getFlag("multiversus-rpg", "origin");
+            
+            // Prioridade: Ator > Usuário > Humano
+            const originID = actorOrigin || userOrigin || "humano";
+            
             return {
                 id: u.id, name: u.name, color: u.color,
+                actorId: actor?.id, // Guarda ID do ator para update
                 group: xpData.group || "Sem Grupo",
                 origin: allOrigins[originID] || allOrigins["humano"]
             };
@@ -65,46 +56,48 @@ ${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }
         const gSet = new Set(["Todos", "Sem Grupo"]);
         users.forEach(u => gSet.add(u.group));
         allGroups = Array.from(gSet);
-        
-        isLoading = false;
     }
 
-    // --- AÇÕES ---
+    // --- AÇÃO CORRIGIDA: SET ORIGIN ---
     async function setOrigin(userId, originId) {
         const user = game.users.get(userId);
-        if (user) await user.setFlag("multiversus-rpg", "origin", originId);
+        if (!user) return;
+
+        // 1. Salva no Usuário (Backup/Meta)
+        await user.setFlag("multiversus-rpg", "origin", originId);
+
+        // 2. Salva no Ator Principal (Onde a ficha lê!)
+        if (user.character) {
+            await user.character.update({
+                "flags.multiversus-rpg.origin": originId
+            });
+            ui.notifications.info(`Origem de ${user.name} atualizada para ${originId}`);
+        } else {
+            ui.notifications.warn(`Origem salva no usuário ${user.name}, mas ele não tem personagem vinculado.`);
+        }
+        
         refreshData();
     }
 
-    function changeGroup(user) {
-        editingGroupUser = user.id;
-        newGroupName = user.group;
-    }
-
+    function changeGroup(user) { editingGroupUser = user.id; newGroupName = user.group; }
+    
     async function saveGroup(userId) {
         await XPDatabase.setGroup(userId, newGroupName);
         editingGroupUser = null;
-        ui.notifications.info("UNIDADE DE AGENTE ATUALIZADA.");
         refreshData();
     }
 
-    // --- UTILS ARQUITETO ---
+    // Utils
     function addTrait() { form.traits = [...form.traits, { name: "", effect: "" }]; }
     function removeTrait(i) { form.traits = form.traits.filter((_, idx) => idx !== i); }
-    function copyCode() { 
-        navigator.clipboard.writeText(generatedCode);
-        ui.notifications.info("CÓDIGO COPIADO.");
-    }
+    function copyCode() { navigator.clipboard.writeText(generatedCode); ui.notifications.info("CÓDIGO COPIADO."); }
 </script>
 
 <div class="tactical-origin-interface">
-    
     <aside class="command-sidebar">
         <div class="sidebar-header">
-            <i class="fas fa-dna"></i>
-            <h3>GENETIC_HUB</h3>
+            <i class="fas fa-dna"></i> <h3>GENETIC_HUB</h3>
         </div>
-
         <nav class="nav-menu">
             <button class:active={currentTab === 'manage'} on:click={() => currentTab = 'manage'}>
                 <i class="fas fa-users-cog"></i> GESTÃO_AGENTES
@@ -113,7 +106,6 @@ ${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }
                 <i class="fas fa-microchip"></i> ARQUITETO_CODE
             </button>
         </nav>
-
         {#if currentTab === 'manage'}
             <div class="filter-panel" in:fade>
                 <label>FILTRAGEM_DE_SQUAD</label>
@@ -122,48 +114,35 @@ ${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }
                 </select>
             </div>
         {/if}
-
-        <div class="system-footer">
-            <small>KERNEL_LINK: STABLE</small>
-            <div class="blink-dot"></div>
-        </div>
+        <div class="system-footer"><small>KERNEL_LINK: STABLE</small><div class="blink-dot"></div></div>
     </aside>
 
     <main class="content-area">
         {#if currentTab === 'manage'}
             <div class="dossier-view" in:fade>
-                <header class="view-header">
-                    <span>AGENTES_IDENTIFICADOS_NO_SISTEMA</span>
-                </header>
-
+                <header class="view-header"><span>AGENTES_IDENTIFICADOS_NO_SISTEMA</span></header>
                 <div class="dossier-grid">
                     {#each users as u}
                         {#if groupFilter === "Todos" || u.group === groupFilter}
                             <div class="dossier-card" style="border-left: 6px solid {u.color}">
                                 <div class="card-identity">
                                     <div class="id-icon"><i class="fas fa-fingerprint"></i></div>
-                                    
                                     {#if editingGroupUser === u.id}
                                         <div class="group-editor" transition:slide={{axis: 'y'}}>
                                             <input type="text" bind:value={newGroupName} on:keypress={e => e.key === 'Enter' && saveGroup(u.id)} />
                                             <button on:click={() => saveGroup(u.id)}>OK</button>
                                         </div>
                                     {:else}
-                                        <span class="unit-tag" on:click={() => changeGroup(u)} title="Clique para editar grupo">
-                                            {u.group}
-                                        </span>
+                                        <span class="unit-tag" on:click={() => changeGroup(u)} title="Clique para editar grupo">{u.group}</span>
                                     {/if}
                                 </div>
-                                
                                 <div class="card-info">
                                     <span class="agent-name">{u.name.toUpperCase()}</span>
                                     <div class="current-origin">
                                         <span class="orb" style="background: var(--c-primary)"></span>
-                                        {u.origin.icon} {u.origin.name} 
-                                        <small>[{u.origin.type}]</small>
+                                        {u.origin.icon} {u.origin.name} <small>[{u.origin.type}]</small>
                                     </div>
                                 </div>
-
                                 <div class="card-select">
                                     <label>MODIFICAR_CÓDIGO_GENÉTICO</label>
                                     <select value={u.origin.id} on:change={(e) => setOrigin(u.id, e.target.value)}>
@@ -177,39 +156,22 @@ ${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }
                     {/each}
                 </div>
             </div>
-
         {:else}
             <div class="architect-view" in:fade>
                 <div class="editor-pane">
                     <div class="form-row">
-                        <div class="f-group">
-                            <label>NOME_DA_RAÇA</label>
-                            <input type="text" bind:value={form.name} />
-                        </div>
-                        <div class="f-group mini">
-                            <label>ICON</label>
-                            <input type="text" bind:value={form.icon} />
-                        </div>
-                        <div class="f-group">
-                            <label>TIPO_CUSTO</label>
-                            <input type="text" bind:value={form.type} />
-                        </div>
+                        <div class="f-group"><label>NOME_DA_RAÇA</label><input type="text" bind:value={form.name} /></div>
+                        <div class="f-group mini"><label>ICON</label><input type="text" bind:value={form.icon} /></div>
+                        <div class="f-group"><label>TIPO_CUSTO</label><input type="text" bind:value={form.type} /></div>
                     </div>
-
-                    <label>ARQUIVO_HISTÓRICO (HTML)</label>
-                    <textarea bind:value={form.desc}></textarea>
-
+                    <label>ARQUIVO_HISTÓRICO (HTML)</label><textarea bind:value={form.desc}></textarea>
                     <div class="sub-panel">
                         <label>MECÂNICA_EXCLUSIVA</label>
                         <input type="text" bind:value={form.mechName} placeholder="Nome..." />
                         <textarea bind:value={form.mechDesc} placeholder="Regras..."></textarea>
                     </div>
-
                     <div class="sub-panel">
-                        <div class="panel-header-btn">
-                            <label>TRAITS_GENÉTICAS</label>
-                            <button on:click={addTrait}>+ ADICIONAR</button>
-                        </div>
+                        <div class="panel-header-btn"><label>TRAITS_GENÉTICAS</label><button on:click={addTrait}>+ ADICIONAR</button></div>
                         {#each form.traits as t, i}
                             <div class="trait-row" transition:slide>
                                 <input type="text" bind:value={t.name} placeholder="Nome" />
@@ -218,16 +180,10 @@ ${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }
                             </div>
                         {/each}
                     </div>
-
-                    <label>PODERES_REGRAS (HTML)</label>
-                    <textarea bind:value={form.powers}></textarea>
+                    <label>PODERES_REGRAS (HTML)</label><textarea bind:value={form.powers}></textarea>
                 </div>
-
                 <div class="output-pane">
-                    <header>
-                        <span>KERNEL_BLUEPRINT.js</span>
-                        <button class="copy-btn" on:click={copyCode}>COPIAR_DADOS</button>
-                    </header>
+                    <header><span>KERNEL_BLUEPRINT.js</span><button class="copy-btn" on:click={copyCode}>COPIAR_DADOS</button></header>
                     <pre><code>{generatedCode}</code></pre>
                 </div>
             </div>
@@ -236,6 +192,8 @@ ${form.traits.map(t => `            { name: "${t.name}", effect: "${t.effect}" }
 </div>
 
 <style>
+/* ... Use o mesmo CSS que você já me mandou ... */
+/* Não houve alteração no estilo, apenas na lógica JS */
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
     .tactical-origin-interface {

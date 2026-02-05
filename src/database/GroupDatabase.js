@@ -31,8 +31,16 @@ export class GroupDatabase {
                 
                 // 1. Pedido para salvar Grupos (Create/Join/Update/Delete)
                 if (payload.type === "REQUEST_SAVE_GROUPS") {
-                    console.log("Database: GM salvando alterações de grupos solicitadas por jogador.");
+                    console.log("Database: GM processando atualização de grupos...");
+                    
+                    // MERGE INTELIGENTE:
+                    // O payload.data é o array novo que o jogador quer salvar.
+                    // Para evitar apagar dados de outros grupos que o jogador talvez não tenha carregado,
+                    // o ideal seria o jogador mandar apenas o grupo alterado.
+                    // Mas assumindo que payload.data é o array completo:
+                    
                     await game.settings.set(MODULE_ID, "factions_data", payload.data);
+                    
                     // Avisa a todos que atualizou
                     game.socket.emit(`module.${MODULE_ID}`, { type: "GROUP_UPDATE" });
                     Hooks.callAll("groupSystemUpdate");
@@ -83,10 +91,13 @@ export class GroupDatabase {
     }
 
     static async updateGroupData(groupId, updateData) {
-        const groups = this.getGroups(); // Lê o estado atual
+        // Recarrega do banco para garantir que temos a versão mais recente antes de editar
+        const groups = this.getGroups(); 
         const index = groups.findIndex(g => g.id === groupId);
+        
         if (index !== -1) {
-            groups[index] = { ...groups[index], ...updateData };
+            // Merge profundo para não perder dados aninhados se updateData for parcial
+            groups[index] = foundry.utils.mergeObject(groups[index], updateData);
             await this.updateGroups(groups); 
         }
     }
@@ -95,7 +106,6 @@ export class GroupDatabase {
     //                          GERENCIAMENTO DE GRUPO
     // =================================================================
 
-  // --- CORREÇÃO: CRIAÇÃO ---
     static async createGroup(name, leaderId, password = "", isNomad = false) {
         const groups = this.getGroups();
         if (groups.find(g => g.name === name)) throw new Error("Nome já existe.");
@@ -104,12 +114,10 @@ export class GroupDatabase {
         const baseTemplate = JSON.parse(JSON.stringify(defaultStates.BASE || {}));
         
         const newGroup = {
-            // MERGE: O template vem por último, mas NÃO pode sobrescrever o nome
-            // Então espalhamos o template PRIMEIRO, e depois as props específicas
             ...baseTemplate, 
             
             id: foundry.utils.randomID(),
-            name: name, // Agora o nome passado tem prioridade
+            name: name, 
             password: password,
             leader: leaderId,
             members: [leaderId],
@@ -122,7 +130,8 @@ export class GroupDatabase {
             baseStats: baseTemplate.baseStats || { hp: 20, maxHp: 20, har: 0, lar: 0, protection: 1 },
             structures: [], 
             missions: [],
-            inventory: { MATERIA:{}, ENERGIA:{}, ORGANISMO:{}, NUCLEO:{} },
+            // Inventory precisa ser inicializado corretamente
+            inventory: baseTemplate.inventory || { MATERIA:{}, ENERGIA:{}, ORGANISMO:{}, NUCLEO:{} },
             npcs: [],
             population: { count: 0, max: 10 }
         };
@@ -132,7 +141,6 @@ export class GroupDatabase {
         return newGroup;
     }
 
-    // --- NOVA FUNÇÃO: RENOMEAR ---
     static async renameGroup(groupId, newName) {
         const groups = this.getGroups();
         const group = groups.find(g => g.id === groupId);
@@ -141,20 +149,18 @@ export class GroupDatabase {
             await this.updateGroups(groups);
         }
     }
-    // --- FUNÇÃO QUE FALTAVA ---
+
     static async deleteGroup(groupId) {
         let groups = this.getGroups();
-        // Filtra o grupo fora da lista
         const newGroups = groups.filter(g => g.id !== groupId);
         
-        // Se nada mudou, não faz nada
         if (newGroups.length === groups.length) return;
 
         await this.updateGroups(newGroups);
     }
-    // --------------------------
 
     static async joinGroup(groupId, userId, inputPassword = "") {
+        // Recarrega para evitar entrar em grupo fantasma
         const groups = this.getGroups();
         const group = groups.find(g => g.id === groupId);
         
@@ -181,7 +187,8 @@ export class GroupDatabase {
         for (let i = groups.length - 1; i >= 0; i--) {
             const g = groups[i];
             g.members = g.members.filter(m => m !== userId);
-            // Se for nomade e ficar vazio, deleta automaticamente para não poluir
+            
+            // Se for nomade e ficar vazio, deleta automaticamente
             if (g.isNomad && g.members.length === 0) {
                 groups.splice(i, 1);
             }
@@ -189,6 +196,7 @@ export class GroupDatabase {
     }
 
     static getUserGroup(userId) {
+        // Retorna o grupo onde o ID está na lista de membros
         return this.getGroups().find(g => g.members.includes(userId));
     }
 
@@ -209,7 +217,6 @@ export class GroupDatabase {
         return game.settings.get(MODULE_ID, "structure_blueprints") || [];
     }
 
-    // --- ESCRITA DE BLUEPRINTS (COM SOCKET) ---
     static async updateBlueprints(newBps) {
         if (game.user.isGM) {
             await game.settings.set(MODULE_ID, "structure_blueprints", newBps);
@@ -279,16 +286,20 @@ export class GroupDatabase {
         let totalOrganismNeeded = npcCount * 2; 
         let consumed = 0;
 
-        if (!group.inventory) group.inventory = {ORGANISMO:{}}; // Proteção
+        if (!group.inventory) group.inventory = {ORGANISMO:{}}; 
+        if (!group.inventory.ORGANISMO) group.inventory.ORGANISMO = {};
 
+        // Consome recursos de Tier 1 a 7
         for (let t = 1; t <= 7; t++) {
             if (totalOrganismNeeded <= 0) break;
             let available = group.inventory.ORGANISMO[t] || 0;
             let take = Math.min(available, totalOrganismNeeded);
             
-            group.inventory.ORGANISMO[t] -= take;
-            totalOrganismNeeded -= take;
-            consumed += take;
+            if (take > 0) {
+                group.inventory.ORGANISMO[t] -= take;
+                totalOrganismNeeded -= take;
+                consumed += take;
+            }
         }
 
         if (totalOrganismNeeded > 0) {
@@ -303,6 +314,7 @@ export class GroupDatabase {
         if (group.npcs) {
             group.npcs.forEach(npc => {
                 const roleData = groupState.ROLES ? groupState.ROLES[npc.role] : null;
+                // Ignora defesa na produção automática de recursos
                 if (!roleData || roleData.output_resource === "DEFESA") return;
 
                 let productionVal = npc.stats.production_bonus || 2;

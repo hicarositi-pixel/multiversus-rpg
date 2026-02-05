@@ -1,264 +1,269 @@
 <script>
-  import { onMount } from 'svelte';
-  import { fade, slide } from 'svelte/transition';
-  
-  // Tenta importar, se falhar usa fallback interno
-  import { CombatThemes } from './CombatThemeDB.js'; 
+    import { onMount } from 'svelte';
+    import { fade, slide } from 'svelte/transition';
+    
+    // Tenta importar, se falhar usa fallback interno
+    import { CombatThemes } from './CombatThemeDB.js'; 
 
-  export let actor;
+    export let actor;
 
-  const MODULE_ID = "multiversus-rpg";
-  const isGM = game.user.isGM;
+    const MODULE_ID = "multiversus-rpg";
+    // REMOVIDO: const isGM = game.user.isGM; (Não precisamos mais restringir)
 
-  // =========================================================
-  // 1. SETTINGS & TEMA (Auto-Repair)
-  // =========================================================
-  
-  function ensureSetting(key, defaultVal, type = Object) {
-      if (!game.settings.settings.has(`${MODULE_ID}.${key}`)) {
-          game.settings.register(MODULE_ID, key, {
-              name: key, scope: "world", config: false, type: type, default: defaultVal, onChange: () => {}
-          });
-      }
-      return game.settings.get(MODULE_ID, key);
-  }
+    // =========================================================
+    // 1. SETTINGS & TEMA (Auto-Repair)
+    // =========================================================
+    
+    function ensureSetting(key, defaultVal, type = Object) {
+        // Settings globais ainda precisam ser registradas, mas leitura é livre
+        if (!game.settings.settings.has(`${MODULE_ID}.${key}`)) {
+            game.settings.register(MODULE_ID, key, {
+                name: key, scope: "world", config: false, type: type, default: defaultVal, onChange: () => {}
+            });
+        }
+        return game.settings.get(MODULE_ID, key);
+    }
 
-  let currentThemeKey = ensureSetting('combatThemeKey', 'nexus', String);
-  
-  const defaultTraumas = {
-    "bullet": { icon: "Running Round", color: "#fbbf24", label: "Bala", desc: "Cirurgia." },
-    "cut": { icon: "Bleeding Eye", color: "#ef4444", label: "Corte", desc: "Sutura." },
-    "break": { icon: "Broken Bone", color: "#fff", label: "Fratura", desc: "Tala." }
-  };
-  let traumaDB = ensureSetting('traumaDB', defaultTraumas, Object);
+    let currentThemeKey = ensureSetting('combatThemeKey', 'nexus', String);
+    
+    const defaultTraumas = {
+      "bullet": { icon: "Running Round", color: "#fbbf24", label: "Bala", desc: "Cirurgia." },
+      "cut": { icon: "Bleeding Eye", color: "#ef4444", label: "Corte", desc: "Sutura." },
+      "break": { icon: "Broken Bone", color: "#fff", label: "Fratura", desc: "Tala." }
+    };
+    let traumaDB = ensureSetting('traumaDB', defaultTraumas, Object);
 
-  // Fallback de Tema caso o arquivo não exista
-  const fallbackTheme = {
-      vars: { "--c-primary": "#00ff41", "--c-bg": "#050505", "--c-panel": "#111", "--c-shock": "#eab308", "--c-kill": "#ef4444", "--r-node": "4px", "--r-slot": "0px" },
-      css: ""
-  };
-  $: theme = CombatThemes?.[currentThemeKey] || CombatThemes?.['nexus'] || fallbackTheme;
+    // Fallback de Tema caso o arquivo não exista
+    const fallbackTheme = {
+        vars: { "--c-primary": "#00ff41", "--c-bg": "#050505", "--c-panel": "#111", "--c-shock": "#eab308", "--c-kill": "#ef4444", "--r-node": "4px", "--r-slot": "0px" },
+        css: ""
+    };
+    $: theme = CombatThemes?.[currentThemeKey] || CombatThemes?.['nexus'] || fallbackTheme;
 
-  // =========================================================
-  // 2. DADOS & ESTADO (IMAGENS + LOCAIS)
-  // =========================================================
-  
-  const DEFAULT_LIMBS = [
-      { id: 'leg-l', name: 'P.ESQ', loc: '1', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 65, y: 75 },
-      { id: 'leg-r', name: 'P.DIR', loc: '2', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 35, y: 75 },
-      { id: 'arm-l', name: 'B.ESQ', loc: '3-4', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 80, y: 40 },
-      { id: 'arm-r', name: 'B.DIR', loc: '5-6', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 20, y: 40 },
-      { id: 'torso', name: 'TORSO', loc: '7-9', hp: 7, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 40 },
-      { id: 'head', name: 'CABEÇA', loc: '10', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 10 }
-  ];
+    // =========================================================
+    // 2. DADOS & ESTADO (IMAGENS + LOCAIS)
+    // =========================================================
+    
+    const DEFAULT_LIMBS = [
+        { id: 'leg-l', name: 'P.ESQ', loc: '1', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 65, y: 75 },
+        { id: 'leg-r', name: 'P.DIR', loc: '2', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 35, y: 75 },
+        { id: 'arm-l', name: 'B.ESQ', loc: '3-4', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 80, y: 40 },
+        { id: 'arm-r', name: 'B.DIR', loc: '5-6', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 20, y: 40 },
+        { id: 'torso', name: 'TORSO', loc: '7-9', hp: 7, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 40 },
+        { id: 'head', name: 'CABEÇA', loc: '10', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 10 }
+    ];
 
-  let activeForm = "base"; // 'base' ou 'trans'
+    let activeForm = "base"; // 'base' ou 'trans'
 
-  // Carregamento Inicial (Flags)
-  let bgBase = actor.getFlag(MODULE_ID, 'bg_base') || ""; 
-  let imgBase = actor.getFlag(MODULE_ID, 'img_base') || "icons/svg/mystery-man.svg";
-  
-  let bgTrans = actor.getFlag(MODULE_ID, 'bg_trans') || "";
-  let imgTrans = actor.getFlag(MODULE_ID, 'img_trans') || "icons/svg/mystery-man.svg";
+    // Carregamento Inicial (Flags)
+    let bgBase = actor.getFlag(MODULE_ID, 'bg_base') || ""; 
+    let imgBase = actor.getFlag(MODULE_ID, 'img_base') || "icons/svg/mystery-man.svg";
+    
+    let bgTrans = actor.getFlag(MODULE_ID, 'bg_trans') || "";
+    let imgTrans = actor.getFlag(MODULE_ID, 'img_trans') || "icons/svg/mystery-man.svg";
 
-  let limbsBase = actor.getFlag(MODULE_ID, 'limbs_base') || JSON.parse(JSON.stringify(DEFAULT_LIMBS));
-  let limbsTrans = actor.getFlag(MODULE_ID, 'limbs_trans') || JSON.parse(JSON.stringify(DEFAULT_LIMBS));
+    let limbsBase = actor.getFlag(MODULE_ID, 'limbs_base') || JSON.parse(JSON.stringify(DEFAULT_LIMBS));
+    let limbsTrans = actor.getFlag(MODULE_ID, 'limbs_trans') || JSON.parse(JSON.stringify(DEFAULT_LIMBS));
 
-  // Migração de Segurança (Garante array de trauma)
-  limbsBase = limbsBase.map(l => ({...l, trauma: l.trauma || []}));
-  limbsTrans = limbsTrans.map(l => ({...l, trauma: l.trauma || []}));
+    // Migração de Segurança (Garante array de trauma)
+    limbsBase = limbsBase.map(l => ({...l, trauma: l.trauma || []}));
+    limbsTrans = limbsTrans.map(l => ({...l, trauma: l.trauma || []}));
 
-  // Reatividade para troca de abas
-  $: currentLimbs = activeForm === 'base' ? limbsBase : limbsTrans;
-  $: currentImg = activeForm === 'base' ? imgBase : imgTrans;
-  $: currentBg = activeForm === 'base' ? bgBase : bgTrans;
+    // Reatividade para troca de abas
+    $: currentLimbs = activeForm === 'base' ? limbsBase : limbsTrans;
+    $: currentImg = activeForm === 'base' ? imgBase : imgTrans;
+    $: currentBg = activeForm === 'base' ? bgBase : bgTrans;
 
-  // Estados de UI
-  let selectedLimbId = null;
-  let editingMode = false;
-  let showConfig = false;
-  let showTraumaCreator = false;
-  
-  // Estado do Modal de Imagem Customizado (Substituto do Prompt)
-  let showImgModal = false;
-  let imgModalType = ''; // 'sil' ou 'bg'
-  let imgModalUrl = '';
+    // Estados de UI
+    let selectedLimbId = null;
+    let editingMode = false;
+    let showConfig = false;
+    let showTraumaCreator = false;
+    
+    // Estado do Modal de Imagem Customizado (Substituto do Prompt)
+    let showImgModal = false;
+    let imgModalType = ''; // 'sil' ou 'bg'
+    let imgModalUrl = '';
 
-  let inputShock = null;
-  let inputKilling = null;
-  let inputHeal = null;
-  let newTrauma = { key: "", label: "", color: "#ffffff", desc: "", icon: "Biohazard" };
+    let inputShock = null;
+    let inputKilling = null;
+    let inputHeal = null;
+    let newTrauma = { key: "", label: "", color: "#ffffff", desc: "", icon: "Biohazard" };
 
-  $: selectedLimb = currentLimbs.find(l => l.id === selectedLimbId);
+    $: selectedLimb = currentLimbs.find(l => l.id === selectedLimbId);
 
-  // =========================================================
-  // 3. CORE LOGIC & SAVE
-  // =========================================================
+    // =========================================================
+    // 3. CORE LOGIC & SAVE
+    // =========================================================
 
-  async function saveData() {
-      const flagKey = activeForm === 'base' ? 'limbs_base' : 'limbs_trans';
-      // Atualiza variável local explicitamente para reatividade imediata
-      if (activeForm === 'base') limbsBase = currentLimbs; else limbsTrans = currentLimbs;
-      
-      // Salva no banco
-      await actor.update({ [`flags.${MODULE_ID}.${flagKey}`]: currentLimbs }, { render: false });
-  }
+    async function saveData() {
+        const flagKey = activeForm === 'base' ? 'limbs_base' : 'limbs_trans';
+        // Atualiza variável local explicitamente para reatividade imediata
+        if (activeForm === 'base') limbsBase = currentLimbs; else limbsTrans = currentLimbs;
+        
+        // Salva no banco
+        await actor.update({ [`flags.${MODULE_ID}.${flagKey}`]: currentLimbs }, { render: false });
+    }
 
-  // --- CALCULADORA ORE ---
-  async function applyDamage() {
-      if (!selectedLimb) return ui.notifications.warn("Selecione um membro!");
-      let S_in = Number(inputShock || 0);
-      let K_in = Number(inputKilling || 0);
-      const LAR = Number(selectedLimb.lar || 0);
-      const HAR = Number(selectedLimb.har || 0);
+    // --- CALCULADORA ORE ---
+    async function applyDamage() {
+        if (!selectedLimb) return ui.notifications.warn("Selecione um membro!");
+        let S_in = Number(inputShock || 0);
+        let K_in = Number(inputKilling || 0);
+        const LAR = Number(selectedLimb.lar || 0);
+        const HAR = Number(selectedLimb.har || 0);
 
-      if (HAR > 0) { S_in = Math.max(0, S_in - (HAR * 2)); K_in = Math.max(0, K_in - HAR); }
-      let S_final = Math.max(0, S_in - LAR);
-      let converted_K = Math.min(K_in, LAR);
-      let K_final = K_in - converted_K;
-      S_final += converted_K;
+        if (HAR > 0) { S_in = Math.max(0, S_in - (HAR * 2)); K_in = Math.max(0, K_in - HAR); }
+        let S_final = Math.max(0, S_in - LAR);
+        let converted_K = Math.min(K_in, LAR);
+        let K_final = K_in - converted_K;
+        S_final += converted_K;
 
-      let curK = selectedLimb.killing;
-      let curS = selectedLimb.shock;
-      const hp = selectedLimb.hp;
-      const occupied = selectedLimb.trauma.length; 
+        let curK = selectedLimb.killing;
+        let curS = selectedLimb.shock;
+        const hp = selectedLimb.hp;
+        const occupied = selectedLimb.trauma.length; 
 
-      let tempK = curK + K_final;
-      
-      if (tempK >= hp) {
-          selectedLimb.killing = hp; selectedLimb.shock = 0;
-      } else {
-          let tempS = curS + S_final;
-          let totalSpace = hp - occupied;
-          let totalDamage = tempK + tempS;
+        let tempK = curK + K_final;
+        
+        if (tempK >= hp) {
+            selectedLimb.killing = hp; selectedLimb.shock = 0;
+        } else {
+            let tempS = curS + S_final;
+            let totalSpace = hp - occupied;
+            let totalDamage = tempK + tempS;
 
-          if (totalDamage > totalSpace) {
-              let overflow = totalDamage - totalSpace;
-              tempK += overflow;
-              selectedLimb.killing = Math.min(totalSpace, tempK);
-              selectedLimb.shock = Math.max(0, totalSpace - selectedLimb.killing);
-          } else {
-              selectedLimb.killing = tempK; selectedLimb.shock = tempS;
-          }
-      }
-      saveData();
-      inputShock = null; inputKilling = null;
-      if (selectedLimb.killing >= selectedLimb.hp) ui.notifications.error(`${selectedLimb.name} DESTRUÍDO!`);
-  }
+            if (totalDamage > totalSpace) {
+                let overflow = totalDamage - totalSpace;
+                tempK += overflow;
+                selectedLimb.killing = Math.min(totalSpace, tempK);
+                selectedLimb.shock = Math.max(0, totalSpace - selectedLimb.killing);
+            } else {
+                selectedLimb.killing = tempK; selectedLimb.shock = tempS;
+            }
+        }
+        saveData();
+        inputShock = null; inputKilling = null;
+        if (selectedLimb.killing >= selectedLimb.hp) ui.notifications.error(`${selectedLimb.name} DESTRUÍDO!`);
+    }
 
-  async function applyHeal() {
-      if (!selectedLimb) return;
-      let amount = Number(inputHeal || 0);
-      while (amount > 0) {
-          if (selectedLimb.killing > 0) { selectedLimb.killing--; amount--; }
-          else if (selectedLimb.shock > 0) { selectedLimb.shock--; amount--; }
-          else break;
-      }
-      saveData();
-      inputHeal = null;
-  }
+    async function applyHeal() {
+        if (!selectedLimb) return;
+        let amount = Number(inputHeal || 0);
+        while (amount > 0) {
+            if (selectedLimb.killing > 0) { selectedLimb.killing--; amount--; }
+            else if (selectedLimb.shock > 0) { selectedLimb.shock--; amount--; }
+            else break;
+        }
+        saveData();
+        inputHeal = null;
+    }
 
-  // --- EDITOR DE LAYOUT ---
-  let draggingNode = null;
-  function onNodeDragStart(e, limb) { if (editingMode) draggingNode = limb; }
-  function onCanvasDrop(e) {
-      if (!editingMode || !draggingNode) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = ((e.clientX - rect.left) / rect.width) * 100;
-      const y = ((e.clientY - rect.top) / rect.height) * 100;
-      const idx = currentLimbs.findIndex(l => l.id === draggingNode.id);
-      currentLimbs[idx].x = x; currentLimbs[idx].y = y;
-      draggingNode = null; saveData();
-  }
+    // --- EDITOR DE LAYOUT ---
+    let draggingNode = null;
+    function onNodeDragStart(e, limb) { if (editingMode) draggingNode = limb; }
+    function onCanvasDrop(e) {
+        if (!editingMode || !draggingNode) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        const idx = currentLimbs.findIndex(l => l.id === draggingNode.id);
+        currentLimbs[idx].x = x; currentLimbs[idx].y = y;
+        draggingNode = null; saveData();
+    }
 
-  // --- TRAUMA DRAG & DROP ---
-  let draggingTrauma = null;
-  function onTraumaDrop(e, limbId, slotIdx) {
-      if (!isGM || !draggingTrauma) return;
-      const idx = currentLimbs.findIndex(l => l.id === limbId);
-      const limb = currentLimbs[idx];
-      limb.trauma = limb.trauma.filter(t => t.index !== slotIdx);
-      limb.trauma.push({ id: foundry.utils.randomID(), type: draggingTrauma, index: slotIdx });
-      if (limb.killing <= slotIdx) limb.killing = slotIdx + 1;
-      draggingTrauma = null; saveData();
-  }
-  function removeTrauma(limbId, traumaId) {
-      if (!isGM) return;
-      const idx = currentLimbs.findIndex(l => l.id === limbId);
-      currentLimbs[idx].trauma = currentLimbs[idx].trauma.filter(t => t.id !== traumaId);
-      saveData();
-  }
+    // --- TRAUMA DRAG & DROP ---
+    let draggingTrauma = null;
+    function onTraumaDrop(e, limbId, slotIdx) {
+        if (!draggingTrauma) return; // Removido check isGM
+        const idx = currentLimbs.findIndex(l => l.id === limbId);
+        const limb = currentLimbs[idx];
+        limb.trauma = limb.trauma.filter(t => t.index !== slotIdx);
+        limb.trauma.push({ id: foundry.utils.randomID(), type: draggingTrauma, index: slotIdx });
+        if (limb.killing <= slotIdx) limb.killing = slotIdx + 1;
+        draggingTrauma = null; saveData();
+    }
+    function removeTrauma(limbId, traumaId) {
+        // Removido check isGM
+        const idx = currentLimbs.findIndex(l => l.id === limbId);
+        currentLimbs[idx].trauma = currentLimbs[idx].trauma.filter(t => t.id !== traumaId);
+        saveData();
+    }
 
-  // --- TRAUMA CREATOR ---
-  async function createGlobalTrauma() {
-      if (!newTrauma.key || !newTrauma.label) return ui.notifications.warn("Preencha ID e Nome.");
-      const newDB = { ...traumaDB, [newTrauma.key]: { ...newTrauma } };
-      await game.settings.set(MODULE_ID, 'traumaDB', newDB);
-      traumaDB = newDB;
-      showTraumaCreator = false;
-      newTrauma = { key: "", label: "", color: "#ffffff", desc: "", icon: "Biohazard" };
-  }
-  async function deleteGlobalTrauma(key) {
-      const newDB = { ...traumaDB };
-      delete newDB[key];
-      await game.settings.set(MODULE_ID, 'traumaDB', newDB);
-      traumaDB = newDB;
-  }
+    // --- TRAUMA CREATOR ---
+    async function createGlobalTrauma() {
+        if (!newTrauma.key || !newTrauma.label) return ui.notifications.warn("Preencha ID e Nome.");
+        const newDB = { ...traumaDB, [newTrauma.key]: { ...newTrauma } };
+        
+        // NOTA: Para jogadores, salvamos localmente primeiro para UX, 
+        // mas game.settings.set requer permissão de GM normalmente. 
+        // Se der erro de permissão, o jogador só vai ver localmente até reiniciar.
+        // O ideal seria um socket GM, mas para simplificar:
+        try {
+            await game.settings.set(MODULE_ID, 'traumaDB', newDB);
+        } catch (e) {
+            console.warn("Sem permissão para salvar Trauma globalmente. Salvando na sessão.", e);
+        }
+        
+        traumaDB = newDB;
+        showTraumaCreator = false;
+        newTrauma = { key: "", label: "", color: "#ffffff", desc: "", icon: "Biohazard" };
+    }
+    
+    async function deleteGlobalTrauma(key) {
+        const newDB = { ...traumaDB };
+        delete newDB[key];
+        try {
+            await game.settings.set(MODULE_ID, 'traumaDB', newDB);
+        } catch (e) { console.warn("Sem permissão para deletar global.", e); }
+        traumaDB = newDB;
+    }
 
-  // =========================================================
-  // 4. IMAGE MANAGER (CUSTOM MODAL)
-  // =========================================================
-  
-  function openImageModal(type) {
-      imgModalType = type;
-      imgModalUrl = ''; // Limpa input
-      showImgModal = true;
-  }
+    // =========================================================
+    // 4. IMAGE MANAGER (CUSTOM MODAL)
+    // =========================================================
+    
+    function openImageModal(type) {
+        imgModalType = type;
+        imgModalUrl = ''; // Limpa input
+        showImgModal = true;
+    }
 
-  async function applyImageUpdate(path) {
-      // 1. Atualização Otimista (Visual Imediato)
-      if (activeForm === 'base') {
-          if (imgModalType === 'sil') imgBase = path;
-          else bgBase = path;
-      } else {
-          if (imgModalType === 'sil') imgTrans = path;
-          else bgTrans = path;
-      }
+    async function applyImageUpdate(path) {
+        if (activeForm === 'base') {
+            if (imgModalType === 'sil') imgBase = path;
+            else bgBase = path;
+        } else {
+            if (imgModalType === 'sil') imgTrans = path;
+            else bgTrans = path;
+        }
 
-      // 2. Salvar no Backend
-      const flagPrefix = activeForm === 'base' ? '' : '_trans'; // sufixo para trans
-      const flagType = imgModalType === 'sil' ? 'img' : 'bg'; // prefixo img ou bg
-      
-      // Monta a chave correta: img_base, bg_base, img_silhouette_trans, etc.
-      // Corrigindo para usar as chaves que definimos lá em cima:
-      // Base: 'bg_base', 'img_base'
-      // Trans: 'bg_trans', 'img_trans'
-      
-      const key = `${flagType}_${activeForm}`;
-      await actor.update({ [`flags.${MODULE_ID}.${key}`]: path }, { render: false });
-      
-      showImgModal = false;
-  }
+        const flagType = imgModalType === 'sil' ? 'img' : 'bg';
+        const key = `${flagType}_${activeForm}`;
+        await actor.update({ [`flags.${MODULE_ID}.${key}`]: path }, { render: false });
+        
+        showImgModal = false;
+    }
 
-  function openFilePicker() {
-      new FilePicker({
-          type: "image",
-          callback: (path) => applyImageUpdate(path)
-      }).browse();
-  }
+    function openFilePicker() {
+        new FilePicker({
+            type: "image",
+            callback: (path) => applyImageUpdate(path)
+        }).browse();
+    }
 
-  async function addLimb() {
-      const newLimb = { id: foundry.utils.randomID(), name: 'NOVO', loc: '0', hp: 3, lar:0, har:0, killing:0, shock:0, trauma:[], x: 50, y: 50 };
-      currentLimbs = [...currentLimbs, newLimb]; saveData();
-  }
+    async function addLimb() {
+        const newLimb = { id: foundry.utils.randomID(), name: 'NOVO', loc: '0', hp: 3, lar:0, har:0, killing:0, shock:0, trauma:[], x: 50, y: 50 };
+        currentLimbs = [...currentLimbs, newLimb]; saveData();
+    }
 
-  function getSlotState(limb, i) {
-      const t = limb.trauma.find(x => x.index === i);
-      if (t) return { status: 'trauma', data: traumaDB[t.type] || traumaDB['bullet'], id: t.id };
-      if (i < limb.killing) return { status: 'killing' };
-      if (i < (limb.killing + limb.shock)) return { status: 'shock' };
-      return { status: 'empty' };
-  }
+    function getSlotState(limb, i) {
+        const t = limb.trauma.find(x => x.index === i);
+        if (t) return { status: 'trauma', data: traumaDB[t.type] || traumaDB['bullet'], id: t.id };
+        if (i < limb.killing) return { status: 'killing' };
+        if (i < (limb.killing + limb.shock)) return { status: 'shock' };
+        return { status: 'empty' };
+    }
 </script>
 
 <div class="body-dashboard" style="
@@ -279,10 +284,8 @@
             <button class="tab {activeForm === 'trans' ? 'active trans-mode' : ''}" on:click={() => activeForm = 'trans'}>TRANSFORMAÇÃO</button>
         </div>
         <div class="tools">
-            {#if isGM}
-                <button class="tool-btn {editingMode ? 'on' : ''}" on:click={() => editingMode = !editingMode} title="Modo Edição"><i class="fas fa-edit"></i></button>
-                <button class="tool-btn" on:click={() => showConfig = true} title="Temas"><i class="fas fa-palette"></i></button>
-            {/if}
+            <button class="tool-btn {editingMode ? 'on' : ''}" on:click={() => editingMode = !editingMode} title="Modo Edição"><i class="fas fa-edit"></i></button>
+            <button class="tool-btn" on:click={() => showConfig = true} title="Temas"><i class="fas fa-palette"></i></button>
         </div>
     </div>
 
@@ -356,9 +359,9 @@
                 <div class="calc-title">{selectedLimb ? selectedLimb.name : "SELECIONE ALVO"}</div>
                 {#if selectedLimb}
                     <div class="armor-edit">
-                        <label>L <input type="number" bind:value={selectedLimb.lar} on:change={saveData} disabled={!isGM}></label>
-                        <label>H <input type="number" bind:value={selectedLimb.har} on:change={saveData} disabled={!isGM}></label>
-                        {#if isGM}<label>HP <input type="number" bind:value={selectedLimb.hp} on:change={saveData}></label>{/if}
+                        <label>L <input type="number" bind:value={selectedLimb.lar} on:change={saveData}></label>
+                        <label>H <input type="number" bind:value={selectedLimb.har} on:change={saveData}></label>
+                        <label>HP <input type="number" bind:value={selectedLimb.hp} on:change={saveData}></label>
                     </div>
                     <div class="dmg-inputs">
                         <div class="grp"><label style="color:var(--c-shock)">SHOCK</label><input type="number" bind:value={inputShock}></div>
@@ -369,23 +372,21 @@
                 {/if}
             </div>
 
-            {#if isGM}
-                <div class="trauma-box">
-                    <div class="box-title">
-                        <span>CONDIÇÕES</span>
-                        <button class="add-cond" on:click={() => showTraumaCreator = true}>+</button>
-                    </div>
-                    <div class="t-list custom-scroll">
-                        {#each Object.entries(traumaDB) as [key, data]}
-                            <div class="t-item" draggable="true" on:dragstart={(e) => { draggingTrauma = key; }}>
-                                <i class="fas fa-virus" style="color: {data.color}"></i>
-                                <span class="t-name">{data.label}</span>
-                                <button class="t-del" on:click={() => deleteGlobalTrauma(key)}>×</button>
-                            </div>
-                        {/each}
-                    </div>
+            <div class="trauma-box">
+                <div class="box-title">
+                    <span>CONDIÇÕES</span>
+                    <button class="add-cond" on:click={() => showTraumaCreator = true}>+</button>
                 </div>
-            {/if}
+                <div class="t-list custom-scroll">
+                    {#each Object.entries(traumaDB) as [key, data]}
+                        <div class="t-item" draggable="true" on:dragstart={(e) => { draggingTrauma = key; }}>
+                            <i class="fas fa-virus" style="color: {data.color}"></i>
+                            <span class="t-name">{data.label}</span>
+                            <button class="t-del" on:click={() => deleteGlobalTrauma(key)}>×</button>
+                        </div>
+                    {/each}
+                </div>
+            </div>
         </div>
     </div>
 
@@ -442,7 +443,7 @@
 </div>
 
 <style>
-    /* MAIN CSS */
+    /* CSS MANTIDO IDÊNTICO */
     .body-dashboard { display: flex; flex-direction: column; height: 100%; background: var(--c-bg); color: #ccc; font-family: var(--f-main); overflow: hidden; position: relative; }
     
     .dash-header { display: flex; justify-content: space-between; background: #111; padding: 5px; border-bottom: 2px solid var(--c-primary); z-index: 20; }

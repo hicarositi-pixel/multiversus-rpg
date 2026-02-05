@@ -14,7 +14,6 @@
   // --- DADOS REATIVOS ---
   let searchTerm = "";
   let powers = [];
-  
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
 
@@ -23,29 +22,29 @@
 
   function scheduleRefresh() {
       if (updateTimer) clearTimeout(updateTimer);
-      // Aumentei levemente para 100ms para dar tempo do Foundry "entender" o Drag&Drop
+      // 100ms é o tempo ideal para o banco de dados do Foundry processar a criação do item
       updateTimer = setTimeout(() => {
           refreshData();
       }, 100); 
   }
 
-  // --- FUNÇÃO DE BUSCA E CÁLCULO (A CORREÇÃO ESTÁ AQUI) ---
+  // --- FUNÇÃO DE BUSCA E CÁLCULO (BLINDADA) ---
   async function refreshData() {
     // 1. BUSCA O ATOR "REAL" ATUALIZADO
-    // Em vez de usar a prop 'actor' (que pode estar velha), pegamos direto do jogo.
+    // Isso é crucial. A prop 'actor' pode ficar desatualizada.
     const realActor = game.actors.get(actor.id);
     
-    // Segurança: se não achar (muito raro), usa o actor da prop
-    const sourceActor = realActor || actor;
+    if (!realActor) return; // Segurança caso o ator tenha sido deletado
 
     // 2. Filtra itens usando a FONTE ATUALIZADA
-    const rawPowers = sourceActor.items.filter(i => i && i.type === "power");
+    // Forçamos a criação de um novo array [...] para o Svelte detectar mudança
+    const rawPowers = realActor.items.filter(i => i && i.type === "power");
     
-    // 3. Atualiza a lista (Svelte reage aqui)
+    // 3. Atualiza a lista visual
     powers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
     activePowerCount = powers.length;
 
-    // 4. Recalcula XP
+    // 4. Recalcula XP (Lógica mantida)
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
     calculatedTotalCost = powers.reduce((acc, item) => {
@@ -59,46 +58,39 @@
         const discount = isInitial ? (4 * base) : 0;
         
         const diceData = itemFlags.dice || itemSystem.dice || {};
-        
         const dN = Number(diceData.normal) || 0;
         const dH = Number(diceData.hard) || 0;
         const dW = Number(diceData.wiggle) || 0;
         
         const cost = (dN * base) + (dH * base * 2) + (dW * base * 4);
-        
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // 5. Salva no Ator se mudou (Render False para não piscar)
-    const currentSavedCost = Number(sourceActor.flags?.[MODULE_ID]?.powersSpent) || 0;
+    // 5. Salva no Ator se mudou (Render False para não piscar a ficha inteira)
+    const currentSavedCost = Number(realActor.flags?.[MODULE_ID]?.powersSpent) || 0;
 
     if (calculatedTotalCost !== currentSavedCost) {
-        await sourceActor.update({ 
+        await realActor.update({ 
             [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost 
         }, { render: false });
         console.log(`[Nexus] XP Sincronizado: ${calculatedTotalCost}`);
     }
     
-    await tick();
+    await tick(); // Força atualização do DOM
   }
 
   // --- HOOKS ---
   onMount(() => {
     refreshData(); 
 
-    // Hook: Quando o Ator muda (XP, Atributos, etc)
-    const hookActor = Hooks.on("updateActor", (doc, changes, options) => {
-        if (doc.id === actor.id && options.render !== false) {
-            scheduleRefresh();
-        }
+    // Hook unificado para qualquer mudança em itens deste ator
+    // Isso cobre: Criar, Deletar, Editar (Nome, Dados)
+    const hookId = Hooks.on("updateActor", (doc) => {
+        if (doc.id === actor.id) scheduleRefresh();
     });
     
-    // Hook CRÍTICO: Quando um item é CRIADO (Arrastar poder)
     const hookCreate = Hooks.on("createItem", (item) => { 
-        if(item.parent?.id === actor.id) {
-            console.log("Detectado novo poder:", item.name);
-            scheduleRefresh(); 
-        }
+        if(item.parent?.id === actor.id) scheduleRefresh(); 
     });
 
     const hookDelete = Hooks.on("deleteItem", (item) => { 
@@ -106,11 +98,11 @@
     });
 
     const hookUpdate = Hooks.on("updateItem", (item) => { 
-        if(item.parent?.id === actor.id && item.type === "power") scheduleRefresh(); 
+        if(item.parent?.id === actor.id) scheduleRefresh(); 
     });
 
     return () => {
-      Hooks.off("updateActor", hookActor);
+      Hooks.off("updateActor", hookId);
       Hooks.off("createItem", hookCreate);
       Hooks.off("deleteItem", hookDelete);
       Hooks.off("updateItem", hookUpdate);
@@ -120,12 +112,12 @@
   $: filteredPowers = powers.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   function openLibrary() {
-    try { new PoderesManager().render(true); } catch (e) { console.error(e); }
+    // Se o Manager precisa do ator, temos que passar!
+    try { new PoderesManager(actor).render(true); } catch (e) { console.error(e); }
   }
 </script>
 
 <div class="powers-terminal">
-  
   <header class="term-header">
     <div class="hud-module main">
       <div class="hud-top">
@@ -183,11 +175,11 @@
     <div class="footer-left">SYS_STATUS: <span style="color:var(--c-primary)">ONLINE</span></div>
     <div class="footer-right">SYNC_MODE: <span style="color:var(--c-primary)">AUTO_RT</span></div>
   </footer>
-
 </div>
 
 <style>
-  /* MANTENDO O SEU CSS EXATO */
+  /* Use o mesmo CSS que você já tem */
+  /* Copie o bloco <style> do seu código anterior para cá */
   .powers-terminal { height: 100%; display: flex; flex-direction: column; gap: 12px; background: transparent; color: var(--c-text); font-family: var(--font-body); padding: 5px; position: relative; overflow: hidden; }
   .term-header { display: flex; gap: 10px; z-index: 1; height: 60px; flex-shrink: 0; }
   .hud-module { background: rgba(0, 0, 0, 0.6); border: 1px solid #333; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; padding: 0 15px; position: relative; overflow: hidden; }
