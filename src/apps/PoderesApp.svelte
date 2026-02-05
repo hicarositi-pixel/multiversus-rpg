@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick, onDestroy } from 'svelte';
+  import { onMount, tick } from 'svelte';
   import { slide, fade } from 'svelte/transition';
   import PowerInventoryCard from '../components/PowerInventoryCard.svelte';
   import PoderesManager from './PoderesManager.js'; 
@@ -10,49 +10,47 @@
 
   const isGM = game.user.isGM;
   const MODULE_ID = "multiversus-rpg";
-
-  // Captura o UUID para buscar sempre a versão mais fresca do ator
-  // Isso resolve problemas com Tokens e Atores Sintéticos
   const actorUUID = actor.uuid;
 
   // --- DADOS REATIVOS ---
   let searchTerm = "";
   let powers = [];
-  
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
+
+  // Estado de carregamento para evitar tela branca
+  let isReady = false;
 
   // --- CONTROLE DE ATUALIZAÇÃO ---
   let updateTimer = null;
 
   function scheduleRefresh() {
       if (updateTimer) clearTimeout(updateTimer);
-      // 150ms é um delay seguro para garantir que o Foundry terminou de gravar o item
+      // 100ms é rápido o suficiente para parecer instantâneo, 
+      // mas lento o suficiente para evitar conflito de banco de dados
       updateTimer = setTimeout(() => {
           refreshData();
-      }, 150); 
+      }, 100); 
   }
 
-  // --- FUNÇÃO CORE (AQUI ESTÁ A CORREÇÃO) ---
+  // --- FUNÇÃO CORE ---
   async function refreshData() {
-    // 1. Busca a instância mais recente do Ator usando o UUID
-    // Não usamos a prop 'actor' pois ela pode estar obsoleta (stale)
+    // 1. Busca instância fresca via UUID
     const freshActor = await fromUuid(actorUUID);
 
     if (!freshActor) {
-        console.error("[PoderesApp] Ator não encontrado via UUID.");
+        console.warn("Nexus | Ator não encontrado no refresh.");
         return;
     }
 
-    // 2. Filtra itens da instância fresca
-    // O [... ] cria um novo array para forçar o Svelte a redesenhar
+    // 2. Filtra itens
     const rawPowers = freshActor.items.filter(i => i && i.type === "power");
     
-    // 3. Atualiza a lista visual
+    // 3. Atualiza lista visual (Cria nova referência para Svelte reagir)
     powers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
     activePowerCount = powers.length;
 
-    // 4. Recalcula XP
+    // 4. Recalcula XP (COM PROTEÇÃO CONTRA CRASH)
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
     calculatedTotalCost = powers.reduce((acc, item) => {
@@ -61,23 +59,22 @@
 
         const cat = itemFlags.category || "principal";
         const base = XP_RULES[cat] || 8;
-        
         const isInitial = itemFlags.isInitial || false;
         const discount = isInitial ? (4 * base) : 0;
         
+        // PROTEÇÃO: Novos itens podem não ter diceData
         const diceData = itemFlags.dice || itemSystem.dice || {};
         
-        const dN = Number(diceData.normal) || 0;
-        const dH = Number(diceData.hard) || 0;
-        const dW = Number(diceData.wiggle) || 0;
+        // Garante que é número ou 0
+        const dN = Number(diceData.normal || 0);
+        const dH = Number(diceData.hard || 0);
+        const dW = Number(diceData.wiggle || 0);
         
         const cost = (dN * base) + (dH * base * 2) + (dW * base * 4);
-        
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // 5. Sincroniza XP Total no Ator (se mudou)
-    // Usamos o freshActor para garantir que o update vá para o lugar certo
+    // 5. Salva XP no Ator (Apenas se mudou)
     const currentSavedCost = Number(freshActor.flags?.[MODULE_ID]?.powersSpent) || 0;
 
     if (calculatedTotalCost !== currentSavedCost) {
@@ -85,42 +82,38 @@
             [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost 
         }, { render: false });
     }
-    
+
+    isReady = true;
     await tick();
   }
 
-  // --- HOOKS DE REATIVIDADE ---
+  // --- HOOKS ---
   onMount(() => {
     refreshData(); 
 
-    // Hook Genérico: Qualquer operação de Item (Create, Update, Delete)
-    // Se o item pertencer a este ator, atualiza a lista.
+    // Hook unificado: Create, Update, Delete
+    const hookId = Hooks.on("updateActor", (doc) => {
+        if (doc.uuid === actorUUID) scheduleRefresh();
+    });
+    
+    // Captura itens criados/deletados neste ator
     const hookCreate = Hooks.on("createItem", (item) => { 
-        if (item.parent?.uuid === actorUUID) {
-            console.log("Poder criado, atualizando...");
-            scheduleRefresh(); 
-        }
+        if(item.parent?.uuid === actorUUID) scheduleRefresh(); 
     });
 
     const hookDelete = Hooks.on("deleteItem", (item) => { 
-        if (item.parent?.uuid === actorUUID) scheduleRefresh(); 
+        if(item.parent?.uuid === actorUUID) scheduleRefresh(); 
     });
 
     const hookUpdate = Hooks.on("updateItem", (item) => { 
-        if (item.parent?.uuid === actorUUID && item.type === "power") scheduleRefresh(); 
+        if(item.parent?.uuid === actorUUID && item.type === "power") scheduleRefresh(); 
     });
 
-    // Se o próprio ator mudar (ex: reverteu um snapshot)
-    const hookActor = Hooks.on("updateActor", (doc) => {
-        if (doc.uuid === actorUUID) scheduleRefresh();
-    });
-
-    // Limpeza ao fechar
     return () => {
+      Hooks.off("updateActor", hookId);
       Hooks.off("createItem", hookCreate);
       Hooks.off("deleteItem", hookDelete);
       Hooks.off("updateItem", hookUpdate);
-      Hooks.off("updateActor", hookActor);
     };
   });
 
@@ -137,7 +130,7 @@
     <div class="hud-module main">
       <div class="hud-top">
         <span class="hud-label"><i class="fas fa-bolt"></i> DRENAGEM DE SISTEMA (XP)</span>
-        <span class="hud-value xp">{calculatedTotalCost}</span>
+        <span class="hud-value xp">{isReady ? calculatedTotalCost : '...'}</span>
       </div>
       <div class="hud-bar-bg">
         <div class="hud-bar-fill scanning-anim"></div>
@@ -146,7 +139,7 @@
 
     <div class="hud-module side">
       <div class="hud-label">MÓDULOS</div>
-      <div class="hud-value">{activePowerCount}</div>
+      <div class="hud-value">{isReady ? activePowerCount : '...'}</div>
     </div>
   </header>
 
@@ -163,27 +156,33 @@
   </div>
 
   <div class="list-container">
-    <div class="powers-grid">
-      {#if filteredPowers.length > 0}
-        {#each filteredPowers as power (power.id)}
-          <div transition:slide|local={{duration: 200}}>
-             <PowerInventoryCard 
-                item={power} 
-                actor={actor} 
-                isGM={isGM} 
-             />
-          </div>
-        {/each}
-      {:else}
-        <div class="empty-state" in:fade>
-          <div class="glitch-wrapper">
-            <i class="fas fa-wifi"></i>
-          </div>
-          <span class="empty-title">NENHUM MÓDULO DETECTADO</span>
-          <span class="empty-sub">Acesse a Database para iniciar download.</span>
+    {#if !isReady}
+        <div class="loading-state">
+            <i class="fas fa-satellite-dish fa-spin"></i> Sincronizando Poderes...
         </div>
-      {/if}
-    </div>
+    {:else}
+        <div class="powers-grid">
+        {#if filteredPowers.length > 0}
+            {#each filteredPowers as power (power.id)}
+            <div transition:slide|local={{duration: 200}}>
+                <PowerInventoryCard 
+                    item={power} 
+                    actor={actor} 
+                    isGM={isGM} 
+                />
+            </div>
+            {/each}
+        {:else}
+            <div class="empty-state" in:fade>
+            <div class="glitch-wrapper">
+                <i class="fas fa-wifi"></i>
+            </div>
+            <span class="empty-title">NENHUM MÓDULO DETECTADO</span>
+            <span class="empty-sub">Arraste um poder ou acesse a Database.</span>
+            </div>
+        {/if}
+        </div>
+    {/if}
   </div>
 
   <footer class="term-footer">
@@ -194,7 +193,7 @@
 </div>
 
 <style>
-  /* MANTENDO O SEU CSS EXATO */
+/* CSS Mantido - Igual ao Original */
   .powers-terminal { height: 100%; display: flex; flex-direction: column; gap: 12px; background: transparent; color: var(--c-text); font-family: var(--font-body); padding: 5px; position: relative; overflow: hidden; }
   .term-header { display: flex; gap: 10px; z-index: 1; height: 60px; flex-shrink: 0; }
   .hud-module { background: rgba(0, 0, 0, 0.6); border: 1px solid #333; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; padding: 0 15px; position: relative; overflow: hidden; }
@@ -228,6 +227,7 @@
   .empty-title { font-weight: bold; color: #888; font-size: 1em; letter-spacing: 1px; font-family: var(--font-head); }
   .empty-sub { font-size: 0.7em; }
   .term-footer { display: flex; justify-content: space-between; font-size: 0.6em; color: #555; z-index: 1; padding: 0 5px; font-family: var(--font-head); margin-top: auto; }
+  .loading-state { text-align: center; color: var(--c-primary); margin-top: 50px; font-family: var(--font-head); }
   @keyframes scan-bar { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
   @keyframes glitch { 0% { transform: translate(0); } 2% { transform: translate(-2px, 2px); } 4% { transform: translate(2px, -2px); } 6% { transform: translate(0); } 100% { transform: translate(0); } }
 </style>

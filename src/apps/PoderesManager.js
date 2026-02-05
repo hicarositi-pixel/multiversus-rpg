@@ -3,7 +3,7 @@ const { ApplicationV2 } = foundry.applications.api;
 
 export default class PoderesManager extends ApplicationV2 {
   constructor(actor) {
-    // Definimos um título dinâmico se tiver ator
+    // Título dinâmico
     const title = actor ? `Nexus Database: ${actor.name}` : "Nexus Database";
     super({ window: { title } });
     this.actor = actor;
@@ -17,7 +17,7 @@ export default class PoderesManager extends ApplicationV2 {
       resizable: true,
       width: 500,
       height: 700,
-      contentClasses: ["multiversus-app"] // Garante rolagem correta
+      contentClasses: ["multiversus-app"] // Classe CSS para scroll
     },
     position: {
       width: 500,
@@ -29,21 +29,22 @@ export default class PoderesManager extends ApplicationV2 {
     const wrapper = document.createElement("div");
     wrapper.style.height = "100%";
     wrapper.style.overflow = "hidden";
-    wrapper.style.display = "flex";       // Garante flexbox
+    wrapper.style.display = "flex";       
     wrapper.style.flexDirection = "column";
 
-    // Limpeza de segurança
+    // Se já existe um componente, não precisamos destruir e recriar se for apenas um render forçado pelo Foundry.
+    // Mas, ApplicationV2 espera novo HTML. Então vamos recriar o Svelte limpo.
     if (this.component) {
         this.component.$destroy();
     }
 
-    // Inicializa Svelte com o Ator
+    // Inicializa Svelte
     this.component = new PoderesAppShell({
       target: wrapper,
       props: {
         application: this,
-        actor: this.actor, // <--- CRUCIAL: Passa o ator para o App funcionar
-        themeColor: "#00ff41", // Cor padrão se faltar
+        actor: this.actor,
+        themeColor: "#00ff41",
         flags: this.actor?.flags?.["multiversus-rpg"] || {}
       }
     });
@@ -55,7 +56,7 @@ export default class PoderesManager extends ApplicationV2 {
     content.replaceWith(result);
   }
 
-  // Limpeza de memória ao fechar
+  // Limpeza
   _onClose(options) {
     if (this.component) {
       this.component.$destroy();

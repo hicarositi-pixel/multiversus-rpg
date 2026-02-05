@@ -70,6 +70,7 @@
     function checkResources(costs) {
         if (!group || !costs || costs.length === 0) return true;
         for (let c of costs) {
+            // Proteção contra inventory undefined
             if ((group.inventory?.[c.type]?.[c.tier] || 0) < c.qty) return false;
         }
         return true;
@@ -81,12 +82,17 @@
         if (!isGM && !checkResources(bp.costs)) return ui.notifications.warn("Recursos insuficientes.");
 
         if (!isGM) {
+            // Garante que inventory existe antes de subtrair
+            if (!group.inventory) group.inventory = { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
+            
             for (let c of bp.costs) {
+                if (!group.inventory[c.type]) group.inventory[c.type] = {};
                 group.inventory[c.type][c.tier] -= c.qty;
             }
         }
 
         await GroupDatabase.buildStructure(group.id, bp);
+        // Atualiza inventário também, pois buildStructure salva group mas inventory mudou localmente
         await GroupDatabase.updateGroupData(group.id, { inventory: group.inventory });
         
         ui.notifications.info(`${bp.name} construído!`);
@@ -284,8 +290,7 @@
 {/if}
 
 <style>
-/* ... (Mantenha o CSS original que você já tem) ... */
-/* Apenas omiti o CSS para economizar espaço, ele não muda */
+/* CSS igual ao original (Mantenha o mesmo do arquivo anterior) */
     .structures-layout { height: 100%; display: flex; flex-direction: column; gap: 10px; color: #fff; font-family: 'Share Tech Mono', monospace; }
     
     .tabs { display: flex; gap: 5px; border-bottom: 1px solid #333; }

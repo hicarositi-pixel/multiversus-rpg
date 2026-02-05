@@ -3,7 +3,7 @@
     import { GroupDatabase } from '../../database/GroupDatabase.js';
     import materialsDB from '../../../crafting/materials.json';
 
-    // --- PROTEÇÃO 1 ---
+    // CORREÇÃO 1: Inicializa com null
     export let group = null;
     export let actor; 
     export let isLeader;
@@ -21,30 +21,36 @@
     let activeType = 'MATERIA';
     let transferMode = 'DEPOSIT';
     let transferAmount = 1;
-    let groupNotes = group?.notes || ""; // Safe access
+    
+    // Safe access para notes
+    let groupNotes = group?.notes || "";
     let isSavingNotes = false;
 
-    // --- PROTEÇÃO 2: Reatividade Segura ---
-    // Só tenta inicializar se group existir
+    // CORREÇÃO 2: Reatividade Segura
+    // Se group existe mas inventory não, cria objeto vazio
     $: if (group && !group.inventory) group.inventory = { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
 
-    // --- FUNÇÕES ---
+    // --- FUNÇÃO DO MESTRE ---
     async function modifyStock(type, tier, amount) {
-        if (!group) return;
+        if (!group || !group.id) return; // Proteção
         if (!isGM) return ui.notifications.warn("Apenas o GM pode alterar a realidade.");
+        
         if (!group.inventory[type]) group.inventory[type] = {};
 
         let current = group.inventory[type][tier] || 0;
         let newVal = Math.max(0, current + amount);
         
         group.inventory[type][tier] = newVal;
-        group = group; // Force update
+        
+        // Força reatividade local
+        group = group; 
 
         await GroupDatabase.updateGroupData(group.id, { inventory: group.inventory });
     }
 
+    // --- FUNÇÃO DO JOGADOR ---
     async function executeTransfer(type, tier, qty = null) {
-        if (!group) return;
+        if (!group || !group.id) return; // Proteção
         if (!actor) return ui.notifications.warn("Vincule um personagem para interagir com o cofre.");
 
         const baseInv = group.inventory;
@@ -55,6 +61,7 @@
         if (transferMode === 'DEPOSIT') {
             const available = charPockets[type]?.[tier] || 0;
             if (available <= 0) return ui.notifications.warn("Você não possui este item.");
+            
             amount = Math.min(amount, available);
 
             if (!baseInv[type]) baseInv[type] = {};
@@ -65,6 +72,7 @@
         } else { // WITHDRAW
             const available = baseInv[type]?.[tier] || 0;
             if (available <= 0) return ui.notifications.warn("Cofre vazio.");
+
             amount = Math.min(amount, available);
 
             baseInv[type][tier] = available - amount;
@@ -73,14 +81,16 @@
         }
 
         group.inventory = baseInv;
-        group = group;
+        group = group; // Svelte update
+        
         await GroupDatabase.updateGroupData(group.id, { inventory: baseInv });
         ui.notifications.info(`${transferMode === 'DEPOSIT' ? 'Depositado' : 'Sacado'}: ${amount}x ${type} T${tier}`);
     }
 
+    // --- BLOCO DE NOTAS ---
     let notesTimeout;
     function handleNotesInput() {
-        if (!group) return;
+        if (!group || !group.id) return;
         isSavingNotes = true;
         clearTimeout(notesTimeout);
         notesTimeout = setTimeout(async () => {
@@ -188,7 +198,7 @@
 {/if}
 
 <style>
-    /* CSS Original (Mantido) */
+/* CSS IGUAL AO ORIGINAL */
     .inventory-layout { height: 100%; display: flex; flex-direction: column; gap: 10px; color: #fff; font-family: 'Share Tech Mono', monospace; }
 
     /* HEADER & NAV */

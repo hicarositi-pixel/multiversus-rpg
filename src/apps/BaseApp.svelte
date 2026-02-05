@@ -3,7 +3,6 @@
     import { slide, fade, scale } from 'svelte/transition';
     import { GroupDatabase } from '../database/GroupDatabase.js';
     
-    // Sub-Módulos
     import BaseDashboard from './bases/BaseDashboard.svelte';
     import BaseStructures from './bases/BaseStructures.svelte';
     import BaseMembers from './bases/BaseMembers.svelte';
@@ -12,12 +11,15 @@
     
     export let actor;
 
+    // INICIALIZAÇÃO SEGURA
     let myGroup = null;
     let allGroups = []; 
     let activeSubApp = 'dashboard';
-    let isSystemReady = false; // Controle para evitar o "bug do F5"
     
-    // Forms
+    // Flag crítica: Só renderiza a UI quando isso for true
+    let isSystemReady = false; 
+    
+    // Forms e Estados
     let newGroupName = "";
     let newGroupPass = ""; 
     let isProcessing = false;
@@ -30,26 +32,30 @@
     $: isLeader = myGroup?.leader === game.user.id;
     $: isGM = game.user.isGM;
 
-    // --- SINCRONIA E CARREGAMENTO ---
+    // --- REFRESH ---
     async function refreshData() {
-        // Puxa a lista mais recente do banco de dados
-        allGroups = await GroupDatabase.getGroups(); 
+        // Busca listas globais
+        allGroups = await GroupDatabase.getGroups() || []; 
         
-        // Verifica se o usuário atual está em algum grupo
-        myGroup = await GroupDatabase.getUserGroup(game.user.id);
+        // Busca o grupo do usuário atual
+        const foundGroup = await GroupDatabase.getUserGroup(game.user.id);
         
-        // Libera a interface
+        // Garante que myGroup seja o objeto ou null, nunca undefined
+        myGroup = foundGroup || null; 
+        
+        // Libera a renderização
         isSystemReady = true; 
     }
 
     onMount(async () => {
         await refreshData();
         
-        // Escuta mudanças globais no sistema (Settings ou Sockets)
+        // Hooks para manter sincronia em tempo real
         Hooks.on("nexusGroupUpdate", refreshData);
-        // Escuta atualizações de configurações do mundo (onde os grupos geralmente ficam salvos)
+        
+        // Fallback: Se alguém editar as configurações do mundo manualmente
         Hooks.on("updateSetting", (setting) => {
-            if (setting.key.includes("groups")) refreshData();
+            if (setting.key.includes("factions_data")) refreshData();
         });
     });
 
@@ -57,10 +63,10 @@
         Hooks.off("nexusGroupUpdate", refreshData);
     });
 
-    // Função auxiliar para avisar outros clientes
+    // Função auxiliar para forçar update visual nos outros clientes
     function notifyUpdate() {
         Hooks.callAll("nexusGroupUpdate");
-        refreshData(); // Atualiza a si mesmo
+        refreshData();
     }
 
     // --- AÇÕES ---
@@ -72,6 +78,7 @@
             newGroupName = ""; newGroupPass = "";
             activeSubApp = 'dashboard';
             ui.notifications.info("Base criada!");
+            // A própria database já chama os hooks, mas garantimos aqui
             notifyUpdate();
         } catch (e) { ui.notifications.error(e.message); }
         isProcessing = false;
@@ -92,21 +99,23 @@
     async function deleteGroup(groupId) {
         if (!isGM) return;
         new Dialog({
-            title: "Confirmar Exclusão",
-            content: "<p>Apagar este grupo permanentemente?</p>",
+            title: "Confirmar", content: "<p>Apagar este grupo?</p>",
             buttons: {
                 yes: { icon: '<i class="fas fa-trash"></i>', label: "Sim", callback: async () => {
                     await GroupDatabase.deleteGroup(groupId);
-                    ui.notifications.info("Grupo apagado.");
                     notifyUpdate();
                 }},
-                no: { icon: '<i class="fas fa-times"></i>', label: "Não", callback: () => {} }
+                no: { icon: '<i class="fas fa-times"></i>', label: "Não" }
             }
         }).render(true);
     }
 
-    function openRename() { renameInput = myGroup.name; showRename = true; }
-
+    function openRename() { 
+        if (!myGroup) return;
+        renameInput = myGroup.name; 
+        showRename = true; 
+    }
+    
     async function confirmRename() {
         if (!renameInput.trim()) return;
         await GroupDatabase.renameGroup(myGroup.id, renameInput.trim());
@@ -115,11 +124,8 @@
     }
 
     function initiateJoin(group) {
-        if (group.password && !isGM) {
-            targetGroup = group; joinPasswordInput = "";
-        } else {
-            confirmJoin(group.id, "");
-        }
+        if (group.password && !isGM) { targetGroup = group; joinPasswordInput = ""; } 
+        else { confirmJoin(group.id, ""); }
     }
 
     async function confirmJoin(id = null, pass = null) {
@@ -131,7 +137,7 @@
             targetGroup = null;
             activeSubApp = 'dashboard';
             ui.notifications.info("Conectado.");
-            notifyUpdate(); // Avisa o líder que você entrou
+            notifyUpdate();
         } catch (e) { ui.notifications.error(e.message); }
         isProcessing = false;
     }
@@ -140,26 +146,24 @@
         await GroupDatabase.leaveGroup(game.user.id);
         showLeaveConfirm = false;
         activeSubApp = 'dashboard';
-        notifyUpdate(); // Avisa que você saiu
+        notifyUpdate();
     }
 </script>
 
 <div class="faction-hub">
-    
     {#if !isSystemReady}
         <div class="loading-screen">
             <i class="fas fa-satellite-dish pulse-icon"></i>
             <span>SINCRONIZANDO UPLINK...</span>
         </div>
     {:else}
-
+        
         {#if targetGroup}
-            <div class="modal-backdrop" transition:fade>
-                <div class="modal-box" in:scale>
-                    <header><i class="fas fa-lock"></i> ACESSO RESTRITO</header>
+            <div class="modal-backdrop">
+                <div class="modal-box">
+                    <header>SENHA REQUERIDA</header>
                     <div class="modal-body">
-                        <p>Senha para <strong>{targetGroup.name}</strong>:</p>
-                        <input type="password" bind:value={joinPasswordInput} autofocus on:keydown={e => e.key === 'Enter' && confirmJoin()} />
+                        <input type="password" bind:value={joinPasswordInput} on:keydown={e => e.key === 'Enter' && confirmJoin()} />
                     </div>
                     <div class="modal-footer">
                         <button class="btn-cancel" on:click={() => targetGroup = null}>X</button>
@@ -170,12 +174,10 @@
         {/if}
 
         {#if showRename}
-            <div class="modal-backdrop" transition:fade>
-                <div class="modal-box" in:scale>
-                    <header><i class="fas fa-edit"></i> RENOMEAR GRUPO</header>
-                    <div class="modal-body">
-                        <input type="text" bind:value={renameInput} autofocus on:keydown={e => e.key === 'Enter' && confirmRename()} />
-                    </div>
+            <div class="modal-backdrop">
+                <div class="modal-box">
+                    <header>RENOMEAR</header>
+                    <div class="modal-body"><input type="text" bind:value={renameInput} /></div>
                     <div class="modal-footer">
                         <button class="btn-cancel" on:click={() => showRename = false}>X</button>
                         <button class="btn-confirm" on:click={confirmRename}>SALVAR</button>
@@ -191,45 +193,31 @@
                         <i class="fas fa-network-wired pulse-icon"></i>
                         <h2>NEXUS UPLINK</h2>
                     </header>
-
                     <div class="login-body">
                         <div class="action-column">
-                            <h3>CRIAR FREQUÊNCIA</h3>
+                            <h3>CRIAR</h3>
                             <div class="create-form">
                                 <input type="text" bind:value={newGroupName} placeholder="NOME DA UNIDADE" class="big-input"/>
-                                <input type="password" bind:value={newGroupPass} placeholder="SENHA (OPCIONAL)" class="pass-input"/>
-                                <button class="btn-create" on:click={createGroup} disabled={isProcessing}>
-                                    <i class="fas fa-plus-circle"></i> FUNDAR BASE
-                                </button>
+                                <input type="password" bind:value={newGroupPass} placeholder="SENHA" class="pass-input"/>
+                                <button class="btn-create" on:click={createGroup} disabled={isProcessing}>FUNDAR BASE</button>
                             </div>
-                            <div class="divider"><span>OU</span></div>
-                            <button class="btn-nomad" on:click={createNomad} disabled={isProcessing}>
-                                <i class="fas fa-user-secret"></i> MODO NÔMADE
-                            </button>
+                            <div class="divider"></div>
+                            <button class="btn-nomad" on:click={createNomad} disabled={isProcessing}>MODO NÔMADE</button>
                         </div>
-
                         <div class="list-column">
                             <h3>SINAIS ({allGroups.length})</h3>
                             <div class="group-list custom-scroll">
                                 {#each allGroups as g}
                                     <div class="group-item">
                                         <div class="g-info">
-                                            <div class="g-name">
-                                                <i class="fas {g.isNomad ? 'fa-user-secret' : 'fa-warehouse'}" style="color: {g.isNomad ? '#aaa' : '#facc15'}"></i>
-                                                {g.name}
-                                                {#if g.password}<i class="fas fa-lock" title="Senha"></i>{/if}
-                                            </div>
-                                            <small>Líder: {game.users.get(g.leader)?.name || '???'}</small>
+                                            <strong>{g.name}</strong>
+                                            <small>{g.isNomad ? 'Nômade' : 'Base'} {g.password ? '🔒' : ''}</small>
                                         </div>
                                         <div class="g-actions">
-                                            <button class="btn-join" on:click={() => initiateJoin(g)} disabled={isProcessing}>ENTRAR</button>
-                                            {#if isGM}
-                                                <button class="btn-del" on:click={() => deleteGroup(g.id)}><i class="fas fa-trash"></i></button>
-                                            {/if}
+                                            <button class="btn-join" on:click={() => initiateJoin(g)}>ENTRAR</button>
+                                            {#if isGM}<button class="btn-del" on:click={() => deleteGroup(g.id)}>X</button>{/if}
                                         </div>
                                     </div>
-                                {:else}
-                                    <div class="empty-state"><span>Sem sinais.</span></div>
                                 {/each}
                             </div>
                         </div>
@@ -238,23 +226,15 @@
             </div>
 
         {:else}
-            <div class="main-interface" in:scale={{start:0.98}}>
+            <div class="main-interface" in:fade>
                 <header class="hub-header">
-                    <div class="group-identity">
-                        <div class="logo-box"><i class="fas {myGroup.isNomad ? 'fa-user-secret' : 'fa-users'}"></i></div>
-                        <div class="titles">
-                            <div class="title-row">
-                                <h1>{myGroup.name}</h1>
-                                {#if isLeader || isGM}
-                                    <button class="btn-edit-name" on:click={openRename} title="Renomear"><i class="fas fa-pen"></i></button>
-                                {/if}
-                            </div>
-                            <span class="id-tag">ID: {myGroup.id}</span>
-                        </div>
+                    <div class="titles">
+                        <h1>{myGroup.name}</h1>
+                        {#if isLeader || isGM}<i class="fas fa-pen btn-edit-name" on:click={openRename}></i>{/if}
                     </div>
                     <div class="user-controls">
-                        <span class="u-name">{game.user.name}</span>
-                        <button class="btn-leave" on:click={() => showLeaveConfirm = true} title="Sair"><i class="fas fa-power-off"></i></button>
+                        <span>{game.user.name}</span>
+                        <button class="btn-leave" on:click={() => showLeaveConfirm = true}><i class="fas fa-power-off"></i></button>
                     </div>
                 </header>
 
@@ -264,16 +244,20 @@
                         <button class:active={activeSubApp === 'structures'} on:click={() => activeSubApp = 'structures'}><i class="fas fa-industry"></i> ESTRUTURAS</button>
                         <button class:active={activeSubApp === 'inventory'} on:click={() => activeSubApp = 'inventory'}><i class="fas fa-boxes"></i> COFRE</button>
                         <button class:active={activeSubApp === 'members'} on:click={() => activeSubApp = 'members'}><i class="fas fa-users"></i> PESSOAL</button>
-                        <div class="nav-spacer"></div>
                         <button class:active={activeSubApp === 'missions'} on:click={() => activeSubApp = 'missions'}><i class="fas fa-crosshairs"></i> MISSÕES</button>
                     </nav>
 
                     <main class="hub-content custom-scroll">
-                        {#if activeSubApp === 'dashboard'} <BaseDashboard {group} isLeader={isLeader} />
-                        {:else if activeSubApp === 'structures'} <BaseStructures {group} isLeader={isLeader} />
-                        {:else if activeSubApp === 'inventory'} <BaseInventory {group} actor={actor} isLeader={isLeader || isGM} />
-                        {:else if activeSubApp === 'members'} <BaseMembers {group} isLeader={isLeader} isGM={isGM} />
-                        {:else if activeSubApp === 'missions'} <BaseMissions {group} isLeader={isLeader} isGM={isGM} />
+                        {#if activeSubApp === 'dashboard'} 
+                            <BaseDashboard group={myGroup} isLeader={isLeader} />
+                        {:else if activeSubApp === 'structures'} 
+                            <BaseStructures group={myGroup} isLeader={isLeader} />
+                        {:else if activeSubApp === 'inventory'} 
+                            <BaseInventory group={myGroup} actor={actor} isLeader={isLeader || isGM} />
+                        {:else if activeSubApp === 'members'} 
+                            <BaseMembers group={myGroup} isLeader={isLeader} isGM={isGM} />
+                        {:else if activeSubApp === 'missions'} 
+                            <BaseMissions group={myGroup} isLeader={isLeader} isGM={isGM} />
                         {/if}
                     </main>
                 </div>
@@ -291,27 +275,21 @@
                 </div>
             </div>
         {/if}
-    {/if} </div>
+    {/if}
+</div>
 
 <style>
-/* CSS Mantido, com adição do loading-screen */
-    /* ... (Seu CSS anterior aqui) ... */
-    
-    .loading-screen {
-        width: 100%; height: 100%; display: flex; flex-direction: column; 
-        align-items: center; justify-content: center; color: #00ff41; gap: 15px;
-    }
-    .loading-screen i { font-size: 40px; }
-    
-    /* ... (Restante do CSS) ... */
     .faction-hub { width: 100%; height: 100%; background: #050505; color: #00ff41; font-family: 'Share Tech Mono', monospace; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    
+    .loading-screen { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
+    .pulse-icon { font-size: 30px; animation: pulse 1s infinite; }
+    
     .custom-scroll::-webkit-scrollbar { width: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #004400; border-radius: 2px; }
     
     .login-screen { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at center, #0a0a0a 0%, #000 100%); }
     .login-panel { width: 100%; max-width: 800px; height: 500px; border: 1px solid #00ff41; background: rgba(0, 10, 0, 0.95); display: flex; flex-direction: column; }
     .login-panel header { padding: 15px; text-align: center; border-bottom: 1px solid #004400; }
-    .pulse-icon { font-size: 28px; margin-bottom: 5px; animation: pulse 2s infinite; }
     .login-body { flex: 1; display: flex; overflow: hidden; }
     
     .action-column { flex: 1; padding: 30px; border-right: 1px solid #004400; display: flex; flex-direction: column; justify-content: center; }
@@ -323,14 +301,12 @@
     .btn-create, .btn-nomad { padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 10px; }
     .btn-create { background: #004400; color: #fff; border: 1px solid #00ff41; font-weight: bold; }
     .btn-nomad { background: transparent; border: 1px dashed #444; color: #888; }
-    .divider { display: flex; align-items: center; margin: 20px 0; opacity: 0.5; font-size: 10px; }
-    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: #004400; }
+    .divider { display: flex; align-items: center; margin: 20px 0; opacity: 0.5; font-size: 10px; height: 1px; background: #004400; width: 100%; }
     
     .group-list { display: flex; flex-direction: column; gap: 5px; }
     .group-item { background: rgba(255,255,255,0.03); padding: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid transparent; }
     .group-item:hover { border-color: #00ff41; }
     .g-info { display: flex; flex-direction: column; }
-    .g-name { font-weight: bold; display: flex; align-items: center; gap: 5px; }
     .g-actions { display: flex; gap: 5px; }
     .btn-join { background: transparent; border: 1px solid #00ff41; color: #00ff41; cursor: pointer; padding: 5px 15px; font-size: 11px; }
     .btn-join:hover { background: #00ff41; color: #000; }
@@ -338,12 +314,10 @@
 
     .main-interface { display: flex; flex-direction: column; height: 100%; }
     .hub-header { height: 60px; background: #080808; border-bottom: 2px solid #004400; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-    .group-identity { display: flex; align-items: center; gap: 15px; }
-    .logo-box { width: 40px; height: 40px; border: 2px solid #00ff41; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(0,255,65,0.1); }
-    .titles h1 { margin: 0; font-size: 20px; line-height: 1; letter-spacing: 1px; }
-    .title-row { display: flex; align-items: center; gap: 10px; }
-    .btn-edit-name { background: none; border: none; color: #00ff41; cursor: pointer; opacity: 0.5; font-size: 12px; }
-    .btn-edit-name:hover { opacity: 1; }
+    .titles h1 { margin: 0; font-size: 20px; line-height: 1; letter-spacing: 1px; display: inline-block;}
+    .btn-edit-name { cursor: pointer; margin-left: 10px; color: #00ff41; }
+    .user-controls { display: flex; align-items: center; gap: 10px; }
+    .btn-leave { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; }
     
     .hub-body { flex: 1; display: flex; overflow: hidden; }
     .hub-nav { width: 200px; background: rgba(0,0,0,0.6); border-right: 1px solid #004400; display: flex; flex-direction: column; padding: 15px 0; }
@@ -360,5 +334,5 @@
     .btn-cancel { background: transparent; border: 1px solid #555; color: #888; padding: 5px 15px; cursor: pointer; }
     .btn-confirm { background: #004400; border: 1px solid #00ff41; color: #fff; padding: 5px 15px; font-weight: bold; cursor: pointer; }
 
-    @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } }
+    @keyframes pulse { 50% { opacity: 0.5; } }
 </style>

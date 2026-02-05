@@ -2,13 +2,13 @@
     import { slide } from 'svelte/transition';
     import { GroupDatabase } from '../../database/GroupDatabase.js';
 
-    // --- PROTEÇÃO 1 ---
+    // CORREÇÃO 1: Inicializa com null
     export let group = null;
     export let isGM;
 
-    // --- PROTEÇÃO 2: Reatividade Segura ---
+    // CORREÇÃO 2: Reatividade Segura
     // Se group for nulo, retorna array vazio
-    $: missions = group?.missions || [];
+    $: missions = (group && group.missions) ? group.missions : [];
 
     // Formulário de Criação (Só GM)
     let newMission = {

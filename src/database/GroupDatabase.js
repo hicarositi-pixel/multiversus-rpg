@@ -1,5 +1,4 @@
 import { get } from 'svelte/store';
-// Imports dos JSONs
 import personalities from '../../crafting/personalities.json';
 import groupState from '../../crafting/GroupBaseState.json';
 import defaultStates from '../../crafting/default_states.json';
@@ -8,7 +7,7 @@ const MODULE_ID = "multiversus-rpg";
 
 export class GroupDatabase {
     static init() {
-        // Database de Facções (Instâncias Ativas)
+        // Database de Facções
         game.settings.register(MODULE_ID, "factions_data", {
             scope: "world",
             config: false,
@@ -16,7 +15,7 @@ export class GroupDatabase {
             default: []
         });
 
-        // Database de Projetos de Estruturas (Blueprints Globais)
+        // Database de Blueprints
         game.settings.register(MODULE_ID, "structure_blueprints", {
             scope: "world", 
             config: false, 
@@ -24,114 +23,109 @@ export class GroupDatabase {
             default: []
         });
 
-        // --- LISTENER DE SOCKET (O GM OUVE AQUI) ---
+        // --- SOCKET LISTENER (O CÉREBRO DA SINCRONIA) ---
         game.socket.on(`module.${MODULE_ID}`, async (payload) => {
-            // Se eu sou o GM Principal ativo, eu processo os pedidos de escrita
+            // Apenas o GM Ativo processa as escritas para evitar duplicidade
             if (game.user.id === game.users.activeGM?.id) {
                 
-                // 1. Pedido para salvar Grupos (Create/Join/Update/Delete)
                 if (payload.type === "REQUEST_SAVE_GROUPS") {
-                    console.log("Database: GM processando atualização de grupos...");
-                    
-                    // MERGE INTELIGENTE:
-                    // O payload.data é o array novo que o jogador quer salvar.
-                    // Para evitar apagar dados de outros grupos que o jogador talvez não tenha carregado,
-                    // o ideal seria o jogador mandar apenas o grupo alterado.
-                    // Mas assumindo que payload.data é o array completo:
-                    
+                    console.log("[Nexus DB] GM processando save de grupos...");
+                    // O GM salva os dados recebidos (Merge ou Overwrite dependendo da lógica)
+                    // Aqui assumimos que o payload.data já é o array completo tratado pelo solicitante
+                    // Nota: Em sistemas complexos, o ideal é o GM fazer o merge, mas para simplificar:
                     await game.settings.set(MODULE_ID, "factions_data", payload.data);
                     
-                    // Avisa a todos que atualizou
+                    // Avisa a todos que houve mudança
                     game.socket.emit(`module.${MODULE_ID}`, { type: "GROUP_UPDATE" });
-                    Hooks.callAll("groupSystemUpdate");
+                    Hooks.callAll("nexusGroupUpdate");
                 }
 
-                // 2. Pedido para salvar Blueprints
                 if (payload.type === "REQUEST_SAVE_BLUEPRINTS") {
                     await game.settings.set(MODULE_ID, "structure_blueprints", payload.data);
                     game.socket.emit(`module.${MODULE_ID}`, { type: "GROUP_UPDATE" });
-                    Hooks.callAll("groupSystemUpdate");
+                    Hooks.callAll("nexusGroupUpdate");
                 }
             }
 
-            // Se for apenas notificação de update (para todos)
+            // Todos os clientes (incluindo o GM que não processou) recebem isso
             if (payload.type === "GROUP_UPDATE") {
-                Hooks.callAll("groupSystemUpdate");
+                Hooks.callAll("nexusGroupUpdate");
             }
         });
 
-        console.log("MULTIVERSUS | Database de Facções & Estruturas Iniciada (Socket Ready).");
+        console.log("MULTIVERSUS | Database de Facções Iniciada.");
     }
 
-    // --- LEITURA (Qualquer um pode ler) ---
+    // --- LEITURA ---
     static getGroups() {
         return game.settings.get(MODULE_ID, "factions_data") || [];
     }
 
-    // --- ESCRITA INTELIGENTE (Socket Delegate) ---
+    static getBlueprints() {
+        return game.settings.get(MODULE_ID, "structure_blueprints") || [];
+    }
+
+    // --- ESCRITA SEGURA ---
     static async updateGroups(newData) {
         if (game.user.isGM) {
-            // Se sou GM, salvo direto
+            // GM salva direto
             await game.settings.set(MODULE_ID, "factions_data", newData);
             game.socket.emit(`module.${MODULE_ID}`, { type: "GROUP_UPDATE" });
-            Hooks.callAll("groupSystemUpdate");
+            Hooks.callAll("nexusGroupUpdate");
         } else {
-            // Se sou Jogador, peço pro GM salvar
+            // Jogador pede pro GM salvar
             if (!game.users.activeGM) {
-                ui.notifications.error("Nenhum Mestre online para validar a alteração.");
-                return;
+                return ui.notifications.error("Nenhum Mestre online para salvar as alterações.");
             }
             game.socket.emit(`module.${MODULE_ID}`, { 
                 type: "REQUEST_SAVE_GROUPS", 
                 data: newData 
             });
-            // Atualização otimista local para fluidez
-            Hooks.callAll("groupSystemUpdate"); 
+            // Atualiza localmente para feedback instantâneo (Otimista)
+            Hooks.callAll("nexusGroupUpdate");
         }
     }
 
     static async updateGroupData(groupId, updateData) {
-        // Recarrega do banco para garantir que temos a versão mais recente antes de editar
+        // Recarrega para garantir dados frescos antes de mergear
         const groups = this.getGroups(); 
         const index = groups.findIndex(g => g.id === groupId);
         
         if (index !== -1) {
-            // Merge profundo para não perder dados aninhados se updateData for parcial
+            // Merge recursivo para não perder dados aninhados (Inventory, Bio)
             groups[index] = foundry.utils.mergeObject(groups[index], updateData);
             await this.updateGroups(groups); 
         }
     }
 
     // =================================================================
-    //                          GERENCIAMENTO DE GRUPO
+    //                          AÇÕES DE GRUPO
     // =================================================================
 
     static async createGroup(name, leaderId, password = "", isNomad = false) {
         const groups = this.getGroups();
         if (groups.find(g => g.name === name)) throw new Error("Nome já existe.");
 
-        // Clone profundo para evitar referência
         const baseTemplate = JSON.parse(JSON.stringify(defaultStates.BASE || {}));
         
         const newGroup = {
             ...baseTemplate, 
-            
             id: foundry.utils.randomID(),
             name: name, 
             password: password,
             leader: leaderId,
-            members: [leaderId],
+            members: [leaderId], // Líder já entra como membro
             isNomad: isNomad,
             createdAt: Date.now(),
             
-            // Garante campos vitais se o template falhar
+            // Garante inicialização de objetos vitais
             resources: baseTemplate.resources || { metal: 0, fuel: 0, tech: 0 },
             bio: baseTemplate.bio || { fome: 10, sede: 10, exaustao: 0 }, 
             baseStats: baseTemplate.baseStats || { hp: 20, maxHp: 20, har: 0, lar: 0, protection: 1 },
             structures: [], 
             missions: [],
-            // Inventory precisa ser inicializado corretamente
-            inventory: baseTemplate.inventory || { MATERIA:{}, ENERGIA:{}, ORGANISMO:{}, NUCLEO:{} },
+            // Importante: Inicializa todos os tipos de material para evitar undefined
+            inventory: { MATERIA:{}, ENERGIA:{}, ORGANISMO:{}, NUCLEO:{}, ...(baseTemplate.inventory || {}) },
             npcs: [],
             population: { count: 0, max: 10 }
         };
@@ -153,14 +147,11 @@ export class GroupDatabase {
     static async deleteGroup(groupId) {
         let groups = this.getGroups();
         const newGroups = groups.filter(g => g.id !== groupId);
-        
         if (newGroups.length === groups.length) return;
-
         await this.updateGroups(newGroups);
     }
 
     static async joinGroup(groupId, userId, inputPassword = "") {
-        // Recarrega para evitar entrar em grupo fantasma
         const groups = this.getGroups();
         const group = groups.find(g => g.id === groupId);
         
@@ -171,9 +162,10 @@ export class GroupDatabase {
             if (inputPassword !== group.password) throw new Error("Senha Incorreta.");
         }
 
+        // Remove de outros grupos antes de entrar (Regra de 1 grupo por vez)
         this.removeMemberFromAll(groups, userId);
-        group.members.push(userId);
         
+        group.members.push(userId);
         await this.updateGroups(groups);
     }
 
@@ -183,12 +175,14 @@ export class GroupDatabase {
         await this.updateGroups(groups);
     }
 
+    // Helper interno: Remove usuário de qualquer grupo e limpa grupos nômades vazios
     static removeMemberFromAll(groups, userId) {
         for (let i = groups.length - 1; i >= 0; i--) {
             const g = groups[i];
+            // Filtra membros
             g.members = g.members.filter(m => m !== userId);
             
-            // Se for nomade e ficar vazio, deleta automaticamente
+            // Se for nômade e ficar vazio, deleta o grupo
             if (g.isNomad && g.members.length === 0) {
                 groups.splice(i, 1);
             }
@@ -196,32 +190,18 @@ export class GroupDatabase {
     }
 
     static getUserGroup(userId) {
-        // Retorna o grupo onde o ID está na lista de membros
         return this.getGroups().find(g => g.members.includes(userId));
     }
 
-    static async kickMember(groupId, targetId) {
-        const groups = this.getGroups();
-        const group = groups.find(g => g.id === groupId);
-        if (group) {
-            group.members = group.members.filter(m => m !== targetId);
-            await this.updateGroups(groups);
-        }
-    }
-
     // =================================================================
-    //                          SISTEMA DE ESTRUTURAS
+    //                          ESTRUTURAS (BLUEPRINTS)
     // =================================================================
-
-    static getBlueprints() {
-        return game.settings.get(MODULE_ID, "structure_blueprints") || [];
-    }
 
     static async updateBlueprints(newBps) {
         if (game.user.isGM) {
             await game.settings.set(MODULE_ID, "structure_blueprints", newBps);
             game.socket.emit(`module.${MODULE_ID}`, { type: "GROUP_UPDATE" });
-            Hooks.callAll("groupSystemUpdate");
+            Hooks.callAll("nexusGroupUpdate");
         } else {
             if (!game.users.activeGM) return;
             game.socket.emit(`module.${MODULE_ID}`, { type: "REQUEST_SAVE_BLUEPRINTS", data: newBps });
@@ -231,10 +211,8 @@ export class GroupDatabase {
     static async saveBlueprint(blueprint) {
         const bps = this.getBlueprints();
         const index = bps.findIndex(b => b.id === blueprint.id);
-        
         if (index !== -1) bps[index] = blueprint;
         else bps.push(blueprint);
-
         await this.updateBlueprints(bps);
     }
 
@@ -264,13 +242,12 @@ export class GroupDatabase {
         const groups = this.getGroups();
         const group = groups.find(g => g.id === groupId);
         if (!group) return;
-
         group.structures = group.structures.filter(s => s.instanceId !== instanceId);
         await this.updateGroups(groups);
     }
 
     // =================================================================
-    //                          CICLO DE VIDA & NPCs
+    //                          CICLO E NPCS
     // =================================================================
 
     static async runNPCCycle(groupId) {
@@ -283,13 +260,12 @@ export class GroupDatabase {
 
         // 1. SUSTENTO
         const npcCount = group.npcs ? group.npcs.length : 0;
-        let totalOrganismNeeded = npcCount * 2; 
+        let totalOrganismNeeded = npcCount * 2; // 2 recursos por NPC
         let consumed = 0;
 
         if (!group.inventory) group.inventory = {ORGANISMO:{}}; 
         if (!group.inventory.ORGANISMO) group.inventory.ORGANISMO = {};
 
-        // Consome recursos de Tier 1 a 7
         for (let t = 1; t <= 7; t++) {
             if (totalOrganismNeeded <= 0) break;
             let available = group.inventory.ORGANISMO[t] || 0;
@@ -314,7 +290,6 @@ export class GroupDatabase {
         if (group.npcs) {
             group.npcs.forEach(npc => {
                 const roleData = groupState.ROLES ? groupState.ROLES[npc.role] : null;
-                // Ignora defesa na produção automática de recursos
                 if (!roleData || roleData.output_resource === "DEFESA") return;
 
                 let productionVal = npc.stats.production_bonus || 2;
@@ -367,17 +342,16 @@ export class GroupDatabase {
         newNPC.id = foundry.utils.randomID();
         newNPC.name = `Sobrevivente ${Math.floor(Math.random()*1000)}`;
         newNPC.role = randomRoleKey;
-        newNPC.roleLabel = roleData.label; 
         newNPC.personality = randomPersKey;
-        newNPC.personalityLabel = persData.label;
         newNPC.rarity = rarityKey;
         newNPC.img = "icons/svg/mystery-man.svg"; 
         newNPC.description = persData.description;
 
-        newNPC.stats = newNPC.stats || {};
-        newNPC.stats.production_bonus = rarityData.production_val;
-        newNPC.stats.combat_dice = rarityData.combat_dice;
-        newNPC.stats.personality_effect = persData.effect.label;
+        newNPC.stats = {
+            production_bonus: rarityData.production_val,
+            combat_dice: rarityData.combat_dice,
+            personality_effect: persData.effect.label
+        };
 
         if(!group.npcs) group.npcs = [];
         group.npcs.push(newNPC);

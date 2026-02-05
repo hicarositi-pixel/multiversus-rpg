@@ -2,34 +2,36 @@
     import { fade } from 'svelte/transition';
     import { GroupDatabase } from '../../database/GroupDatabase.js';
 
-    export let group = null; // Inicializa null para segurança
+    // Inicializa com null para evitar "undefined"
+    export let group = null;
     export let isLeader = false;
     const isGM = game.user.isGM;
 
-    // Sincronia local com proteção (Safe Access)
-    // Se group for undefined, usa objeto vazio para não quebrar a UI
-    $: baseBio = group?.bio || { fome: 10, sede: 10, exaustao: 0 };
-    $: baseStats = group?.baseStats || { hp: 20, maxHp: 20, har: 0, lar: 0, protection: 1 };
+    // Sincronia local com proteção total
+    // Se group for null, usa os valores padrão imediatamente
+    $: baseBio = (group && group.bio) ? group.bio : { fome: 10, sede: 10, exaustao: 0 };
+    $: baseStats = (group && group.baseStats) ? group.baseStats : { hp: 20, maxHp: 20, har: 0, lar: 0, protection: 1 };
 
     // --- CÁLCULO DE CONSUMO ---
-    $: npcCount = group?.npcs?.length || 0;
+    $: npcCount = (group && group.npcs) ? group.npcs.length : 0;
     $: costPerAction = npcCount; 
     $: totalCycleCost = costPerAction * 2; 
 
     async function updateStats() {
-        if (!isGM || !group?.id) return; // Proteção extra
+        if (!isGM || !group || !group.id) return; 
         await GroupDatabase.updateGroupData(group.id, { baseStats, bio: baseBio });
         ui.notifications.info("Estatísticas da Base Atualizadas.");
     }
 
     async function runCycle() {
-        if (!isGM || !group?.id) return;
+        if (!isGM || !group || !group.id) return;
         await GroupDatabase.runNPCCycle(group.id);
     }
 </script>
 
 {#if group && group.id}
     <div class="dashboard-container" in:fade>
+        
         <div class="sustenance-panel">
             <div class="sus-header">
                 <i class="fas fa-apple-alt"></i> LOGÍSTICA DE SOBREVIVÊNCIA
@@ -158,8 +160,8 @@
 
     </div>
 {:else}
-    <div style="padding: 20px; color: #00ff41; text-align: center;">
-        <i class="fas fa-circle-notch fa-spin"></i> Carregando Dashboard...
+    <div style="padding: 20px; color: #00ff41; text-align: center; opacity: 0.7;">
+        <i class="fas fa-circle-notch fa-spin"></i> Sincronizando Dashboard...
     </div>
 {/if}
 
