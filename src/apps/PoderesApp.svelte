@@ -1,5 +1,5 @@
 <script>
-  import { onMount, tick } from 'svelte';
+  import { onMount, tick, onDestroy } from 'svelte';
   import { slide, fade } from 'svelte/transition';
   import PowerInventoryCard from '../components/PowerInventoryCard.svelte';
   import PoderesManager from './PoderesManager.js'; 
@@ -11,40 +11,48 @@
   const isGM = game.user.isGM;
   const MODULE_ID = "multiversus-rpg";
 
+  // Captura o UUID para buscar sempre a versão mais fresca do ator
+  // Isso resolve problemas com Tokens e Atores Sintéticos
+  const actorUUID = actor.uuid;
+
   // --- DADOS REATIVOS ---
   let searchTerm = "";
   let powers = [];
+  
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
 
-  // --- CONTROLE DE ATUALIZAÇÃO (DEBOUNCE) ---
+  // --- CONTROLE DE ATUALIZAÇÃO ---
   let updateTimer = null;
 
   function scheduleRefresh() {
       if (updateTimer) clearTimeout(updateTimer);
-      // 100ms é o tempo ideal para o banco de dados do Foundry processar a criação do item
+      // 150ms é um delay seguro para garantir que o Foundry terminou de gravar o item
       updateTimer = setTimeout(() => {
           refreshData();
-      }, 100); 
+      }, 150); 
   }
 
-  // --- FUNÇÃO DE BUSCA E CÁLCULO (BLINDADA) ---
+  // --- FUNÇÃO CORE (AQUI ESTÁ A CORREÇÃO) ---
   async function refreshData() {
-    // 1. BUSCA O ATOR "REAL" ATUALIZADO
-    // Isso é crucial. A prop 'actor' pode ficar desatualizada.
-    const realActor = game.actors.get(actor.id);
-    
-    if (!realActor) return; // Segurança caso o ator tenha sido deletado
+    // 1. Busca a instância mais recente do Ator usando o UUID
+    // Não usamos a prop 'actor' pois ela pode estar obsoleta (stale)
+    const freshActor = await fromUuid(actorUUID);
 
-    // 2. Filtra itens usando a FONTE ATUALIZADA
-    // Forçamos a criação de um novo array [...] para o Svelte detectar mudança
-    const rawPowers = realActor.items.filter(i => i && i.type === "power");
+    if (!freshActor) {
+        console.error("[PoderesApp] Ator não encontrado via UUID.");
+        return;
+    }
+
+    // 2. Filtra itens da instância fresca
+    // O [... ] cria um novo array para forçar o Svelte a redesenhar
+    const rawPowers = freshActor.items.filter(i => i && i.type === "power");
     
     // 3. Atualiza a lista visual
     powers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
     activePowerCount = powers.length;
 
-    // 4. Recalcula XP (Lógica mantida)
+    // 4. Recalcula XP
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
     calculatedTotalCost = powers.reduce((acc, item) => {
@@ -58,66 +66,73 @@
         const discount = isInitial ? (4 * base) : 0;
         
         const diceData = itemFlags.dice || itemSystem.dice || {};
+        
         const dN = Number(diceData.normal) || 0;
         const dH = Number(diceData.hard) || 0;
         const dW = Number(diceData.wiggle) || 0;
         
         const cost = (dN * base) + (dH * base * 2) + (dW * base * 4);
+        
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // 5. Salva no Ator se mudou (Render False para não piscar a ficha inteira)
-    const currentSavedCost = Number(realActor.flags?.[MODULE_ID]?.powersSpent) || 0;
+    // 5. Sincroniza XP Total no Ator (se mudou)
+    // Usamos o freshActor para garantir que o update vá para o lugar certo
+    const currentSavedCost = Number(freshActor.flags?.[MODULE_ID]?.powersSpent) || 0;
 
     if (calculatedTotalCost !== currentSavedCost) {
-        await realActor.update({ 
+        await freshActor.update({ 
             [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost 
         }, { render: false });
-        console.log(`[Nexus] XP Sincronizado: ${calculatedTotalCost}`);
     }
     
-    await tick(); // Força atualização do DOM
+    await tick();
   }
 
-  // --- HOOKS ---
+  // --- HOOKS DE REATIVIDADE ---
   onMount(() => {
     refreshData(); 
 
-    // Hook unificado para qualquer mudança em itens deste ator
-    // Isso cobre: Criar, Deletar, Editar (Nome, Dados)
-    const hookId = Hooks.on("updateActor", (doc) => {
-        if (doc.id === actor.id) scheduleRefresh();
-    });
-    
+    // Hook Genérico: Qualquer operação de Item (Create, Update, Delete)
+    // Se o item pertencer a este ator, atualiza a lista.
     const hookCreate = Hooks.on("createItem", (item) => { 
-        if(item.parent?.id === actor.id) scheduleRefresh(); 
+        if (item.parent?.uuid === actorUUID) {
+            console.log("Poder criado, atualizando...");
+            scheduleRefresh(); 
+        }
     });
 
     const hookDelete = Hooks.on("deleteItem", (item) => { 
-        if(item.parent?.id === actor.id) scheduleRefresh(); 
+        if (item.parent?.uuid === actorUUID) scheduleRefresh(); 
     });
 
     const hookUpdate = Hooks.on("updateItem", (item) => { 
-        if(item.parent?.id === actor.id) scheduleRefresh(); 
+        if (item.parent?.uuid === actorUUID && item.type === "power") scheduleRefresh(); 
     });
 
+    // Se o próprio ator mudar (ex: reverteu um snapshot)
+    const hookActor = Hooks.on("updateActor", (doc) => {
+        if (doc.uuid === actorUUID) scheduleRefresh();
+    });
+
+    // Limpeza ao fechar
     return () => {
-      Hooks.off("updateActor", hookId);
       Hooks.off("createItem", hookCreate);
       Hooks.off("deleteItem", hookDelete);
       Hooks.off("updateItem", hookUpdate);
+      Hooks.off("updateActor", hookActor);
     };
   });
 
   $: filteredPowers = powers.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   function openLibrary() {
-    // Se o Manager precisa do ator, temos que passar!
     try { new PoderesManager(actor).render(true); } catch (e) { console.error(e); }
   }
 </script>
 
 <div class="powers-terminal">
+  
   <header class="term-header">
     <div class="hud-module main">
       <div class="hud-top">
@@ -175,11 +190,11 @@
     <div class="footer-left">SYS_STATUS: <span style="color:var(--c-primary)">ONLINE</span></div>
     <div class="footer-right">SYNC_MODE: <span style="color:var(--c-primary)">AUTO_RT</span></div>
   </footer>
+
 </div>
 
 <style>
-  /* Use o mesmo CSS que você já tem */
-  /* Copie o bloco <style> do seu código anterior para cá */
+  /* MANTENDO O SEU CSS EXATO */
   .powers-terminal { height: 100%; display: flex; flex-direction: column; gap: 12px; background: transparent; color: var(--c-text); font-family: var(--font-body); padding: 5px; position: relative; overflow: hidden; }
   .term-header { display: flex; gap: 10px; z-index: 1; height: 60px; flex-shrink: 0; }
   .hud-module { background: rgba(0, 0, 0, 0.6); border: 1px solid #333; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; padding: 0 15px; position: relative; overflow: hidden; }

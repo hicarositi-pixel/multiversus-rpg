@@ -2,16 +2,18 @@
     import { slide } from 'svelte/transition';
     import { GroupDatabase } from '../../database/GroupDatabase.js';
 
-    export let group;
+    // --- PROTEÇÃO 1 ---
+    export let group = null;
     export let isGM;
 
-    let missions = group.missions || [];
-    $: missions = group.missions || [];
+    // --- PROTEÇÃO 2: Reatividade Segura ---
+    // Se group for nulo, retorna array vazio
+    $: missions = group?.missions || [];
 
     // Formulário de Criação (Só GM)
     let newMission = {
         title: "", difficulty: "NORMAL", desc: "", rewards: "",
-        objectives: [{ text: "", hidden: false }] // Começa com 1
+        objectives: [{ text: "", hidden: false }] 
     };
 
     function addObjectiveRow() {
@@ -19,101 +21,108 @@
     }
 
     async function createMission() {
+        if (!group) return;
         if (!newMission.title) return;
         await GroupDatabase.addMission(group.id, newMission);
-        // Reseta form
         newMission = { title: "", difficulty: "NORMAL", desc: "", rewards: "", objectives: [{ text: "", hidden: false }] };
     }
 
     async function toggleObj(mId, idx, field) {
+        if (!group) return;
         if (!isGM) return;
         await GroupDatabase.toggleObjective(group.id, mId, idx, field);
     }
 
     async function deleteMission(mId) {
+        if (!group) return;
         await GroupDatabase.deleteMission(group.id, mId);
     }
 </script>
 
-<div class="missions-container custom-scroll">
-    
-    {#if isGM}
-        <div class="gm-creator">
-            <h4>NOVA MISSÃO (GM)</h4>
-            <div class="form-row">
-                <input type="text" bind:value={newMission.title} placeholder="Título da Missão" />
-                <select bind:value={newMission.difficulty}>
-                    <option>FÁCIL</option>
-                    <option>NORMAL</option>
-                    <option>DIFÍCIL</option>
-                    <option>SUICIDA</option>
-                </select>
-            </div>
-            <textarea bind:value={newMission.desc} placeholder="Descrição breve..." rows="2"></textarea>
-            
-            <div class="objs-list">
-                <small>OBJETIVOS:</small>
-                {#each newMission.objectives as obj, i}
-                    <div class="obj-input">
-                        <input type="text" bind:value={obj.text} placeholder="Objetivo {i+1}..." />
-                        <label>
-                            <input type="checkbox" bind:checked={obj.hidden} /> Secreto?
-                        </label>
-                    </div>
-                {/each}
-                <button class="small-btn" on:click={addObjectiveRow}>+ Add Objetivo</button>
-            </div>
-            
-            <input type="text" bind:value={newMission.rewards} placeholder="Recompensas (Texto)..." />
-            <button class="create-btn" on:click={createMission}>PUBLICAR MISSÃO</button>
-        </div>
-    {/if}
-
-    <div class="missions-list">
-        {#each missions as m}
-            <div class="mission-card" transition:slide>
-                <div class="m-header">
-                    <span class="diff-tag {m.difficulty}">{m.difficulty}</span>
-                    <h3>{m.title}</h3>
-                    {#if isGM}<button class="del-btn" on:click={()=>deleteMission(m.id)}>X</button>{/if}
+{#if group && group.id}
+    <div class="missions-container custom-scroll">
+        
+        {#if isGM}
+            <div class="gm-creator">
+                <h4>NOVA MISSÃO (GM)</h4>
+                <div class="form-row">
+                    <input type="text" bind:value={newMission.title} placeholder="Título da Missão" />
+                    <select bind:value={newMission.difficulty}>
+                        <option>FÁCIL</option>
+                        <option>NORMAL</option>
+                        <option>DIFÍCIL</option>
+                        <option>SUICIDA</option>
+                    </select>
                 </div>
-                <p class="desc">{m.desc}</p>
+                <textarea bind:value={newMission.desc} placeholder="Descrição breve..." rows="2"></textarea>
                 
-                <div class="objectives-box">
-                    {#each m.objectives as obj, i}
-                        <div class="obj-row {obj.completed ? 'done' : ''}">
-                            <div class="check-area" on:click={() => isGM && toggleObj(m.id, i, 'completed')}>
-                                <i class="fas {obj.completed ? 'fa-check-square' : 'fa-square'}"></i>
-                            </div>
-                            
-                            <span class="obj-text">
-                                {#if obj.hidden && !isGM}
-                                    <span class="redacted">████████████ (SECRETO)</span>
-                                {:else}
-                                    {obj.text} {#if obj.hidden}(👁️ GM: Oculto){/if}
-                                {/if}
-                            </span>
-
-                            {#if isGM}
-                                <i class="fas {obj.hidden ? 'fa-eye-slash' : 'fa-eye'} gm-eye" 
-                                   on:click={() => toggleObj(m.id, i, 'hidden')} 
-                                   title="Revelar/Ocultar"></i>
-                            {/if}
+                <div class="objs-list">
+                    <small>OBJETIVOS:</small>
+                    {#each newMission.objectives as obj, i}
+                        <div class="obj-input">
+                            <input type="text" bind:value={obj.text} placeholder="Objetivo {i+1}..." />
+                            <label>
+                                <input type="checkbox" bind:checked={obj.hidden} /> Secreto?
+                            </label>
                         </div>
                     {/each}
+                    <button class="small-btn" on:click={addObjectiveRow}>+ Add Objetivo</button>
                 </div>
-
-                <div class="rewards">
-                    <strong>RECOMPENSA:</strong> {m.rewards}
-                </div>
+                
+                <input type="text" bind:value={newMission.rewards} placeholder="Recompensas (Texto)..." />
+                <button class="create-btn" on:click={createMission}>PUBLICAR MISSÃO</button>
             </div>
-        {:else}
-            <div class="empty">Nenhuma missão ativa no momento.</div>
-        {/each}
+        {/if}
+
+        <div class="missions-list">
+            {#each missions as m}
+                <div class="mission-card" transition:slide>
+                    <div class="m-header">
+                        <span class="diff-tag {m.difficulty}">{m.difficulty}</span>
+                        <h3>{m.title}</h3>
+                        {#if isGM}<button class="del-btn" on:click={()=>deleteMission(m.id)}>X</button>{/if}
+                    </div>
+                    <p class="desc">{m.desc}</p>
+                    
+                    <div class="objectives-box">
+                        {#each m.objectives as obj, i}
+                            <div class="obj-row {obj.completed ? 'done' : ''}">
+                                <div class="check-area" on:click={() => isGM && toggleObj(m.id, i, 'completed')}>
+                                    <i class="fas {obj.completed ? 'fa-check-square' : 'fa-square'}"></i>
+                                </div>
+                                
+                                <span class="obj-text">
+                                    {#if obj.hidden && !isGM}
+                                        <span class="redacted">████████████ (SECRETO)</span>
+                                    {:else}
+                                        {obj.text} {#if obj.hidden}(👁️ GM: Oculto){/if}
+                                    {/if}
+                                </span>
+
+                                {#if isGM}
+                                    <i class="fas {obj.hidden ? 'fa-eye-slash' : 'fa-eye'} gm-eye" 
+                                       on:click={() => toggleObj(m.id, i, 'hidden')} 
+                                       title="Revelar/Ocultar"></i>
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+
+                    <div class="rewards">
+                        <strong>RECOMPENSA:</strong> {m.rewards}
+                    </div>
+                </div>
+            {:else}
+                <div class="empty">Nenhuma missão ativa no momento.</div>
+            {/each}
+        </div>
     </div>
-</div>
+{:else}
+    <div style="padding: 20px; color: #ccc; text-align: center;">Carregando Missões...</div>
+{/if}
 
 <style>
+/* CSS Original (Mantido) */
     .missions-container { padding: 10px; color: #fff; font-family: monospace; }
     
     /* FORM GM */

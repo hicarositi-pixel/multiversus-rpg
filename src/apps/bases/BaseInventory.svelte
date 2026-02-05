@@ -3,7 +3,8 @@
     import { GroupDatabase } from '../../database/GroupDatabase.js';
     import materialsDB from '../../../crafting/materials.json';
 
-    export let group; // Objeto reativo vindo do pai
+    // --- PROTEÇÃO 1 ---
+    export let group = null;
     export let actor; 
     export let isLeader;
 
@@ -20,38 +21,33 @@
     let activeType = 'MATERIA';
     let transferMode = 'DEPOSIT';
     let transferAmount = 1;
-    let groupNotes = group.notes || "";
+    let groupNotes = group?.notes || ""; // Safe access
     let isSavingNotes = false;
 
-    // Reatividade para garantir que inventories existam
-    $: if (!group.inventory) group.inventory = { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
+    // --- PROTEÇÃO 2: Reatividade Segura ---
+    // Só tenta inicializar se group existir
+    $: if (group && !group.inventory) group.inventory = { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
 
-    // --- FUNÇÃO DO MESTRE (GOD MODE) ---
+    // --- FUNÇÕES ---
     async function modifyStock(type, tier, amount) {
+        if (!group) return;
         if (!isGM) return ui.notifications.warn("Apenas o GM pode alterar a realidade.");
-        
-        // Garante a estrutura
         if (!group.inventory[type]) group.inventory[type] = {};
 
         let current = group.inventory[type][tier] || 0;
         let newVal = Math.max(0, current + amount);
         
         group.inventory[type][tier] = newVal;
-        
-        // Força reatividade local
-        group = group; 
+        group = group; // Force update
 
         await GroupDatabase.updateGroupData(group.id, { inventory: group.inventory });
     }
 
-    // --- FUNÇÃO DO JOGADOR (FÍSICA REAL) ---
     async function executeTransfer(type, tier, qty = null) {
+        if (!group) return;
         if (!actor) return ui.notifications.warn("Vincule um personagem para interagir com o cofre.");
 
-        // Referências
         const baseInv = group.inventory;
-        // O inventário do personagem geralmente fica em system.pockets no seu sistema
-        // Se não existir, criamos um objeto vazio para leitura
         const charPockets = actor.system.pockets || {}; 
         
         let amount = qty === 'ALL' ? 999999 : (qty || transferAmount);
@@ -59,43 +55,32 @@
         if (transferMode === 'DEPOSIT') {
             const available = charPockets[type]?.[tier] || 0;
             if (available <= 0) return ui.notifications.warn("Você não possui este item.");
-            
-            // Ajusta quantidade real
             amount = Math.min(amount, available);
 
-            // Atualiza Base
             if (!baseInv[type]) baseInv[type] = {};
             baseInv[type][tier] = (baseInv[type][tier] || 0) + amount;
 
-            // Atualiza Personagem
-            // Nota: Para atualizar um campo aninhado no Foundry, usamos a notação de ponto
             await actor.update({ [`system.pockets.${type}.${tier}`]: available - amount });
 
         } else { // WITHDRAW
             const available = baseInv[type]?.[tier] || 0;
             if (available <= 0) return ui.notifications.warn("Cofre vazio.");
-
             amount = Math.min(amount, available);
 
-            // Atualiza Base
             baseInv[type][tier] = available - amount;
-
-            // Atualiza Personagem
             const currentActorQty = charPockets[type]?.[tier] || 0;
             await actor.update({ [`system.pockets.${type}.${tier}`]: currentActorQty + amount });
         }
 
-        // Salva Base e Força Reatividade
         group.inventory = baseInv;
-        group = group; // Svelte update
-        
+        group = group;
         await GroupDatabase.updateGroupData(group.id, { inventory: baseInv });
         ui.notifications.info(`${transferMode === 'DEPOSIT' ? 'Depositado' : 'Sacado'}: ${amount}x ${type} T${tier}`);
     }
 
-    // --- BLOCO DE NOTAS ---
     let notesTimeout;
     function handleNotesInput() {
+        if (!group) return;
         isSavingNotes = true;
         clearTimeout(notesTimeout);
         notesTimeout = setTimeout(async () => {
@@ -105,101 +90,105 @@
     }
 </script>
 
-<div class="inventory-layout" in:fade>
-    
-    <header class="inv-header">
-        <div class="mode-switch">
-            <button class:active={transferMode === 'DEPOSIT'} on:click={() => transferMode = 'DEPOSIT'}>
-                <i class="fas fa-upload"></i> DEPOSITAR
-            </button>
-            <button class:active={transferMode === 'WITHDRAW'} on:click={() => transferMode = 'WITHDRAW'}>
-                <i class="fas fa-download"></i> SACAR
-            </button>
-        </div>
+{#if group && group.id}
+    <div class="inventory-layout" in:fade>
         
-        <div class="amount-ctrl">
-            <small>QTD:</small>
-            <input type="number" min="1" bind:value={transferAmount} class="qty-input"/>
-        </div>
-    </header>
-
-    <nav class="type-nav">
-        {#each matTypes as type}
-            <button class:active={activeType === type} 
-                    style="--type-color: {materialsDB[type].color}"
-                    on:click={() => activeType = type}>
-                <i class="{materialsDB[type].icon}"></i> {materialsDB[type].label}
-            </button>
-        {/each}
-    </nav>
-
-    <div class="items-grid custom-scroll">
-        {#each tiers as tier}
-            {@const baseQty = group.inventory?.[activeType]?.[tier] || 0}
-            {@const charQty = actor?.system.pockets?.[activeType]?.[tier] || 0}
-            {@const hasItem = baseQty > 0 || charQty > 0}
-
-            <div class="item-row" class:dimmed={!hasItem}>
-                
-                <div class="item-identity">
-                    <span class="tier-badge" style="background: {RARITY_COLORS[tier]}">T{tier}</span>
-                    <span class="rarity-name">{materialsDB[activeType].tiers[tier].label}</span>
-                </div>
-
-                <div class="stocks">
-                    {#if isGM}
-                        <div class="gm-controls">
-                            <button on:click={() => modifyStock(activeType, tier, -1)}>-</button>
-                        </div>
-                    {/if}
-
-                    <div class="stock-box base" title="No Cofre da Base">
-                        <i class="fas fa-archive"></i> {baseQty}
-                    </div>
-
-                    {#if isGM}
-                        <div class="gm-controls">
-                            <button on:click={() => modifyStock(activeType, tier, 1)}>+</button>
-                        </div>
-                    {/if}
-
-                    <div class="arrow-indicator">
-                        <i class="fas {transferMode === 'DEPOSIT' ? 'fa-arrow-right' : 'fa-arrow-left'}"></i>
-                    </div>
-
-                    <div class="stock-box actor" title="No seu Inventário">
-                        <i class="fas fa-user"></i> {charQty}
-                    </div>
-                </div>
-
-                <div class="actions">
-                    <button class="btn-action" on:click={() => executeTransfer(activeType, tier)}>
-                        {transferMode === 'DEPOSIT' ? 'GUARDAR' : 'PEGAR'}
-                    </button>
-                    <button class="btn-all" on:click={() => executeTransfer(activeType, tier, 'ALL')}>
-                        ALL
-                    </button>
-                </div>
+        <header class="inv-header">
+            <div class="mode-switch">
+                <button class:active={transferMode === 'DEPOSIT'} on:click={() => transferMode = 'DEPOSIT'}>
+                    <i class="fas fa-upload"></i> DEPOSITAR
+                </button>
+                <button class:active={transferMode === 'WITHDRAW'} on:click={() => transferMode = 'WITHDRAW'}>
+                    <i class="fas fa-download"></i> SACAR
+                </button>
             </div>
-        {/each}
-    </div>
+            
+            <div class="amount-ctrl">
+                <small>QTD:</small>
+                <input type="number" min="1" bind:value={transferAmount} class="qty-input"/>
+            </div>
+        </header>
 
-    <div class="notes-section">
-        <div class="notes-header">
-            <i class="fas fa-sticky-note"></i> NOTAS DA FACÇÃO
-            {#if isSavingNotes}<span class="saving">Salvando...</span>{/if}
+        <nav class="type-nav">
+            {#each matTypes as type}
+                <button class:active={activeType === type} 
+                        style="--type-color: {materialsDB[type].color}"
+                        on:click={() => activeType = type}>
+                    <i class="{materialsDB[type].icon}"></i> {materialsDB[type].label}
+                </button>
+            {/each}
+        </nav>
+
+        <div class="items-grid custom-scroll">
+            {#each tiers as tier}
+                {@const baseQty = group.inventory?.[activeType]?.[tier] || 0}
+                {@const charQty = actor?.system.pockets?.[activeType]?.[tier] || 0}
+                {@const hasItem = baseQty > 0 || charQty > 0}
+
+                <div class="item-row" class:dimmed={!hasItem}>
+                    
+                    <div class="item-identity">
+                        <span class="tier-badge" style="background: {RARITY_COLORS[tier]}">T{tier}</span>
+                        <span class="rarity-name">{materialsDB[activeType].tiers[tier].label}</span>
+                    </div>
+
+                    <div class="stocks">
+                        {#if isGM}
+                            <div class="gm-controls">
+                                <button on:click={() => modifyStock(activeType, tier, -1)}>-</button>
+                            </div>
+                        {/if}
+
+                        <div class="stock-box base" title="No Cofre da Base">
+                            <i class="fas fa-archive"></i> {baseQty}
+                        </div>
+
+                        {#if isGM}
+                            <div class="gm-controls">
+                                <button on:click={() => modifyStock(activeType, tier, 1)}>+</button>
+                            </div>
+                        {/if}
+
+                        <div class="arrow-indicator">
+                            <i class="fas {transferMode === 'DEPOSIT' ? 'fa-arrow-right' : 'fa-arrow-left'}"></i>
+                        </div>
+
+                        <div class="stock-box actor" title="No seu Inventário">
+                            <i class="fas fa-user"></i> {charQty}
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-action" on:click={() => executeTransfer(activeType, tier)}>
+                            {transferMode === 'DEPOSIT' ? 'GUARDAR' : 'PEGAR'}
+                        </button>
+                        <button class="btn-all" on:click={() => executeTransfer(activeType, tier, 'ALL')}>
+                            ALL
+                        </button>
+                    </div>
+                </div>
+            {/each}
         </div>
-        <textarea 
-            bind:value={groupNotes} 
-            on:input={handleNotesInput} 
-            placeholder="Registro logístico..."
-        ></textarea>
-    </div>
 
-</div>
+        <div class="notes-section">
+            <div class="notes-header">
+                <i class="fas fa-sticky-note"></i> NOTAS DA FACÇÃO
+                {#if isSavingNotes}<span class="saving">Salvando...</span>{/if}
+            </div>
+            <textarea 
+                bind:value={groupNotes} 
+                on:input={handleNotesInput} 
+                placeholder="Registro logístico..."
+            ></textarea>
+        </div>
+
+    </div>
+{:else}
+    <div style="padding: 20px; color: #ccc; text-align: center;">Carregando Cofre...</div>
+{/if}
 
 <style>
-/* CSS Mantido - Igual ao Original */
+    /* CSS Original (Mantido) */
     .inventory-layout { height: 100%; display: flex; flex-direction: column; gap: 10px; color: #fff; font-family: 'Share Tech Mono', monospace; }
 
     /* HEADER & NAV */

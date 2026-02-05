@@ -3,14 +3,17 @@
     import { GroupDatabase } from '../../database/GroupDatabase.js';
     import materialsDB from '../../../crafting/materials.json';
 
-    export let group;
+    // --- PROTEÇÃO 1: Inicializar com null ---
+    export let group = null;
     export let isLeader;
     const isGM = game.user.isGM;
 
     // --- ESTADO ---
     let activeTab = 'built'; // 'built', 'blueprints', 'creator'
     let blueprints = [];
-    let builtStructures = Array.isArray(group.structures) ? group.structures : []; // Garante array
+    
+    // --- PROTEÇÃO 2: Reatividade segura ---
+    $: builtStructures = (group && Array.isArray(group.structures)) ? group.structures : [];
 
     // --- DADOS DO CRIADOR (DRAFT) ---
     let draft = {
@@ -19,23 +22,21 @@
         icon: "fas fa-home",
         description: "",
         stats: { hp: 20, maxHp: 20, har: 0, lar: 0, protection: 0 },
-        costs: [], // { type, tier, qty }
-        effects: [], // { label, desc }
-        script: "// Escreva JS aqui. Variáveis disponíveis: actor, group, structure, ui, chat..."
+        costs: [], 
+        effects: [], 
+        script: "// Escreva JS aqui. Variáveis: actor, group, structure, ui..."
     };
 
     // Recarrega blueprints quando houver update
     $: {
         blueprints = GroupDatabase.getBlueprints();
-        builtStructures = Array.isArray(group.structures) ? group.structures : [];
     }
 
     // --- FUNÇÕES DE CRIAÇÃO (GM) ---
     function initCreator(bp = null) {
         if (bp) {
-            draft = JSON.parse(JSON.stringify(bp)); // Edição
+            draft = JSON.parse(JSON.stringify(bp)); 
         } else {
-            // Novo
             draft = {
                 id: foundry.utils.randomID(),
                 name: "Nova Estrutura",
@@ -50,55 +51,42 @@
         activeTab = 'creator';
     }
 
-    function addCostRow() {
-        draft.costs = [...draft.costs, { type: 'MATERIA', tier: 1, qty: 10 }];
-    }
-    function removeCostRow(i) {
-        draft.costs = draft.costs.filter((_, idx) => idx !== i);
-    }
-
-    function addEffectRow() {
-        draft.effects = [...draft.effects, { label: "Novo Efeito", desc: "Descrição..." }];
-    }
-    function removeEffectRow(i) {
-        draft.effects = draft.effects.filter((_, idx) => idx !== i);
-    }
+    function addCostRow() { draft.costs = [...draft.costs, { type: 'MATERIA', tier: 1, qty: 10 }]; }
+    function removeCostRow(i) { draft.costs = draft.costs.filter((_, idx) => idx !== i); }
+    function addEffectRow() { draft.effects = [...draft.effects, { label: "Novo Efeito", desc: "Descrição..." }]; }
+    function removeEffectRow(i) { draft.effects = draft.effects.filter((_, idx) => idx !== i); }
 
     async function saveBlueprint() {
         if (!draft.name) return ui.notifications.warn("Nome obrigatório.");
-        draft.stats.maxHp = draft.stats.hp; // Sincroniza MaxHP
+        draft.stats.maxHp = draft.stats.hp; 
         await GroupDatabase.saveBlueprint(draft);
         ui.notifications.info("Projeto Salvo na Database Global.");
         activeTab = 'blueprints';
     }
 
-    async function deleteBlueprint(id) {
-        await GroupDatabase.deleteBlueprint(id);
-    }
+    async function deleteBlueprint(id) { await GroupDatabase.deleteBlueprint(id); }
 
     // --- FUNÇÕES DE CONSTRUÇÃO (JOGADOR) ---
     function checkResources(costs) {
-        if (!costs || costs.length === 0) return true;
+        if (!group || !costs || costs.length === 0) return true;
         for (let c of costs) {
-            if ((group.inventory[c.type]?.[c.tier] || 0) < c.qty) return false;
+            if ((group.inventory?.[c.type]?.[c.tier] || 0) < c.qty) return false;
         }
         return true;
     }
 
     async function build(bp) {
+        if (!group) return;
         if (!isLeader && !isGM) return ui.notifications.warn("Apenas o líder constrói.");
         if (!isGM && !checkResources(bp.costs)) return ui.notifications.warn("Recursos insuficientes.");
 
-        // Consome recursos
         if (!isGM) {
             for (let c of bp.costs) {
                 group.inventory[c.type][c.tier] -= c.qty;
             }
         }
 
-        // Salva estrutura e inventário
         await GroupDatabase.buildStructure(group.id, bp);
-        // Atualiza inventário na DB também (pois buildStructure salva group, mas inventory mudou localmente)
         await GroupDatabase.updateGroupData(group.id, { inventory: group.inventory });
         
         ui.notifications.info(`${bp.name} construído!`);
@@ -106,6 +94,7 @@
     }
 
     async function demolish(instanceId) {
+        if (!group) return;
         if (!isLeader && !isGM) return;
         await GroupDatabase.deleteStructureInstance(group.id, instanceId);
     }
@@ -117,38 +106,24 @@
                 <h3 style="color:#00ff41; border-bottom:1px solid #333; margin:0 0 5px 0;">${structName}</h3>
                 <div style="font-weight:bold; color:#facc15;">SYSTEM: ${effect.label}</div>
                 <div style="font-size:12px; margin-top:5px;">${effect.desc}</div>
-            </div>
-        `;
+            </div>`;
         ChatMessage.create({ content });
     }
 
-    // --- ORACLE ENGINE (EXECUÇÃO DE SCRIPT) ---
+    // --- ORACLE ENGINE ---
     async function runScript(structure) {
         if (!structure.script || structure.script.length < 5) return;
-        
         ui.notifications.info(`Executando protocolos de ${structure.name}...`);
 
         try {
-            // Cria função assíncrona isolada
             const asyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+            const scriptFunc = new asyncFunction("structure", "group", "actor", "game", "ui", "GroupDatabase", structure.script);
             
-            const scriptFunc = new asyncFunction(
-                "structure", "group", "actor", "game", "ui", "GroupDatabase",
-                structure.script
-            );
-
-            // Executa passando o contexto atual
-            // structure é passado como objeto. Se o script alterar 'structure.currentHp', 
-            // precisaremos salvar isso manualmente depois se quisermos persistência.
-            
-            // Para permitir persistência fácil, passamos uma função de saveHelper
             const saveHelper = async () => {
                 await GroupDatabase.updateGroupData(group.id, { structures: group.structures });
             };
 
             await scriptFunc(structure, group, game.user.character, game, ui, GroupDatabase);
-            
-            // Auto-save após script rodar (caso tenha alterado stats da estrutura)
             await saveHelper();
 
         } catch (err) {
@@ -160,153 +135,157 @@
     const RARITY_COLORS = { 1:'#999', 2:'#3b82f6', 3:'#f59e0b', 4:'#ef4444', 5:'#10b981', 6:'#7c3aed', 7:'#000' };
 </script>
 
-<div class="structures-layout" in:fade>
-    
-    <div class="tabs">
-        <button class:active={activeTab==='built'} on:click={()=>activeTab='built'}>BASE OPERACIONAL</button>
-        <button class:active={activeTab==='blueprints'} on:click={()=>activeTab='blueprints'}>PROJETOS</button>
-        {#if isGM}
-            <button class:active={activeTab==='creator'} on:click={()=>initCreator()} class="gm-tab">CRIADOR (GM)</button>
-        {/if}
-    </div>
-
-    <div class="content-area custom-scroll">
+{#if group && group.id}
+    <div class="structures-layout" in:fade>
         
-        {#if activeTab === 'built'}
-            {#if builtStructures.length === 0}
-                <div class="empty">Nenhuma estrutura funcional. Vá em Projetos para construir.</div>
+        <div class="tabs">
+            <button class:active={activeTab==='built'} on:click={()=>activeTab='built'}>BASE OPERACIONAL</button>
+            <button class:active={activeTab==='blueprints'} on:click={()=>activeTab='blueprints'}>PROJETOS</button>
+            {#if isGM}
+                <button class:active={activeTab==='creator'} on:click={()=>initCreator()} class="gm-tab">CRIADOR (GM)</button>
             {/if}
-            <div class="struct-grid">
-                {#each builtStructures as struct}
-                    <div class="struct-card">
-                        <div class="head">
-                            <i class={struct.icon}></i> 
-                            <span class="s-name">{struct.name}</span>
-                            <div class="hp-badge">
-                                HP {struct.currentHp ?? struct.stats.hp}/{struct.stats.hp}
+        </div>
+
+        <div class="content-area custom-scroll">
+            
+            {#if activeTab === 'built'}
+                {#if builtStructures.length === 0}
+                    <div class="empty">Nenhuma estrutura funcional. Vá em Projetos para construir.</div>
+                {/if}
+                <div class="struct-grid">
+                    {#each builtStructures as struct}
+                        <div class="struct-card">
+                            <div class="head">
+                                <i class={struct.icon}></i> 
+                                <span class="s-name">{struct.name}</span>
+                                <div class="hp-badge">HP {struct.currentHp ?? struct.stats.hp}/{struct.stats.hp}</div>
+                                {#if isGM || isLeader}
+                                    <i class="fas fa-trash del-btn" on:click={()=>demolish(struct.instanceId)}></i>
+                                {/if}
                             </div>
-                            {#if isGM || isLeader}
-                                <i class="fas fa-trash del-btn" on:click={()=>demolish(struct.instanceId)}></i>
-                            {/if}
-                        </div>
-                        
-                        <div class="stats-row">
-                            <span title="Blindagem">HAR: {struct.stats.har}</span>
-                            <span title="Armadura Leve">LAR: {struct.stats.lar}</span>
-                            <span title="Proteção Geral">PROT: {struct.stats.protection}</span>
-                        </div>
+                            
+                            <div class="stats-row">
+                                <span title="Blindagem">HAR: {struct.stats.har}</span>
+                                <span title="Armadura Leve">LAR: {struct.stats.lar}</span>
+                                <span title="Proteção Geral">PROT: {struct.stats.protection}</span>
+                            </div>
 
-                        <div class="desc">{struct.description}</div>
+                            <div class="desc">{struct.description}</div>
 
-                        <div class="effects-list">
-                            {#each struct.effects as eff}
-                                <button class="eff-btn" on:click={()=>sendEffectToChat(eff, struct.name)}>
-                                    <i class="fas fa-bolt"></i> {eff.label}
+                            <div class="effects-list">
+                                {#each struct.effects as eff}
+                                    <button class="eff-btn" on:click={()=>sendEffectToChat(eff, struct.name)}>
+                                        <i class="fas fa-bolt"></i> {eff.label}
+                                    </button>
+                                {/each}
+                            </div>
+
+                            {#if struct.script && struct.script.length > 10}
+                                <button class="script-btn" on:click={()=>runScript(struct)}>
+                                    <i class="fas fa-terminal"></i> EXECUTAR SISTEMA
                                 </button>
-                            {/each}
-                        </div>
-
-                        {#if struct.script && struct.script.length > 10}
-                            <button class="script-btn" on:click={()=>runScript(struct)}>
-                                <i class="fas fa-terminal"></i> EXECUTAR SISTEMA
-                            </button>
-                        {/if}
-                    </div>
-                {/each}
-            </div>
-
-        {:else if activeTab === 'blueprints'}
-            <div class="bp-grid">
-                {#each blueprints as bp}
-                    {@const canBuild = checkResources(bp.costs)}
-                    <div class="bp-card" class:disabled={!canBuild && !isGM}>
-                        <div class="bp-head">
-                            <strong>{bp.name}</strong>
-                            {#if isGM}
-                                <div class="gm-tools">
-                                    <i class="fas fa-edit" on:click={()=>initCreator(bp)}></i>
-                                    <i class="fas fa-trash" on:click={()=>deleteBlueprint(bp.id)}></i>
-                                </div>
                             {/if}
                         </div>
-                        
-                        <div class="bp-stats">
-                            HP:{bp.stats.hp} | HAR:{bp.stats.har} | PROT:{bp.stats.protection}
-                        </div>
+                    {/each}
+                </div>
 
-                        <div class="costs-list">
-                            {#each bp.costs as c}
-                                <div class="cost-tag" class:ok={(group.inventory[c.type]?.[c.tier]||0) >= c.qty}>
-                                    {c.qty}x {c.type} <span style="color:{RARITY_COLORS[c.tier]}">T{c.tier}</span>
-                                </div>
-                            {/each}
-                            {#if bp.costs.length === 0}<span class="free">GRÁTIS</span>{/if}
-                        </div>
+            {:else if activeTab === 'blueprints'}
+                <div class="bp-grid">
+                    {#each blueprints as bp}
+                        {@const canBuild = checkResources(bp.costs)}
+                        <div class="bp-card" class:disabled={!canBuild && !isGM}>
+                            <div class="bp-head">
+                                <strong>{bp.name}</strong>
+                                {#if isGM}
+                                    <div class="gm-tools">
+                                        <i class="fas fa-edit" on:click={()=>initCreator(bp)}></i>
+                                        <i class="fas fa-trash" on:click={()=>deleteBlueprint(bp.id)}></i>
+                                    </div>
+                                {/if}
+                            </div>
+                            
+                            <div class="bp-stats">
+                                HP:{bp.stats.hp} | HAR:{bp.stats.har} | PROT:{bp.stats.protection}
+                            </div>
 
-                        <button class="build-btn" disabled={!canBuild && !isGM} on:click={()=>build(bp)}>
-                            CONSTRUIR
-                        </button>
+                            <div class="costs-list">
+                                {#each bp.costs as c}
+                                    <div class="cost-tag" class:ok={(group.inventory?.[c.type]?.[c.tier]||0) >= c.qty}>
+                                        {c.qty}x {c.type} <span style="color:{RARITY_COLORS[c.tier]}">T{c.tier}</span>
+                                    </div>
+                                {/each}
+                                {#if bp.costs.length === 0}<span class="free">GRÁTIS</span>{/if}
+                            </div>
+
+                            <button class="build-btn" disabled={!canBuild && !isGM} on:click={()=>build(bp)}>
+                                CONSTRUIR
+                            </button>
+                        </div>
+                    {/each}
+                </div>
+
+            {:else if activeTab === 'creator'}
+                <div class="creator-panel">
+                    <div class="form-row">
+                        <input type="text" bind:value={draft.name} placeholder="Nome da Estrutura">
+                        <input type="text" bind:value={draft.icon} placeholder="Ícone (fas fa-...)">
                     </div>
-                {/each}
-            </div>
+                    <textarea bind:value={draft.description} rows="2" placeholder="Descrição temática..."></textarea>
+                    
+                    <div class="stats-inputs">
+                        <label>HP <input type="number" bind:value={draft.stats.hp}></label>
+                        <label>HAR <input type="number" bind:value={draft.stats.har}></label>
+                        <label>LAR <input type="number" bind:value={draft.stats.lar}></label>
+                        <label>PROT <input type="number" bind:value={draft.stats.protection}></label>
+                    </div>
 
-        {:else if activeTab === 'creator'}
-            <div class="creator-panel">
-                <div class="form-row">
-                    <input type="text" bind:value={draft.name} placeholder="Nome da Estrutura">
-                    <input type="text" bind:value={draft.icon} placeholder="Ícone (fas fa-...)">
-                </div>
-                <textarea bind:value={draft.description} rows="2" placeholder="Descrição temática..."></textarea>
-                
-                <div class="stats-inputs">
-                    <label>HP <input type="number" bind:value={draft.stats.hp}></label>
-                    <label>HAR <input type="number" bind:value={draft.stats.har}></label>
-                    <label>LAR <input type="number" bind:value={draft.stats.lar}></label>
-                    <label>PROT <input type="number" bind:value={draft.stats.protection}></label>
-                </div>
+                    <div class="list-editor">
+                        <div class="le-head">CUSTOS DE CONSTRUÇÃO <i class="fas fa-plus" on:click={addCostRow}></i></div>
+                        {#each draft.costs as c, i}
+                            <div class="le-row">
+                                <select bind:value={c.type}>
+                                    {#each Object.keys(materialsDB) as k}<option value={k}>{k}</option>{/each}
+                                </select>
+                                <select bind:value={c.tier}>
+                                    {#each [1,2,3,4,5,6,7] as t}<option value={t}>Tier {t}</option>{/each}
+                                </select>
+                                <input type="number" bind:value={c.qty} style="width:50px">
+                                <i class="fas fa-times" on:click={()=>removeCostRow(i)}></i>
+                            </div>
+                        {/each}
+                    </div>
 
-                <div class="list-editor">
-                    <div class="le-head">CUSTOS DE CONSTRUÇÃO <i class="fas fa-plus" on:click={addCostRow}></i></div>
-                    {#each draft.costs as c, i}
-                        <div class="le-row">
-                            <select bind:value={c.type}>
-                                {#each Object.keys(materialsDB) as k}<option value={k}>{k}</option>{/each}
-                            </select>
-                            <select bind:value={c.tier}>
-                                {#each [1,2,3,4,5,6,7] as t}<option value={t}>Tier {t}</option>{/each}
-                            </select>
-                            <input type="number" bind:value={c.qty} style="width:50px">
-                            <i class="fas fa-times" on:click={()=>removeCostRow(i)}></i>
-                        </div>
-                    {/each}
-                </div>
+                    <div class="list-editor">
+                        <div class="le-head">EFEITOS (Botões de Chat) <i class="fas fa-plus" on:click={addEffectRow}></i></div>
+                        {#each draft.effects as e, i}
+                            <div class="le-row">
+                                <input type="text" bind:value={e.label} placeholder="Nome do Botão">
+                                <input type="text" bind:value={e.desc} placeholder="Texto do Chat...">
+                                <i class="fas fa-times" on:click={()=>removeEffectRow(i)}></i>
+                            </div>
+                        {/each}
+                    </div>
 
-                <div class="list-editor">
-                    <div class="le-head">EFEITOS (Botões de Chat) <i class="fas fa-plus" on:click={addEffectRow}></i></div>
-                    {#each draft.effects as e, i}
-                        <div class="le-row">
-                            <input type="text" bind:value={e.label} placeholder="Nome do Botão">
-                            <input type="text" bind:value={e.desc} placeholder="Texto do Chat...">
-                            <i class="fas fa-times" on:click={()=>removeEffectRow(i)}></i>
-                        </div>
-                    {/each}
-                </div>
+                    <div class="script-editor">
+                        <div class="le-head">ORACLE SCRIPT ENGINE (JS)</div>
+                        <textarea bind:value={draft.script} class="code-area"></textarea>
+                        <small>Contexto: structure, group, actor, game, ui, GroupDatabase</small>
+                    </div>
 
-                <div class="script-editor">
-                    <div class="le-head">ORACLE SCRIPT ENGINE (JS)</div>
-                    <textarea bind:value={draft.script} class="code-area"></textarea>
-                    <small>Contexto: structure, group, actor, game, ui, GroupDatabase</small>
+                    <div class="creator-footer">
+                        <button class="save-bp" on:click={saveBlueprint}>SALVAR PROJETO GLOBAL</button>
+                    </div>
                 </div>
-
-                <div class="creator-footer">
-                    <button class="save-bp" on:click={saveBlueprint}>SALVAR PROJETO GLOBAL</button>
-                </div>
-            </div>
-        {/if}
+            {/if}
+        </div>
     </div>
-</div>
+{:else}
+    <div style="padding: 20px; color: #ccc; text-align: center;">Carregando Estruturas...</div>
+{/if}
 
 <style>
+/* ... (Mantenha o CSS original que você já tem) ... */
+/* Apenas omiti o CSS para economizar espaço, ele não muda */
     .structures-layout { height: 100%; display: flex; flex-direction: column; gap: 10px; color: #fff; font-family: 'Share Tech Mono', monospace; }
     
     .tabs { display: flex; gap: 5px; border-bottom: 1px solid #333; }

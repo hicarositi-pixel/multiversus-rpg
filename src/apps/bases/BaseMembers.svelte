@@ -6,21 +6,21 @@
     import personalities from '../../../crafting/personalities.json';
     import defaultStates from '../../../crafting/default_states.json';
 
-    // Props recebidas do BaseApp (reativas)
-    export let group;
-    export let isLeader;
-    export let isGM;
+    // Props recebidas do BaseApp
+    export let group = null; // Inicializa como null para segurança
+    export let isLeader = false;
+    export let isGM = false;
 
     let activeTab = 'npcs'; 
     let editingNPC = null; 
     let isCreating = false;
     let draftNPC = null;
 
-    // --- REATIVIDADE CORRIGIDA (CRUCIAL) ---
-    // Recalcula listas sempre que 'group' mudar
+    // --- REATIVIDADE SEGURA ---
+    // Se group for nulo, retorna array vazio para não quebrar o loop
     $: npcList = group?.npcs || [];
     
-    // Mapeia IDs para objetos de User do Foundry e filtra inválidos
+    // Mapeia IDs para Users, com proteção contra group nulo
     $: playerList = (group?.members || [])
         .map(id => game.users.get(id))
         .filter(u => u !== undefined);
@@ -29,7 +29,6 @@
     const rarityList = Object.keys(groupState.RARITY_SCALE);
     const personalityList = Object.keys(personalities);
 
-    // Preview em tempo real para o formulário de criação
     let previewEffect = { label: '', desc: '' };
 
     $: if (isCreating && draftNPC) {
@@ -52,14 +51,12 @@
     }
 
     async function confirmCreation() {
+        if (!group) return; // Segurança extra
         if (!draftNPC.name) return ui.notifications.warn("O NPC precisa de um nome.");
         
-        // Clona arrays para garantir que o Svelte detecte a mudança
-        const newNpcs = [...group.npcs, draftNPC];
-        // Incrementa contagem populacional
-        const newPop = { ...group.population, count: (group.population.count || 0) + 1 };
+        const newNpcs = [...(group.npcs || []), draftNPC];
+        const newPop = { ...group.population, count: (group.population?.count || 0) + 1 };
 
-        // Salva no banco (O BaseApp vai ouvir o evento e atualizar a prop 'group')
         await GroupDatabase.updateGroupData(group.id, { npcs: newNpcs, population: newPop });
         
         isCreating = false;
@@ -70,16 +67,17 @@
     function cancelCreation() { isCreating = false; draftNPC = null; }
 
     async function generateNPC() {
-        if (!isGM) return;
+        if (!isGM || !group) return;
         await GroupDatabase.generateRandomNPC(group.id);
     }
 
     async function deleteNPC(npcId) {
-        if (!isGM) return;
+        if (!isGM || !group) return;
         await GroupDatabase.deleteNPC(group.id, npcId);
     }
 
     async function saveEdit(npc) {
+        if (!group) return;
         const newNpcs = [...group.npcs];
         const index = newNpcs.findIndex(n => n.id === npc.id);
         if (index !== -1) {
@@ -89,7 +87,7 @@
         editingNPC = null;
     }
 
-    // --- HELPERS VISUAIS ---
+    // Helpers Visuais
     function getRoleIcon(roleKey) { return groupState.ROLES[roleKey]?.icon || 'fas fa-user'; }
     function getRoleLabel(roleKey) { return groupState.ROLES[roleKey]?.label || roleKey; }
     function getRoleDesc(roleKey) { return groupState.ROLES[roleKey]?.description || ''; }
@@ -102,178 +100,184 @@
     }
 </script>
 
-<div class="members-container" in:fade>
-    
-    <div class="tabs">
-        <button class:active={activeTab === 'npcs'} on:click={() => activeTab = 'npcs'}>
-            POPULAÇÃO ({npcList.length})
-        </button>
-        <button class:active={activeTab === 'players'} on:click={() => activeTab = 'players'}> 
-            JOGADORES ({playerList.length})
-        </button>
-    </div>
-
-    <div class="content-scroll custom-scroll">
+{#if group}
+    <div class="members-container" in:fade>
         
-        {#if isCreating}
-            <div class="creation-panel" transition:slide>
-                <div class="creation-header">NOVO REGISTRO</div>
-                <div class="creation-body">
-                    <div class="form-col">
-                        <div class="f-group"><label>Nome</label><input type="text" bind:value={draftNPC.name}></div>
-                        <div class="f-group">
-                            <label>Função</label>
-                            <select bind:value={draftNPC.role}>
-                                {#each rolesList as r}<option value={r}>{getRoleLabel(r)}</option>{/each}
-                            </select>
-                        </div>
-                        <div class="f-row">
-                            <div class="f-group">
-                                <label>Raridade</label>
-                                <select bind:value={draftNPC.rarity}>
-                                    {#each rarityList as r}<option value={r}>{r}</option>{/each}
-                                </select>
-                            </div>
-                            <div class="f-group">
-                                <label>Personalidade</label>
-                                <select bind:value={draftNPC.personality}>
-                                    {#each personalityList as p}<option value={p}>{getPersLabel(p)}</option>{/each}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="f-group"><label>URL Imagem</label><input type="text" bind:value={draftNPC.img}></div>
-                        <div class="f-group"><label>Histórico (Opcional)</label><textarea bind:value={draftNPC.description} rows="2"></textarea></div>
-                    </div>
+        <div class="tabs">
+            <button class:active={activeTab === 'npcs'} on:click={() => activeTab = 'npcs'}>
+                POPULAÇÃO ({npcList.length})
+            </button>
+            <button class:active={activeTab === 'players'} on:click={() => activeTab = 'players'}> 
+                JOGADORES ({playerList.length})
+            </button>
+        </div>
 
-                    <div class="preview-col">
-                        <small>PREVIEW</small>
-                        <div class="npc-card rarity-{draftNPC.rarity} preview-card">
+        <div class="content-scroll custom-scroll">
+            
+            {#if isCreating}
+                <div class="creation-panel" transition:slide>
+                    <div class="creation-header">NOVO REGISTRO</div>
+                    <div class="creation-body">
+                        <div class="form-col">
+                            <div class="f-group"><label>Nome</label><input type="text" bind:value={draftNPC.name}></div>
+                            <div class="f-group">
+                                <label>Função</label>
+                                <select bind:value={draftNPC.role}>
+                                    {#each rolesList as r}<option value={r}>{getRoleLabel(r)}</option>{/each}
+                                </select>
+                            </div>
+                            <div class="f-row">
+                                <div class="f-group">
+                                    <label>Raridade</label>
+                                    <select bind:value={draftNPC.rarity}>
+                                        {#each rarityList as r}<option value={r}>{r}</option>{/each}
+                                    </select>
+                                </div>
+                                <div class="f-group">
+                                    <label>Personalidade</label>
+                                    <select bind:value={draftNPC.personality}>
+                                        {#each personalityList as p}<option value={p}>{getPersLabel(p)}</option>{/each}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="f-group"><label>URL Imagem</label><input type="text" bind:value={draftNPC.img}></div>
+                            <div class="f-group"><label>Histórico (Opcional)</label><textarea bind:value={draftNPC.description} rows="2"></textarea></div>
+                        </div>
+
+                        <div class="preview-col">
+                            <small>PREVIEW</small>
+                            <div class="npc-card rarity-{draftNPC.rarity} preview-card">
+                                <div class="npc-head">
+                                    <div class="role-icon"><i class={getRoleIcon(draftNPC.role)}></i></div>
+                                    <div class="npc-basic">
+                                        <div class="name">{draftNPC.name || 'Nome'}</div>
+                                        <div class="badges">
+                                            <span class="badge role">{getRoleLabel(draftNPC.role)}</span>
+                                            <span class="badge rarity">{draftNPC.rarity}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="npc-body">
+                                    <div class="img-box"><img src={draftNPC.img} alt="NPC"></div>
+                                    <div class="details">
+                                        <div class="trait-effect">
+                                            <div class="eff-head"><i class="fas fa-star"></i> {previewEffect.label}</div>
+                                            <div class="eff-desc">{previewEffect.desc}</div>
+                                        </div>
+                                        <div class="desc-box"><p>{draftNPC.description || getRoleDesc(draftNPC.role)}</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="creation-footer">
+                        <button class="btn-cancel" on:click={cancelCreation}>CANCELAR</button>
+                        <button class="btn-confirm" on:click={confirmCreation}>CONFIRMAR</button>
+                    </div>
+                </div>
+            {/if}
+
+            {#if activeTab === 'npcs' && !isCreating}
+                <div class="npc-controls">
+                    <span>Habitantes da Base</span>
+                    {#if isGM}
+                        <div class="gm-actions">
+                            <button class="manual-btn" on:click={startCreation}><i class="fas fa-edit"></i> MANUAL</button>
+                            <button class="add-btn" on:click={generateNPC}><i class="fas fa-dice"></i> ALEATÓRIO</button>
+                        </div>
+                    {/if}
+                </div>
+
+                <div class="npc-grid">
+                    {#each npcList as npc (npc.id)}
+                        {@const effect = getEffectData(npc.personality)}
+                        
+                        <div class="npc-card rarity-{npc.rarity}" transition:fade|local>
                             <div class="npc-head">
-                                <div class="role-icon"><i class={getRoleIcon(draftNPC.role)}></i></div>
+                                <div class="role-icon"><i class={getRoleIcon(npc.role)}></i></div>
                                 <div class="npc-basic">
-                                    <div class="name">{draftNPC.name || 'Nome'}</div>
-                                    <div class="badges">
-                                        <span class="badge role">{getRoleLabel(draftNPC.role)}</span>
-                                        <span class="badge rarity">{draftNPC.rarity}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="npc-body">
-                                <div class="img-box"><img src={draftNPC.img} alt="NPC"></div>
-                                <div class="details">
-                                    <div class="trait-effect">
-                                        <div class="eff-head"><i class="fas fa-star"></i> {previewEffect.label}</div>
-                                        <div class="eff-desc">{previewEffect.desc}</div>
-                                    </div>
-                                    <div class="desc-box"><p>{draftNPC.description || getRoleDesc(draftNPC.role)}</p></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="creation-footer">
-                    <button class="btn-cancel" on:click={cancelCreation}>CANCELAR</button>
-                    <button class="btn-confirm" on:click={confirmCreation}>CONFIRMAR</button>
-                </div>
-            </div>
-        {/if}
-
-        {#if activeTab === 'npcs' && !isCreating}
-            <div class="npc-controls">
-                <span>Habitantes da Base</span>
-                {#if isGM}
-                    <div class="gm-actions">
-                        <button class="manual-btn" on:click={startCreation}><i class="fas fa-edit"></i> MANUAL</button>
-                        <button class="add-btn" on:click={generateNPC}><i class="fas fa-dice"></i> ALEATÓRIO</button>
-                    </div>
-                {/if}
-            </div>
-
-            <div class="npc-grid">
-                {#each npcList as npc (npc.id)}
-                    {@const effect = getEffectData(npc.personality)}
-                    
-                    <div class="npc-card rarity-{npc.rarity}" transition:fade|local>
-                        <div class="npc-head">
-                            <div class="role-icon"><i class={getRoleIcon(npc.role)}></i></div>
-                            <div class="npc-basic">
-                                {#if editingNPC === npc.id}
-                                    <input type="text" bind:value={npc.name} class="edit-name">
-                                {:else}
-                                    <div class="name">{npc.name}</div>
-                                {/if}
-                                <div class="badges">
-                                    <span class="badge role">{getRoleLabel(npc.role)}</span>
-                                    <span class="badge rarity">{npc.rarity}</span>
-                                </div>
-                            </div>
-                            
-                            {#if isGM}
-                                <div class="card-tools">
                                     {#if editingNPC === npc.id}
-                                        <i class="fas fa-save save" on:click={() => saveEdit(npc)}></i>
+                                        <input type="text" bind:value={npc.name} class="edit-name">
                                     {:else}
-                                        <i class="fas fa-pen edit" on:click={() => editingNPC = npc.id}></i>
-                                        <i class="fas fa-trash del" on:click={() => deleteNPC(npc.id)}></i>
+                                        <div class="name">{npc.name}</div>
                                     {/if}
-                                </div>
-                            {/if}
-                        </div>
-
-                        <div class="npc-body">
-                            <div class="img-box">
-                                {#if editingNPC === npc.id}
-                                    <input type="text" bind:value={npc.img} placeholder="URL">
-                                {/if}
-                                <img src={npc.img || "icons/svg/mystery-man.svg"} alt="NPC">
-                            </div>
-                            
-                            <div class="details">
-                                <div class="trait">
-                                    <strong>{getPersLabel(npc.personality)}</strong>
-                                </div>
-
-                                <div class="trait-effect">
-                                    <div class="eff-head"><i class="fas fa-star"></i> {effect.label}</div>
-                                    <div class="eff-desc">{effect.desc}</div>
+                                    <div class="badges">
+                                        <span class="badge role">{getRoleLabel(npc.role)}</span>
+                                        <span class="badge rarity">{npc.rarity}</span>
+                                    </div>
                                 </div>
                                 
-                                <div class="desc-box">
+                                {#if isGM}
+                                    <div class="card-tools">
+                                        {#if editingNPC === npc.id}
+                                            <i class="fas fa-save save" on:click={() => saveEdit(npc)}></i>
+                                        {:else}
+                                            <i class="fas fa-pen edit" on:click={() => editingNPC = npc.id}></i>
+                                            <i class="fas fa-trash del" on:click={() => deleteNPC(npc.id)}></i>
+                                        {/if}
+                                    </div>
+                                {/if}
+                            </div>
+
+                            <div class="npc-body">
+                                <div class="img-box">
                                     {#if editingNPC === npc.id}
-                                        <textarea bind:value={npc.description} rows="3"></textarea>
-                                    {:else}
-                                        <p>{npc.description || getRoleDesc(npc.role)}</p>
+                                        <input type="text" bind:value={npc.img} placeholder="URL">
                                     {/if}
+                                    <img src={npc.img || "icons/svg/mystery-man.svg"} alt="NPC">
+                                </div>
+                                
+                                <div class="details">
+                                    <div class="trait">
+                                        <strong>{getPersLabel(npc.personality)}</strong>
+                                    </div>
+
+                                    <div class="trait-effect">
+                                        <div class="eff-head"><i class="fas fa-star"></i> {effect.label}</div>
+                                        <div class="eff-desc">{effect.desc}</div>
+                                    </div>
+                                    
+                                    <div class="desc-box">
+                                        {#if editingNPC === npc.id}
+                                            <textarea bind:value={npc.description} rows="3"></textarea>
+                                        {:else}
+                                            <p>{npc.description || getRoleDesc(npc.role)}</p>
+                                        {/if}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="npc-footer">
-                            <span><i class="fas fa-cogs"></i> Prod: {npc.stats.production_bonus}x</span>
-                            <span><i class="fas fa-fist-raised"></i> Combate: {npc.stats.combat_dice}d</span>
+                            <div class="npc-footer">
+                                <span><i class="fas fa-cogs"></i> Prod: {npc.stats.production_bonus}x</span>
+                                <span><i class="fas fa-fist-raised"></i> Combate: {npc.stats.combat_dice}d</span>
+                            </div>
                         </div>
-                    </div>
-                {/each}
-            </div>
+                    {/each}
+                </div>
 
-        {:else if activeTab === 'players'}
-            <div class="player-grid">
-                {#each playerList as p (p.id)}
-                    <div class="player-card" transition:slide|local>
-                        <img src={p.character?.img || "icons/svg/mystery-man.svg"} alt="P">
-                        <span>{p.name}</span>
-                        <span class="role" style="background: {p.id === group.leader ? '#004400' : '#222'}; color: {p.id === group.leader ? '#00ff41' : '#aaa'}">
-                            {p.id === group.leader ? 'LÍDER' : 'MEMBRO'}
-                        </span>
-                    </div>
-                {/each}
-            </div>
-        {/if}
+            {:else if activeTab === 'players'}
+                <div class="player-grid">
+                    {#each playerList as p (p.id)}
+                        <div class="player-card" transition:slide|local>
+                            <img src={p.character?.img || "icons/svg/mystery-man.svg"} alt="P">
+                            <span>{p.name}</span>
+                            <span class="role" style="background: {p.id === group.leader ? '#004400' : '#222'}; color: {p.id === group.leader ? '#00ff41' : '#aaa'}">
+                                {p.id === group.leader ? 'LÍDER' : 'MEMBRO'}
+                            </span>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+        </div>
     </div>
-</div>
+{:else}
+    <div class="loading-state" style="color: #00ff41; padding: 20px; text-align: center;">
+        <i class="fas fa-circle-notch fa-spin"></i> Carregando dados do grupo...
+    </div>
+{/if}
 
 <style>
-    /* CSS MANTIDO - Design Cyberpunk */
+/* CSS Mantido */
     .members-container { height: 100%; display: flex; flex-direction: column; gap: 10px; font-family: 'Share Tech Mono', monospace; color: #fff; }
     .tabs { display: flex; gap: 5px; border-bottom: 1px solid #333; }
     .tabs button { background: transparent; border: none; color: #666; padding: 8px 15px; cursor: pointer; font-weight: bold; border-bottom: 2px solid transparent; transition: 0.2s; }
