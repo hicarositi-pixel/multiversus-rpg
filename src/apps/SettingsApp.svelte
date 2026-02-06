@@ -1,80 +1,76 @@
 <script>
-    import { createEventDispatcher, onMount } from 'svelte';
+    import { createEventDispatcher } from 'svelte';
     import { fade, slide } from 'svelte/transition';
     import { SHEET_THEMES } from '../data/SheetThemeDB.js'; 
-    import PassManager from '../PassManager.svelte'; // Se ainda for usar, mantenha
 
     export let actor;
-    export let flags; // Recebe as flags atualizadas da Ficha Pai
+    export let flags; // Recebe as flags atualizadas e reativas da Ficha Pai
 
     const dispatch = createEventDispatcher();
     const MODULE_ID = "multiversus-rpg";
     const isGM = game.user.isGM;
 
-    // --- ESTADO LOCAL ---
-    // Sincroniza com as flags recebidas
+    // --- SINCRONIA REATIVA (Lê direto das flags) ---
     $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
     $: wallpaper = flags.sheetConfig?.wallpaper || "";
-    $: fastBoot = flags.sheetConfig?.fastBoot || false;
-    $: password = flags.sheetConfig?.password || ""; // Senha salva
     
-    // Tamanho da janela
+    // Configurações de Login
+    $: fastBoot = flags.sheetConfig?.fastBoot || false;
+    $: password = flags.sheetConfig?.password || ""; 
+    
+    // Janela
     $: winWidth = flags.sheetConfig?.windowSize?.width || 800;
     $: winHeight = flags.sheetConfig?.windowSize?.height || 700;
     
     let actorImg = actor.img;
     let tempUrl = ""; 
-    let showPassManager = false;
 
-    // --- REATIVIDADE DE TEMA ---
+    // --- TEMA ---
     $: currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal'];
     $: cssVariables = Object.entries(currentThemeData.vars)
         .map(([key, val]) => `${key}: ${val};`)
         .join(' ');
 
-    // --- FUNÇÃO DE SALVAMENTO UNIFICADA ---
+    // --- SALVAMENTO NO BANCO DE DADOS ---
     async function updateConfig(key, value) {
-        // Atualiza a flag específica dentro de sheetConfig
+        // Atualiza a flag. A Ficha.svelte detectará isso e atualizará o comportamento.
         await actor.update({
             [`flags.${MODULE_ID}.sheetConfig.${key}`]: value
         }, { render: false }); 
-        
-        // Dica: A ficha pai (Ficha.svelte) vai detectar essa mudança via Hook e atualizar o login
     }
 
-    // --- AÇÕES ESPECÍFICAS ---
+    // --- HANDLERS DE AÇÃO ---
 
-    function selectTheme(key) {
-        updateConfig('theme', key);
-    }
+    function selectTheme(key) { updateConfig('theme', key); }
 
     function applyWallpaper() {
         if (!tempUrl) return ui.notifications.warn("Insira uma URL válida.");
         updateConfig('wallpaper', tempUrl);
-        ui.notifications.info("Wallpaper do terminal atualizado.");
+        ui.notifications.info("Wallpaper atualizado.");
     }
 
-    // Fast Boot: Se ligado, pula a tela de login
-    function toggleFastBoot(checked) {
+    // FAST BOOT: Configura se o JOGADOR vai ver o login
+    function toggleFastBoot(e) {
+        const checked = e.target.checked;
         updateConfig('fastBoot', checked);
-        if (checked) {
-            ui.notifications.info("Fast Boot ativado: Login será automático.");
-        } else {
-            ui.notifications.info("Fast Boot desativado: Senha será exigida.");
-        }
+        
+        if (checked) ui.notifications.info("Fast Boot ativado para este personagem.");
+        else ui.notifications.info("Fast Boot desligado. Senha será exigida.");
     }
 
-    // Senha: Salva o código de 6 dígitos
-    function savePassword(newPass) {
-        // Remove caracteres não numéricos se quiser forçar PIN
-        // const cleanPass = newPass.replace(/\D/g, ''); 
+    // SENHA: Salva apenas ao terminar de digitar (on:change)
+    function savePassword(e) {
+        const val = e.target.value;
+        const newPass = val.slice(0, 6); // Força máx 6 chars
         updateConfig('password', newPass);
+        
+        if (newPass) ui.notifications.info("Nova senha de acesso definida.");
+        else ui.notifications.info("Senha removida.");
     }
 
     function pickImage() {
         new FilePicker({
-            type: "image",
-            current: actorImg,
+            type: "image", current: actorImg,
             callback: async (path) => { 
                 actorImg = path;
                 await actor.update({ img: path });
@@ -82,16 +78,13 @@
         }).browse();
     }
 
-    // --- JANELA (RESIZE) ---
+    // --- JANELA ---
     async function manualResize(w, h) {
-        // Atualiza visualmente agora
         actor.sheet.setPosition({ width: w, height: h });
-        // Salva para persistir
         await actor.update({ [`flags.${MODULE_ID}.sheetConfig.windowSize`]: { width: w, height: h } }, { render: false });
     }
     
     function resetWindow() { manualResize(800, 700); }
-
     function close() { dispatch('close'); }
 </script>
 
@@ -115,14 +108,60 @@
             <div class="actor-id">
                 <small>ID_USER</small>
                 <div class="name">{actor.name}</div>
-                {#if isGM}
-                    <span class="gm-tag">[ ADMIN ACCESS ]</span>
-                {/if}
+                {#if isGM}<span class="gm-tag">[ ADMIN ACCESS ]</span>{/if}
             </div>
         </aside>
 
         <main class="settings-grid">
             
+            <section class="group">
+                <h2 class="group-title">:: SEGURANÇA & ACESSO ::</h2>
+                
+                <div class="security-panel">
+                    <div class="setting-row">
+                        <div class="label-group">
+                            <label>Fast Boot Protocol</label>
+                            <small>
+                                {#if isGM}
+                                    Configurar para o Jogador. (GM sempre ignora login).
+                                {:else}
+                                    Pular tela de login e verificação de biometria.
+                                {/if}
+                            </small>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked={fastBoot} on:change={toggleFastBoot}>
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row vertical">
+                        <div class="label-group">
+                            <label>Código de Acesso (PIN)</label>
+                            <small>Senha numérica de 6 dígitos.</small>
+                        </div>
+                        
+                        <div class="pass-input-wrapper">
+                            <input 
+                                type="text" 
+                                value={password} 
+                                maxlength="6" 
+                                placeholder="SEM SENHA"
+                                on:change={savePassword} 
+                                class="pass-input"
+                            />
+                            <i class="fas fa-lock lock-icon"></i>
+                        </div>
+                        
+                        {#if isGM}
+                            <div class="gm-note">
+                                <i class="fas fa-eye"></i> GM: Você pode redefinir a senha do jogador aqui.
+                            </div>
+                        {/if}
+                    </div>
+                </div>
+            </section>
+
             <section class="group">
                 <h2 class="group-title">:: TEMA VISUAL ::</h2>
                 <div class="theme-grid">
@@ -148,58 +187,8 @@
                 <div class="setting-row vertical">
                     <label>Wallpaper do Terminal (URL)</label>
                     <div class="input-with-button">
-                        <input 
-                            type="text" 
-                            bind:value={tempUrl} 
-                            placeholder={wallpaper || "Cole a URL do GIF aqui..."}
-                            class="url-input"
-                        />
-                        <button type="button" class="apply-btn" on:click={applyWallpaper} title="Sincronizar Link">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                    <small class="helper-text">Recomendado: GIFs dark ou tech. Atual: {wallpaper ? 'Definido' : 'Padrão'}</small>
-                </div>
-            </section>
-
-            <section class="group">
-                <h2 class="group-title">:: SEGURANÇA & ACESSO ::</h2>
-                
-                <div class="security-panel">
-                    <div class="setting-row">
-                        <div class="label-group">
-                            <label>Fast Boot Protocol</label>
-                            <small>Pular tela de login e verificação de biometria.</small>
-                        </div>
-                        <label class="switch">
-                            <input type="checkbox" checked={fastBoot} on:change={e => toggleFastBoot(e.target.checked)}>
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-
-                    <div class="setting-row vertical">
-                        <div class="label-group">
-                            <label>Código de Acesso Pessoal (PIN)</label>
-                            <small>Senha de 6 dígitos exigida se o Fast Boot estiver desligado.</small>
-                        </div>
-                        
-                        <div class="pass-input-wrapper">
-                            <input 
-                                type="text" 
-                                value={password} 
-                                maxlength="6" 
-                                placeholder="******"
-                                on:change={e => savePassword(e.target.value)} 
-                                class="pass-input"
-                            />
-                            <i class="fas fa-lock lock-icon"></i>
-                        </div>
-                        
-                        {#if isGM}
-                            <div class="gm-note">
-                                <i class="fas fa-eye"></i> GM: Você pode ver e resetar a senha do jogador aqui.
-                            </div>
-                        {/if}
+                        <input type="text" bind:value={tempUrl} placeholder={wallpaper || "Cole a URL aqui..."} class="url-input"/>
+                        <button type="button" class="apply-btn" on:click={applyWallpaper} title="Sincronizar Link"><i class="fas fa-sync-alt"></i></button>
                     </div>
                 </div>
             </section>
@@ -207,16 +196,10 @@
             <section class="group">
                 <h2 class="group-title">:: RESOLUÇÃO ::</h2>
                 <div class="res-control">
-                    <div class="res-input">
-                        <span>LARGURA</span>
-                        <input type="number" value={winWidth} on:change={e => manualResize(Number(e.target.value), winHeight)}>
-                    </div>
+                    <div class="res-input"><span>LARGURA</span><input type="number" value={winWidth} on:change={e => manualResize(Number(e.target.value), winHeight)}></div>
                     <span class="x">x</span>
-                    <div class="res-input">
-                        <span>ALTURA</span>
-                        <input type="number" value={winHeight} on:change={e => manualResize(winWidth, Number(e.target.value))}>
-                    </div>
-                    <button class="reset-btn" on:click={resetWindow} title="Resetar Padrão"><i class="fas fa-undo"></i></button>
+                    <div class="res-input"><span>ALTURA</span><input type="number" value={winHeight} on:change={e => manualResize(winWidth, Number(e.target.value))}></div>
+                    <button class="reset-btn" on:click={resetWindow} title="Resetar"><i class="fas fa-undo"></i></button>
                 </div>
             </section>
 

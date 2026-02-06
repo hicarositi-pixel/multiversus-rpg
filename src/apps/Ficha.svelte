@@ -11,7 +11,7 @@
     import BaseApp from './BaseApp.svelte';
     import PoderesApp from './PoderesApp.svelte'; 
     import InventoryApp from './InventoryApp.svelte';
-    import StatsSkillsApp from './StatsSkillsApp.svelte'; // <--- O arquivo anterior vai aqui
+    import StatsSkillsApp from './StatsSkillsApp.svelte'; 
     import OraclePlayerApp from './OraclePlayerApp.svelte';
     import PlayerNexus from '../database/PlayerNexus.svelte';
     import CommsApp from './CommsApp.svelte';
@@ -25,18 +25,21 @@
     export let actor;
     
     const MODULE_ID = "multiversus-rpg";
+    const isGM = game.user.isGM; // Variável global de GM
 
     // --- 1. DADOS REATIVOS (FLAGS) ---
-    // A fonte da verdade agora são as FLAGS
     $: flags = actor?.flags?.[MODULE_ID] || {};
-    // Mantemos system apenas para leitura de legado, se necessário
     $: system = actor?.system || {}; 
     
-    // --- 2. SISTEMA DE TEMAS (ENGINE) ---
+    // Configurações de Boot
+    // Se for GM, forçamos true. Se não, lê a flag.
+    $: fastBootEnabled = isGM ? true : (flags.sheetConfig?.fastBoot || false);
+    $: savedPassword = flags.sheetConfig?.password || "";
+
+    // --- 2. SISTEMA DE TEMAS ---
     $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
     $: currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal'];
     
-    // Converte vars para CSS
     $: cssString = Object.entries(currentThemeData.vars)
         .map(([key, value]) => `${key}: ${value};`)
         .join(' ');
@@ -44,20 +47,16 @@
     $: themeColor = currentThemeData.vars['--c-primary'];
     $: wallpaperURL = flags.sheetConfig?.wallpaper || "https://mir-s3-cdn-cf.behance.net/project_modules/hd/e4316a93890387.5e70ade47b737.gif";
 
-    // Aplica o tema globalmente (com proteção para não rodar desnecessariamente)
     $: {
         if (typeof ThemeEngine !== 'undefined' && SHEET_THEMES[activeThemeKey]) {
-            // Pequeno delay para garantir que o DOM existe
             setTimeout(() => ThemeEngine.apply(activeThemeKey, SHEET_THEMES[activeThemeKey]), 10);
         }
     }
 
-    // --- 3. REATIVIDADE MANUAL DO FOUNDRY (CRUCIAL) ---
+    // --- 3. REATIVIDADE MANUAL DO FOUNDRY ---
     onMount(() => {
         const hookId = Hooks.on("updateActor", (doc, changes) => {
             if (doc.id === actor.id) {
-                // Força o Svelte a perceber que as flags mudaram criando um novo objeto
-                // Isso conserta o bug de "comprei e não apareceu"
                 if (doc.flags[MODULE_ID]) {
                     flags = { ...doc.flags[MODULE_ID] };
                 }
@@ -66,16 +65,15 @@
         return () => Hooks.off("updateActor", hookId);
     });
 
-    // --- 4. LÓGICA DE LOGIN / BOOT ---
-    let loginState = 'idle'; 
+    // --- 4. LÓGICA DE LOGIN / BOOT (CORRIGIDA) ---
+    
+    // Inicializa o estado baseado no FastBoot IMEDIATAMENTE
+    // Se fastBoot for true (ou GM), começa como 'logged_in', senão 'idle'
+    let loginState = (isGM || (actor.getFlag(MODULE_ID, "sheetConfig.fastBoot") === true)) ? 'logged_in' : 'idle';
+    
     let bootText = "";
     let activeApp = null; 
     let inputBuffer = ""; 
-
-    // Fast Boot
-    $: if (loginState === 'idle' && (flags.fastBoot)) {
-        loginState = 'logged_in';
-    }
 
     function closeSystem() { actor.sheet.close(); }
 
@@ -91,19 +89,28 @@
 
     function handleKeydown(e) {
         if (loginState !== 'idle') return;
+
         if (e.key === 'Enter') {
-            if (inputBuffer.length === 6) { 
-                const savedPass = flags.password || "";
-                if (savedPass && inputBuffer !== savedPass) {
-                    inputBuffer = ""; 
-                    ui.notifications.warn(">> ACESSO NEGADO: CÓDIGO INVÁLIDO");
-                    return;
-                }
-                startLoginSequence();
+            // Se tiver senha salva, verifica. Se não tiver, qualquer Enter passa (ou exija tamanho mínimo)
+            if (savedPassword) {
+                 if (inputBuffer === savedPassword) {
+                     startLoginSequence();
+                 } else {
+                     inputBuffer = ""; 
+                     ui.notifications.warn(">> ACESSO NEGADO: CÓDIGO INVÁLIDO");
+                 }
+            } else {
+                // Sem senha configurada: exige apenas 6 digitos quaisquer ou libera direto?
+                // Vamos liberar se tiver digitado algo, ou direto.
+                if (inputBuffer.length >= 4) startLoginSequence(); // Mínimo 4 dígitos pra 'fingir'
+                else ui.notifications.warn("DIGITE UM CÓDIGO DE ACESSO INICIAL (MÍN 4)");
             }
-        } else if (e.key === 'Backspace') {
+        } 
+        else if (e.key === 'Backspace') {
             inputBuffer = inputBuffer.slice(0, -1);
-        } else if (e.key.length === 1 && inputBuffer.length < 6) {
+        } 
+        else if (e.key.length === 1 && inputBuffer.length < 6) {
+            // Aceita letras e números para senha, ou só números? Vou deixar geral.
             inputBuffer += e.key;
         }
     }
@@ -169,7 +176,7 @@
                             {/each}
                         </div>
                         <div class="login-msg blink">
-                            {inputBuffer.length < 6 ? "INSIRA CÓDIGO DE ACESSO" : "[ PRESSIONE ENTER ]"}
+                            {inputBuffer.length < 6 ? (savedPassword ? "INSIRA SENHA" : "DEFINA ACESSO TEMPORÁRIO") : "[ PRESSIONE ENTER ]"}
                         </div>
                     {:else}
                         <div class="boot-sequence" in:fade>
@@ -224,7 +231,7 @@
                                 {:else if activeApp === 'settings'} 
                                     <SettingsApp {actor} {flags} on:close={() => activeApp = null} />
                                 {:else if activeApp === 'survival'} 
-                                    <SurvivalApp {actor} {flags} />
+                                    <SurvivalApp {actor} {flags} themeColor={themeColor} />
                                 {:else if activeApp === 'comms'} 
                                     <CommsApp {actor} {flags} themeStyle={cssString} />
                                 {:else if activeApp === 'testamento'}

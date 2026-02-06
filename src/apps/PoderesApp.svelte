@@ -4,79 +4,92 @@
   import PowerInventoryCard from '../components/PowerInventoryCard.svelte';
   import PoderesManager from './PoderesManager.js'; 
 
-  export let actor;
+  export let actor; // Recebido apenas na criação
   export let themeColor;
   export let flags = {}; 
 
   const isGM = game.user.isGM;
   const MODULE_ID = "multiversus-rpg";
+  
+  // Guardamos o ID e UUID para as buscas de segurança
   const actorUUID = actor.uuid;
+  const actorID = actor.id;
 
   // --- DADOS REATIVOS ---
   let searchTerm = "";
   let powers = [];
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
-
-  // Estado de carregamento para evitar tela branca
   let isReady = false;
 
-  // --- CONTROLE DE ATUALIZAÇÃO ---
+  // --- DEBOUNCE (Evita atualizações frenéticas) ---
   let updateTimer = null;
 
   function scheduleRefresh() {
       if (updateTimer) clearTimeout(updateTimer);
-      // 100ms é rápido o suficiente para parecer instantâneo, 
-      // mas lento o suficiente para evitar conflito de banco de dados
+      // 100ms é o ponto ideal entre performance e resposta visual
       updateTimer = setTimeout(() => {
           refreshData();
       }, 100); 
   }
 
-  // --- FUNÇÃO CORE ---
+  // --- FUNÇÃO CORE (TRAVA DE SEGURANÇA 2) ---
   async function refreshData() {
-    // 1. Busca instância fresca via UUID
-    const freshActor = await fromUuid(actorUUID);
+    let freshActor = null;
 
-    if (!freshActor) {
-        console.warn("Nexus | Ator não encontrado no refresh.");
-        return;
+    try {
+        // TENTATIVA 1: Busca precisa via UUID (Ideal para Tokens e Atores)
+        freshActor = await fromUuid(actorUUID);
+
+        // TENTATIVA 2: Fallback para busca global se o UUID falhar
+        if (!freshActor) {
+            console.warn("[Nexus] UUID falhou, tentando ID direto...");
+            freshActor = game.actors.get(actorID);
+        }
+
+        // TENTATIVA 3: Se for um token não vinculado na cena
+        if (!freshActor && canvas.tokens) {
+             freshActor = canvas.tokens.placeables.find(t => t.actor?.id === actorID)?.actor;
+        }
+
+    } catch (e) {
+        console.error("Erro crítico buscando ator:", e);
     }
 
-    // 2. Filtra itens
+    // Se falhou tudo, aborta para não quebrar a UI
+    if (!freshActor) return;
+
+    // --- PROCESSAMENTO DE DADOS ---
+    
+    // Filtra itens
     const rawPowers = freshActor.items.filter(i => i && i.type === "power");
     
-    // 3. Atualiza lista visual (Cria nova referência para Svelte reagir)
+    // Atualiza lista visual (Cria nova referência de array)
     powers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
     activePowerCount = powers.length;
 
-    // 4. Recalcula XP (COM PROTEÇÃO CONTRA CRASH)
+    // Recalcula XP
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
     calculatedTotalCost = powers.reduce((acc, item) => {
-        const itemFlags = item.flags?.[MODULE_ID] || {};
-        const itemSystem = item.system || {}; 
+        const iFlags = item.flags?.[MODULE_ID] || {};
+        const iSys = item.system || {}; 
 
-        const cat = itemFlags.category || "principal";
+        const cat = iFlags.category || "principal";
         const base = XP_RULES[cat] || 8;
-        const isInitial = itemFlags.isInitial || false;
-        const discount = isInitial ? (4 * base) : 0;
+        const discount = (iFlags.isInitial) ? (4 * base) : 0;
         
-        // PROTEÇÃO: Novos itens podem não ter diceData
-        const diceData = itemFlags.dice || itemSystem.dice || {};
-        
-        // Garante que é número ou 0
-        const dN = Number(diceData.normal || 0);
-        const dH = Number(diceData.hard || 0);
-        const dW = Number(diceData.wiggle || 0);
+        // Proteção contra dados vazios/NaN
+        const dN = Number(iFlags.dice?.normal || iSys.dice?.normal || 0);
+        const dH = Number(iFlags.dice?.hard || iSys.dice?.hard || 0);
+        const dW = Number(iFlags.dice?.wiggle || iSys.dice?.wiggle || 0);
         
         const cost = (dN * base) + (dH * base * 2) + (dW * base * 4);
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // 5. Salva XP no Ator (Apenas se mudou)
+    // Salva XP no Ator (apenas se mudou, para evitar loop)
     const currentSavedCost = Number(freshActor.flags?.[MODULE_ID]?.powersSpent) || 0;
-
     if (calculatedTotalCost !== currentSavedCost) {
         await freshActor.update({ 
             [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost 
@@ -91,29 +104,30 @@
   onMount(() => {
     refreshData(); 
 
-    // Hook unificado: Create, Update, Delete
-    const hookId = Hooks.on("updateActor", (doc) => {
-        if (doc.uuid === actorUUID) scheduleRefresh();
+    // Hook Global: Monitora qualquer item sendo criado/deletado/alterado
+    // Se o pai do item for nosso ator, atualiza a lista.
+    const hookAll = Hooks.on("updateItem", (item) => { 
+        if (item.parent?.uuid === actorUUID || item.parent?.id === actorID) scheduleRefresh(); 
     });
     
-    // Captura itens criados/deletados neste ator
     const hookCreate = Hooks.on("createItem", (item) => { 
-        if(item.parent?.uuid === actorUUID) scheduleRefresh(); 
+        if (item.parent?.uuid === actorUUID || item.parent?.id === actorID) scheduleRefresh(); 
     });
 
     const hookDelete = Hooks.on("deleteItem", (item) => { 
-        if(item.parent?.uuid === actorUUID) scheduleRefresh(); 
+        if (item.parent?.uuid === actorUUID || item.parent?.id === actorID) scheduleRefresh(); 
     });
 
-    const hookUpdate = Hooks.on("updateItem", (item) => { 
-        if(item.parent?.uuid === actorUUID && item.type === "power") scheduleRefresh(); 
+    // Se o ator mudar (nome, imagem, flags)
+    const hookActor = Hooks.on("updateActor", (doc) => {
+        if (doc.uuid === actorUUID || doc.id === actorID) scheduleRefresh();
     });
 
     return () => {
-      Hooks.off("updateActor", hookId);
+      Hooks.off("updateItem", hookAll);
       Hooks.off("createItem", hookCreate);
       Hooks.off("deleteItem", hookDelete);
-      Hooks.off("updateItem", hookUpdate);
+      Hooks.off("updateActor", hookActor);
     };
   });
 
@@ -125,7 +139,6 @@
 </script>
 
 <div class="powers-terminal">
-  
   <header class="term-header">
     <div class="hud-module main">
       <div class="hud-top">
@@ -136,7 +149,6 @@
         <div class="hud-bar-fill scanning-anim"></div>
       </div>
     </div>
-
     <div class="hud-module side">
       <div class="hud-label">MÓDULOS</div>
       <div class="hud-value">{isReady ? activePowerCount : '...'}</div>
@@ -149,7 +161,6 @@
       <input type="text" bind:value={searchTerm} placeholder="LOCALIZAR ARQUIVO..." />
       <div class="search-icon"><i class="fas fa-search"></i></div>
     </div>
-
     <button class="btn-db" on:click={openLibrary} title="Acessar Nexus Database">
       <i class="fas fa-database"></i> <span class="btn-text">DATABASE</span>
     </button>
@@ -158,7 +169,7 @@
   <div class="list-container">
     {#if !isReady}
         <div class="loading-state">
-            <i class="fas fa-satellite-dish fa-spin"></i> Sincronizando Poderes...
+            <i class="fas fa-satellite-dish fa-spin"></i> Inicializando Protocolos...
         </div>
     {:else}
         <div class="powers-grid">
@@ -174,9 +185,7 @@
             {/each}
         {:else}
             <div class="empty-state" in:fade>
-            <div class="glitch-wrapper">
-                <i class="fas fa-wifi"></i>
-            </div>
+            <div class="glitch-wrapper"><i class="fas fa-wifi"></i></div>
             <span class="empty-title">NENHUM MÓDULO DETECTADO</span>
             <span class="empty-sub">Arraste um poder ou acesse a Database.</span>
             </div>
@@ -189,11 +198,10 @@
     <div class="footer-left">SYS_STATUS: <span style="color:var(--c-primary)">ONLINE</span></div>
     <div class="footer-right">SYNC_MODE: <span style="color:var(--c-primary)">AUTO_RT</span></div>
   </footer>
-
 </div>
 
 <style>
-/* CSS Mantido - Igual ao Original */
+/* CSS ORIGINIAL MANTIDO */
   .powers-terminal { height: 100%; display: flex; flex-direction: column; gap: 12px; background: transparent; color: var(--c-text); font-family: var(--font-body); padding: 5px; position: relative; overflow: hidden; }
   .term-header { display: flex; gap: 10px; z-index: 1; height: 60px; flex-shrink: 0; }
   .hud-module { background: rgba(0, 0, 0, 0.6); border: 1px solid #333; border-radius: var(--border-radius); display: flex; flex-direction: column; justify-content: center; padding: 0 15px; position: relative; overflow: hidden; }

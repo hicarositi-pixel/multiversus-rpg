@@ -214,7 +214,7 @@
             <div class="modal-window" transition:scale on:click|stopPropagation>
                 <div class="modal-header">
                     <span>DADOS_CRIPTOGRAFADOS // {activePopup.title}</span>
-                    <button class="close-btn" on:click={() => activePopup = null}>✕</button>
+                    <button class="close-btn" on:click|stopPropagation={() => activePopup = null}>✕</button>
                 </div>
                 <div class="modal-body">
                     {@html activePopup.desc}
@@ -604,7 +604,22 @@
     .modal-window { width: 500px; max-height: 80vh; background: #050505; border: 1px solid var(--c-primary); display: flex; flex-direction: column; }
     .modal-header { background: var(--c-primary); color: #000; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; }
     .modal-body { padding: 20px; overflow-y: auto; color: #ccc; line-height: 1.6; }
-    .close-btn { background: none; border: none; font-weight: bold; cursor: pointer; font-size: 16px; }
+.close-btn { 
+    background: none; 
+    border: none; 
+    font-weight: bold; 
+    cursor: pointer; 
+    font-size: 16px; 
+    color: #000; /* Garante visibilidade no header colorido */
+    padding: 5px 10px; /* Aumenta a área de clique */
+    z-index: 10000; /* Garante que está no topo */
+    pointer-events: all; /* Força captura de clique */
+}
+.close-btn:hover {
+    color: #fff;
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
 
     @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
