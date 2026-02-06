@@ -452,4 +452,4 @@ const MUSIC_PATH = game.settings.get("multiversus-rpg", "openingMusicUrl");
         1% { transform: translate(-2px, 1px); opacity: 0.9; } 
         2% { transform: translate(2px, -1px); opacity: 1; } 
     }
-</style>
+</style> 
