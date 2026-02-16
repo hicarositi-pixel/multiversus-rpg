@@ -209,12 +209,18 @@
 
 <div class="bio-terminal" style="--c-primary: {themeColor};">
     
-    {#if activePopup}
+{#if activePopup}
         <div class="modal-backdrop" on:click={() => activePopup = null} transition:fade>
-            <div class="modal-window" transition:scale on:click|stopPropagation>
+            <div class="modal-window" transition:scale on:click|stopPropagation role="dialog">
                 <div class="modal-header">
                     <span>DADOS_CRIPTOGRAFADOS // {activePopup.title}</span>
-                    <button class="close-btn" on:click|stopPropagation={() => activePopup = null}>✕</button>
+                    
+                    <button class="close-btn" 
+                            on:click|stopPropagation={() => activePopup = null}
+                            on:mousedown|stopPropagation
+                            title="Fechar">
+                        ✕
+                    </button>
                 </div>
                 <div class="modal-body">
                     {@html activePopup.desc}
@@ -235,22 +241,22 @@
                     <label>CODENAME</label>
                     <input type="text" class="name-input" value={actor.name} on:change={e => actor.update({name: e.target.value}, {render: false})} />
                     <button class="sync-btn {isSyncing ? 'pulsing' : ''}" on:click={importPlayerXP}>
-                        <i class="fas fa-satellite-dish"></i> SYNC_XP_DATABASE
+                        <i class="fas fa-satellite-dish"></i> ATUALIZAR XP E ORIGEM
                     </button>
                 </div>
             </div>
 
             <div class="resource-display">
                 <div class="res-line">
-                    <span class="lbl">CAPACIDADE</span>
+                    <span class="lbl">Pontos de Ficha Totais</span>
                     <span class="val">{totalPointsCap}</span>
                 </div>
                 <div class="res-line">
-                    <span class="lbl">CUSTO SISTEMA</span>
+                    <span class="lbl">Pontos de Ficha Gastos</span>
                     <span class="val dim">{spentPoints}</span>
                 </div>
                 <div class="res-line main">
-                    <span class="lbl">MEMÓRIA LIVRE</span>
+                    <span class="lbl">Pontos de Ficha Disponível</span>
                     <span class="val" style="color: {availablePoints < 0 ? '#ff3333' : 'var(--c-primary)'}">
                         {availablePoints}
                     </span>
@@ -320,11 +326,11 @@
             <div class="origin-header">
                 <div class="origin-icon">{originData.icon}</div>
                 <div class="origin-title">
-                    <small>ARQUIVO DE ORIGEM:</small>
+                    <small>ORIGEM:</small>
                     <span>{originData.name.toUpperCase()}</span>
                 </div>
                 <button class="btn-info" on:click={() => activePopup = {title: originData.name, desc: originData.desc + "<hr>" + originData.powers}}>
-                    <i class="fas fa-file-alt"></i> LER ARQUIVO
+                    <i class="fas fa-file-alt"></i> Descrição da Origem
                 </button>
             </div>
             
@@ -334,7 +340,7 @@
                     <span class="val">{originData.mechanic.name}</span>
                 </div>
                 <div class="detail-box traits">
-                    <span class="lbl">TRAÇOS GENÉTICOS</span>
+                    <span class="lbl">TRAÇOS ESPECIAIS</span>
                     <div class="traits-list">
                         {#each originData.traits as t}
                             <span class="trait-tag" on:click={() => activePopup = {title: t.name, desc: t.effect}}>{t.name}</span>
@@ -347,7 +353,7 @@
         <section class="dual-lists">
             <div class="cyber-list">
                 <div class="list-head">
-                    <span>HISTÓRICO MULTIVERSAL</span>
+                    <span>ARQUÉTIPOS MULTIVERSAIS</span>
                     <button class="add-btn" on:click={addUniverse} title="Adicionar Universo (Custa 8 Pontos)">+</button>
                 </div>
                 <div class="list-content">
@@ -375,7 +381,7 @@
 
             <div class="cyber-list">
                 <div class="list-head">
-                    <span>CONVICÇÕES & OBJETIVOS</span>
+                    <span>LEALDADE & PAIXÔES</span>
                     <button class="add-btn" on:click={addMotivation}>+</button>
                 </div>
                 <div class="list-content">
@@ -395,16 +401,16 @@
 
         <section class="text-areas">
             <div class="text-box full">
-                <div class="box-label">REGISTRO_BIOGRÁFICO.log</div>
+                <div class="box-label">HISTÓRIA & ANOTAÇÔES</div>
                 <textarea value={loreContent} on:change={e => { loreContent = e.target.value; saveBioText(); }}></textarea>
             </div>
             <div class="split-text">
                 <div class="text-box">
-                    <div class="box-label">PERFIL_PSICOLÓGICO</div>
+                    <div class="box-label">PERFIL PSICOLÓGICO</div>
                     <textarea class="short" value={localPsyche} on:change={e => { localPsyche = e.target.value; saveBioText(); }}></textarea>
                 </div>
                 <div class="text-box">
-                    <div class="box-label">DADOS_VISUAIS</div>
+                    <div class="box-label">DADOS VISUAIS</div>
                     <textarea class="short" value={localAppearance} on:change={e => { localAppearance = e.target.value; saveBioText(); }}></textarea>
                 </div>
             </div>
@@ -412,7 +418,7 @@
 
         <div class="footer-save">
             <button on:click={saveBioText}>
-                <i class="fas fa-save"></i> SALVAR DADOS NA MATRIZ
+                <i class="fas fa-save"></i> SALVAR ALTERAÇÕES
             </button>
         </div>
 
@@ -610,11 +616,23 @@
     font-weight: bold; 
     cursor: pointer; 
     font-size: 16px; 
-    color: #000; /* Garante visibilidade no header colorido */
-    padding: 5px 10px; /* Aumenta a área de clique */
-    z-index: 10000; /* Garante que está no topo */
-    pointer-events: all; /* Força captura de clique */
+    color: #000; 
+    
+    /* CORREÇÃO DO CLIQUE */
+    position: relative; /* Obrigatório para o z-index funcionar */
+    z-index: 100000; 
+    pointer-events: all;
+    
+    /* Melhoria da área de clique */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; /* Garante tamanho físico */
+    height: 30px;
+    padding: 0;
+    margin-left: 10px;
 }
+
 .close-btn:hover {
     color: #fff;
     background: rgba(0,0,0,0.2);

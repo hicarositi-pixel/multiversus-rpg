@@ -142,7 +142,7 @@
   <header class="term-header">
     <div class="hud-module main">
       <div class="hud-top">
-        <span class="hud-label"><i class="fas fa-bolt"></i> DRENAGEM DE SISTEMA (XP)</span>
+        <span class="hud-label"><i class="fas fa-bolt"></i> Pontos Investidos (XP)</span>
         <span class="hud-value xp">{isReady ? calculatedTotalCost : '...'}</span>
       </div>
       <div class="hud-bar-bg">
@@ -150,19 +150,19 @@
       </div>
     </div>
     <div class="hud-module side">
-      <div class="hud-label">MÓDULOS</div>
+      <div class="hud-label">Poderes</div>
       <div class="hud-value">{isReady ? activePowerCount : '...'}</div>
     </div>
   </header>
 
   <div class="toolbar">
     <div class="search-box">
-      <span class="prompt">&gt;_QUERY:</span>
+      <span class="prompt">Pesquisa:</span>
       <input type="text" bind:value={searchTerm} placeholder="LOCALIZAR ARQUIVO..." />
       <div class="search-icon"><i class="fas fa-search"></i></div>
     </div>
-    <button class="btn-db" on:click={openLibrary} title="Acessar Nexus Database">
-      <i class="fas fa-database"></i> <span class="btn-text">DATABASE</span>
+    <button class="btn-db" on:click={openLibrary} title="Upe ou Modifique os Poderes por Aqui">
+      <i class="fas fa-database"></i> <span class="btn-text">MODIFICAR PODER</span>
     </button>
   </div>
 
@@ -186,8 +186,8 @@
         {:else}
             <div class="empty-state" in:fade>
             <div class="glitch-wrapper"><i class="fas fa-wifi"></i></div>
-            <span class="empty-title">NENHUM MÓDULO DETECTADO</span>
-            <span class="empty-sub">Arraste um poder ou acesse a Database.</span>
+            <span class="empty-title">NENHUM PODER Alocado</span>
+            <span class="empty-sub">Peça a um Auxiliar ou Mestre seu Poder Inicial no canal do Discord Avaliação de Ficha.</span>
             </div>
         {/if}
         </div>
@@ -196,7 +196,7 @@
 
   <footer class="term-footer">
     <div class="footer-left">SYS_STATUS: <span style="color:var(--c-primary)">ONLINE</span></div>
-    <div class="footer-right">SYNC_MODE: <span style="color:var(--c-primary)">AUTO_RT</span></div>
+    <div class="footer-right">SYNC_MODE: <span style="color:var(--c-primary)">AUTO</span></div>
   </footer>
 </div>
 

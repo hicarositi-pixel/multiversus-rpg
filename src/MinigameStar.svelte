@@ -36,8 +36,8 @@
     
     {#if !isCaught}
         <div class="instructions" in:fade>
-            PROTOCOL: CATCH_THE_STAR<br>
-            <span style="font-size: 0.7em; opacity: 0.7;">INTERCEPT THE SIGNAL</span>
+            PROTOCOLO: PEGUE A ESTRELA<br>
+            <span style="font-size: 0.7em; opacity: 0.7;">INTERCEPTE O SINAL DA LOCALIZAÇÂO DA ESTRELA</span>
         </div>
 
         <button 
@@ -51,7 +51,7 @@
         </button>
     {:else}
         <div class="success-msg" in:scale>
-            ACCESS GRANTED
+            INFORMAÇÂO FORNECIDA AO SR VOLHEIM
         </div>
     {/if}
 </div>

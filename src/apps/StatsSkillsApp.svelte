@@ -254,12 +254,12 @@
     <header class="xp-header">
         <div class="xp-info">
             <div class="xp-col">
-                <span class="lbl">CAPACIDADE</span>
+                <span class="lbl">PONTOS DE FICHA TOTAIS</span>
                 <span class="val">{pointsCap}</span>
             </div>
             <div class="xp-sep"></div>
             <div class="xp-col">
-                <span class="lbl">DISPONÍVEL</span>
+                <span class="lbl">PONTOS DE FICHA DISPONÍVEL</span>
                 <span class="val highlight" class:debt={pointsAvailable < 0}>{pointsAvailable}</span>
             </div>
         </div>

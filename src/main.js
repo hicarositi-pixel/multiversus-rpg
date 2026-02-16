@@ -59,6 +59,14 @@ game.settings.register("multiversus-rpg", "openingVideoUrl", {
         default: ""
     });
 
+    game.settings.register("multiversus-rpg", "worldNewsData", {
+        name: "Database de Notícias",
+        scope: "world",
+        config: false, // Escondido do menu padrão
+        type: Object,
+        default: [] // Array vazio inicial
+    });
+
     // No seu Hooks.once("init", ...) junto com a config do vídeo:
 
 game.settings.register("multiversus-rpg", "skipOpeningVideo", {

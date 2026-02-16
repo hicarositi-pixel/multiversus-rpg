@@ -3,6 +3,7 @@
     import { fade, fly, slide } from 'svelte/transition';
     import { MENU_THEMES } from './data/MainMenuThemeDB.js'; 
     import MinigameStar from './MinigameStar.svelte';
+    import JornalApp from './JornalApp.svelte';
 
     export let app;
     export let onFinish;
@@ -17,6 +18,7 @@ const MUSIC_PATH = game.settings.get("multiversus-rpg", "openingMusicUrl");
     let skipVideoPref = game.settings.get("multiversus-rpg", "skipOpeningVideo");
     let skipLoginPref = game.settings.get("multiversus-rpg", "skipLoginAnim");
     let currentThemeId = game.settings.get("multiversus-rpg", "menuTheme") || "default";
+    
 
     // Tema Ativo
     $: theme = MENU_THEMES?.[currentThemeId] || MENU_THEMES?.['default'] || { colors: { primary: '#00ff41', bg: '#000' }, font: 'monospace' };
@@ -34,6 +36,7 @@ const MUSIC_PATH = game.settings.get("multiversus-rpg", "openingMusicUrl");
     // Travas de Segurança
     let closingTimer = null;
     let finished = false; 
+    
 
     // --- CICLO DE VIDA ---
     onMount(() => {
@@ -177,6 +180,15 @@ const MUSIC_PATH = game.settings.get("multiversus-rpg", "openingMusicUrl");
         ui.notifications.warn("ACESSO NEGADO: Módulo não instalado ou nível insuficiente.");
     }
 
+    
+    function openJournal() {
+    state = 'journal';
+}
+
+function closeJournal() {
+    state = 'menu'; // Retorna ao menu quando fechar o jornal
+}
+
     // --- FASE 5: ENTRADA FINAL ---
     function enterGame() {
         if (finished) return;
@@ -252,11 +264,9 @@ const MUSIC_PATH = game.settings.get("multiversus-rpg", "openingMusicUrl");
                     <span>INICIAR SESSÃO</span>
                 </button>
 
-                <button class="menu-btn locked" on:click={lockedAction}>
-                    <i class="fas fa-newspaper"></i> 
-                    <span>JORNAL DO NEXUS</span>
-                    <span class="tag">EM BREVE</span>
-                </button>
+<button class="menu-btn" on:click={openJournal}> <i class="fas fa-newspaper"></i> 
+    <span>JORNAL DATA HELL</span>
+</button>
 
                 <button class="menu-btn locked" on:click={lockedAction}>
                     <i class="fas fa-user-secret"></i> 
@@ -319,6 +329,10 @@ const MUSIC_PATH = game.settings.get("multiversus-rpg", "openingMusicUrl");
             </div>
         </div>
     {/if}
+
+    {#if state === 'journal'}
+    <JornalApp on:close={closeJournal} />
+{/if}
 
 </div>
 

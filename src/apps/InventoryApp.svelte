@@ -220,7 +220,7 @@
   <header class="os-header">
     <div class="os-brand">
       <i class="fas fa-box-open pulse"></i>
-      <div class="os-titles"><h1>NEXUS_INV</h1><small>{actor.name}</small></div>
+      <div class="os-titles"><h1>INVENTÁRIO</h1><small>{actor.name}</small></div>
     </div>
     
     <div class="os-stats">
@@ -300,7 +300,7 @@
     </div>
 
     <div class="stash-panel" on:dragover={handleDragOver} on:drop={handleDropOnStash} on:click={() => { selectedItem = null; isEditing = false; }}>
-      <div class="stash-header"><span>BUFFER</span> <span class="count-badge">{stashItems.length}</span></div>
+      <div class="stash-header"><span>ITENS FORA DO INVENTÁRIO</span> <span class="count-badge">{stashItems.length}</span></div>
       <div class="stash-grid custom-scroll">
         {#each stashItems as item (item.id)}
           <div class="stash-slot" draggable="true" on:dragstart={(e) => handleDragStart(e, item, 'stash')}>
