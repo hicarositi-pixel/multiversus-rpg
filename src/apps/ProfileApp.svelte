@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { slide, fade } from 'svelte/transition';
+import { slide, fade, scale } from 'svelte/transition';
     import { XPDatabase } from '../XPDatabase.js'; // Certifique-se que o caminho está certo
     import { LevelCalculator } from '../LevelSystem.js';
     import { OriginDatabase } from '../OriginDatabase.js';
@@ -212,17 +212,20 @@
 {#if activePopup}
         <div class="modal-backdrop" on:click={() => activePopup = null} transition:fade>
             <div class="modal-window" transition:scale on:click|stopPropagation role="dialog">
+                
                 <div class="modal-header">
                     <span>DADOS_CRIPTOGRAFADOS // {activePopup.title}</span>
                     
                     <button class="close-btn" 
+                            type="button"
                             on:click|stopPropagation={() => activePopup = null}
                             on:mousedown|stopPropagation
-                            title="Fechar">
-                        ✕
+                            title="Fechar Janela">
+                        <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="modal-body">
+
+                <div class="modal-body custom-scroll">
                     {@html activePopup.desc}
                 </div>
             </div>
@@ -611,32 +614,34 @@
     .modal-header { background: var(--c-primary); color: #000; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; }
     .modal-body { padding: 20px; overflow-y: auto; color: #ccc; line-height: 1.6; }
 .close-btn { 
-    background: none; 
-    border: none; 
-    font-weight: bold; 
+    background: transparent; 
+    border: 1px solid rgba(0,0,0,0.2); 
+    border-radius: 4px;
     cursor: pointer; 
-    font-size: 16px; 
     color: #000; 
     
-    /* CORREÇÃO DO CLIQUE */
-    position: relative; /* Obrigatório para o z-index funcionar */
-    z-index: 100000; 
+    /* SEGURANÇA DE CLIQUE */
+    position: relative; 
+    z-index: 999999; 
     pointer-events: all;
     
-    /* Melhoria da área de clique */
+    /* TAMANHO E ALINHAMENTO */
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 30px; /* Garante tamanho físico */
-    height: 30px;
+    width: 28px; 
+    height: 28px;
     padding: 0;
-    margin-left: 10px;
+    margin-left: auto; /* Empurra pra direita se o flex falhar */
+    transition: 0.2s;
 }
 
 .close-btn:hover {
     color: #fff;
-    background: rgba(0,0,0,0.2);
-    border-radius: 4px;
+    background: #ff0000; /* Vermelho no hover para feedback visual */
+    border-color: #ff0000;
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255,0,0,0.5);
 }
 
     @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }

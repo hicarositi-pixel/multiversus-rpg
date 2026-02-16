@@ -59,6 +59,14 @@ game.settings.register("multiversus-rpg", "openingVideoUrl", {
         default: ""
     });
 
+    game.settings.register("multiversus-rpg", "worldNewsCategories", {
+    name: "Categorias do Jornal",
+    scope: "world",
+    config: false, // Escondido do menu, pois o App gerencia
+    type: Object,  // Foundry salva Arrays como Object/JSON
+    default: ["GERAL", "MISSÕES", "RUMORES"]
+});
+
     game.settings.register("multiversus-rpg", "worldNewsData", {
         name: "Database de Notícias",
         scope: "world",
