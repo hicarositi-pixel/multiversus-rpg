@@ -12,6 +12,7 @@ import SocialButton from './apps/SocialButton.svelte';
 import SocialMenu from './apps/SocialMenu.js';
 import { SocialHubDatabase } from './database/SocialHubDatabase.js';
 import { GroupDatabase } from "./database/GroupDatabase.js";
+import MobileHudApp from './apps/MobileHudApp.js';
 
 // Sheets JS
 import MultiversusItemSheet from './sheets/MultiversusItemSheet.js';
@@ -23,7 +24,13 @@ import { AuxiliarSystem } from './auxiliar/AuxiliarSystem.js';
 import "./DiscordHandler.js";
 import OpeningScreen from "./OpeningScreen.svelte";
 
+import { CardDatabase } from '../Logic/CardDatabase.js';
 
+Hooks.once('init', () => {
+    CardDatabase.init();
+});
+
+ 
 const MODULE_ID = "multiversus-rpg";
 
 // =========================================================
@@ -77,6 +84,7 @@ game.settings.register("multiversus-rpg", "openingVideoUrl", {
 
     // No seu Hooks.once("init", ...) junto com a config do vídeo:
 
+
 game.settings.register("multiversus-rpg", "skipOpeningVideo", {
     name: "Sempre Pular Vídeo",
     scope: "client", // Cada jogador escolhe o seu
@@ -123,7 +131,8 @@ game.settings.register("multiversus-rpg", "menuTheme", {
         currentDate: { day: 1, month: 0, year: 1 },
         events: {}, // { "1-0-1": [{type: 'note', text: 'Inicio'}, {type: 'group', id: 'xyz'}] }
         notes: {}
-    }
+    },
+    
 });
 
     // --- B. BANCOS DE DADOS ---
@@ -148,6 +157,12 @@ game.settings.register("multiversus-rpg", "menuTheme", {
     const ActorClass = CONFIG.Actor.documentClass;
     ActorClass.prototype.save = function(path, value, force = false) {
         StoreDatabase.scheduleUpdate(this, path, value, force);
+    };
+
+        const moduleData = game.modules.get("multiversus-rpg");
+    moduleData.api = {
+        ...moduleData.api,
+        MobileHudApp: MobileHudApp
     };
 
     console.log("MULTIVERSUS RPG | Init Concluído.");
@@ -477,6 +492,8 @@ Hooks.on("init", () => {
     CONFIG.Combat.initiative = {
         decimals: 2 
     };
+
+    
 });
 
 // ... (Seus imports e configurações iniciais) ...

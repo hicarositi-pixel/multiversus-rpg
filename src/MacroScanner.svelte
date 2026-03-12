@@ -25,7 +25,7 @@
     let showMiro = false;
     let miroMode = "players";
     let combatData = null;
-    let showBoardSelector = false; // Seletor customizado
+    let showBoardSelector = false;
 
     // PEGA A COR DO TEMA GLOBAL (ou da ficha do personagem)
     $: themeColor = user.getFlag(MODULE_ID, "globalTheme") || (currentActor?.flags?.[MODULE_ID]?.sheetConfig?.themeColor) || "#00ff41";
@@ -80,15 +80,31 @@
 
     function openApp(appId, e) {
         if (e) e.stopPropagation();
+        
         if (appId === 'ficha') {
             if (currentActor) currentActor.sheet.render(true);
             else ui.notifications.warn("PERSONAGEM_NÃO_ENCONTRADO");
             isOpen = false; return;
         }
+        
+        // NOVO: Abertura da Ficha Móvel
+        if (appId === 'mobileHud') {
+            const api = game.modules.get(MODULE_ID)?.api;
+            if (api && api.MobileHudApp) {
+                const existing = Object.values(ui.windows).find(w => w.id === "nexus-mobile-hud-app");
+                if (existing) existing.close();
+                else new api.MobileHudApp().render(true);
+            } else {
+                ui.notifications.error("SISTEMA TÁTICO OFFLINE. A API não foi carregada.");
+            }
+            isOpen = false; return;
+        }
+
         if (appId === 'detetive') {
             showBoardSelector = !showBoardSelector;
             return;
         }
+        
         activeApp = (activeApp === appId) ? null : appId;
         isOpen = false;
     }
@@ -101,17 +117,6 @@
         showBoardSelector = false;
     }
 </script>
-
-<svelte:window on:mousemove={handleMouseMove} on:mouseup={handleMouseUp} />
-
-<div class="apps-overlay">
-    {#if activeApp === 'combate'}<CombatTerminal actor={currentActor} on:close={() => activeApp = null} on:officialize={(e) => { combatData = e.detail; activeApp = 'resolucao'; }} />{/if}
-    {#if activeApp === 'resolucao'}<CombatResolution data={combatData} themeColor={themeColor} on:close={() => activeApp = null} />{/if}
-    {#if activeApp === 'loja'}<StoreApp actor={currentActor} on:close={() => activeApp = null} />{/if}
-    {#if activeApp === 'dados'}<DiceLogic on:close={() => activeApp = null} />{/if}
-    {#if showMiro}<MiroHub themeColor={themeColor} mode={miroMode} onClose={() => showMiro = false} />{/if}
-</div>
-
 <div class="macro-scanner-root" style="left: {pos.x}px; top: {pos.y}px; --c-primary: {themeColor}">
     
     <div class="scanner-unit">
@@ -126,9 +131,12 @@
         </div>
 
         {#if isOpen}
-            <div class="star-orbit" transition:scale={{duration: 400, easing: cubicOut}}>
+            <div class="star-orbit" transition:scale={{duration: 500, easing: elasticOut}}>
                 
-                <button class="m-btn star-pt n1" on:click={(e) => openApp('ficha', e)} title="PERFIL_BIOMÉTRICO">
+                <div class="tech-ring"></div>
+                <div class="hex-wireframe"></div>
+
+                <button class="m-btn star-pt n1" on:click={(e) => openApp('ficha', e)} title="FICHA_ORIGINAL">
                     <i class="fas fa-id-card"></i>
                 </button>
                 
@@ -140,19 +148,22 @@
                     <i class="fas fa-shopping-cart"></i>
                 </button>
 
-                <button class="m-btn star-pt n4" on:click={(e) => openApp('dados', e)} title="LÓGICA_DADOS">
+                <button class="m-btn star-pt n4" on:click={(e) => openApp('mobileHud', e)} title="FICHA_MÓVEL_TÁTICA">
+                    <i class="fas fa-tablet-alt"></i>
+                </button>
+
+                <button class="m-btn star-pt n5" on:click={(e) => openApp('dados', e)} title="LÓGICA_DADOS">
                     <i class="fas fa-dice"></i>
                 </button>
 
-                <button class="m-btn star-pt n5" on:click={(e) => openApp('detetive', e)} title="DETETIVE_HUB">
+                <button class="m-btn star-pt n6" on:click={(e) => openApp('detetive', e)} title="DETETIVE_HUB">
                     <i class="fas fa-search-plus"></i>
                 </button>
 
-                <div class="star-deco"></div>
             </div>
 
             {#if showBoardSelector}
-                <div class="board-selector-hud" transition:fly={{x: 20, duration: 300}}>
+                <div class="board-selector-hud" transition:fly={{x: -20, duration: 300, easing: cubicOut}}>
                     <div class="selector-title">SELEÇÃO_DE_MURAL</div>
                     <button class="sel-option" on:click={() => launchMiro('players')}>
                         <i class="fas fa-users"></i> ARQUIVO_GRUPO
@@ -176,62 +187,96 @@
 
     /* GATILHO CENTRAL */
     .finger-trigger { 
-        width: 60px; height: 60px; background: #000; border: 2px solid var(--c-primary); 
-        color: var(--c-primary); border-radius: 15px; display: flex; align-items: center; 
+        width: 60px; height: 60px; background: #050505; border: 2px solid var(--c-primary); 
+        color: var(--c-primary); border-radius: 16px; display: flex; align-items: center; 
         justify-content: center; font-size: 26px; cursor: pointer; position: relative; 
-        z-index: 100; pointer-events: auto; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        box-shadow: 0 0 15px rgba(0,0,0,0.8), inset 0 0 10px var(--c-primary);
+        z-index: 200; pointer-events: auto; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 12px rgba(var(--c-primary), 0.5);
     }
     .core-glow { position: absolute; inset: 0; background: var(--c-primary); opacity: 0; border-radius: inherit; transition: 0.3s; filter: blur(15px); }
-    .finger-trigger:hover .core-glow { opacity: 0.3; }
-    .finger-trigger.is-active { border-radius: 50%; transform: rotate(180deg); background: var(--c-primary); color: #000; box-shadow: 0 0 30px var(--c-primary); }
+    .finger-trigger:hover { transform: scale(1.05); }
+    .finger-trigger:hover .core-glow { opacity: 0.4; }
+    
+    /* Estado Aberto do Botão Central */
+    .finger-trigger.is-active { 
+        border-radius: 50%; transform: rotate(180deg); 
+        background: var(--c-primary); color: #000; 
+        box-shadow: 0 0 25px var(--c-primary); 
+    }
 
-    /* ÓRBITA DA ESTRELA */
-    .star-orbit { position: absolute; width: 220px; height: 220px; pointer-events: none; display: flex; align-items: center; justify-content: center; }
+    /* ÓRBITA HEXAGONAL */
+    .star-orbit { 
+        position: absolute; width: 240px; height: 240px; 
+        pointer-events: none; display: flex; align-items: center; justify-content: center; 
+        z-index: 150;
+    }
 
+    /* DECORAÇÕES DE FUNDO SCIFI */
+    .tech-ring {
+        position: absolute; inset: 10px; border-radius: 50%;
+        border: 1px dashed var(--c-primary); opacity: 0.3;
+        animation: spin 25s linear infinite;
+    }
+    .hex-wireframe {
+        position: absolute; inset: 30px;
+        border: 1px solid var(--c-primary); opacity: 0.2;
+        clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        animation: pulseGlow 3s infinite alternate;
+    }
+
+    /* BOTÕES ORBITAIS */
     .m-btn { 
-        position: absolute; width: 45px; height: 45px; background: #000; 
+        position: absolute; width: 48px; height: 48px; background: #0a0a0f; 
         border: 2px solid var(--c-primary); color: var(--c-primary); border-radius: 50%;
         cursor: pointer; pointer-events: auto; display: flex; align-items: center; 
-        justify-content: center; font-size: 18px; transition: 0.3s;
-        animation: breathe 4s infinite ease-in-out;
+        justify-content: center; font-size: 18px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(0, 0, 0, 0.9);
+        z-index: 160;
     }
-    .m-btn:hover { background: var(--c-primary); color: #000; transform: scale(1.2); box-shadow: 0 0 20px var(--c-primary); }
-
-    /* POSICIONAMENTO PENTAGONAL */
-    .n1 { top: 0; } /* Topo */
-    .n2 { top: 30%; right: 0; animation-delay: 0.5s; } /* Superior Direita */
-    .n3 { bottom: 5%; right: 15%; animation-delay: 1s; } /* Inferior Direita */
-    .n4 { bottom: 5%; left: 15%; animation-delay: 1.5s; } /* Inferior Esquerda */
-    .n5 { top: 30%; left: 0; animation-delay: 2s; } /* Superior Esquerda */
-
-    .star-deco { 
-        position: absolute; inset: 30px; border: 1px solid var(--c-primary); 
-        clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-        opacity: 0.15; animation: spin 20s linear infinite;
+    
+    .m-btn:hover { 
+        background: var(--c-primary); color: #000; 
+        transform: translate(-50%, -50%) scale(1.2) !important; /* Scale mantendo o centro */
+        box-shadow: 0 0 20px var(--c-primary), inset 0 0 5px #fff; 
     }
+
+    /* MATEMÁTICA DO HEXÁGONO PERFEITO (Com translate para centralizar a âncora do botão)
+       Centro = 50%, 50% | Raio baseado na altura e largura
+    */
+    .n1 { top: 0%; left: 50%; transform: translate(-50%, -50%); animation: float1 4s ease-in-out infinite; } 
+    .n2 { top: 25%; left: 93.3%; transform: translate(-50%, -50%); animation: float2 4.5s ease-in-out infinite; } 
+    .n3 { top: 75%; left: 93.3%; transform: translate(-50%, -50%); animation: float3 4.2s ease-in-out infinite; } 
+    .n4 { top: 100%; left: 50%; transform: translate(-50%, -50%); animation: float1 4.7s ease-in-out infinite; } 
+    .n5 { top: 75%; left: 6.7%; transform: translate(-50%, -50%); animation: float2 4.1s ease-in-out infinite; } 
+    .n6 { top: 25%; left: 6.7%; transform: translate(-50%, -50%); animation: float3 4.6s ease-in-out infinite; } 
 
     /* SELETOR DE MURAL */
     .board-selector-hud {
-        position: absolute; left: 140px; top: 50%; transform: translateY(-50%);
-        background: rgba(0,0,0,0.9); border: 1px solid var(--c-primary);
-        padding: 10px; display: flex; flex-direction: column; gap: 8px;
-        width: 180px; pointer-events: auto; box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+        position: absolute; left: 160px; top: 50%; transform: translateY(-50%);
+        background: rgba(5,5,10,0.95); border: 1px solid var(--c-primary); border-radius: 8px;
+        padding: 12px; display: flex; flex-direction: column; gap: 8px;
+        width: 180px; pointer-events: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        backdrop-filter: blur(5px);
     }
-    .selector-title { font-size: 9px; color: var(--c-primary); border-bottom: 1px solid var(--c-primary); padding-bottom: 4px; margin-bottom: 4px; opacity: 0.7; }
+    .selector-title { font-size: 10px; font-weight: bold; color: var(--c-primary); border-bottom: 1px dashed var(--c-primary); padding-bottom: 6px; margin-bottom: 4px; letter-spacing: 1px; }
     .sel-option { 
-        background: transparent; border: 1px solid rgba(var(--c-primary), 0.3);
-        color: #fff; padding: 8px; font-size: 10px; cursor: pointer; text-align: left;
+        background: rgba(255,255,255,0.05); border: 1px solid transparent; border-radius: 4px;
+        color: #ddd; padding: 10px; font-size: 11px; cursor: pointer; text-align: left;
         display: flex; align-items: center; gap: 10px; transition: 0.2s;
     }
-    .sel-option:hover { background: var(--c-primary); color: #000; }
-    .sel-option.locked { opacity: 0.3; cursor: not-allowed; filter: grayscale(1); }
+    .sel-option:hover { background: var(--c-primary); color: #000; border-color: var(--c-primary); font-weight: bold; }
+    .sel-option.locked { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); }
+    .sel-option.locked:hover { background: rgba(255,0,0,0.2); border-color: red; color: red; }
 
     /* ANIMAÇÕES */
-    @keyframes breathe { 0%, 100% { transform: scale(1); box-shadow: 0 0 5px var(--c-primary); } 50% { transform: scale(1.08); box-shadow: 0 0 15px var(--c-primary); } }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes pulseGlow { from { opacity: 0.1; } to { opacity: 0.5; box-shadow: inset 0 0 30px var(--c-primary); } }
+    
+    /* Flutuação suave individual para não parecer robótico */
+    @keyframes float1 { 0%, 100% { margin-top: 0px; } 50% { margin-top: -6px; } }
+    @keyframes float2 { 0%, 100% { margin-top: 0px; } 50% { margin-top: -4px; } }
+    @keyframes float3 { 0%, 100% { margin-top: 0px; } 50% { margin-top: -8px; } }
+
     .scan-line { position: absolute; width: 100%; height: 2px; background: var(--c-primary); top: 0; animation: scan 2s infinite linear; opacity: 0.4; pointer-events: none; }
     @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
-    .blink { animation: blink 1s infinite; }
-    @keyframes blink { 50% { opacity: 0.3; } }
 </style>

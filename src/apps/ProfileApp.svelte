@@ -1,7 +1,7 @@
 <script>
-    import { onMount } from 'svelte';
-import { slide, fade, scale } from 'svelte/transition';
-    import { XPDatabase } from '../XPDatabase.js'; // Certifique-se que o caminho está certo
+    import { onMount, createEventDispatcher } from 'svelte';
+    import { slide, fade, scale } from 'svelte/transition';
+    import { XPDatabase } from '../XPDatabase.js'; 
     import { LevelCalculator } from '../LevelSystem.js';
     import { OriginDatabase } from '../OriginDatabase.js';
 
@@ -9,11 +9,13 @@ import { slide, fade, scale } from 'svelte/transition';
     export let flags = {}; 
     export let system = {}; // Recebe o system para ler atributos
 
-    // O tema vem das flags do ator ou usa verde padrão
-    $: themeColor = flags.customColor || "#00ff41";
-
+    const dispatch = createEventDispatcher();
     const MODULE_ID = "multiversus-rpg";
     const BASE_POINTS_CAP = 150;
+    const isGM = game.user.isGM;
+
+    // O tema vem das flags do ator ou usa verde padrão
+    $: themeColor = flags.customColor || "#00ff41";
 
     // === 1. DADOS DE BIOGRAFIA ===
     $: loreContent = flags.bio_lore || "";
@@ -22,43 +24,46 @@ import { slide, fade, scale } from 'svelte/transition';
     $: motivations = flags.bio_motivations || [{ text: "", stars: 1 }];
     $: originUniverses = flags.bio_universes || [{ universe: "", theme: "" }];
 
-    // === 2. SISTEMA DE VONTADE (WILLPOWER & BASE WILL) ===
+    // === MODO GM (OVERRIDE) ===
+    let gmMode = flags.gmOverride || false;
+    let customLevel = flags.customLevel || 1;
+    let customPoints = flags.customPoints || 150;
+
+    // === CÁLCULO DE NÍVEL ===
+    $: currentXP = flags.xp || 0; 
+    $: lvlInfo = LevelCalculator.getLevelInfo(currentXP);
     
-    // Leitura dos Stats do Sistema (Ajuste conforme a estrutura do seu system.json)
-    // Assumindo que Charm e Command estão em system.stats ou attributes
-    $: statCharm = Number(system.stats?.charm?.value || system.attributes?.charm?.value || 0);
-    $: statCommand = Number(system.stats?.command?.value || system.attributes?.command?.value || 0);
+    // O nível que realmente vale para os cálculos (Se GM forçar, usa o forçado)
+    $: activeLevel = gmMode ? customLevel : lvlInfo.level;
+    $: missingXP = lvlInfo.nextXP - currentXP;
+    $: totalPointsCap = gmMode ? customPoints : (BASE_POINTS_CAP + currentXP);
+
+    // === 2. SISTEMA DE VONTADE ATUALIZADO ===
     
-    // Pontos Comprados (Permanentes)
+    // Leitura dos Stats
+    $: statCharm = Number(system.stats?.charm?.value || system.attributes?.charm?.value || flags.stats?.charm?.normal || 1);
+    $: statCommand = Number(system.stats?.command?.value || system.attributes?.command?.value || flags.stats?.command?.normal || 1);
+    
+    // Pontos Comprados (Apenas Base Will pode ser comprado agora)
     $: boughtBaseWill = flags.boughtBaseWill || 0;
-    $: boughtWillpower = flags.boughtWillpower || 0;
-
-    // Cálculos de Totais
-    // Base Will = (Charme + Comando) + Comprados
-    $: maxBaseWill = statCharm + statCommand + boughtBaseWill;
     
-    // Max Willpower = Base Will Total + Comprados
-    $: maxWillpower = maxBaseWill + boughtWillpower;
+    // Cálculos de Totais (A MÁGICA ACONTECE AQUI)
+    // Base Will = (Charme + Comando + Nivel) + Comprados
+    $: maxBaseWill = statCharm + statCommand + activeLevel + boughtBaseWill;
+    
+    // Max Willpower = Travado no Base Will Total
+    $: maxWillpower = maxBaseWill;
 
-    // Valores Atuais (Editáveis para dano/recuperação)
+    // Valores Atuais (Editáveis na barra)
     $: currBaseWill = flags.currBaseWill !== undefined ? flags.currBaseWill : maxBaseWill;
     $: currWillpower = flags.currWillpower !== undefined ? flags.currWillpower : maxWillpower;
 
-    // Custos de XP
+    // Custos de XP (Willpower atual não custa mais XP)
     $: costBaseWill = boughtBaseWill * 3;
-    $: costWillpower = boughtWillpower * 1;
-    $: totalWillCost = costBaseWill + costWillpower;
+    $: totalWillCost = costBaseWill;
 
     // === 3. LÓGICA DE PONTOS GERAIS ===
-    
-    // Custo de Universos
     $: universeCost = Math.max(0, originUniverses.length - 1) * 8;
-
-    // XP Total
-    $: currentXP = flags.xp || 0; // Fonte de verdade é a flag sincronizada
-    $: totalPointsCap = BASE_POINTS_CAP + currentXP;
-
-    // Custos Totais
     $: statsCost = flags.statsCost || 0;
     $: powersCost = flags.powersSpent || 0;
 
@@ -80,7 +85,6 @@ import { slide, fade, scale } from 'svelte/transition';
     }
 
     // Barra Circular
-    $: lvlInfo = LevelCalculator.getLevelInfo(currentXP);
     $: strokeDashoffset = 283 - (283 * lvlInfo.progress / 100);
 
     // === 4. ESTADOS DE UI ===
@@ -96,46 +100,43 @@ import { slide, fade, scale } from 'svelte/transition';
         await actor.update({ [`flags.${MODULE_ID}.${key}`]: value }, { render: false });
     }
 
-    // SINCRONIZAÇÃO COM O GM (CORREÇÃO AQUI)
+    // Funções de Override do GM
+    function toggleGMMode() {
+        gmMode = !gmMode;
+        actor.update({[`flags.${MODULE_ID}.gmOverride`]: gmMode});
+    }
+    function saveGMConfig() {
+        actor.update({
+            [`flags.${MODULE_ID}.customLevel`]: customLevel,
+            [`flags.${MODULE_ID}.customPoints`]: customPoints
+        });
+    }
+
     async function importPlayerXP() {
         isSyncing = true;
         try {
-            // 1. Pega ID do Usuário Dono (ou o atual se for dono)
-            // Se o ator tiver um permission default, tentamos achar o dono
             const userId = game.user.id; 
-
-            // 2. Busca no XPDatabase
             const xpData = await XPDatabase.getPlayerData(userId);
-            
-            // 3. Busca a Origem definida pelo GM na flag do Usuário
             const userOrigin = game.users.get(userId)?.getFlag(MODULE_ID, "origin");
 
-            // 4. Atualiza o Ator
             const updates = {
                 [`flags.${MODULE_ID}.xp`]: xpData.earnedXP || 0,
                 [`flags.${MODULE_ID}.bio_group`]: xpData.group || "Sem Grupo"
             };
 
-            if (userOrigin) {
-                updates[`flags.${MODULE_ID}.origin`] = userOrigin;
-            }
+            if (userOrigin) updates[`flags.${MODULE_ID}.origin`] = userOrigin;
 
             await actor.update(updates, { render: false });
-            
-            // Recarrega dados visuais
             currentXP = xpData.earnedXP || 0;
             if (userOrigin) await loadOriginData(userOrigin);
-
             ui.notifications.info(`Sincronização: ${currentXP} XP recebidos. Origem atualizada.`);
-
         } catch (e) {
             console.error(e);
-            ui.notifications.warn("Falha ao sincronizar com o Database. Verifique se o GM está online.");
+            ui.notifications.warn("Falha ao sincronizar com o Database.");
         }
         isSyncing = false;
     }
 
-    // Carregamento de Origem
     async function loadOriginData(originID) {
         try {
             const allOrigins = await OriginDatabase.load();
@@ -143,21 +144,16 @@ import { slide, fade, scale } from 'svelte/transition';
         } catch (e) { console.warn("OriginDB Offline", e); }
     }
 
-    // Manipulação de Willpower
+    // Manipulação de Willpower Atualizada (Só compra Base Will agora)
     function buyStat(type, amount) {
-        // Verifica saldo
-        const cost = type === 'bw' ? 3 : 1;
+        if (type === 'wp') return; // Segurança extra: não pode mais comprar WP
+
+        const cost = 3;
         if (availablePoints < cost && amount > 0) {
             return ui.notifications.warn("XP Insuficiente para aprimoramento.");
         }
-
-        if (type === 'bw') {
-            const newVal = Math.max(0, boughtBaseWill + amount);
-            actor.update({ [`flags.${MODULE_ID}.boughtBaseWill`]: newVal }, {render:false});
-        } else {
-            const newVal = Math.max(0, boughtWillpower + amount);
-            actor.update({ [`flags.${MODULE_ID}.boughtWillpower`]: newVal }, {render:false});
-        }
+        const newVal = Math.max(0, boughtBaseWill + amount);
+        actor.update({ [`flags.${MODULE_ID}.boughtBaseWill`]: newVal }, {render:false});
     }
 
     function updateCurrent(type, val) {
@@ -169,7 +165,7 @@ import { slide, fade, scale } from 'svelte/transition';
         }
     }
 
-    // Manipulação de Universos e Motivações (Código Preservado)
+    // Funções Originais de Universo e Motivação
     function addUniverse() { 
         const newList = [...originUniverses, { universe: "", theme: "" }];
         if (newList.length > 1 && availablePoints < 8) ui.notifications.warn("Atenção: Custo de 8 XP pendente!");
@@ -200,31 +196,21 @@ import { slide, fade, scale } from 'svelte/transition';
     function getStars(c) { return "★".repeat(Math.min(5, Math.max(1, c))) + "☆".repeat(5 - Math.min(5, Math.max(1, c))); }
     
     async function editImg() { 
-        new FilePicker({ 
-            type: "image", current: actor.img, 
-            callback: path => actor.update({img: path}, {render: false}) 
-        }).render(true); 
+        new FilePicker({ type: "image", current: actor.img, callback: path => actor.update({img: path}, {render: false}) }).render(true); 
     }
 </script>
 
 <div class="bio-terminal" style="--c-primary: {themeColor};">
     
-{#if activePopup}
+    {#if activePopup}
         <div class="modal-backdrop" on:click={() => activePopup = null} transition:fade>
             <div class="modal-window" transition:scale on:click|stopPropagation role="dialog">
-                
                 <div class="modal-header">
                     <span>DADOS_CRIPTOGRAFADOS // {activePopup.title}</span>
-                    
-                    <button class="close-btn" 
-                            type="button"
-                            on:click|stopPropagation={() => activePopup = null}
-                            on:mousedown|stopPropagation
-                            title="Fechar Janela">
+                    <button class="close-btn" type="button" on:click|stopPropagation={() => activePopup = null} title="Fechar">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-
                 <div class="modal-body custom-scroll">
                     {@html activePopup.desc}
                 </div>
@@ -246,8 +232,27 @@ import { slide, fade, scale } from 'svelte/transition';
                     <button class="sync-btn {isSyncing ? 'pulsing' : ''}" on:click={importPlayerXP}>
                         <i class="fas fa-satellite-dish"></i> ATUALIZAR XP E ORIGEM
                     </button>
+                    {#if !gmMode && missingXP <= 0}
+                        <button class="lvl-up-btn" on:click={() => dispatch('openLvlUp')} transition:fade>
+                            <i class="fas fa-arrow-up"></i> REALIZAR LVL UP!
+                        </button>
+                    {/if}
                 </div>
             </div>
+
+            {#if isGM}
+                <div class="gm-panel">
+                    <button class="gm-toggle" class:active={gmMode} on:click={toggleGMMode} title="Modo NPC">
+                        <i class="fas fa-user-shield"></i> Override
+                    </button>
+                    {#if gmMode}
+                        <div class="gm-inputs" transition:slide>
+                            <label>LVL <input type="number" bind:value={customLevel} on:change={saveGMConfig}></label>
+                            <label>PTS <input type="number" bind:value={customPoints} on:change={saveGMConfig}></label>
+                        </div>
+                    {/if}
+                </div>
+            {/if}
 
             <div class="resource-display">
                 <div class="res-line">
@@ -264,6 +269,11 @@ import { slide, fade, scale } from 'svelte/transition';
                         {availablePoints}
                     </span>
                 </div>
+                {#if !gmMode}
+                    <div class="res-line" style="margin-top: 5px; font-size: 9px; justify-content: center; color: #888;">
+                        Faltam {missingXP > 0 ? missingXP : 0} XP p/ Nível {activeLevel + 1}
+                    </div>
+                {/if}
             </div>
 
             <div class="level-orb">
@@ -273,19 +283,27 @@ import { slide, fade, scale } from 'svelte/transition';
                 </svg>
                 <div class="level-txt">
                     <small>LVL</small>
-                    <strong>{lvlInfo.level}</strong>
+                    <strong>{activeLevel}</strong>
                 </div>
             </div>
         </header>
+
+        {#if !gmMode}
+            <div class="level-info-bar">
+                <div class="li-item"><b style="color: var(--c-primary)">Limites Atuais:</b> {lvlInfo.limits}</div>
+                <div class="li-item"><b style="color: var(--c-primary)">Bônus Ativos:</b> {lvlInfo.buffs}</div>
+            </div>
+        {/if}
 
         <section class="willpower-module">
             <div class="will-row">
                 <div class="will-info">
                     <span class="w-label">BASE WILL</span>
-                    <div class="w-calc">
-                        <span title="Charme">{statCharm}</span> + 
-                        <span title="Comando">{statCommand}</span> + 
-                        <span class="bought" title="Comprado">{boughtBaseWill}</span>
+                    <div class="w-calc" title="Charme + Comando + Nível + Comprados">
+                        <span title="Charme">[{statCharm}]</span> + 
+                        <span title="Comando">[{statCommand}]</span> + 
+                        <span title="Nível">[{activeLevel}]</span> + 
+                        <span class="bought" title="Comprado (Custa 3XP)">[{boughtBaseWill}]</span>
                         = <strong>{maxBaseWill}</strong>
                     </div>
                 </div>
@@ -302,24 +320,18 @@ import { slide, fade, scale } from 'svelte/transition';
                 </div>
             </div>
 
-            <div class="will-row">
+            <div class="will-row" style="border-left: 2px solid #00aaff;">
                 <div class="will-info">
-                    <span class="w-label">WILLPOWER</span>
+                    <span class="w-label" style="color: #00aaff;">WILLPOWER</span>
                     <div class="w-calc">
-                        <span title="Base Will">{maxBaseWill}</span> + 
-                        <span class="bought" title="Comprado">{boughtWillpower}</span>
+                        <span style="color: #666; font-style: italic;">O máximo é atrelado ao Base Will.</span>
                         = <strong>{maxWillpower}</strong>
                     </div>
                 </div>
                 <div class="will-controls">
-                    <div class="buyer">
-                        <button on:click={() => buyStat('wp', -1)}>-</button>
-                        <span>+1 XP</span>
-                        <button on:click={() => buyStat('wp', 1)}>+</button>
-                    </div>
                     <div class="current-input-wrapper">
-                        <label>ATUAL</label>
-                        <input type="number" value={currWillpower} on:change={e => updateCurrent('wp', e.target.value)}>
+                        <label style="color: #00aaff;">ATUAL</label>
+                        <input type="number" value={currWillpower} on:change={e => updateCurrent('wp', e.target.value)} style="border-color: #00aaff;">
                     </div>
                 </div>
             </div>
@@ -429,59 +441,74 @@ import { slide, fade, scale } from 'svelte/transition';
 </div>
 
 <style>
+    /* ... TODO O SEU CSS ORIGINAL FICA AQUI ... */
+
+    /* APENAS ADICIONE ESTAS CLASSES PARA OS NOVOS BOTÕES NO FINAL DO STYLE: */
+    
+    .level-info-bar {
+        background: rgba(0,0,0,0.5);
+        border: 1px dashed var(--c-primary);
+        border-radius: 6px;
+        padding: 10px;
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        font-size: 11px;
+    }
+    .li-item { border-left: 2px solid var(--c-primary); padding-left: 8px; }
+
+    .lvl-up-btn {
+        margin-top: 5px;
+        background: #000;
+        border: 1px solid #ffaa00;
+        color: #ffaa00;
+        font-weight: bold;
+        padding: 5px;
+        cursor: pointer;
+        animation: pulse 1.5s infinite;
+        font-family: inherit;
+    }
+    .lvl-up-btn:hover { background: #ffaa00; color: #000; }
+
+    .gm-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: rgba(255, 170, 0, 0.1);
+        padding: 5px;
+        border-radius: 4px;
+        border: 1px solid #333;
+    }
+    .gm-toggle {
+        background: #111; color: #aaa; border: 1px solid #444; padding: 5px; cursor: pointer; font-size: 10px;
+    }
+    .gm-toggle.active { background: #ffaa00; color: #000; border-color: #ffaa00; font-weight: bold; }
+    .gm-inputs { display: flex; flex-direction: column; gap: 5px; }
+    .gm-inputs label { font-size: 9px; color: #ffaa00; display: flex; justify-content: space-between; align-items: center; }
+    .gm-inputs input { width: 40px; background: #000; color: #fff; border: 1px solid #ffaa00; text-align: center; }
+
+    /* Cole o seu css antigo a partir daqui */
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
-    .bio-terminal {
-        height: 100%; display: flex; flex-direction: column; 
-        background: #050505; color: #ccc; 
-        font-family: 'Share Tech Mono', monospace;
-        --glass: rgba(255, 255, 255, 0.03);
-        --border: 1px solid rgba(255,255,255,0.1);
-        --glow: 0 0 10px rgba(var(--c-primary), 0.2);
-    }
-
+    .bio-terminal { height: 100%; display: flex; flex-direction: column; background: #050505; color: #ccc; font-family: 'Share Tech Mono', monospace; --glass: rgba(255, 255, 255, 0.03); --border: 1px solid rgba(255,255,255,0.1); --glow: 0 0 10px rgba(var(--c-primary), 0.2); }
     .content-scroll { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
-    
-    /* HEADER */
     .top-hud { display: flex; gap: 20px; border-bottom: 2px solid #222; padding-bottom: 20px; align-items: center; }
-    
     .id-card { flex: 2; display: flex; gap: 15px; align-items: center; }
-    .portrait { 
-        width: 80px; height: 80px; border: 2px solid var(--c-primary); 
-        position: relative; overflow: hidden; cursor: pointer; background: #000;
-        box-shadow: 0 0 15px var(--c-primary);
-    }
+    .portrait { width: 80px; height: 80px; border: 2px solid var(--c-primary); position: relative; overflow: hidden; cursor: pointer; background: #000; box-shadow: 0 0 15px var(--c-primary); }
     .portrait img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.5); transition: 0.3s; }
     .portrait:hover img { filter: grayscale(0); transform: scale(1.1); }
-    
     .info-col { flex: 1; display: flex; flex-direction: column; justify-content: center; }
     .info-col label { font-size: 10px; color: var(--c-primary); letter-spacing: 2px; }
-    .name-input { 
-        background: transparent; border: none; border-bottom: 1px solid #333; 
-        color: #fff; font-size: 24px; font-family: inherit; width: 100%; text-transform: uppercase; 
-    }
+    .name-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-size: 24px; font-family: inherit; width: 100%; text-transform: uppercase; }
     .name-input:focus { outline: none; border-bottom-color: var(--c-primary); }
-    
-    .sync-btn {
-        margin-top: 5px; background: transparent; border: 1px solid #444; color: #666;
-        font-size: 10px; padding: 2px 8px; cursor: pointer; width: fit-content;
-        transition: 0.2s; font-family: inherit;
-    }
+    .sync-btn { margin-top: 5px; background: transparent; border: 1px solid #444; color: #666; font-size: 10px; padding: 2px 8px; cursor: pointer; width: fit-content; transition: 0.2s; font-family: inherit; }
     .sync-btn:hover { border-color: var(--c-primary); color: var(--c-primary); }
     .pulsing { animation: pulse 1s infinite; color: var(--c-primary); border-color: var(--c-primary); }
-
-    /* MONITOR */
-    .resource-display {
-        flex: 1.5; background: #080808; border: var(--border); padding: 10px;
-        display: flex; flex-direction: column; justify-content: center; gap: 4px;
-        border-right: 4px solid var(--c-primary);
-    }
+    .resource-display { flex: 1.5; background: #080808; border: var(--border); padding: 10px; display: flex; flex-direction: column; justify-content: center; gap: 4px; border-right: 4px solid var(--c-primary); }
     .res-line { display: flex; justify-content: space-between; font-size: 11px; }
     .res-line .val { font-weight: bold; }
     .res-line.main { margin-top: 4px; border-top: 1px dashed #333; padding-top: 4px; color: var(--c-primary); font-size: 14px; }
     .dim { color: #555; }
-
-    /* ORB */
     .level-orb { width: 70px; height: 70px; position: relative; display: flex; align-items: center; justify-content: center; }
     .level-orb svg { width: 100%; height: 100%; transform: rotate(-90deg); }
     .bg-ring { fill: none; stroke: #111; stroke-width: 6; }
@@ -489,48 +516,29 @@ import { slide, fade, scale } from 'svelte/transition';
     .level-txt { position: absolute; display: flex; flex-direction: column; align-items: center; line-height: 1; }
     .level-txt small { font-size: 8px; color: #666; }
     .level-txt strong { font-size: 20px; color: #fff; }
-
-    /* --- WILLPOWER MODULE --- */
-    .willpower-module {
-        background: rgba(0,0,0,0.3); border: var(--border); padding: 10px;
-        display: flex; flex-direction: column; gap: 10px;
-    }
-    .will-row {
-        display: flex; align-items: center; justify-content: space-between;
-        background: rgba(255,255,255,0.02); padding: 8px; border-radius: 4px;
-    }
+    .willpower-module { background: rgba(0,0,0,0.3); border: var(--border); padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+    .will-row { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 8px; border-radius: 4px; }
     .will-info { flex: 1; display: flex; flex-direction: column; }
     .w-label { font-size: 10px; color: var(--c-primary); font-weight: bold; letter-spacing: 1px; }
     .w-calc { font-size: 12px; color: #888; }
     .w-calc strong { color: #fff; font-size: 14px; margin-left: 5px; }
     .w-calc .bought { color: var(--c-primary); }
-
     .will-controls { display: flex; align-items: center; gap: 15px; }
     .buyer { display: flex; align-items: center; gap: 5px; border: 1px solid #333; padding: 2px; border-radius: 4px; }
     .buyer button { width: 20px; background: #222; border: none; color: #fff; cursor: pointer; }
     .buyer button:hover { background: var(--c-primary); color: #000; }
     .buyer span { font-size: 9px; color: #666; width: 40px; text-align: center; }
-
     .current-input-wrapper { display: flex; flex-direction: column; align-items: center; }
     .current-input-wrapper label { font-size: 8px; color: #555; }
-    .current-input-wrapper input { 
-        width: 50px; background: #000; border: 1px solid var(--c-primary); 
-        color: #fff; text-align: center; padding: 5px; font-weight: bold; font-family: inherit;
-    }
-
-    /* ORIGIN PANEL */
+    .current-input-wrapper input { width: 50px; background: #000; border: 1px solid var(--c-primary); color: #fff; text-align: center; padding: 5px; font-weight: bold; font-family: inherit; }
     .origin-display { border: var(--border); background: var(--glass); display: flex; flex-direction: column; }
-    .origin-header { 
-        background: rgba(255,255,255,0.05); padding: 8px 15px; display: flex; align-items: center; gap: 10px; 
-        border-bottom: 1px solid #333; 
-    }
+    .origin-header { background: rgba(255,255,255,0.05); padding: 8px 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #333; }
     .origin-icon { font-size: 20px; }
     .origin-title { flex: 1; display: flex; flex-direction: column; line-height: 1.2; }
     .origin-title span { color: var(--c-primary); font-weight: bold; letter-spacing: 1px; }
     .origin-title small { font-size: 9px; color: #666; }
     .btn-info { background: transparent; border: 1px solid var(--c-primary); color: var(--c-primary); font-family: inherit; font-size: 10px; cursor: pointer; padding: 4px 10px; }
     .btn-info:hover { background: var(--c-primary); color: #000; }
-
     .origin-details { display: flex; padding: 10px; gap: 10px; }
     .detail-box { flex: 1; background: #000; border: 1px solid #222; padding: 8px; cursor: help; transition: 0.2s; }
     .detail-box:hover { border-color: #555; }
@@ -539,111 +547,38 @@ import { slide, fade, scale } from 'svelte/transition';
     .traits-list { display: flex; flex-wrap: wrap; gap: 5px; }
     .trait-tag { background: #111; border: 1px solid #333; padding: 2px 6px; font-size: 10px; color: #aaa; cursor: help; }
     .trait-tag:hover { color: #fff; border-color: #fff; }
-
-    /* LISTAS */
     .dual-lists { display: flex; gap: 20px; }
     .cyber-list { flex: 1; border: var(--border); background: #080808; display: flex; flex-direction: column; }
-    .list-head { 
-        background: rgba(255,255,255,0.05); padding: 5px 10px; font-size: 11px; font-weight: bold; 
-        color: #888; display: flex; justify-content: space-between; align-items: center; 
-        border-bottom: 1px solid #333; 
-    }
+    .list-head { background: rgba(255,255,255,0.05); padding: 5px 10px; font-size: 11px; font-weight: bold; color: #888; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; }
     .add-btn { background: #222; color: #fff; border: none; width: 20px; height: 20px; cursor: pointer; font-weight: bold; }
     .add-btn:hover { background: var(--c-primary); color: #000; }
-
     .list-content { padding: 10px; display: flex; flex-direction: column; gap: 5px; }
-    .list-row { 
-        display: flex; justify-content: space-between; align-items: center; 
-        background: rgba(255,255,255,0.02); padding: 5px; border: 1px solid transparent; 
-        transition: 0.2s; 
-    }
+    .list-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 5px; border: 1px solid transparent; transition: 0.2s; }
     .list-row:hover { border-color: #444; background: rgba(255,255,255,0.04); }
     .list-row.column { flex-direction: column; align-items: flex-start; gap: 5px; }
-
     .input-group { display: flex; align-items: center; gap: 5px; flex: 1; }
-    .univ-input, .theme-input, .full-input { 
-        background: transparent; border: none; border-bottom: 1px solid #333; 
-        color: #fff; font-family: inherit; font-size: 12px; width: 100%; 
-    }
+    .univ-input, .theme-input, .full-input { background: transparent; border: none; border-bottom: 1px solid #333; color: #fff; font-family: inherit; font-size: 12px; width: 100%; }
     .univ-input:focus, .theme-input:focus, .full-input:focus { border-color: var(--c-primary); outline: none; }
-    
     .controls, .stars-ctrl { display: flex; align-items: center; gap: 8px; }
     .del-btn { background: transparent; border: none; color: #444; cursor: pointer; }
     .del-btn:hover { color: #f33; }
-    
-    .cost-badge {
-        font-size: 9px; color: #ff3333; border: 1px solid #ff3333; padding: 1px 4px;
-        animation: blink 2s infinite; font-weight: bold;
-    }
-
+    .cost-badge { font-size: 9px; color: #ff3333; border: 1px solid #ff3333; padding: 1px 4px; animation: blink 2s infinite; font-weight: bold; }
     .num-input { width: 30px; background: #000; border: 1px solid #333; color: #fff; text-align: center; }
-
-    /* TEXT AREAS */
     .text-areas { display: flex; flex-direction: column; gap: 15px; }
     .split-text { display: flex; gap: 20px; }
     .text-box { flex: 1; border: var(--border); background: #000; position: relative; }
-    .box-label { 
-        position: absolute; top: -8px; left: 10px; background: #000; padding: 0 5px; 
-        font-size: 10px; color: var(--c-primary); border: 1px solid #333; 
-    }
-    textarea { 
-        width: 100%; background: transparent; border: none; padding: 15px; color: #ccc; 
-        font-family: inherit; resize: none; min-height: 120px; font-size: 13px; line-height: 1.5; 
-    }
+    .box-label { position: absolute; top: -8px; left: 10px; background: #000; padding: 0 5px; font-size: 10px; color: var(--c-primary); border: 1px solid #333; }
+    textarea { width: 100%; background: transparent; border: none; padding: 15px; color: #ccc; font-family: inherit; resize: none; min-height: 120px; font-size: 13px; line-height: 1.5; }
     textarea.short { min-height: 80px; }
     textarea:focus { background: rgba(255,255,255,0.02); outline: none; }
-
-    .footer-save button {
-        width: 100%; background: #111; border: 1px solid var(--c-primary); color: var(--c-primary);
-        padding: 12px; font-family: inherit; font-weight: bold; font-size: 14px; cursor: pointer;
-        transition: 0.2s;
-    }
+    .footer-save button { width: 100%; background: #111; border: 1px solid var(--c-primary); color: var(--c-primary); padding: 12px; font-family: inherit; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.2s; }
     .footer-save button:hover { background: var(--c-primary); color: #000; box-shadow: 0 0 20px var(--c-primary); }
-
-    /* MODAL */
-    .modal-backdrop { 
-        position: fixed; 
-        inset: 0; 
-        background: rgba(0,0,0,0.9); 
-        z-index: 9999; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-    }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; }
     .modal-window { width: 500px; max-height: 80vh; background: #050505; border: 1px solid var(--c-primary); display: flex; flex-direction: column; }
     .modal-header { background: var(--c-primary); color: #000; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; }
     .modal-body { padding: 20px; overflow-y: auto; color: #ccc; line-height: 1.6; }
-.close-btn { 
-    background: transparent; 
-    border: 1px solid rgba(0,0,0,0.2); 
-    border-radius: 4px;
-    cursor: pointer; 
-    color: #000; 
-    
-    /* SEGURANÇA DE CLIQUE */
-    position: relative; 
-    z-index: 999999; 
-    pointer-events: all;
-    
-    /* TAMANHO E ALINHAMENTO */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px; 
-    height: 28px;
-    padding: 0;
-    margin-left: auto; /* Empurra pra direita se o flex falhar */
-    transition: 0.2s;
-}
-
-.close-btn:hover {
-    color: #fff;
-    background: #ff0000; /* Vermelho no hover para feedback visual */
-    border-color: #ff0000;
-    transform: scale(1.1);
-    box-shadow: 0 0 10px rgba(255,0,0,0.5);
-}
-
+    .close-btn { background: transparent; border: 1px solid rgba(0,0,0,0.2); border-radius: 4px; cursor: pointer; color: #000; position: relative; z-index: 999999; pointer-events: all; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; margin-left: auto; transition: 0.2s; }
+    .close-btn:hover { color: #fff; background: #ff0000; border-color: #ff0000; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,0,0,0.5); }
     @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 </style>
