@@ -1,18 +1,43 @@
 <script>
+import { onMount } from 'svelte'; // NOVO
     import { fade, slide } from 'svelte/transition';
     import { CardDatabase } from '../../Logic/CardDatabase.js';
     import CardWindow from './components/CardWindow.svelte';
 
-    // O ator do Mestre (pra poder testar scripts no Preview)
     export let actor;
+    export let closeApp = () => {};
+    export let cardToEdit = null; // NOVO
 
-    let cards = [];
+    // --- SISTEMA DE ARRASTAR JANELA ---
+    let pos = { x: window.innerWidth / 2 - 550, y: window.innerHeight / 2 - 350 };
+    let isDragging = false;
+    let dragStart = { x: 0, y: 0 };
+
+    function onMouseDown(e) {
+        if (e.target.closest('.no-drag')) return;
+        isDragging = true;
+        dragStart = { x: e.clientX - pos.x, y: e.clientY - pos.y };
+    }
+    function onMouseMove(e) {
+        if (!isDragging) return;
+        pos = { x: e.clientX - dragStart.x, y: e.clientY - dragStart.y };
+    }
+    function onMouseUp() { isDragging = false; }
+
+    // --- LÓGICA DE CARTAS ---
+   let cards = [];
     let searchSource = "";
     let selectedCategory = "Todos";
     let editingCard = null; 
 
-    
-    
+    // NOVO: Quando abrir, checa se mandaram uma carta pra editar
+    onMount(async () => {
+        await refresh();
+        if (cardToEdit) {
+            // Clona a carta para não mutar a original acidentalmente
+            editingCard = JSON.parse(JSON.stringify(cardToEdit)); 
+        }
+    });
     $: categories = ["Todos", ...new Set(cards.map(c => c.category || "Geral"))];
     $: filteredCards = cards.filter(c => {
         const matchesSearch = c.name.toLowerCase().includes(searchSource.toLowerCase());
@@ -24,7 +49,7 @@
         cards = await CardDatabase.getCards();
     }
 
-const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>";
+    const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>";
     const cssExample = ".meu-botao { background: #00ff41; color: #000; padding: 10px; cursor: pointer; }";
     const jsExample = "window.minhaAcao = () => { ui.notifications.info('Rodou!'); }";
 
@@ -37,16 +62,14 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
             category: "Utilitário",
             tags: [{label: "Tipo", val: "Ação", color: "#00ff41"}],
             isGlobal: false,
-            html: "",
-            css: "",
-            js: ""
+            html: "", css: "", js: ""
         };
     }
 
     async function save() {
         if (!editingCard) return;
         await CardDatabase.saveCard(editingCard);
-        ui.notifications.info(`Carta "${editingCard.name}" salva!`);
+        ui.notifications.info(`Carta "${editingCard.name}" ${editingCard.id ? 'atualizada' : 'criada'} com sucesso!`);
         refresh();
     }
 
@@ -72,8 +95,11 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
     refresh();
 </script>
 
-<div class="card-forge-container no-drag" transition:fade>
-    <aside class="library">
+<svelte:window on:mousemove={onMouseMove} on:mouseup={onMouseUp} />
+
+<div class="card-forge-container" style="left: {pos.x}px; top: {pos.y}px;" on:mousedown={onMouseDown} transition:fade>
+    
+    <aside class="library no-drag">
         <header class="lib-header">
             <h3>CARD_LIBRARY</h3>
             <button class="add-btn" on:click={createNew}>+</button>
@@ -103,7 +129,7 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
     </aside>
 
     {#if editingCard}
-<main class="editor" transition:slide={{axis: 'x'}}>
+    <main class="editor no-drag" transition:slide={{axis: 'x'}}>
         <div class="editor-scroll custom-scroll">
             
             <div class="form-row">
@@ -145,7 +171,9 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
             </div>
 
             <div class="actions">
-                <button class="save-btn" on:click={save}><i class="fas fa-save"></i> SALVAR NO BANCO</button>
+                <button class="save-btn" on:click={save}>
+                    <i class="fas fa-save"></i> {editingCard.id ? 'ATUALIZAR CARTA' : 'CRIAR CARTA'}
+                </button>
                 {#if editingCard.id}
                     <button class="del-btn" on:click={() => deleteCard(editingCard.id)}>DELETAR</button>
                 {/if}
@@ -153,8 +181,10 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
         </div>
     </main>
 
-    <aside class="preview-panel">
-        <div class="tag">LIVE_PREVIEW</div>
+    <aside class="preview-panel no-drag">
+        <button class="close-forge-btn" on:click={closeApp}><i class="fas fa-times"></i> FECHAR FORJA</button>
+
+        <div class="tag" style="margin-top: 15px;">LIVE_PREVIEW</div>
         
         <div class="preview-wrapper">
             {#key editingCard}
@@ -174,7 +204,8 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
         </div>
     </aside>
     {:else}
-    <div class="empty-state">
+    <div class="empty-state no-drag">
+        <button class="close-forge-btn absolute-top-right" on:click={closeApp}><i class="fas fa-times"></i></button>
         <i class="fas fa-magic"></i>
         <p>Selecione uma carta na biblioteca ou clique em + para forjar uma nova.</p>
     </div>
@@ -182,9 +213,23 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
 </div>
 
 <style>
-    /* Cole todo aquele seu bloco <style> do CardCreator original aqui */
-    /* (Cortei pra não estourar o limite da mensagem, o seu CSS do Forge tava ótimo!) */
-    .card-forge-container { display: flex; width: 1100px; height: 700px; background: #050505; border: 2px solid #00ff41; border-radius: 12px; overflow: hidden; font-family: 'Share Tech Mono', monospace; color: #fff; }
+    .card-forge-container { 
+        position: fixed; /* Fixa na tela */
+        pointer-events: all;
+        display: flex; width: 1100px; height: 700px; 
+        background: #050505; border: 2px solid #00ff41; border-radius: 12px; 
+        overflow: hidden; font-family: 'Share Tech Mono', monospace; color: #fff; 
+        box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+    }
+    
+    .close-forge-btn {
+        background: #440000; color: #fff; border: 1px solid #ff4444; padding: 5px 10px;
+        cursor: pointer; width: 100%; font-weight: bold; border-radius: 4px; transition: 0.2s;
+    }
+    .close-forge-btn:hover { background: #ff4444; color: #000; }
+    .absolute-top-right { position: absolute; top: 10px; right: 10px; width: auto; }
+
+    /* --- TODO O RESTO DO SEU CSS CONTINUA INTACTO --- */
     .library { width: 300px; background: #0a0a0f; border-right: 1px solid #333; display: flex; flex-direction: column; }
     .lib-header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #333; }
     .lib-header h3 { color: #00ff41; margin: 0; }
@@ -209,14 +254,14 @@ const htmlExample = "<div class='meu-botao' onclick='minhaAcao()'>Executar</div>
     .actions { display: flex; gap: 10px; margin-top: 20px; }
     .save-btn { flex: 1; background: #00ff41; color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; }
     .del-btn { background: #440000; color: #fff; border: none; padding: 10px; cursor: pointer; }
-    .preview-panel { width: 360px; background: #0a0a0f; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .preview-panel { position: relative; width: 360px; background: #0a0a0f; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
     .preview-wrapper { transform: scale(0.9); }
     .tag { font-size: 9px; color: #00ff41; width: 100%; border-bottom: 1px solid #333; margin-bottom: 5px; opacity: 0.6; }
     .distribution { width: 100%; }
     .actor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
     .actor-btn { background: #111; border: 1px solid #333; color: #fff; font-size: 10px; padding: 5px; cursor: pointer; text-align: left; }
     .actor-btn:hover { border-color: #00ff41; color: #00ff41; }
-    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #333; }
+    .empty-state { position: relative; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #333; }
     .empty-state i { font-size: 60px; margin-bottom: 20px; }
     .custom-scroll::-webkit-scrollbar { width: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }

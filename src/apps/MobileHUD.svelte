@@ -11,6 +11,7 @@
     import StatusHelper from './components/StatusHelper.svelte';
     import CombatVitals from './components/CombatVitals.svelte';
     import HelperMobile from './components/HelperMobile.svelte';
+    import CardCreatorApp from './CardCreatorApp.js';
 
     export let actor;
 
@@ -193,6 +194,8 @@
                 <img src={data.header.img} alt="Avatar" />
                 <button class="cfg-btn" on:click={() => editMode = !editMode}><i class="fas fa-cog"></i></button>
             </div>
+
+            
             
             <div class="identity-panel">
                 <div class="name-plate">{data.header.name}</div>
@@ -202,11 +205,11 @@
                 </div>
             </div>
             
-            {#if data.isGM}
-                <button class="action-btn gm-btn" on:click={() => showCardCreator = true}>
-                    <i class="fas fa-magic"></i> CARD FORGE
-                </button>
-            {/if}
+{#if data.isGM}
+    <button class="action-btn gm-btn" on:click={() => new CardCreatorApp({actor}).render(true)}>
+        <i class="fas fa-magic"></i> CARD FORGE
+    </button>
+{/if}
         </header>
 
         {#if !isMinimized}
@@ -319,10 +322,17 @@
             </div>
         {/if}
 
-        {#if selectedCard}
+{#if selectedCard}
             <div class="modal-backdrop no-drag" transition:fade>
                 <div class="card-display-area" transition:scale>
-                    <CardWindow cardData={selectedCard} {actor} />
+                    <CardWindow 
+                        cardData={selectedCard} 
+                        {actor} 
+                        on:editRequest={(e) => {
+                            selectedCard = null; // Fecha o modal atual
+                            new CardCreatorApp({ actor, cardToEdit: e.detail }).render(true); // Abre o Forge já com a carta
+                        }} 
+                    />
                     <div class="card-actions">
                         <button class="btn-play" on:click={() => {
                             if(selectedCard.type === 'power') rollModal = {name: selectedCard.name, pool: selectedCard.raw.dice};
