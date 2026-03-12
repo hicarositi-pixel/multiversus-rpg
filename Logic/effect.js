@@ -7,6 +7,8 @@
 import { ResumoLogic } from './resumo.js';
 import { ExtrasLogic } from './Extras.js';
 
+const MODULE_ID = "multiversus-rpg";
+
 // Tabela Oficial de Capacidades ORE (1d a 10d+)
 // HD e WD contam como dados normais (1 dado cada) para fins de capacidade bruta.
 const BODY_CAPACITY_TABLE = {

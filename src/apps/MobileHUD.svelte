@@ -22,13 +22,14 @@
     let pos = { x: 100, y: 100 };
     let isDragging = false;
     let dragStart = { x: 0, y: 0 };
+    let permissionDenied = false; // Controle de Segurança
     
     const themes = ThemeDB.getThemes();
     let currentTheme = themes[0];
 
     // --- NAVEGAÇÃO DE ABAS ---
-    let activeTab = 'status'; // status, powers, deck, notes, inv
-    let deckFilter = 'Todos'; // Todos, Geral, Poderes, Traits, Itens
+    let activeTab = 'status'; 
+    let deckFilter = 'Todos'; 
 
     // --- DADOS LOCAIS (NOTAS, INV, ATALHOS) ---
     let notes = [];
@@ -40,13 +41,21 @@
     let showCardCreator = false;
     let rollModal = null; 
 
-    // --- REATIVIDADE EM TEMPO REAL (O SEGREDO DO _RENDER) ---
+    // --- REATIVIDADE E SEGURANÇA ---
     let hookId;
+    
     onMount(() => {
+        // --- 1. BLINDAGEM DE SEGURANÇA ---
+        // Se o ator não existir, ou se o usuário não for GM E não tiver pelo menos permissão de OBSERVADOR, barra.
+        if (!actor || (!game.user.isGM && !actor.testUserPermission(game.user, "OBSERVER"))) {
+            permissionDenied = true;
+            ui.notifications.error("ACESSO NEGADO: Você não possui autorização biométrica para este perfil.");
+            return;
+        }
+
         loadLocalData();
         updateData();
 
-        // Escuta qualquer alteração na ficha (Dano, XP, Willpower) e atualiza na hora!
         hookId = Hooks.on("updateActor", (updatedActor) => {
             if (updatedActor.id === actor.id) {
                 actor = updatedActor;
@@ -92,12 +101,10 @@
         if (!data) return;
         const customCards = CardDatabase.getCards();
         
-        // Mapeia Poderes Nativos para a aba de Cartas
         let mappedPowers = data.powers.map(p => ({
             ...p, type: 'power', deckCategory: 'Poderes'
         }));
 
-        // Mapeia Customizadas (Se a categoria for Poderes, Traits ou Itens, vai pra lá. Senão, Geral)
         let mappedCustoms = customCards.map(c => {
             let cat = 'Geral';
             if(c.category.toLowerCase().includes('poder') || c.category.toLowerCase().includes('magia')) cat = 'Poderes';
@@ -109,7 +116,6 @@
         deckCards = [...mappedPowers, ...mappedCustoms];
     }
 
-    // --- FUNÇÕES DE HOTBAR (ATALHOS) ---
     function assignToSlot(slotIndex, card) {
         quickSlots[slotIndex] = card;
         saveData();
@@ -120,27 +126,23 @@
         saveData();
     }
 
-    // --- FUNÇÕES DE NOTAS E INVENTÁRIO ---
     function addNote() { notes = [{ id: foundry.utils.randomID(), title: "Nova Nota", img: "", text: "", open: true }, ...notes]; saveData(); }
     function deleteNote(id) { notes = notes.filter(n => n.id !== id); saveData(); }
     
     function addInv() { inventory = [{ id: foundry.utils.randomID(), name: "Novo Item", qty: 1, desc: "" }, ...inventory]; saveData(); }
     function deleteInv(id) { inventory = inventory.filter(i => i.id !== id); saveData(); }
 
-function closeApp() {
-        // Tenta fechar no sistema novo do Foundry (ApplicationV2)
+    function closeApp() {
         for (const app of foundry.applications.instances.values()) {
             if (app.id === "nexus-mobile-hud-app") {
                 app.close();
                 return;
             }
         }
-        // Fallback: Tenta fechar no sistema antigo do Foundry (ApplicationV1)
         const win = Object.values(ui.windows).find(w => w.id === "nexus-mobile-hud-app");
         if (win) win.close();
     }
 
-    // --- ARRASTAR MOUSE ---
     function onMouseDown(e) {
         if (e.target.closest('.no-drag')) return;
         isDragging = true;
@@ -155,7 +157,21 @@ function closeApp() {
 
 <svelte:window on:mousemove={onMouseMove} on:mouseup={onMouseUp} />
 
-{#if data}
+{#if permissionDenied}
+    <div class="nexus-hud-wrapper" style="left: 200px; top: 200px; --res: 1.0; --primary: #ff4444; --bg: rgba(20,0,0,0.9);">
+        <div class="window-controls">
+            <span class="app-title" style="color: #ff4444;">ALERTA DE SEGURANÇA</span>
+            <div class="wc-btns"><button on:click={closeApp}><i class="fas fa-times"></i></button></div>
+        </div>
+        <div style="padding: 20px; text-align: center; color: #ffaa00; font-family: monospace;">
+            <i class="fas fa-biohazard" style="font-size: 50px; margin-bottom: 10px; color: #ff4444;"></i>
+            <h3>ACESSO REJEITADO</h3>
+            <p>Você não possui credenciais suficientes para inspecionar os dados deste alvo.</p>
+        </div>
+    </div>
+{/if}
+
+{#if data && !permissionDenied}
     <div class="nexus-hud-wrapper {isMinimized ? 'minimized' : ''}" 
          style="left: {pos.x}px; top: {pos.y}px; --res: {uiScale}; --primary: {currentTheme.primary}; --bg: {currentTheme.bg};" 
          on:mousedown={onMouseDown}>
@@ -163,10 +179,12 @@ function closeApp() {
         <div class="window-controls">
             <span class="app-title">Ficha Móvel - Multiversus RPG</span>
             <div class="wc-btns no-drag">
-                <button on:click={() => isMinimized = !isMinimized} title="Minimizar">
+                <button on:mousedown|stopPropagation on:click|stopPropagation={() => isMinimized = !isMinimized} title="Minimizar">
                     <i class="fas {isMinimized ? 'fa-window-maximize' : 'fa-window-minimize'}"></i>
                 </button>
-                <button class="close-win" on:click={closeApp} title="Fechar"><i class="fas fa-times"></i></button>
+                <button class="close-win" on:mousedown|stopPropagation on:click|stopPropagation={closeApp} title="Fechar">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
 
@@ -233,9 +251,7 @@ function closeApp() {
             </div>
 
             <div class="hud-body no-drag">
-                
                 <aside class="left-panel custom-scroll">
-                    
                     {#if activeTab === 'status'}
                         <StatusHelper stats={data.stats} on:roll={(e) => rollModal = {name: e.detail.actionName, pool: e.detail.pool}} />
                     
@@ -302,55 +318,55 @@ function closeApp() {
                 </main>
             </div>
         {/if}
-    </div>
-{/if}
 
-{#if selectedCard}
-    <div class="modal-backdrop no-drag" transition:fade>
-        <div class="card-display-area" transition:scale>
-            <CardWindow cardData={selectedCard} {actor} />
-            <div class="card-actions">
-                <button class="btn-play" on:click={() => {
-                    if(selectedCard.type === 'power') rollModal = {name: selectedCard.name, pool: selectedCard.raw.dice};
-                    selectedCard = null; 
-                }}>ATIVAR / JOGAR</button>
-                
-                <div class="assign-slots">
-                    <span>Atalho:</span>
-                    {#each [0,1,2,3,4] as s}
-                        <button on:click={() => assignToSlot(s, selectedCard)}>{s+1}</button>
-                    {/each}
+        {#if selectedCard}
+            <div class="modal-backdrop no-drag" transition:fade>
+                <div class="card-display-area" transition:scale>
+                    <CardWindow cardData={selectedCard} {actor} />
+                    <div class="card-actions">
+                        <button class="btn-play" on:click={() => {
+                            if(selectedCard.type === 'power') rollModal = {name: selectedCard.name, pool: selectedCard.raw.dice};
+                            selectedCard = null; 
+                        }}>ATIVAR / JOGAR</button>
+                        
+                        <div class="assign-slots">
+                            <span>Atalho:</span>
+                            {#each [0,1,2,3,4] as s}
+                                <button on:click={() => assignToSlot(s, selectedCard)}>{s+1}</button>
+                            {/each}
+                        </div>
+
+                        <button class="btn-close" on:click={() => selectedCard = null}>FECHAR</button>
+                    </div>
                 </div>
-
-                <button class="btn-close" on:click={() => selectedCard = null}>FECHAR</button>
             </div>
-        </div>
-    </div>
-{/if}
+        {/if}
 
-{#if showCardCreator}
-    <div class="modal-backdrop no-drag" transition:fade>
-        <div class="creator-container" transition:scale>
-            <div class="creator-head">
-                <h2>FORJA DE CARTAS</h2>
-                <button on:click={() => {showCardCreator = false; generateDeck();}}>FECHAR</button>
+        {#if showCardCreator}
+            <div class="modal-backdrop no-drag" transition:fade>
+                <div class="creator-container" transition:scale>
+                    <div class="creator-head">
+                        <h2>FORJA DE CARTAS</h2>
+                        <button on:click={() => {showCardCreator = false; generateDeck();}}>FECHAR</button>
+                    </div>
+                    <CardCreator {actor} />
+                </div>
             </div>
-            <CardCreator {actor} />
-        </div>
-    </div>
-{/if}
+        {/if}
 
-{#if rollModal}
-    <RollEngine 
-        actor={actor} actionName={rollModal.name} pool={rollModal.pool} theme={currentTheme}
-        onClose={() => rollModal = null}
-    />
+        {#if rollModal}
+            <RollEngine 
+                actor={actor} actionName={rollModal.name} pool={rollModal.pool} theme={currentTheme}
+                onClose={() => rollModal = null}
+            />
+        {/if}
+
+    </div>
 {/if}
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-    /* O FIX PARA O CHAT DO FOUNDRY: pointer-events limits interactions só pra dentro dele */
     .nexus-hud-wrapper {
         position: fixed; z-index: 500; 
         font-family: 'Share Tech Mono', monospace;
@@ -361,15 +377,12 @@ function closeApp() {
         box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5);
         backdrop-filter: blur(10px);
         display: flex; flex-direction: column;
-        /* MUITO IMPORTANTE: */
         pointer-events: all; 
     }
 
     .minimized { width: calc(300px * var(--res)); border-bottom-color: transparent; }
-
     .no-drag { cursor: default; }
 
-    /* BARRA DE TÍTULO */
     .window-controls { display: flex; justify-content: space-between; background: rgba(0,0,0,0.8); padding: 5px 10px; border-bottom: 1px solid var(--primary); cursor: grab; }
     .window-controls:active { cursor: grabbing; }
     .app-title { font-size: calc(10px * var(--res)); color: var(--primary); font-weight: bold; letter-spacing: 2px; }
@@ -378,7 +391,6 @@ function closeApp() {
     .wc-btns button:hover { color: #fff; }
     .close-win:hover { color: #ff4444 !important; }
 
-    /* HEADER */
     .hud-header { display: flex; gap: 15px; padding: 15px; align-items: center; border-bottom: 1px solid #333; }
     .portrait-box { position: relative; width: calc(50px * var(--res)); height: calc(50px * var(--res)); border: 2px solid var(--primary); border-radius: 4px; }
     .portrait-box img { width: 100%; height: 100%; object-fit: cover; }
@@ -391,7 +403,6 @@ function closeApp() {
     .action-btn { background: #111; border: 1px solid var(--primary); color: var(--primary); font-family: inherit; font-size: calc(9px * var(--res)); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
     .gm-btn { border-color: #ffaa00; color: #ffaa00; } .gm-btn:hover { background: #ffaa00; color: #000; }
 
-    /* HOTBAR */
     .hotbar-container { display: flex; gap: 5px; padding: 5px 15px; background: #080808; border-bottom: 1px solid #222; }
     .slot-box { width: calc(30px * var(--res)); height: calc(40px * var(--res)); border: 1px dashed #444; background: #111; border-radius: 4px; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; transition: 0.2s; }
     .slot-box:hover { border-color: var(--primary); }
@@ -399,18 +410,15 @@ function closeApp() {
     .slot-num { position: absolute; top: 0; right: 2px; font-size: calc(8px * var(--res)); font-weight: bold; color: #fff; text-shadow: 1px 1px 2px #000; }
     .empty-slot { font-size: calc(12px * var(--res)); color: #333; }
 
-    /* TABS NAV */
     .tabs-nav { display: flex; background: rgba(0,0,0,0.5); border-bottom: 2px solid #333; }
     .tab-btn { flex: 1; background: transparent; border: none; color: #888; font-family: inherit; font-size: calc(10px * var(--res)); cursor: pointer; padding: 8px 5px; transition: 0.2s; border-bottom: 2px solid transparent; }
     .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; background: rgba(255,255,255,0.05); }
     .tab-btn:hover { color: #fff; }
 
-    /* BODY */
     .hud-body { display: flex; gap: 10px; padding: 15px; height: calc(350px * var(--res)); }
     .left-panel { flex: 1.4; overflow-y: auto; padding-right: 5px; }
     .vitals-panel { flex: 1; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid #222; overflow-y: auto; }
 
-    /* DECK TAB */
     .deck-filters { display: flex; gap: 5px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; }
     .deck-filters button { background: #111; border: 1px solid #333; color: #aaa; font-family: inherit; font-size: calc(9px * var(--res)); padding: 4px 8px; border-radius: 12px; cursor: pointer; white-space: nowrap; }
     .deck-filters button.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
@@ -420,7 +428,6 @@ function closeApp() {
     .card-thumb img { width: 100%; height: 70%; object-fit: cover; border-radius: 4px; }
     .card-thumb span { font-size: calc(8px * var(--res)); margin-top: 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
 
-    /* NOTAS & INV */
     .tab-header-action { margin-bottom: 10px; }
     .tab-header-action button { width: 100%; padding: 8px; background: rgba(0,255,65,0.1); border: 1px dashed var(--primary); color: var(--primary); font-family: inherit; cursor: pointer; border-radius: 4px; }
     .notes-list, .inv-list { display: flex; flex-direction: column; gap: 10px; }
@@ -440,14 +447,12 @@ function closeApp() {
     .inv-row .desc { width: 100%; background: transparent; border: none; color: #888; font-size: 9px; font-family: inherit; font-style: italic; }
     .inv-main .del { background: none; border: none; color: #666; cursor: pointer; } .inv-main .del:hover { color: #f33; }
 
-    /* EDIT TOOLS */
     .edit-tools { background: #111; padding: 10px; border-bottom: 1px solid var(--primary); }
     .edit-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: calc(10px * var(--res)); }
     .themes { justify-content: flex-start; gap: 10px; }
     .t-btn { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #333; cursor: pointer; }
     .t-btn.active { border-color: #fff; transform: scale(1.2); }
 
-    /* MODAIS */
     .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 6000; pointer-events: all; }
     .card-display-area { display: flex; flex-direction: column; align-items: center; gap: 15px; }
     .card-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: center; }
