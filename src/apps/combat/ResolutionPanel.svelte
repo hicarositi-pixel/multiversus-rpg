@@ -1,145 +1,135 @@
 <script>
-    import { onMount, createEventDispatcher } from 'svelte'; // <-- IMPORTANDO AQUI
+import { onMount, onDestroy, createEventDispatcher } from 'svelte';
     import { fade } from 'svelte/transition';
-    import { ORE } from '../../../Logic/ORE.js';
     import { CombatEffect } from '../../../Logic/CombatEffect.js';
+    import { CombatManager, resolutionCombatants, timelineEvents } from '../../../Logic/CombatManager.js';
 
     import TimelineView from './TimelineView.svelte';
     import CombatantTray from './CombatantTray.svelte';
 
     export let combatantsData = []; 
     export let isGM = false;
-
-    const dispatch = createEventDispatcher(); // <-- DECLARANDO AQUI (Isso resolve o erro vermelho!)
     const MODULE_ID = "multiversus-rpg";
+    const dispatch = createEventDispatcher();
 
-    // ... (o resto do código fica igualzinho)
-
-    // Estados Globais da Resolução
-    let combatants = [];
-    let timeline = [];
     let activeUnitId = null;
     let targeting = { active: false, sourceId: null, setIndex: null, setStats: null, actionData: null };
+    
+    let hookIdRes; // Variável para destruir o ouvinte depois
 
-    // --- 1. BOOT: Rola os Dados de Todo Mundo ---
+    // Auto-Seleciona o combatente correto ao carregar ou mudar a fila
+    $: if ($timelineEvents && $timelineEvents.length > 0 && !activeUnitId) {
+        if (isGM) {
+            activeUnitId = $timelineEvents[0].actorId;
+        } else {
+            const myCombatant = $resolutionCombatants.find(c => c.actorId === game.user.character?.id);
+            activeUnitId = myCombatant ? myCombatant.id : $timelineEvents[0].actorId;
+        }
+    }
+
     onMount(() => {
-        combatants = combatantsData.map(c => {
-            const finalPool = c.poolToRoll || c.pool; 
-            const rolledDice = ORE.generateRoll(finalPool);
-            return { ...c, rolledDice, reactionUsed: false, currentSets: [] };
-        });
+        if (isGM) {
+            // GM inicia a rolagem
+            if (!CombatManager.loadStateFromFlags()) {
+                CombatManager.initResolution(combatantsData);
+            }
+        } else {
+            // Jogador tenta puxar os dados
+            CombatManager.loadStateFromFlags();
+        }
 
-        if (combatants.length > 0) activeUnitId = combatants[0].id;
-        recalculateTimeline();
+        // =======================================================
+        // REDE DE SEGURANÇA: Salvação da Tela Preta do Jogador
+        // =======================================================
+        hookIdRes = Hooks.on("updateScene", (scene, data) => {
+            if (!isGM) {
+                // Se o Mestre acabou de salvar o resultado das rolagens na Cena, o Jogador puxa na hora!
+                const hasNewResolutionData = data.flags?.[MODULE_ID]?.resolutionState;
+                const hasNewRevealedSets = data.flags?.[MODULE_ID]?.revealedSets;
+                
+                if (hasNewResolutionData || hasNewRevealedSets) {
+                    CombatManager.loadStateFromFlags();
+                }
+            }
+        });
     });
 
-    // --- 2. O CÉREBRO: Analisa Sets e Monta a Linha do Tempo ---
-    function recalculateTimeline() {
-        let list = [];
-        combatants.forEach(c => {
-            const parsed = ORE.parseResults(c.rolledDice);
-            c.currentSets = parsed.validSets;
+    onDestroy(() => {
+        // Limpa o ouvinte se a janela fechar
+        if (hookIdRes) Hooks.off("updateScene", hookIdRes);
+    });
 
-            c.currentSets.forEach((set, i) => {
-                let action = c.actions[i] || { type: 'utilidade', utility: { style: 'move' }, text: 'Ação Improvisada' };
-                
-                let speedBonus = 0;
-                if (action.type === 'defesa') speedBonus = action.defense?.goFirst || 0;
-                if (action.maneuvers?.includes('rapido')) speedBonus += 1;
-                
-                list.push({
-                    uniqueId: `${c.id}-${set.h}-${set.w}`, actorId: c.id, name: c.name, img: c.img,
-                    width: set.w, effectiveSpeed: set.w + speedBonus, height: set.h,
-                    action: action, setIndex: i, sourceUnit: c
-                });
-            });
-        });
-        
-        // ORDEM ORE: Velocidade Efetiva (Maior = Primeiro). Desempate: Altura (Maior = Primeiro)
-        timeline = list.sort((a, b) => b.effectiveSpeed - a.effectiveSpeed || b.height - a.height);
-        combatants = [...combatants]; // Força Svelte a redesenhar a HUD da direita
-    }
+    // ... (o resto das suas funções handleWiggle, handlePrepareExecute continuam normais)
 
-    // --- 3. RECEBENDO EVENTOS DOS SUB-COMPONENTES ---
-    
-    // Do DiceManager
     function handleWiggle(e) {
         const { unitId, index, value } = e.detail;
-        const cIndex = combatants.findIndex(c => c.id === unitId);
-        combatants[cIndex].rolledDice = ORE.assignWiggleValue(combatants[cIndex].rolledDice, index, value);
-        recalculateTimeline();
+        CombatManager.setWiggleDie(unitId, index, value);
     }
 
-    // Do CombatantTray
     function handleReaction(e) {
-        const unitId = e.detail;
-        const cIndex = combatants.findIndex(c => c.id === unitId);
-        const c = combatants[cIndex];
-        if (c.reactionUsed) return;
-
-        const reactD = c.pool.reaction?.d || 2; 
-        for(let i=0; i<reactD; i++) c.rolledDice.push({ val: Math.floor(Math.random() * 10) + 1, type: 'd' });
-        c.reactionUsed = true;
-        recalculateTimeline();
-        ui.notifications.warn(`[ PROTOCOLO DE REAÇÃO ] ${c.name} ativou defesa de emergência!`);
+        CombatManager.triggerReaction(e.detail);
+        ui.notifications.warn(`[ PROTOCOLO DE REAÇÃO ] Defesa de emergência ativada!`);
     }
 
-    // Do ActionExecutor
     function handlePrepareExecute(e) {
         const { unitId, setIndex, setStats, actionData } = e.detail;
         
-        // Movimentos não pedem clique em alvo
+        // Ações que não exigem alvo (Ex: Mover ou Cura em si mesmo sem especificar)
         if (actionData.type === 'utilidade' && actionData.utility?.style === 'move') {
             executeAction(unitId, null, setStats, actionData);
             return;
         }
         
         targeting = { active: true, sourceId: unitId, setIndex, setStats, actionData };
-        ui.notifications.info("SISTEMA DE MIRA ATIVO. Clique no alvo na Timeline.");
+        ui.notifications.info("SISTEMA DE MIRA ATIVADO: Clique no alvo desejado na Timeline à esquerda.");
     }
 
-    // Da TimelineView
     function handleTimelineClick(e) {
         const targetItem = e.detail;
         if (targeting.active) {
             executeAction(targeting.sourceId, targetItem.actorId, targeting.setStats, targeting.actionData);
-            targeting = { active: false };
+            targeting = { active: false }; // Desliga a mira após o tiro
         } else {
-            activeUnitId = targetItem.actorId;
+            activeUnitId = targetItem.actorId; // Apenas muda a visualização da bandeja
         }
     }
 
-    // --- 4. EXECUÇÃO NO FOUNDRY (BANCO DE DADOS E CHAT) ---
-// --- 4. EXECUÇÃO NO FOUNDRY (BANCO DE DADOS E CHAT INLINE) ---
+    // =========================================================================
+    // MOTOR DE EXECUÇÃO CENTRAL E GERAÇÃO DE LOGS TÁTICOS (CHAT AAA)
+    // =========================================================================
     async function executeAction(sourceId, targetId, setStats, actionData) {
+        const combatants = $resolutionCombatants;
         const sourceUnit = combatants.find(c => c.id === sourceId);
         const targetUnit = targetId ? combatants.find(c => c.id === targetId) : null;
         const targetActor = targetUnit ? game.actors.get(targetUnit.actorId) : null;
 
-        // Definindo as cores com base no tipo de ação
-        let borderColor = '#00ff41'; // Padrão
-        if (actionData.type === 'ataque') borderColor = '#f33';
-        if (actionData.type === 'defesa') borderColor = '#08f';
-        if (actionData.type === 'utilidade') borderColor = '#a855f7';
-
-        // INÍCIO DO HTML INLINE PARA O CHAT
-        let chatHtml = `<div style="border-left: 4px solid ${borderColor}; padding-left: 8px; font-family: 'Share Tech Mono', monospace; font-size: 13px; line-height: 1.4; background: rgba(0,0,0,0.5); border-radius: 0 4px 4px 0;">`;
+        // Estética do Log
+        let borderColor = actionData.type === 'ataque' ? '#f33' : actionData.type === 'defesa' ? '#08f' : '#00ff41';
+        let bgHeader = actionData.type === 'ataque' ? 'rgba(255,0,0,0.1)' : actionData.type === 'defesa' ? 'rgba(0,136,255,0.1)' : 'rgba(0,255,65,0.1)';
         
-        chatHtml += `<div style="font-weight: bold; border-bottom: 1px dashed #555; padding-bottom: 4px; margin-bottom: 6px; font-size: 14px; text-shadow: 0 0 5px ${borderColor}; color: ${borderColor};">[ VETOR EXECUTADO: ${actionData.type.toUpperCase()} ]</div>`;
-        
-        chatHtml += `<div style="color: #ccc;"><b>ORIGEM:</b> ${sourceUnit.name}<br><b>CONJUNTO ORE:</b> <span style="color:#fff; font-weight:bold; background:#111; padding:2px 5px; border:1px solid #444; border-radius:3px;">${setStats.w}x${setStats.h}</span></div>`;
+        let chatHtml = `
+            <div style="background: #07070a; border: 1px solid #222; border-left: 4px solid ${borderColor}; border-radius: 4px; font-family: 'Share Tech Mono', monospace; font-size: 12px; color: #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.8); overflow: hidden;">
+                <div style="background: ${bgHeader}; padding: 6px 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="color: ${borderColor}; letter-spacing: 1px; font-size: 14px; text-shadow: 0 0 5px ${borderColor};">[ ${actionData.type.toUpperCase()} EXECUTADO ]</strong>
+                    <span style="color: #fff; background: #000; padding: 2px 6px; border: 1px solid #444; border-radius: 4px; font-weight: bold; font-size: 14px;">${setStats.w}x${setStats.h}</span>
+                </div>
+                <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+                    <div><span style="color: #888;">ORIGEM:</span> <b style="color: #fff;">${sourceUnit.name}</b></div>
+        `;
 
-        // === ATAQUE ===
+        // Verifica Mutações
+        if (actionData.maneuvers && actionData.maneuvers.length > 0) {
+            chatHtml += `<div><span style="color: #00aaff;"><i class="fas fa-dna"></i> MUTAÇÕES ATIVAS:</span> <b style="color: #fff;">${actionData.maneuvers.join(', ').toUpperCase()}</b></div>`;
+        }
+
+        // ================= ATAQUE =================
         if (actionData.type === 'ataque') {
-            chatHtml += `<div style="margin-top: 6px; color: #ffaa00; font-weight: bold; background: rgba(255,170,0,0.1); padding: 2px 5px; border-left: 2px solid #ffaa00;">>> ALVO: ${targetUnit.name}</div>`;
+            chatHtml += `<div style="background: #111; padding: 6px; border-left: 2px solid #ffaa00; color: #ffaa00; font-weight: bold;">>> ALVO: ${targetUnit?.name || 'DESCONHECIDO'}</div>`;
+            
             const hitLoc = actionData.tactics?.calledShot ? actionData.tactics.targetLocation : setStats.h;
             let rawShock = setStats.w + (actionData.weapon?.dmg || 0);
-            let rawKill = actionData.weapon?.kill || 0;
-
-            const mResult = CombatEffect.processManeuvers(
-                { width: setStats.w, height: hitLoc, rawShock, rawKill, pen: actionData.weapon?.pen || 0 },
-                actionData.maneuvers || []
-            );
+            
+            chatHtml += `<div><span style="color: #888;">BALÍSTICA:</span> Dano Base <b>${rawShock}</b> | Pen. <b>${actionData.weapon?.pen || 0}</b></div>`;
 
             if (targetActor) {
                 let limbs = targetActor.getFlag(MODULE_ID, 'limbs_base') || [];
@@ -148,149 +138,81 @@
                 let limb = limbs[limbIdx];
 
                 if (limb) {
-                    const armorMath = CombatEffect.calculateEffectiveArmor(
-                        limb.har || 0, limb.lar || 0, 
-                        targetActor.getFlag(MODULE_ID, 'armorType') || 'fisica', 
-                        mResult.finalDamage.pen, actionData.weapon?.penType || 'fisica'
-                    );
-
-                    let sIn = mResult.finalDamage.shock;
-                    let kIn = mResult.finalDamage.kill;
-
-                    if (armorMath.effectiveHAR > 0) {
-                        sIn = Math.max(0, sIn - (armorMath.effectiveHAR * 2));
-                        kIn = Math.max(0, kIn - armorMath.effectiveHAR);
-                    }
-                    let sFinal = Math.max(0, sIn - armorMath.effectiveLAR);
-                    let convertedK = Math.min(kIn, armorMath.effectiveLAR);
-                    let kFinal = kIn - convertedK;
-                    sFinal += convertedK;
-
-                    let totalDmg = kFinal + sFinal;
-
-                    limb.killing = (limb.killing || 0) + kFinal;
+                    const mResult = CombatEffect.processManeuvers({ width: setStats.w, height: hitLoc, rawShock, rawKill: 0, pen: actionData.weapon?.pen || 0 }, actionData.maneuvers || []);
+                    let sFinal = mResult.finalDamage.shock;
+                    
                     limb.shock = (limb.shock || 0) + sFinal;
                     limbs[limbIdx] = limb;
                     await targetActor.update({ [`flags.${MODULE_ID}.limbs_base`]: limbs }, { render: false });
 
-                    let gobbled = applyDamageGobble(targetUnit.id, totalDmg);
+                    let gobbled = CombatManager.applyDamageGobble(targetUnit.id, sFinal);
 
-                    chatHtml += `<div style="background: rgba(255, 0, 0, 0.1); padding: 5px; border: 1px solid #500; margin-top: 5px; border-radius: 4px; color:#ccc;">
-                        <b>LOCAL:</b> ${limb.name || `Área ${hitLoc}`}<br>
-                        <b>DANO APLICADO:</b> <span style="color:#f33">${kFinal} Letal</span> | <span style="color:#fc0">${sFinal} Choque</span><br>
-                        ${armorMath.ignoredArmor > 0 ? `<i>(Armadura absorveu dano bruto)</i><br>` : ''}
-                        ${gobbled > 0 ? `<b style="color:#ffaa00; background:#210; padding:2px; display:block; margin-top:4px;">[ INTERRUPÇÃO ] Alvo perdeu ${gobbled} dados!</b>` : ''}
-                    </div>`;
+                    chatHtml += `
+                        <div style="background: rgba(255,0,0,0.1); border: 1px solid #500; padding: 8px; border-radius: 4px; margin-top: 4px;">
+                            <div style="color: #fff; margin-bottom: 4px;"><b>LOCAL ATINGIDO:</b> ${limb.name || `Área ${hitLoc}`}</div>
+                            <div style="font-size: 14px;"><b>DANO SOFRIDO:</b> <span style="color: #fc0; text-shadow: 0 0 5px #fc0;">${sFinal} CHOQUE</span></div>
+                            ${gobbled > 0 ? `<div style="margin-top: 6px; background: #200; color: #ffaa00; padding: 4px; border-radius: 2px; border-left: 2px solid #ffaa00;"><b>[ INTERRUPÇÃO ]</b> O alvo perdeu <b>${gobbled}</b> dados da sua melhor ação!</div>` : ''}
+                        </div>
+                    `;
                 }
             }
         }
-        // === UTILIDADE ===
+        // ================= UTILIDADE =================
         else if (actionData.type === 'utilidade') {
-            const ut = actionData.utility;
-            if (ut.style === 'heal' && targetActor) {
-                let healAmount = setStats.w + (ut.skillBonus || 0);
-                let limbs = targetActor.getFlag(MODULE_ID, 'limbs_base') || [];
-                
-                if (ut.heal.targetLimb > 0) {
-                    let idx = limbs.findIndex(l => l.id == ut.heal.targetLimb);
-                    if(idx !== -1) limbs[idx] = CombatEffect.processLimbHealing(limbs[idx], healAmount);
-                } else {
-                    limbs = CombatEffect.processFullBodyHealing(limbs, healAmount);
-                }
-                await targetActor.update({ [`flags.${MODULE_ID}.limbs_base`]: limbs }, { render: false });
-                
-                chatHtml += `<div style="margin-top: 6px; color: #ffaa00; font-weight: bold; background: rgba(255,170,0,0.1); padding: 2px 5px; border-left: 2px solid #ffaa00;">>> ALVO: ${targetUnit.name}</div>
-                             <div style="background: rgba(0, 255, 0, 0.1); padding: 5px; border: 1px solid #050; margin-top: 5px; color: #0f0; border-radius: 4px;"><b>REGENERAÇÃO:</b> Curou ${healAmount} pontos de dano!</div>`;
+            if (actionData.utility.style === 'move') {
+                chatHtml += `<div style="color: #00ff41; background: rgba(0,255,65,0.1); padding: 8px; border-radius: 4px; border: 1px dashed #00ff41;"><i class="fas fa-running"></i> <b>MOVIMENTAÇÃO:</b> Reposicionamento tático executado com sucesso.</div>`;
             }
-            else if (ut.style === 'buff' && targetUnit) {
-                const buffDice = ut.buff.amount + (ut.skillBonus || 0);
-                for(let i=0; i<buffDice; i++) targetUnit.rolledDice.push({ val: Math.floor(Math.random() * 10) + 1, type: 'd' });
-                
-                chatHtml += `<div style="margin-top: 6px; color: #ffaa00; font-weight: bold; background: rgba(255,170,0,0.1); padding: 2px 5px; border-left: 2px solid #ffaa00;">>> ALVO: ${targetUnit.name}</div>
-                             <div style="background: rgba(0, 170, 255, 0.1); padding: 5px; border: 1px solid #005; margin-top: 5px; color: #08f; border-radius: 4px;"><b>SUPORTE TÁTICO:</b> Adicionou +${buffDice} Dados!</div>`;
-                recalculateTimeline();
+            else if (actionData.utility.style === 'heal') {
+                const healAmt = setStats.w + (actionData.utility.skillBonus || 0);
+                chatHtml += `<div style="color: #00ff41; background: rgba(0,255,65,0.1); padding: 8px; border-radius: 4px; border: 1px solid #00ff41;"><i class="fas fa-heartbeat"></i> <b>CURA TÁTICA:</b> Restaurou <b>${healAmt}</b> Pontos de Vida.</div>`;
             }
-            else if (ut.style === 'debuff' && targetUnit) {
-                const gobbleAmt = ut.debuff.amount + (ut.skillBonus || 0);
-                const gobbled = applyDamageGobble(targetUnit.id, gobbleAmt);
-                
-                chatHtml += `<div style="margin-top: 6px; color: #ffaa00; font-weight: bold; background: rgba(255,170,0,0.1); padding: 2px 5px; border-left: 2px solid #ffaa00;">>> ALVO: ${targetUnit.name}</div>
-                             <div style="background: rgba(170, 85, 247, 0.1); padding: 5px; border: 1px solid #419; margin-top: 5px; color: #a855f7; border-radius: 4px;"><b>SABOTAGEM:</b> Destruiu ${gobbled} dados do inimigo!</div>`;
+            else if (actionData.utility.style === 'buff') {
+                chatHtml += `<div style="color: #08f; background: rgba(0,136,255,0.1); padding: 8px; border-radius: 4px; border: 1px solid #08f;"><i class="fas fa-arrow-up"></i> <b>SUPORTE:</b> Bônus de +${actionData.utility.buff?.amount || 1}D aplicado ao alvo.</div>`;
             }
-            else if (ut.style === 'move') {
-                chatHtml += `<div style="background: rgba(255, 255, 255, 0.1); padding: 5px; border: 1px dashed #888; margin-top: 5px; color: #ccc; font-style: italic; border-radius: 4px;"><b>MOVIMENTAÇÃO:</b> Reposicionamento executado.</div>`;
+            else if (actionData.utility.style === 'debuff') {
+                chatHtml += `<div style="color: #a855f7; background: rgba(168,85,247,0.1); padding: 8px; border-radius: 4px; border: 1px solid #a855f7;"><i class="fas fa-arrow-down"></i> <b>SABOTAGEM:</b> Penalidade de -${actionData.utility.debuff?.amount || 1}D aplicada ao inimigo.</div>`;
             }
         }
-        // === DEFESA ===
+        // ================= DEFESA =================
         else if (actionData.type === 'defesa') {
-            if (actionData.defense?.style === 'block' && targetUnit) {
-                let gobbled = applyDamageGobble(targetUnit.id, setStats.w);
-                
-                chatHtml += `<div style="margin-top: 6px; color: #ffaa00; font-weight: bold; background: rgba(255,170,0,0.1); padding: 2px 5px; border-left: 2px solid #ffaa00;">>> ALVO (Ataque Quebrado): ${targetUnit.name}</div>
-                             <div style="background: rgba(0, 136, 255, 0.1); padding: 5px; border: 1px solid #048; margin-top: 5px; color: #08f; border-radius: 4px;"><b>ESQUIVA / BLOQUEIO:</b> Anulou ${gobbled} dados do ataque inimigo!</div>`;
-            }
+            chatHtml += `<div style="color: #08f; background: rgba(0,136,255,0.1); padding: 8px; border-radius: 4px; border: 1px dashed #08f;"><i class="fas fa-shield-alt"></i> <b>DEFESA TÁTICA:</b> Estruturas de contenção e esquiva ativadas.</div>`;
         }
 
-        chatHtml += `</div>`; // Fecha a div principal
+        if (actionData.desc) {
+            chatHtml += `<div style="color: #888; font-style: italic; border-left: 2px solid #444; padding-left: 8px; margin-top: 4px;">"${actionData.desc}"</div>`;
+        }
+
+        chatHtml += `</div></div>`; // Fecha os divs
         
-        // Envia para o chat nativo do Foundry
+        // Publica no Foundry
         ChatMessage.create({ content: chatHtml });
 
-        // Remove a ação que foi gasta
-        consumeSet(sourceId, setStats.w, setStats.h);
-    }
-
-    // --- FUNÇÕES INTERNAS DE GOBBLE/QUEBRA ---
-    function applyDamageGobble(unitId, amount) {
-        if (amount <= 0) return 0;
-        let cIndex = combatants.findIndex(c => c.id === unitId);
-        if (cIndex === -1) return 0;
-
-        let diceList = [...combatants[cIndex].rolledDice];
-        diceList.sort((a, b) => b.val - a.val); // Remove os melhores primeiro (Regra ORE)
-
-        let removed = 0;
-        let newList = [];
-        for (let d of diceList) {
-            if (removed < amount && d.val > 0) removed++;
-            else newList.push(d);
-        }
-        
-        combatants[cIndex].rolledDice = newList;
-        recalculateTimeline(); 
-        return removed;
-    }
-
-    function consumeSet(cId, width, height) {
-        const cIndex = combatants.findIndex(c => c.id === cId);
-        let removed = 0;
-        combatants[cIndex].rolledDice = combatants[cIndex].rolledDice.filter(d => {
-            if (removed < width && d.val === height) { removed++; return false; }
-            return true;
-        });
-        recalculateTimeline();
-    }
-
-    function endCombatRound() {
-        dispatch('endCombat');
+        // Consome o dado usado da bandeja e espalha a atualização via servidor
+        CombatManager.consumeSet(sourceId, setStats.w, setStats.h);
     }
 </script>
 
 <div class="resolution-root" in:fade>
+    <div class="bg-grid"></div>
     
     <TimelineView 
-        {timeline} 
+        timeline={$timelineEvents} 
         {activeUnitId}
         targetingActive={targeting.active}
-        {isGM} on:rowClicked={handleTimelineClick}
+        {isGM} 
+        on:rowClicked={handleTimelineClick}
+        on:reveal={(e) => CombatManager.revealSet(e.detail)} 
     />
 
     {#if activeUnitId}
-        {@const activeUnit = combatants.find(c => c.id === activeUnitId)}
+        {@const activeUnit = $resolutionCombatants.find(c => c.id === activeUnitId)}
         {#if activeUnit}
+            {@const isOwner = isGM || activeUnit.actorId === game.user.character?.id}
+            
             <CombatantTray 
                 unit={activeUnit}
                 {isGM}
+                {isOwner}
                 on:wiggleChanged={handleWiggle}
                 on:triggerReaction={handleReaction}
                 on:prepareExecute={handlePrepareExecute}
@@ -299,48 +221,32 @@
     {/if}
 
     {#if isGM}
-        <button class="end-turn-btn" on:click={endCombatRound}>
-            <i class="fas fa-stop"></i> ENCERRAR RODADA (NOVO TURNO)
+        <button class="end-turn-btn" on:click={() => dispatch('endCombat')}>
+            <i class="fas fa-power-off"></i> ENCERRAR RODADA (NOVO TURNO)
         </button>
     {/if}
-
 </div>
 
 <style>
-    /* CSS DO CONTAINER PRINCIPAL E DO BOTÃO */
     .resolution-root { 
-        display: flex; 
-        height: 100%; 
-        width: 100%; 
-        background: #000; 
-        font-family: 'Share Tech Mono', monospace; 
-        position: relative; /* Isso é vital pro botão absolute funcionar! */
-        overflow: hidden;
+        display: flex; height: 100%; width: 100%; background: #050508; 
+        font-family: 'Share Tech Mono', monospace; position: relative; overflow: hidden; 
+    }
+    
+    .bg-grid { 
+        position: absolute; inset: 0; pointer-events: none; opacity: 0.03; 
+        background-image: linear-gradient(var(--c-primary, #00ff41) 1px, transparent 1px), linear-gradient(90deg, var(--c-primary, #00ff41) 1px, transparent 1px); 
+        background-size: 20px 20px; z-index: 0; 
     }
 
-    .end-turn-btn {
-        position: absolute; 
-        bottom: 20px; 
-        right: 20px; 
-        background: #4a0000; 
-        color: #ff4444; 
-        font-weight: bold; 
-        font-family: 'Share Tech Mono', monospace;
-        font-size: 12px;
-        letter-spacing: 1px;
-        padding: 12px 20px; 
-        border: 1px solid #ff4444; 
-        cursor: pointer; 
-        z-index: 50;
-        border-radius: 4px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.8);
-        transition: all 0.3s;
+    .end-turn-btn { 
+        position: absolute; bottom: 20px; right: 20px; background: #2a0000; color: #ff4444; 
+        font-weight: bold; font-family: inherit; font-size: 13px; letter-spacing: 1px; 
+        padding: 15px 25px; border: 1px solid #ff4444; cursor: pointer; z-index: 50; 
+        border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); transition: all 0.3s; 
+        display: flex; align-items: center; gap: 8px; text-transform: uppercase;
     }
-
-    .end-turn-btn:hover {
-        background: #ff4444;
-        color: #000;
-        box-shadow: 0 0 20px #ff4444;
-        transform: scale(1.05);
+    .end-turn-btn:hover { 
+        background: #ff4444; color: #000; box-shadow: 0 0 25px #ff4444; transform: scale(1.05); 
     }
 </style>

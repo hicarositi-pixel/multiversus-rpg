@@ -13,6 +13,7 @@ import SocialMenu from './apps/SocialMenu.js';
 import { SocialHubDatabase } from './database/SocialHubDatabase.js';
 import { GroupDatabase } from "./database/GroupDatabase.js";
 import MobileHudApp from './apps/MobileHudApp.js';
+import { OnlineComms } from './database/OnlineComms.js';
 
 // Sheets JS
 import MultiversusItemSheet from './sheets/MultiversusItemSheet.js';
@@ -602,6 +603,10 @@ Hooks.once('ready', async function() {
     // --- CORREÇÃO DO GATILHO DE ENTRADA ---
     // Apenas chame o Opening. Ele chamará o Loading depois.
     new NexusOpeningClass().render(true);
+});
+
+Hooks.once('ready', () => {
+    OnlineComms.init();
 });
 
 // ... (Seu código de updateScene) ...

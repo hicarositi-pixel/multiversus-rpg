@@ -1,25 +1,23 @@
 <script>
     import { slide } from 'svelte/transition';
-    export let action; // Recebe a ação inteira para modificar
+    export let action; 
     export let disabled = false;
 
-    // O dicionário oficial de efeitos integrado ao CombatEffect.js
     const effectsDatabase = [
-        { id: 'cuidadoso', label: 'Ataque Cuidadoso', desc: 'Converte todo o dano letal (Killing) em dano de choque (Shock).', type: 'ataque', style: 'ambos' },
-        { id: 'cruel', label: 'Ataque Cruel', desc: 'Converte todo o dano de choque em letal. Causa ferimentos graves.', type: 'ataque', style: 'ambos' },
-        { id: 'poderoso', label: 'Ataque Poderoso', desc: '+1 na Largura da rolagem APENAS para calcular Dano e Recuo.', type: 'ataque', style: 'ambos' },
-        { id: 'rapido', label: 'Ataque Rápido', desc: '+1 na Largura da rolagem APENAS para agir primeiro na Iniciativa.', type: 'ataque', style: 'ambos' },
-        { id: 'finta', label: 'Finta', desc: 'Faz um ataque falso. O alvo perde 1 dado da melhor rolagem de defesa dele.', type: 'ataque', style: 'ambos' },
-        { id: 'knockdown', label: 'Derrubar', desc: 'O alvo sofre 1 Shock extra e cai (condição: Derrubado).', type: 'ataque', style: 'melee' },
-        { id: 'atordoar', label: 'Atordoar (Daze)', desc: 'O alvo perde dados igual à largura deste ataque, por [Largura] turnos.', type: 'ataque', style: 'ambos' },
-        { id: 'empurrar', label: 'Empurrar (Shove)', desc: 'Empurra o alvo e quebra 1 dado da melhor rolagem dele.', type: 'ataque', style: 'melee' },
-        { id: 'lutar', label: 'Imobilizar (Wrestle)', desc: 'Ambos caem. O alvo fica Agarrado e não pode agir contra outros.', type: 'ataque', style: 'melee' },
-        { id: 'estrangulamento', label: 'Estrangulamento', desc: 'Requer alvo Imobilizado ou Tiro na Cabeça. Dá 1 Shock por turno.', type: 'ataque', style: 'melee' },
-        { id: 'estrangulamento_letal', label: 'Sufocamento', desc: 'Igual estrangulamento, mas dá 2 Shock por turno (corta sangue).', type: 'ataque', style: 'melee' },
-        { id: 'sniping', label: 'Tiro de Precisão', desc: 'Se matar furtivamente, aciona Teste de Trauma na mente do atirador.', type: 'ataque', style: 'ranged' }
+        { id: 'cuidadoso', label: 'Cuidadoso', desc: 'Converte Letal em Choque.', type: 'ataque', style: 'ambos' },
+        { id: 'cruel', label: 'Cruel', desc: 'Converte Choque em Letal.', type: 'ataque', style: 'ambos' },
+        { id: 'poderoso', label: 'Poderoso', desc: '+1 Largura (Apenas Dano).', type: 'ataque', style: 'ambos' },
+        { id: 'rapido', label: 'Rápido', desc: '+1 Largura (Apenas Iniciativa).', type: 'ataque', style: 'ambos' },
+        { id: 'finta', label: 'Finta', desc: 'Alvo perde 1D de defesa.', type: 'ataque', style: 'ambos' },
+        { id: 'knockdown', label: 'Derrubar', desc: '+1 Shock. Alvo cai.', type: 'ataque', style: 'melee' },
+        { id: 'atordoar', label: 'Atordoar', desc: 'Alvo perde dados = Largura deste ataque.', type: 'ataque', style: 'ambos' },
+        { id: 'empurrar', label: 'Empurrar', desc: 'Afasta alvo e quebra 1D.', type: 'ataque', style: 'melee' },
+        { id: 'lutar', label: 'Wrestle', desc: 'Agarrão tático. Ambos caem.', type: 'ataque', style: 'melee' },
+        { id: 'estrangulamento', label: 'Estrangular', desc: 'Dá 1 Shock/Turno.', type: 'ataque', style: 'melee' },
+        { id: 'estrangulamento_letal', label: 'Sufocar', desc: 'Dá 2 Shock/Turno (Corta sangue).', type: 'ataque', style: 'melee' },
+        { id: 'sniping', label: 'Sniping', desc: 'Morte furtiva (Aciona Trauma).', type: 'ataque', style: 'ranged' }
     ];
 
-    // Filtra o que pode ser exibido com base no que o jogador escolheu (Tiro, Porrada, etc)
     $: availableEffects = effectsDatabase.filter(e => 
         e.type === action.type && (e.style === 'ambos' || e.style === action.style)
     );
@@ -35,40 +33,73 @@
 </script>
 
 <div class="effects-container" transition:slide>
-    <div class="effects-grid">
+    <div class="effects-header">
+        <i class="fas fa-microscope"></i> MANOBRAS E MUTAÇÕES <span>(-1D Custo Tático por Efeito)</span>
+    </div>
+    
+    <div class="effects-pillbox">
         {#each availableEffects as effect}
             {@const isActive = action.maneuvers.includes(effect.id)}
-            <div class="effect-card {isActive ? 'active' : ''}" on:click={() => toggleEffect(effect.id)}>
-                <div class="e-head">
-                    <div class="checkbox">
-                        {#if isActive}<i class="fas fa-check"></i>{/if}
-                    </div>
-                    <strong>{effect.label}</strong>
+            
+            <div class="effect-pill {isActive ? 'active' : ''}" on:click={() => toggleEffect(effect.id)}>
+                <div class="e-check">
+                    {#if isActive}<i class="fas fa-check"></i>{/if}
                 </div>
-                <div class="e-desc">{effect.desc}</div>
-                <div class="e-cost">-1 Dado Base</div>
+                <div class="e-info">
+                    <strong>{effect.label}</strong>
+                    <span>{effect.desc}</span>
+                </div>
             </div>
         {/each}
+        
         {#if availableEffects.length === 0}
-            <div style="color: #666; font-size: 10px; padding: 10px;">Nenhum efeito especial disponível para este tipo de ação.</div>
+            <div class="empty-effects">Nenhum efeito tático disponível para este vetor.</div>
         {/if}
     </div>
 </div>
 
 <style>
-    .effects-container { background: #050505; border: 1px dashed var(--c-primary); border-radius: 4px; padding: 10px; margin-top: 10px; }
-    .effects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+    .effects-container { 
+        background: #050508; 
+        border: 1px solid #222; 
+        border-left: 2px solid var(--c-primary, #00ff41); 
+        border-radius: 6px; 
+        padding: 10px; 
+        margin-top: 5px; 
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    }
     
-    .effect-card { background: #111; border: 1px solid #333; padding: 8px; border-radius: 4px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; gap: 4px; }
-    .effect-card:hover { border-color: #666; }
-    .effect-card.active { background: rgba(0, 255, 65, 0.1); border-color: var(--c-primary); }
+    .effects-header { font-size: 9px; color: var(--c-primary, #00ff41); font-weight: bold; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; border-bottom: 1px dashed #333; padding-bottom: 5px; }
+    .effects-header span { color: #ffaa00; font-size: 8px; margin-left: auto; }
+
+    .effects-pillbox { display: flex; flex-wrap: wrap; gap: 6px; }
     
-    .e-head { display: flex; gap: 6px; align-items: center; color: #fff; font-size: 11px; }
-    .checkbox { width: 14px; height: 14px; border: 1px solid #555; display: flex; justify-content: center; align-items: center; font-size: 9px; color: var(--c-primary); background: #000; }
-    .active .checkbox { border-color: var(--c-primary); }
+    .effect-pill { 
+        display: flex; align-items: center; gap: 8px; 
+        background: #0a0a0f; border: 1px solid #333; border-radius: 20px; 
+        padding: 4px 12px 4px 4px; cursor: pointer; transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); 
+        flex-grow: 1; min-width: 160px; max-width: max-content;
+    }
+    .effect-pill:hover { border-color: #666; background: #111; transform: translateY(-2px); }
     
-    .e-desc { font-size: 9px; color: #888; line-height: 1.2; }
-    .active .e-desc { color: #ccc; }
+    .effect-pill.active { 
+        background: rgba(0, 255, 65, 0.05); 
+        border-color: var(--c-primary, #00ff41); 
+        box-shadow: 0 2px 10px rgba(0,255,65,0.2); 
+    }
     
-    .e-cost { font-size: 8px; color: #ffaa00; font-weight: bold; margin-top: auto; text-align: right; }
+    .e-check { 
+        width: 18px; height: 18px; border-radius: 50%; 
+        background: #000; border: 1px solid #555; 
+        display: flex; justify-content: center; align-items: center; 
+        font-size: 9px; color: var(--c-primary, #00ff41); flex-shrink: 0;
+    }
+    .active .e-check { border-color: var(--c-primary, #00ff41); box-shadow: inset 0 0 5px var(--c-primary, #00ff41); }
+    
+    .e-info { display: flex; flex-direction: column; overflow: hidden; }
+    .e-info strong { font-size: 10px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .e-info span { font-size: 8px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .active .e-info span { color: #aaa; }
+
+    .empty-effects { color: #666; font-size: 9px; font-style: italic; width: 100%; text-align: center; padding: 5px; }
 </style>

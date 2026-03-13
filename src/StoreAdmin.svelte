@@ -46,6 +46,43 @@
     // NOVO: Estado de Inspeção
     let inspectedPlayer = null;
 
+    // ==========================================
+    // ESTADOS DE FILTRO E ORDENAÇÃO
+    // ==========================================
+    let searchQuery = "";
+    let selectedFilterTag = "Todos";
+    let sortOption = "recent"; // 'recent', 'nameAZ', 'nameZA', 'rarity'
+
+    const rarityWeight = { "Comum": 1, "Raro": 2, "Lendário": 3, "Mítico": 4, "Universal": 5, "Multiversal": 6 };
+
+    // Essa linha reativa (começa com $:) refaz a lista sempre que você digita ou muda o filtro
+    $: filteredArchive = processList(archiveItems, searchQuery, selectedFilterTag, sortOption);
+    $: filteredStore = processList(storeItems, searchQuery, selectedFilterTag, sortOption);
+
+    function processList(list, query, tag, sortType) {
+        let result = [...list]; // Faz uma cópia segura para não alterar a DB original
+        
+        // 1. Filtro por Pesquisa (Nome)
+        if (query) {
+            result = result.filter(i => i.name.toLowerCase().includes(query.toLowerCase()));
+        }
+        
+        // 2. Filtro por Tag/Pasta
+        if (tag !== "Todos") {
+            result = result.filter(i => i.systemTag === tag);
+        }
+        
+        // 3. Ordenação
+        result.sort((a, b) => {
+            if (sortType === 'nameAZ') return a.name.localeCompare(b.name);
+            if (sortType === 'nameZA') return b.name.localeCompare(a.name);
+            if (sortType === 'rarity') return (rarityWeight[b.rarity] || 0) - (rarityWeight[a.rarity] || 0);
+            return 0; // 'recent' mantém a ordem do array (últimos criados ficam no fim ou começo dependendo de como a DB entrega)
+        });
+        
+        return result;
+    }
+
     onMount(() => { refreshAllData(); });
 
     function refreshAllData() {
@@ -218,13 +255,12 @@
 </script>
 
 <div class="admin-panel" in:fade>
-    <nav class="admin-nav">
-        <button class:active={activeSection === 'create'} on:click={() => activeSection = 'create'}><i class="fas fa-hammer"></i> CRIAR</button>
-        <button class:active={activeSection === 'manage'} on:click={() => activeSection = 'manage'}><i class="fas fa-list"></i> LOJA ATIVA</button>
-        <button class:active={activeSection === 'archive'} on:click={() => { activeSection = 'archive'; refreshAllData(); }}><i class="fas fa-database"></i> DB GERAL</button>
+<nav class="admin-nav">
+        <button class:active={activeSection === 'create'} on:click={() => { activeSection = 'create'; }}><i class="fas fa-hammer"></i> CRIAR</button>
+        <button class:active={activeSection === 'manage'} on:click={() => { activeSection = 'manage'; searchQuery = ''; selectedFilterTag = 'Todos'; }}><i class="fas fa-list"></i> LOJA ATIVA</button>
+        <button class:active={activeSection === 'archive'} on:click={() => { activeSection = 'archive'; refreshAllData(); searchQuery = ''; selectedFilterTag = 'Todos'; }}><i class="fas fa-database"></i> DB GERAL</button>
         <button class:active={activeSection === 'players'} on:click={() => { activeSection = 'players'; refreshAllData(); }}><i class="fas fa-users"></i> JOGADORES</button>
     </nav>
-
     {#if activeSection === 'create'}
         <div class="create-form">
             <div class="col">
@@ -280,35 +316,61 @@
             </div>
         </div>
 
-    {:else if activeSection === 'manage'}
-        <div class="list">
-            {#each storeItems as item}
-                <div class="row-item">
-                    <img src={item.img} /> <span>{item.name}</span>
-                    <div class="acts">
-                        <button on:click={() => editItem(item)}>EDITAR</button>
-                        <button class="del" on:click={() => deleteItem(item.id)}>REMOVER</button>
-                    </div>
-                </div>
-            {/each}
-        </div>
-
-    {:else if activeSection === 'archive'}
+{:else if activeSection === 'manage' || activeSection === 'archive'}
         <div class="archive-view">
-            <div class="header-info"><span>TOTAL DE ARQUIVOS: {archiveItems.length}</span></div>
-            <div class="items-list">
-                {#each archiveItems as item}
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" bind:value={searchQuery} placeholder="Buscar pelo nome...">
+                </div>
+                <select bind:value={selectedFilterTag} class="filter-select">
+                    <option value="Todos">📁 Todas as Categorias</option>
+                    {#each TAGS as t} <option value={t}>{t}</option> {/each}
+                </select>
+                <select bind:value={sortOption} class="filter-select">
+                    <option value="recent">🕒 Ordem de Criação</option>
+                    <option value="nameAZ">🔤 Nome (A-Z)</option>
+                    <option value="nameZA">🔤 Nome (Z-A)</option>
+                    <option value="rarity">⭐ Maior Raridade</option>
+                </select>
+            </div>
+
+            <div class="header-info">
+                <span>TOTAL DE RESULTADOS: {activeSection === 'archive' ? filteredArchive.length : filteredStore.length}</span>
+            </div>
+
+            <div class="items-list custom-scroll">
+                {#each (activeSection === 'archive' ? filteredArchive : filteredStore) as item (item.id)}
                     {@const inStore = storeItems.some(s => s.id === item.id)}
                     <div class="db-row" class:is-store={inStore}>
-                        <img src={item.img} />
-                        <div class="info"><span class="name">{item.name}</span><span class="meta">{item.systemTag}</span></div>
+                        <img src={item.img} alt="img" />
+                        <div class="info">
+                            <span class="name">{item.name}</span>
+                            <div class="tags-row">
+                                <span class="meta tag">{item.systemTag}</span>
+                                <span class="meta rarity {item.rarity.toLowerCase()}">{item.rarity}</span>
+                            </div>
+                        </div>
                         <div class="controls">
-                            <button class="toggle-btn" class:active={inStore} on:click={() => toggleStore(item)}>{inStore ? "VENDENDO" : "OFFLINE"}</button>
-                            <button class="icon-btn" on:click={() => editItem(item)} title="Editar"><i class="fas fa-edit"></i></button>
-                            <button class="icon-btn del" on:click={() => deletePermanent(item.id)} title="Deletar"><i class="fas fa-trash"></i></button>
+                            {#if activeSection === 'archive'}
+                                <button class="toggle-btn" class:active={inStore} on:click={() => toggleStore(item)}>
+                                    {inStore ? "VENDENDO" : "OFFLINE"}
+                                </button>
+                                <button class="icon-btn" on:click={() => editItem(item)} title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="icon-btn del" on:click={() => deletePermanent(item.id)} title="Deletar BD"><i class="fas fa-trash"></i></button>
+                            {:else}
+                                <button class="icon-btn" on:click={() => editItem(item)} title="Editar"><i class="fas fa-edit"></i></button>
+                                <button class="icon-btn del" style="width:auto; padding:0 10px; font-size:10px; font-weight:bold;" on:click={() => deleteItem(item.id)}>REMOVER DA LOJA</button>
+                            {/if}
                         </div>
                     </div>
                 {/each}
+                
+                {#if (activeSection === 'archive' && filteredArchive.length === 0) || (activeSection === 'manage' && filteredStore.length === 0)}
+                    <div class="empty-state-msg">
+                        <i class="fas fa-ghost"></i> Nenhum item encontrado com estes filtros.
+                    </div>
+                {/if}
             </div>
         </div>
 
@@ -453,4 +515,28 @@
     .active-badge { color: #00ff41; font-size: 9px; font-weight: bold; margin-top: 2px; letter-spacing: 1px; }
     .btn-trash { background: transparent; border: 1px solid #444; color: #666; width: 30px; height: 30px; cursor: pointer; border-radius: 4px; transition: 0.2s; }
     .btn-trash:hover { border-color: #ff3333; color: #ff3333; background: rgba(255, 51, 51, 0.1); }
+    /* FILTROS E ORGANIZAÇÃO */
+    .filter-bar { display: flex; gap: 10px; background: #0a0a0f; padding: 10px; border: 1px solid #333; border-radius: 4px; margin-bottom: 10px; }
+    .search-box { flex: 2; display: flex; align-items: center; background: #000; border: 1px solid #444; border-radius: 4px; padding: 0 10px; color: #888; }
+    .search-box input { flex: 1; border: none; background: transparent; padding: 8px; color: #fff; }
+    .search-box input:focus { border: none; box-shadow: none; }
+    .filter-select { flex: 1; border-radius: 4px; cursor: pointer; }
+
+    .header-info { font-size: 10px; color: #00ff41; border-bottom: 1px dashed #333; padding-bottom: 5px; margin-bottom: 10px; font-weight: bold; letter-spacing: 1px; }
+    .items-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
+    
+    .tags-row { display: flex; gap: 5px; margin-top: 3px; }
+    .meta.tag { background: #222; padding: 2px 6px; border-radius: 4px; border: 1px solid #444; }
+    .meta.rarity { padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    
+    /* Cores de Raridade */
+    .comum { color: #aaa; border: 1px solid #aaa; }
+    .raro { color: #00aaff; border: 1px solid #00aaff; background: rgba(0,170,255,0.1); }
+    .lendário { color: #ffaa00; border: 1px solid #ffaa00; background: rgba(255,170,0,0.1); }
+    .mítico { color: #ff3333; border: 1px solid #ff3333; background: rgba(255,51,51,0.1); }
+    .universal { color: #a855f7; border: 1px solid #a855f7; background: rgba(168,85,247,0.1); }
+    .multiversal { color: #fff; border: 1px solid #fff; box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+
+    .empty-state-msg { padding: 40px; text-align: center; color: #555; font-style: italic; display: flex; flex-direction: column; gap: 10px; font-size: 12px; }
+    .empty-state-msg i { font-size: 30px; opacity: 0.5; }
 </style>
