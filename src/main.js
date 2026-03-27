@@ -13,7 +13,6 @@ import SocialMenu from './apps/SocialMenu.js';
 import { SocialHubDatabase } from './database/SocialHubDatabase.js';
 import { GroupDatabase } from "./database/GroupDatabase.js";
 import MobileHudApp from './apps/MobileHudApp.js';
-import { OnlineComms } from './database/OnlineComms.js';
 
 // Sheets JS
 import MultiversusItemSheet from './sheets/MultiversusItemSheet.js';

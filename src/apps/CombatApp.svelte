@@ -359,13 +359,13 @@
                 <div class="calc-title">{selectedLimb ? selectedLimb.name : "SELECIONE ALVO"}</div>
                 {#if selectedLimb}
                     <div class="armor-edit">
-                        <label>L <input type="number" bind:value={selectedLimb.lar} on:change={saveData}></label>
-                        <label>H <input type="number" bind:value={selectedLimb.har} on:change={saveData}></label>
-                        <label>HP <input type="number" bind:value={selectedLimb.hp} on:change={saveData}></label>
+                        <label>Armadura Leve<input type="number" bind:value={selectedLimb.lar} on:change={saveData}></label>
+                        <label>Armadura Pesada<input type="number" bind:value={selectedLimb.har} on:change={saveData}></label>
+                        <label>Pontos Vida <input type="number" bind:value={selectedLimb.hp} on:change={saveData}></label>
                     </div>
                     <div class="dmg-inputs">
-                        <div class="grp"><label style="color:var(--c-shock)">SHOCK</label><input type="number" bind:value={inputShock}></div>
-                        <div class="grp"><label style="color:var(--c-kill)">KILL</label><input type="number" bind:value={inputKilling}></div>
+                        <div class="grp"><label style="color:var(--c-shock)">Não Letal</label><input type="number" bind:value={inputShock}></div>
+                        <div class="grp"><label style="color:var(--c-kill)">Letal</label><input type="number" bind:value={inputKilling}></div>
                     </div>
                     <button class="btn-hit" on:click={applyDamage}>DANO</button>
                     <div class="heal-row"><input type="number" bind:value={inputHeal} placeholder="Cura"><button on:click={applyHeal}>+</button></div>

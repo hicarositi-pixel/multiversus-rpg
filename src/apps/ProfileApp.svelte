@@ -298,7 +298,7 @@
         <section class="willpower-module">
             <div class="will-row">
                 <div class="will-info">
-                    <span class="w-label">BASE WILL</span>
+                    <span class="w-label">Força de Vontade</span>
                     <div class="w-calc" title="Charme + Comando + Nível + Comprados">
                         <span title="Charme">[{statCharm}]</span> + 
                         <span title="Comando">[{statCommand}]</span> + 
@@ -322,9 +322,9 @@
 
             <div class="will-row" style="border-left: 2px solid #00aaff;">
                 <div class="will-info">
-                    <span class="w-label" style="color: #00aaff;">WILLPOWER</span>
+                    <span class="w-label" style="color: #00aaff;">Energia Nexus</span>
                     <div class="w-calc">
-                        <span style="color: #666; font-style: italic;">O máximo é atrelado ao Base Will.</span>
+                        <span style="color: #666; font-style: italic;">O máximo é atrelado a Força de Vontade.</span>
                         = <strong>{maxWillpower}</strong>
                     </div>
                 </div>
@@ -416,16 +416,16 @@
 
         <section class="text-areas">
             <div class="text-box full">
-                <div class="box-label">HISTÓRIA & ANOTAÇÔES</div>
+                <div class="box-label">ANOTAÇÔES RÁPIDAS</div>
                 <textarea value={loreContent} on:change={e => { loreContent = e.target.value; saveBioText(); }}></textarea>
             </div>
             <div class="split-text">
                 <div class="text-box">
-                    <div class="box-label">PERFIL PSICOLÓGICO</div>
+                    <div class="box-label">História</div>
                     <textarea class="short" value={localPsyche} on:change={e => { localPsyche = e.target.value; saveBioText(); }}></textarea>
                 </div>
                 <div class="text-box">
-                    <div class="box-label">DADOS VISUAIS</div>
+                    <div class="box-label">Aparência e Mentalidade.</div>
                     <textarea class="short" value={localAppearance} on:change={e => { localAppearance = e.target.value; saveBioText(); }}></textarea>
                 </div>
             </div>
