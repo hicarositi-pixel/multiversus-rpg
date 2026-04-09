@@ -15,22 +15,16 @@
     syncLocalVars();
   });
 
-  // --- 1. LEITURA DE DADOS (VIA FLAGS) ---
-  // Reatividade garantida: sempre que 'item' mudar (via props do pai), tudo recarrega
   $: flags = item?.flags?.[MODULE_ID] || {};
-  
   $: img = item?.img || "icons/svg/item-bag.svg";
   $: realName = item?.name || "Desconhecido";
 
-  // --- 2. DADOS DO PODER ---
   $: diceData = flags.dice || {};
   $: dNormal = diceData.normal || 0;
   $: dHard = diceData.hard || 0;
   $: dWiggle = diceData.wiggle || 0;
-  
   $: totalDice = dNormal + dHard + dWiggle;
 
-  // --- 3. CÁLCULO DE CUSTO ---
   $: category = flags.category || "principal";
   $: rarity = flags.rarity || "Comum";
   $: isInitial = flags.isInitial || false;
@@ -42,13 +36,11 @@
   $: discount = isInitial ? (4 * baseCost) : 0;
   $: currentCost = Math.max(0, rawCost - discount);
 
-  // --- 4. CÁLCULO DE XP DISPONÍVEL ---
   $: xpEarned = actor.system?.xp || actor.flags?.[MODULE_ID]?.xp || 0;
   $: totalCap = 150 + xpEarned;
   $: totalSpent = actor.flags?.[MODULE_ID]?.totalSpent || 0;
   $: availableXP = totalCap - totalSpent;
 
-  // --- 5. VISUAL (TEMA) ---
   let editAlias = "";
   let editTheme = "default";
   let editColor = "#ffffff";
@@ -70,10 +62,7 @@
   const RARITY_COLORS = { "Comum": "#a0a0a0", "Raro": "#00bfff", "Lendário": "#ffa500", "Mítico": "#ff4500", "Universal": "#ffffff", "Multiversal": "#d000ff" };
   $: glowColor = (isConfiguring ? editColor : flags.customColor) || currentThemeData.color || RARITY_COLORS[rarity] || "#00ff41";
 
-  // --- 6. AÇÕES DE SALVAMENTO (CORRIGIDAS) ---
-
   async function saveSettings() {
-    // REMOVIDO: { render: false }
     await item.update({
       [`flags.${MODULE_ID}.customAlias`]: editAlias,
       [`flags.${MODULE_ID}.customColor`]: editColor, 
@@ -83,7 +72,6 @@
     ui.notifications.info(`Visual salvo!`);
   }
 
-  // --- 7. COMPRA DE DADOS (CORRIGIDA) ---
   async function upgradeDice(type) {
     if (!item) return;
     
@@ -100,16 +88,9 @@
 
     Hooks.call("nexusPointSpent", actor.name, "Poder", `${displayName} (${type}): ${currentVal} ➔ ${newVal}`, cost, remaining);
       
-    let newDiceData = { 
-        normal: dNormal,
-        hard: dHard,
-        wiggle: dWiggle,
-        ...diceData 
-    };
+    let newDiceData = { normal: dNormal, hard: dHard, wiggle: dWiggle, ...diceData };
     newDiceData[type] = newVal;
 
-    // REMOVIDO: { render: false }
-    // Isso garante que o Foundry avise o 'PoderesApp' que o item mudou
     await item.update({ [`flags.${MODULE_ID}.dice`]: newDiceData });
   }
 
@@ -122,6 +103,19 @@
 
   function openSheet() { item?.sheet?.render(true); }
   async function deletePower() { await item.delete(); }
+
+  // ========================================================================
+  // NOVO: PERMITE ARRASTAR A CARTA PARA A DATABASE (OU OUTRA FICHA)
+  // ========================================================================
+  function handleDragStart(event) {
+      // Empacota os dados da mesma forma que o Foundry faz nativamente
+      const dragData = {
+          type: "Item",
+          uuid: item.uuid,
+          data: item.toObject()
+      };
+      event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+  }
 </script>
 
 {#if item}
@@ -129,6 +123,8 @@
   class="power-card theme-{activeDisplayTheme}" 
   style="--glow: {glowColor};"
   class:expanded={isExpanded || isConfiguring}
+  draggable="true" 
+  on:dragstart={handleDragStart}
 >
   <div class="card-front">
     <div class="icon-box" on:click={openSheet} title="Abrir Ficha Técnica">
@@ -248,8 +244,9 @@
 {/if}
 
 <style>
-/* CSS do seu código original (Mantenha igual) */
-.power-card { background: #050505; border: 1px solid #333; border-left: 4px solid var(--glow); border-radius: 6px; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: 0.3s; }
+/* CSS do seu código original MANTIDO */
+.power-card { background: #050505; border: 1px solid #333; border-left: 4px solid var(--glow); border-radius: 6px; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: 0.3s; cursor: grab;}
+.power-card:active { cursor: grabbing; }
 .power-card:hover { box-shadow: 0 0 15px var(--glow); border-color: var(--glow); }
 .card-front { display: flex; align-items: center; padding: 8px; height: 72px; background: linear-gradient(90deg, #111 0%, #080808 100%); position: relative; z-index: 10; }
 .icon-box { width: 52px; height: 52px; margin-right: 12px; cursor: pointer; border: 1px solid #444; border-radius: 8px; overflow: hidden; position: relative; }

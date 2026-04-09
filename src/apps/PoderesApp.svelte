@@ -136,9 +136,39 @@
   function openLibrary() {
     try { new PoderesManager(actor).render(true); } catch (e) { console.error(e); }
   }
+
+// --- RECEPTOR DE DRAG & DROP (RECEBE DA DATABASE DIRETO NA FICHA) ---
+  async function handleDropOnSheet(event) {
+      event.preventDefault();
+      const dataText = event.dataTransfer.getData('text/plain');
+      if (!dataText) return;
+
+      try {
+          const dropData = JSON.parse(dataText);
+          
+          // Ignora se o poder já foi arrastado de dentro do próprio ator (pra não duplicar à toa)
+          if (dropData.uuid && dropData.uuid.includes(actor.id)) return;
+
+          if (dropData.type === "Item" && dropData.data) {
+              let itemData = foundry.utils.deepClone(dropData.data);
+              
+              // Garante que o tipo é o aceito pelo Foundry Local
+              const validTypes = game.documentTypes.Item;
+              itemData.type = validTypes.includes("power") ? "power" : validTypes[0];
+              
+              // Remove IDs antigos para que o Foundry crie um novo item limpo dentro do Ator
+              delete itemData._id;
+
+              await actor.createEmbeddedDocuments("Item", [itemData]);
+              ui.notifications.info(`[${itemData.name}] inserido na ficha de ${actor.name}.`);
+          }
+      } catch (e) {
+          console.error("Falha ao receber o poder na ficha:", e);
+      }
+  }
 </script>
 
-<div class="powers-terminal">
+<div class="powers-terminal" on:drop={handleDropOnSheet} on:dragover={(e) => e.preventDefault()}>
   <header class="term-header">
     <div class="hud-module main">
       <div class="hud-top">

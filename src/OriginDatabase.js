@@ -849,4 +849,20 @@ const ORIGINS = {
             </ul>
         `
     },
+
+        "batata": {
+        id: "batata",
+        name: "batata",
+        icon: "🧬",
+        type: "Mítico (80+)",
+        desc: `<p>História aqui...</p>`,
+        mechanic: { name: "Mecânica", desc: `<p>Regras aqui...</p>` },
+        traits: [
+            { level: 1, name: "Passiva Base", effect: "" },
+            { level: 3, name: "Despertar (Nv 3)", effect: "Efeito..." },
+            { level: 6, name: "Evolução (Nv 6)", effect: "Efeito..." },
+            { level: 9, name: "Ápice (Nv 9)", effect: "Efeito..." }
+        ],
+        powers: `<h3>Poderes Aqui</h3>`
+    },
 };
