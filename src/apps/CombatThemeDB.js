@@ -54,34 +54,107 @@ export const CombatThemes = {
             .loc-tag { background: transparent; border: 1px solid var(--c-primary); color: var(--c-primary); }
         `
     },
-
-    "bio": {
-        name: "SYMBIOTE (Organic)",
+"heroking": {
+        name: "HERO KING (Tesouro)",
         vars: {
-            "--c-primary": "#88ff00",
-            "--c-bg": "#1a0505",
-            "--c-panel": "rgba(40, 10, 10, 0.9)",
-            "--c-border": "#500",
-            "--c-shock": "#ffff00",
-            "--c-kill": "#550000",
-            "--f-main": "'Courier New', monospace",
-            "--r-node": "15px",
-            "--r-slot": "50%" // Células Redondas
+            "--c-primary": "#ffcc00",     // Ouro Babilônico
+            "--c-bg": "#0a0101",          // Fundo Escuro Carmesim
+            "--c-panel": "rgba(20, 2, 2, 0.95)",
+            "--c-border": "#ff0033",      // Vermelho Enuma Elish
+            "--c-shock": "#c0c0c0",       // Prata
+            "--c-kill": "#cd7f32",        // Bronze
+            "--f-main": "'Cinzel', serif",// Fonte Imperial
+            "--r-node": "6px",            // Borda do card do membro
+            "--r-slot": "50%"             // Deixa o slot perfeitamente redondo (Moeda)
         },
         css: `
-            /* Células Vivas */
-            .hp-slot { 
-                border-radius: 50%; 
-                border: none;
-                background: #311;
-                box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
+            /* Caixa do membro (Placa Imperial) */
+            .limb-node { 
+                border: 1px solid var(--c-border) !important; 
+                background: radial-gradient(circle at top, #1a0202 0%, #000 100%) !important;
+                box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(255,0,51,0.2) !important;
             }
-            .hp-slot.shock, .hp-slot.killing {
-                animation: pulseBio 2s infinite;
-            }
-            @keyframes pulseBio { 0% { transform: scale(0.95); } 50% { transform: scale(1.1); } 100% { transform: scale(0.95); } }
             
-            .limb-node { border: 2px solid #500; }
+            /* Nome do Membro */
+            .loc-tag { 
+                color: var(--c-primary) !important; 
+                font-weight: bold !important; 
+                letter-spacing: 1px !important; 
+                text-shadow: 0 0 5px rgba(255, 204, 0, 0.5) !important;
+            }
+
+            /* HP Cheio: MOEDA DE OURO */
+            .hp-slot { 
+                border: 1px solid #b8860b !important; 
+                background: radial-gradient(circle at 35% 35%, #ffea00, #daa520) !important; 
+                box-shadow: inset 0 -2px 4px rgba(0,0,0,0.6) !important; 
+            }
+
+            /* Dano Shock: MOEDA DE PRATA */
+            .hp-slot.shock, .hp-slot.bashing { 
+                border: 1px solid #888888 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffffff, #a0a0a0) !important; 
+                box-shadow: inset 0 -2px 4px rgba(0,0,0,0.6) !important; 
+            }
+
+            /* Dano Killing: MOEDA DE BRONZE */
+            .hp-slot.kill, .hp-slot.lethal, .hp-slot.killing { 
+                border: 1px solid #8b4513 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffa07a, #cd7f32) !important; 
+                box-shadow: inset 0 -2px 4px rgba(0,0,0,0.6) !important; 
+            }
         `
-    }
+    },
+
+    "novoimortal": {
+        name: "NOVO IMORTAL (Hogyoku)",
+        vars: {
+            "--c-primary": "#00d4ff",     // Azul Hogyoku
+            "--c-bg": "#020406",          // Preto vácuo
+            "--c-panel": "rgba(10, 15, 20, 0.85)",
+            "--c-border": "#00d4ff",      // Borda Azul
+            "--c-shock": "#ffea00",       // Amarelo
+            "--c-kill": "#ff0000",        // Vermelho
+            "--f-main": "'Orbitron', sans-serif",
+            "--r-node": "12px",           // Card do membro arredondado
+            "--r-slot": "50%"             // Células de energia redondas
+        },
+        css: `
+            /* Caixa do membro (Cápsula de Energia) */
+            .limb-node { 
+                border: 1px solid var(--c-border) !important; 
+                background: rgba(5, 10, 15, 0.8) !important;
+                box-shadow: 0 0 15px rgba(0, 212, 255, 0.1), inset 0 0 10px rgba(0, 212, 255, 0.05) !important; 
+                backdrop-filter: blur(5px) !important;
+            }
+            
+            /* Nome do Membro */
+            .loc-tag { 
+                color: #ffffff !important; 
+                font-weight: bold !important; 
+                text-shadow: 0 0 5px var(--c-primary) !important; 
+            }
+
+            /* HP Cheio: BOLINHA AZUL (Energia Hogyoku) */
+            .hp-slot { 
+                border: 1px solid #0055aa !important; 
+                background: radial-gradient(circle at 35% 35%, #ffffff, #00d4ff) !important; 
+                box-shadow: 0 0 5px rgba(0, 212, 255, 0.5) !important; 
+            }
+
+            /* Dano Shock: BOLINHA AMARELA (Energia Corrompida) */
+            .hp-slot.shock, .hp-slot.bashing { 
+                border: 1px solid #aa8800 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffffff, var(--c-shock)) !important; 
+                box-shadow: 0 0 5px var(--c-shock) !important; 
+            }
+
+            /* Dano Killing: BOLINHA VERMELHA (Morte Celular) */
+            .hp-slot.kill, .hp-slot.lethal, .hp-slot.killing { 
+                border: 1px solid #880000 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffcccc, var(--c-kill)) !important; 
+                box-shadow: 0 0 5px var(--c-kill) !important; 
+            }
+        `
+    },
 };

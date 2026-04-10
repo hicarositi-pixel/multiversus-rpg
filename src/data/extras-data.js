@@ -28,6 +28,8 @@ export const EXTRAS_DB = [
   { id: 'spray', name: 'Spray', cost: 1, icon: '💦', desc: 'Adiciona +1d (Spray). Permite ações múltiplas sem penalidade. Hard custa +2, Wiggle +4.' },
   { id: 'subtle', name: 'Subtle', cost: 1, icon: '🥷', desc: 'Poder imperceptível. Requer teste de Percepção para notar.' },
   { id: 'traumatic', name: 'Traumatic', cost: 1, icon: '😱', desc: 'Causa Trauma Check no alvo se causar dano. Obriga o atacante a fazer Trauma Check também.' },
-    { id: 'batata', name: 'batata', cost: 1, icon: '🆕', desc: 'batata' },
-  { id: 'variable', name: 'Variable Effect', cost: 4, icon: '🎲', desc: 'Pode mudar os efeitos do poder para emular outros poderes (Uma ação para mudar).' }
+  { id: 'batata', name: 'batata', cost: 1, icon: '🆕', desc: 'batata' },
+  { id: 'variable', name: 'Variable Effect', cost: 4, icon: '🎲', desc: 'Pode mudar os efeitos do poder para emular outros poderes (Uma ação para mudar).' },
+  { id: 'hyperskill', name: 'Hyper Skill', cost: 1, icon: '🎲', desc: 'Permite comprar Dados Fixo e Variaveis, assim como, comprar dados acima de 5 dados noa pericia.' },
+  { id: 'hyperstat', name: 'Hyper Status', cost: 4, icon: '🎲', desc: 'Permite comprar Dados Fixo e Variaveis, assim como, comprar dados acima de 5 dados no atributo. Por Padrão, você ganha uma qualidade de Ataque e Defesa que faça sentido com o Atributo.' }
 ];

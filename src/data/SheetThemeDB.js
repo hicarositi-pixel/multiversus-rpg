@@ -2261,6 +2261,549 @@ antimatter: {
     }
     `
 },
+heroking: {
+    label: "HERO KING",
+    class: "theme-heroking",
+    desc: "TODOS OS TESOUROS DO MUNDO ME PERTENCEM. CONTEMPLE A FÚRIA DO DRAGÃO.",
+    vars: {
+        "--c-primary": "#ffcc00",     // Ouro Babilônico
+        "--c-secondary": "#ff0033",   // Carmesim (Enuma Elish / Fogo de Dragão)
+        "--c-bg": "#0a0101",          // Escuridão Dracônica
+        "--c-text": "#fcf6ba",        // Ouro Pálido
+        "--font-head": "'Cinzel', 'Times New Roman', serif", // Traz a realeza do Gilgamesh
+        "--font-body": "'Rajdhani', sans-serif",
+        "--f-clip": "polygon(10% 0, 100% 0, 90% 100%, 0% 100%)", // Cortes agressivos em lança
+        "--f-border": "1px solid rgba(255, 204, 0, 0.5)",
+        "--f-shadow": "0 0 20px rgba(255, 0, 51, 0.6)"
+    },
+    extraCSS: `
+        /* --- 1. CURSORES: A LANÇA EA (ENUMA ELISH) --- */
+        /* Uma lança vermelha incandescente com núcleo dourado */
+        .theme-heroking, .theme-heroking * {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 2 L22 12 L16 30 L10 12 Z" fill="%23ff0033" stroke="%23ffcc00" stroke-width="1.5"/><circle cx="16" cy="12" r="2" fill="%23ffffff"/><path d="M16 2 L22 12 L16 30 L10 12 Z" fill="url(%23g)" opacity="0.5"/><defs><radialGradient id="g"><stop offset="0%" stop-color="%23ffcc00"/><stop offset="100%" stop-color="transparent"/></radialGradient></defs></svg>') 16 2, auto !important;
+        }
+
+        .theme-heroking button, .theme-heroking .icon-btn, .theme-heroking [cursor="pointer"], .theme-heroking .visual-card {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M16 0 L24 14 L16 32 L8 14 Z" fill="%23ffcc00" stroke="%23ff0033" stroke-width="2"/><circle cx="16" cy="14" r="3" fill="%23ff0033"/><filter id="glow"><feGaussianBlur stdDeviation="2" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></svg>') 16 0, pointer !important;
+        }
+
+        /* --- 2. LOGIN/FUNDO: PORTÕES DA BABILÔNIA E OLHO DE DRAGÃO --- */
+        .theme-heroking .login-layer, .theme-heroking .tactical-backdrop {
+            background: radial-gradient(circle at center, #1a0202 0%, #000 100%) !important;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Olho do Dragão (Pupila em Fenda) */
+        .theme-heroking .login-layer::before, .theme-heroking .tactical-backdrop::before {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 40px; height: 250px;
+            background: #000;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                0 0 50px 20px #ff0033, 
+                0 0 100px 50px #ffcc00,
+                inset 0 0 20px #ffcc00;
+            z-index: 1;
+            animation: dragon-eye-pulse 6s ease-in-out infinite;
+        }
+
+        /* Ondulações Douradas (Portões da Babilônia abrindo) */
+        .theme-heroking .login-layer::after, .theme-heroking .tactical-backdrop::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 300px; height: 300px;
+            border-radius: 50%;
+            border: 2px solid var(--c-primary);
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 50px var(--c-primary), inset 0 0 50px var(--c-secondary);
+            z-index: 0;
+            animation: gate-of-babylon 3s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+            opacity: 0;
+        }
+
+        /* --- 3. MOLDURAS E PAINÉIS: ESCAMAS DE DRAGÃO --- */
+        .theme-heroking .cyber-panel, 
+        .theme-heroking .dossier-window, 
+        .theme-heroking .military-terminal {
+            background-color: #0a0101 !important;
+            /* Padrão CSS puro criando escamas de dragão sobrepostas */
+            background-image: 
+                radial-gradient(circle at 100% 150%, #0a0101 24%, #ff0033 25%, #0a0101 28%, transparent 29%),
+                radial-gradient(circle at 0% 150%, #0a0101 24%, #ff0033 25%, #0a0101 28%, transparent 29%),
+                radial-gradient(circle at 50% 100%, #1a0202 10%, #ffcc00 11%, #1a0202 14%, transparent 15%) !important;
+            background-size: 40px 20px !important;
+            border: 2px solid var(--c-primary) !important;
+            box-shadow: 0 0 30px rgba(255, 0, 51, 0.4), inset 0 0 20px rgba(255, 204, 0, 0.1) !important;
+            border-radius: 4px !important;
+        }
+
+        .theme-heroking .panel-head, 
+        .theme-heroking .mil-header, 
+        .theme-heroking .dossier-header {
+            background: linear-gradient(90deg, #330000 0%, #000 100%) !important;
+            border-bottom: 2px solid var(--c-primary) !important;
+            box-shadow: 0 5px 15px rgba(255, 204, 0, 0.2);
+        }
+
+        /* --- 4. AVATARES E ÍCONES: OURO DERRETIDO --- */
+        .theme-heroking .icon-frame, 
+        .theme-heroking .portrait-frame {
+            border: 2px solid var(--c-primary) !important;
+            border-radius: 10px 0 10px 0 !important; /* Estética de joia/corte de espada */
+            background: radial-gradient(circle, rgba(255, 204, 0, 0.3) 0%, rgba(255, 0, 51, 0.4) 50%, rgba(0, 0, 0, 1) 100%) !important;
+            box-shadow: 0 0 15px var(--c-secondary) !important;
+            transition: 0.3s;
+        }
+
+        .theme-heroking .portrait-frame img {
+            border-radius: 8px 0 8px 0 !important;
+            filter: contrast(1.1) sepia(0.3) hue-rotate(-10deg) saturate(1.2); /* Tom ligeiramente dourado/épico */
+        }
+
+        .theme-heroking .icon-btn:hover .icon-frame {
+            border-color: #fff !important;
+            box-shadow: 0 0 30px var(--c-primary), inset 0 0 20px var(--c-secondary) !important;
+            transform: scale(1.05) translateY(-2px);
+            background: radial-gradient(circle, rgba(255, 204, 0, 0.6) 0%, rgba(255, 0, 51, 0.8) 50%, rgba(0, 0, 0, 1) 100%) !important;
+        }
+
+        .theme-heroking .icon-btn:hover i {
+            color: #fff !important;
+            text-shadow: 0 0 10px var(--c-primary), 0 0 20px var(--c-secondary);
+            animation: dragon-breath 1s ease-in-out infinite alternate;
+        }
+
+        /* --- 5. RECURSOS E BARRAS: CHAMA E OURO --- */
+        .theme-heroking .orb-liquid {
+            background: linear-gradient(180deg, var(--c-primary) 0%, var(--c-secondary) 80%, #000 100%) !important;
+            box-shadow: inset 0 0 10px #fff;
+            animation: lava-flow 3s linear infinite;
+        }
+
+        .theme-heroking .cap-bar-fill {
+            background: linear-gradient(90deg, var(--c-secondary), var(--c-primary), #fff) !important;
+            box-shadow: 0 0 15px var(--c-primary) !important;
+            background-size: 200% 100% !important;
+            animation: gold-shimmer 2s linear infinite !important;
+        }
+
+        /* --- 6. BOTÕES E INTERAÇÕES --- */
+        .theme-heroking .btn-action, 
+        .theme-heroking .btn-cyber,
+        .theme-heroking .btn-save {
+            background: rgba(255, 0, 51, 0.1) !important;
+            border: 1px solid var(--c-primary) !important;
+            color: var(--c-primary) !important;
+            font-family: var(--font-head) !important;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: inset 0 0 5px rgba(255, 204, 0, 0.2);
+            transition: 0.3s;
+        }
+
+        .theme-heroking .btn-action:hover, 
+        .theme-heroking .btn-cyber:hover,
+        .theme-heroking .btn-save:hover {
+            background: linear-gradient(45deg, var(--c-secondary), var(--c-primary)) !important;
+            color: #000 !important;
+            border-color: #fff !important;
+            box-shadow: 0 0 20px var(--c-primary), inset 0 0 10px #fff !important;
+            transform: scale(1.02);
+            text-shadow: none !important;
+        }
+
+        /* O botão Snap/Multiversal (O disparo do Enuma Elish) */
+        .theme-heroking .btn-multiversal {
+            background: #1a0000 !important;
+            color: var(--c-primary) !important;
+            border: 2px solid var(--c-secondary) !important;
+            box-shadow: 0 0 20px var(--c-secondary), inset 0 0 10px var(--c-secondary) !important;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%) !important; /* Hexágono */
+        }
+
+        .theme-heroking .btn-multiversal:hover {
+            background: var(--c-secondary) !important;
+            color: #fff !important;
+            border-color: var(--c-primary) !important;
+            box-shadow: 0 0 40px var(--c-secondary), 0 0 20px var(--c-primary) !important;
+        }
+
+        .theme-heroking .btn-multiversal.snap-active {
+            animation: enuma-elish-blast 1.5s forwards cubic-bezier(0.8, 0, 0.2, 1) !important;
+        }
+
+        /* --- 7. DESTAQUES E TEXTOS (DECODIFICADOR) --- */
+        :global(.theme-heroking .cyber-highlight) {
+            background: rgba(255, 204, 0, 0.15) !important;
+            color: var(--c-primary) !important;
+            border-bottom: 1px solid var(--c-primary) !important;
+            text-shadow: 0 0 8px rgba(255, 204, 0, 0.8) !important;
+        }
+
+        :global(.theme-heroking .cyber-alert) {
+            background: rgba(255, 0, 51, 0.15) !important;
+            color: #ff3333 !important;
+            border-bottom: 1px solid #ff3333 !important;
+            text-shadow: 0 0 8px rgba(255, 0, 51, 0.8) !important;
+        }
+
+        :global(.theme-heroking .cyber-h3) {
+            color: var(--c-primary) !important;
+            border-bottom: 1px solid var(--c-secondary) !important;
+            font-family: var(--font-head) !important;
+            text-shadow: 0 0 10px rgba(255, 0, 51, 0.5) !important;
+        }
+
+        /* --- 8. ANIMAÇÕES DO REI DOS HERÓIS --- */
+        
+        @keyframes dragon-eye-pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1) scaleX(1); opacity: 0.8; box-shadow: 0 0 50px 20px #ff0033, 0 0 100px 50px #ffcc00, inset 0 0 20px #ffcc00; }
+            50% { transform: translate(-50%, -50%) scale(1.05) scaleX(0.8); opacity: 1; box-shadow: 0 0 70px 30px #ff0033, 0 0 120px 60px #ffcc00, inset 0 0 30px #fff; }
+            /* Blink rápido simulando o dragão piscando */
+            95% { transform: translate(-50%, -50%) scale(1) scaleX(0.1); opacity: 0.2; }
+            98% { transform: translate(-50%, -50%) scale(1) scaleX(1); opacity: 1; }
+        }
+
+        @keyframes gate-of-babylon {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; border-width: 5px; box-shadow: 0 0 50px var(--c-primary), inset 0 0 50px var(--c-secondary); }
+            100% { transform: translate(-50%, -50%) scale(3); opacity: 0; border-width: 1px; box-shadow: 0 0 0px var(--c-primary), inset 0 0 0px var(--c-secondary); }
+        }
+
+        @keyframes lava-flow {
+            0% { filter: hue-rotate(0deg) saturate(1); }
+            50% { filter: hue-rotate(-15deg) saturate(1.5); }
+            100% { filter: hue-rotate(0deg) saturate(1); }
+        }
+
+        @keyframes dragon-breath {
+            0% { transform: translateY(0); color: var(--c-primary); }
+            100% { transform: translateY(-3px); color: #fff; }
+        }
+
+        @keyframes gold-shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+
+        @keyframes enuma-elish-blast {
+            0% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+            20% { transform: scale(0.8) rotate(-45deg); filter: brightness(0.5); box-shadow: inset 0 0 50px #000; }
+            40% { transform: scale(1.5) rotate(180deg); filter: brightness(3); box-shadow: 0 0 100px #ff0033, 0 0 50px #ffcc00; background: #ff0033 !important;}
+            100% { transform: scale(50) rotate(360deg); opacity: 0; filter: brightness(10); }
+        }
+
+        /* ========================================================
+           HERO KING :: INTEGRAÇÃO ABA DE PERFIL
+           ======================================================== */
+        
+        /* Retrato: Tesouro da Babilônia (Bordas de Espada) */
+        .theme-heroking .portrait {
+            border-radius: 12px 0 12px 0 !important;
+            border: 2px solid var(--c-primary) !important;
+            box-shadow: 0 0 15px var(--c-secondary), inset 0 0 10px #000 !important;
+            background: #0a0101 !important;
+        }
+        .theme-heroking .portrait:hover {
+            border-color: #fff !important;
+            box-shadow: 0 0 30px var(--c-primary), 0 0 20px var(--c-secondary) !important;
+            /* Reflexo Dourado Majestoso */
+            filter: contrast(1.1) saturate(1.3) drop-shadow(0 0 10px #ffcc00);
+        }
+        .theme-heroking .info-col label { color: var(--c-secondary) !important; text-shadow: 0 0 5px var(--c-secondary); }
+        .theme-heroking .name-input { color: var(--c-text) !important; border-bottom-color: var(--c-primary) !important; text-shadow: 0 0 10px rgba(255, 204, 0, 0.4);}
+        .theme-heroking .name-input:focus { border-bottom-color: var(--c-secondary) !important; }
+
+        /* Esferas de Nível e Recursos (Escamas e Ouro) */
+        .theme-heroking .resource-display,
+        .theme-heroking .willpower-module,
+        .theme-heroking .origin-display,
+        .theme-heroking .cyber-list,
+        .theme-heroking .bio-card,
+        .theme-heroking .body-art-container {
+            background-color: #0a0101 !important;
+            background-image: 
+                radial-gradient(circle at 100% 150%, #0a0101 24%, rgba(255,0,51,0.1) 25%, #0a0101 28%, transparent 29%),
+                radial-gradient(circle at 0% 150%, #0a0101 24%, rgba(255,0,51,0.1) 25%, #0a0101 28%, transparent 29%) !important;
+            background-size: 30px 15px !important;
+            border: 1px solid var(--c-primary) !important;
+            box-shadow: inset 0 0 20px rgba(255, 0, 51, 0.2) !important;
+            border-radius: 4px !important;
+        }
+        
+        .theme-heroking .res-line.main, .theme-heroking .w-label { color: var(--c-primary) !important; text-shadow: 0 0 5px var(--c-primary); }
+        .theme-heroking .res-line .val, .theme-heroking .w-calc strong { color: #fff !important; }
+        .theme-heroking .dim { color: #aa8888 !important; }
+
+        /* Level Orb: O Portal Abrindo */
+        .theme-heroking .bg-ring { stroke: #220000 !important; }
+        .theme-heroking .prog-ring { stroke: var(--c-primary) !important; filter: drop-shadow(0 0 10px var(--c-secondary)); }
+        .theme-heroking .level-txt strong { color: var(--c-primary) !important; text-shadow: 0 0 10px var(--c-secondary); font-size: 24px !important;}
+
+        /* Animação Fúria do Rei (Hover em Cards e Detalhes) */
+        .theme-heroking .bio-card:hover,
+        .theme-heroking .body-art-container:hover,
+        .theme-heroking .detail-box:hover {
+            border-color: var(--c-secondary) !important;
+            box-shadow: 0 0 20px rgba(255, 0, 51, 0.5), inset 0 0 15px rgba(255, 204, 0, 0.2) !important;
+            transform: translateY(-2px) scale(1.01);
+            background-image: 
+                radial-gradient(circle at 100% 150%, #1a0202 24%, rgba(255,204,0,0.2) 25%, #1a0202 28%, transparent 29%),
+                radial-gradient(circle at 0% 150%, #1a0202 24%, rgba(255,204,0,0.2) 25%, #1a0202 28%, transparent 29%) !important;
+        }
+
+        .theme-heroking .card-header, .theme-heroking .origin-header, .theme-heroking .body-art-header {
+            background: linear-gradient(90deg, #330000 0%, #0a0101 100%) !important;
+            color: var(--c-primary) !important;
+            border-bottom: 2px solid var(--c-secondary) !important;
+        }
+
+        /* Banner: Lente Enuma Elish */
+        .theme-heroking .banner-overlay {
+            background: rgba(10, 1, 1, 0.8) !important;
+            color: var(--c-primary) !important;
+            text-shadow: 0 0 10px var(--c-secondary), 0 0 20px #ff0033;
+            border: 2px solid var(--c-secondary);
+            box-shadow: inset 0 0 40px rgba(255,0,51,0.8);
+        }
+
+        /* Tags e Detalhes Majestosos */
+        .theme-heroking .trait-tag { background: #1a0202 !important; border-color: var(--c-secondary) !important; color: var(--c-primary) !important; }
+        .theme-heroking .trait-tag:hover { background: var(--c-primary) !important; border-color: #fff !important; color: #000 !important; box-shadow: 0 0 10px var(--c-primary); }
+        .theme-heroking .detail-box { background: #000 !important; border-color: #330000 !important; }
+        .theme-heroking .detail-box .val { color: var(--c-primary) !important; }
+        
+        .theme-heroking .sync-btn, .theme-heroking .edit-lore-btn { border-color: var(--c-secondary) !important; color: var(--c-primary) !important; }
+        .theme-heroking .sync-btn:hover, .theme-heroking .edit-lore-btn:hover { background: var(--c-secondary) !important; border-color: #fff !important; color: #fff !important; box-shadow: 0 0 15px var(--c-secondary); }
+    `
+},
+
+novoimortal: {
+    label: "O NOVO IMORTAL",
+    class: "theme-novoimortal",
+    desc: "A EVOLUÇÃO TRANSCENDE A ALMA. O HOGYOKU DESPERTA O DRAGÃO SOLAR.",
+    vars: {
+        "--c-primary": "#00d4ff",     // Azul Hogyoku
+        "--c-secondary": "#ff3300",   // Vermelho/Laranja Solar (Aquecimento)
+        "--c-bg": "#020406",          // Preto Shinigami (Fundo Escuro)
+        "--c-panel": "rgba(10, 15, 20, 0.8)", // Painel de Vidro Escuro
+        "--c-text": "#ffffff",        // Textos puramente brancos
+        "--font-head": "'Cinzel', serif", 
+        "--font-body": "'Rajdhani', sans-serif",
+        "--f-clip": "none",           // Remove os cortes geométricos para dar lugar ao arredondado
+        "--f-border": "1px solid rgba(0, 212, 255, 0.6)",
+        "--f-shadow": "0 0 15px rgba(0, 212, 255, 0.3)"
+    },
+    extraCSS: `
+        /* --- 1. CURSORES TRANSCENDENTES --- */
+        .theme-novoimortal, .theme-novoimortal * {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path d="M12 0 C 20 10, 28 15, 30 25 C 25 25, 15 20, 0 32 C 5 20, 8 10, 12 0 Z" fill="%2300d4ff" stroke="%23ffffff" stroke-width="1.5"/><circle cx="16" cy="18" r="2" fill="%23ffffff"/></svg>') 12 0, auto !important;
+        }
+
+        .theme-novoimortal button, .theme-novoimortal .icon-btn, .theme-novoimortal [cursor="pointer"], .theme-novoimortal .visual-card {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><g><animateTransform attributeName="transform" type="rotate" from="0 16 16" to="360 16 16" dur="3s" repeatCount="indefinite"/><path d="M16 0 L18 10 L28 8 L22 16 L28 24 L18 22 L16 32 L14 22 L4 24 L10 16 L4 8 L14 10 Z" fill="%23ff4400" stroke="%23ffcc00" stroke-width="1.5"/></g><circle cx="16" cy="16" r="4" fill="%23ffffff"/></svg>') 16 16, pointer !important;
+        }
+
+        /* --- 2. O HOGYOKU NO VÁCUO (FUNDO ESCURO) --- */
+        .theme-novoimortal .login-layer, .theme-novoimortal .tactical-backdrop, .theme-novoimortal .dossier-backdrop {
+            background: radial-gradient(circle at center, #050a14 0%, #000000 100%) !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-novoimortal .login-layer::before, .theme-novoimortal .tactical-backdrop::before, .theme-novoimortal .dossier-backdrop::before {
+            content: "";
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 50px; height: 50px;
+            background: #ffffff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                0 0 30px 10px #00d4ff, 
+                0 0 80px 40px rgba(0, 85, 255, 0.4),
+                inset 0 0 15px #0055ff;
+            z-index: 0;
+            animation: hogyoku-void-pulse 4s ease-in-out infinite;
+        }
+
+        /* --- 3. PAINÉIS E BORDAS ARREDONDADAS --- */
+        .theme-novoimortal .military-terminal,
+        .theme-novoimortal .dossier-window,
+        .theme-novoimortal .codex-sidebar,
+        .theme-novoimortal .doc-workspace,
+        .theme-novoimortal .dossier-body,
+        .theme-novoimortal .anotation-backdrop .data-hell-app,
+        .theme-novoimortal .cyber-panel,
+        .theme-novoimortal .bio-card,
+        .theme-novoimortal .body-art-container {
+            background-color: var(--c-panel) !important;
+            border: var(--f-border) !important;
+            border-radius: 12px !important; /* Arredondamento */
+            box-shadow: var(--f-shadow) !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(5px);
+            clip-path: none !important; /* Desativa os recortes quadrados */
+        }
+
+        .theme-novoimortal .mil-header, 
+        .theme-novoimortal .dossier-header,
+        .theme-novoimortal .brand,
+        .theme-novoimortal .card-header,
+        .theme-novoimortal .body-art-header {
+            background: rgba(0, 212, 255, 0.05) !important;
+            border-bottom: 2px solid #00d4ff !important;
+            border-radius: 12px 12px 0 0 !important;
+            color: #ffffff !important;
+            text-shadow: 0 0 8px #00d4ff;
+        }
+
+        /* --- 4. TEXTOS E DADOS CELESTIAIS --- */
+        .theme-novoimortal input, .theme-novoimortal textarea {
+            background: rgba(0, 0, 0, 0.4) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(0, 212, 255, 0.4) !important;
+            border-radius: 8px !important;
+        }
+        
+        .theme-novoimortal input:focus, .theme-novoimortal textarea:focus {
+            border-color: #00d4ff !important;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.4) !important;
+            outline: none;
+        }
+
+        .theme-novoimortal .read-body, .theme-novoimortal p, .theme-novoimortal label, .theme-novoimortal .val {
+            color: #ffffff !important;
+        }
+
+        /* --- 5. ÍCONES COMO FRAGMENTOS DO HOGYOKU --- */
+        .theme-novoimortal .icon-frame,
+        .theme-novoimortal .avatar,
+        .theme-novoimortal .doc-icon {
+            border-radius: 50% !important;
+            border: 2px solid #00d4ff !important;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2) !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            animation: hogyoku-fragment-pulse 3s infinite alternate;
+            clip-path: none !important;
+        }
+
+        /* --- 6. ANIMAÇÃO DE AQUECIMENTO E DESFOQUE (HOVER) --- */
+        .theme-novoimortal button,
+        .theme-novoimortal .btn-action,
+        .theme-novoimortal .btn-cyber,
+        .theme-novoimortal .doc-card,
+        .theme-novoimortal .icon-btn,
+        .theme-novoimortal .detail-box,
+        .theme-novoimortal .trait-tag {
+            background: rgba(0, 212, 255, 0.05) !important;
+            border: 1px solid rgba(0, 212, 255, 0.5) !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+            transition: all 0.3s ease !important; /* Esfria suavemente ao tirar o mouse */
+        }
+
+        /* A MÁGICA: Ao encostar o mouse, a animação assume o controle */
+        .theme-novoimortal button:hover,
+        .theme-novoimortal .doc-card:hover,
+        .theme-novoimortal .icon-btn:hover,
+        .theme-novoimortal .detail-box:hover,
+        .theme-novoimortal .trait-tag:hover {
+            animation: heat-up-wave 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+        }
+
+        .theme-novoimortal button:hover i,
+        .theme-novoimortal .doc-card:hover i,
+        .theme-novoimortal .icon-btn:hover i {
+            color: #ffffff !important;
+            text-shadow: 0 0 10px #ffffff, 0 0 15px #ff6600 !important;
+        }
+
+        /* --- MOTORES DE ANIMAÇÃO TRANSCENDENTES --- */
+        
+        @keyframes hogyoku-void-pulse {
+            0%, 100% { box-shadow: 0 0 30px 10px #00d4ff, 0 0 80px 40px rgba(0, 85, 255, 0.4), inset 0 0 10px #0055ff; transform: translate(-50%, -50%) scale(1); }
+            50% { box-shadow: 0 0 50px 20px #00e5ff, 0 0 100px 50px rgba(0, 119, 255, 0.6), inset 0 0 20px #ffffff; transform: translate(-50%, -50%) scale(1.05); }
+        }
+
+        @keyframes hogyoku-fragment-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 212, 255, 0.4), inset 0 0 5px rgba(255, 255, 255, 0.1); }
+            50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.8), inset 0 0 10px rgba(255, 255, 255, 0.4); }
+        }
+
+        /* Animação de Aquecimento: Começa Azul -> Embaça -> Fica Laranja -> Termina Nítido e Vermelho/Laranja */
+        @keyframes heat-up-wave {
+            0% {
+                border-color: #00d4ff;
+                box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+                filter: blur(0px);
+                background: rgba(0, 212, 255, 0.1);
+            }
+            40% {
+                border-color: #ffaa00;
+                box-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
+                filter: blur(1.5px); /* O borrão rápido do calor */
+                background: rgba(255, 170, 0, 0.2);
+                transform: scale(1.02);
+            }
+            100% {
+                border-color: #ff3300;
+                box-shadow: 0 0 15px rgba(255, 51, 0, 0.6), inset 0 0 10px rgba(255, 51, 0, 0.2);
+                filter: blur(0px); /* Volta a ficar nítido */
+                background: rgba(255, 51, 0, 0.15);
+                transform: scale(1.02);
+            }
+        }
+
+        /* ========================================================
+           NOVO IMORTAL :: INTEGRAÇÃO ABA DE PERFIL
+           ======================================================== */
+        
+        .theme-novoimortal .portrait {
+            border-radius: 50% !important;
+            border: 3px solid #00d4ff !important;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.2) !important;
+            background: #000 !important;
+            animation: hogyoku-fragment-pulse 3s infinite alternate;
+        }
+        .theme-novoimortal .portrait:hover {
+            animation: heat-up-wave 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards !important;
+        }
+        
+        .theme-novoimortal .info-col label { color: #00d4ff !important; }
+        .theme-novoimortal .name-input { color: #ffffff !important; border-bottom-color: #00d4ff !important; font-weight: bold;}
+        .theme-novoimortal .name-input:focus { border-bottom-color: #ff3300 !important; }
+
+        /* Level Orb Brilhante */
+        .theme-novoimortal .bg-ring { stroke: rgba(0, 212, 255, 0.1) !important; }
+        .theme-novoimortal .prog-ring { stroke: #00d4ff !important; filter: drop-shadow(0 0 8px #00d4ff); }
+        .theme-novoimortal .level-txt strong { color: #ffffff !important; text-shadow: 0 0 10px #00d4ff; }
+        .theme-novoimortal .level-txt small { color: #00d4ff !important; }
+
+        .theme-novoimortal .res-line.main, .theme-novoimortal .w-label { color: #00d4ff !important; text-shadow: 0 0 5px rgba(0, 212, 255, 0.5); }
+        
+        .theme-novoimortal .sync-btn, .theme-novoimortal .edit-lore-btn { border-color: #00d4ff !important; color: #00d4ff !important; }
+        .theme-novoimortal .sync-btn:hover, .theme-novoimortal .edit-lore-btn:hover { animation: heat-up-wave 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards !important; color: #fff !important; }
+
+        /* Decodificador na Anotação */
+        :global(.theme-novoimortal .cyber-highlight) {
+            background: rgba(0, 212, 255, 0.2) !important;
+            color: #00ffff !important;
+            border-bottom: 1px solid #00d4ff !important;
+        }
+
+        :global(.theme-novoimortal .cyber-alert) {
+            background: rgba(255, 51, 0, 0.2) !important;
+            color: #ff6600 !important;
+            border-bottom: 1px solid #ff3300 !important;
+        }
+    `
+},
+
 }
 
     

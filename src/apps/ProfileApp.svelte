@@ -864,26 +864,47 @@ $: strokeDashoffset = 283 - (283 * activeLvlInfo.progress / 100);
        ========================================= */
     .portrait:hover .overlay { opacity: 1; } /* Ativa o hover no token */
 
-   .origin-banner { 
-    min-height: 150px; /* Garante que nunca colapse para uma linha */
-    height: clamp(150px, 15vw, 220px); 
-    width: 100%; 
-    display: block;
-    background-size: cover; 
-    background-position: center; 
-    background-color: #050505; /* Dá um fundo bonito caso não tenha imagem */
-    position: relative; 
-    cursor: pointer; 
-    border: var(--border); 
-    border-bottom: none; 
-    border-radius: 4px 4px 0 0; 
-    overflow: hidden; 
-    flex-shrink: 0; /* Impede o Flexbox de esmagar o banner */
-    margin-bottom: -1px;
-}
-    .banner-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; color: var(--c-primary); font-family: var(--font-head); font-weight: bold; opacity: 0; transition: 0.3s; font-size: 1rem; letter-spacing: 2px; }
+ .origin-banner { 
+        width: 100%; 
+        /* A MÁGICA: Trava a caixa exatamente na proporção 16:9 */
+        aspect-ratio: 16 / 9; 
+        
+        /* Limite de segurança opcional para telas muito largas não deixarem o banner gigante */
+        max-height: 280px; 
+        
+        display: block;
+        background-color: #050505; 
+        
+        /* Como a caixa agora é 16:9, o 'cover' vai encaixar perfeitamente sem dar zoom excessivo */
+        background-size: cover; 
+        background-position: center; 
+        
+        position: relative; 
+        cursor: pointer; 
+        border: var(--border); 
+        border-bottom: none; 
+        border-radius: 4px 4px 0 0; 
+        overflow: hidden; 
+        flex-shrink: 0; 
+        margin-bottom: -1px;
+    }
 
-
+    .banner-overlay { 
+        position: absolute; 
+        inset: 0; 
+        background: rgba(0,0,0,0.7); 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        color: var(--c-primary); 
+        font-family: var(--font-head); 
+        font-weight: bold; 
+        opacity: 0; 
+        transition: 0.3s; 
+        font-size: 1rem; 
+        letter-spacing: 2px; 
+    }
+    
     .body-art-container { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.5); border: var(--border); border-top: 2px solid var(--c-primary); border-radius: 4px; overflow: hidden; min-width: 250px; height: auto;}
     .body-art-header { background: rgba(0,0,0,0.8); padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; font-family: var(--font-head); color: #fff; border-bottom: 1px solid #333;}
     .body-art-frame { position: relative; cursor: pointer; background: #050505; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; flex: 1;}
