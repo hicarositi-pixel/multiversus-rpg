@@ -50,11 +50,38 @@
         Hooks.on("passSystemUpdate", refresh);
     });
 
-    async function refresh() {
+async function refresh() {
         season = PassSystem.getSeasonData();
         playerTier = PassSystem.getPlayerTier(game.user.id);
         rewardsMap = PassSystem.getRewardsMap();
-        claimed = actor.getFlag(MODULE_ID, "claimedRewards") || [];
+        
+        // --- SISTEMA DE MIGRAÇÃO RETROATIVA BLINDADA ---
+        // 1. Pega o que já está salvo na conta do jogador (pode estar vazio)
+        let userClaimed = game.user.getFlag(MODULE_ID, "claimedRewards") || [];
+        let maxClaimed = [...userClaimed]; // Começa assumindo que a conta é o maior
+
+        // 2. Varre TODAS as fichas (actors) do mundo
+        game.actors.forEach(a => {
+            // Se o jogador atual é DONO desta ficha...
+            if (a.isOwner) {
+                let actorClaimed = a.getFlag(MODULE_ID, "claimedRewards") || [];
+                // Se essa ficha tem mais itens resgatados que o nosso recorde atual...
+                if (actorClaimed.length > maxClaimed.length) {
+                    maxClaimed = actorClaimed; // Atualiza o recorde!
+                }
+            }
+        });
+
+        // 3. Define os resgates para a tela
+        claimed = maxClaimed;
+
+        // 4. Se a ficha tinha mais progresso que a conta, salva o progresso maior na conta do jogador
+        if (maxClaimed.length > userClaimed.length) {
+            await game.user.setFlag(MODULE_ID, "claimedRewards", maxClaimed);
+            console.log(`[NEXUS PASS] Progresso sincronizado e restaurado para ${game.user.name}.`);
+        }
+        // -----------------------------------------------
+
         calculateTimeLogic();
     }
 
@@ -152,7 +179,7 @@
             }
         }
 
-        await actor.setFlag(MODULE_ID, "claimedRewards", newClaimed);
+      await game.user.setFlag(MODULE_ID, "claimedRewards", newClaimed);
         claimed = newClaimed;
     }
 </script>
@@ -167,7 +194,7 @@
     />
 {/if}
 
-<div class="bp-root">
+<div class="bp-root" style="--c-primary: {themeColor};">
     {#if showAdmin}
         <div class="admin-wrapper">
             <button class="back-btn" on:click={() => showAdmin = false}> <i class="fas fa-arrow-left"></i> VOLTAR </button>
@@ -331,8 +358,8 @@
     /* DIREITA: TRACKS ZONE */
     .tracks-zone { display: flex; flex-direction: column; padding: 0 20px 20px 20px; overflow: hidden; position: relative; }
     .track-header { padding: 20px 0; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; background: linear-gradient(180deg, #0a0a0a 80%, transparent); z-index: 10; }
-    .track-header h3 { margin: 0; color: #00ff41; font-size: 18px; letter-spacing: 2px; }
-    .accent { color: #00ff41; font-size: 18px; text-shadow: 0 0 10px #00ff41; }
+    .track-header h3 { margin: 0; color: var(--c-primary); font-size: 18px; letter-spacing: 2px; }
+    .accent { color: var(--c-primary); font-size: 18px; text-shadow: 0 0 10px var(--c-primary); }
 
     .scroll-track { flex: 1; overflow-y: auto; padding-right: 15px; position: relative; display: flex; flex-direction: column; gap: 30px; padding-bottom: 50px; }
     .connection-line { position: absolute; top: 0; bottom: 0; left: 30px; width: 2px; background: #222; z-index: 0; }
@@ -343,9 +370,8 @@
         padding: 15px; position: relative; z-index: 1; transition: 0.3s; 
         border-radius: 8px; align-items: flex-start;
     }
-    .week-node.current { border-color: #00ff41; box-shadow: 0 0 20px rgba(0,255,65,0.05); background: #0f120f; }
+    .week-node.current { border-color: var(--c-primary); box-shadow: 0 0 20px color-mix(in srgb, var(--c-primary) 5%, transparent); background: #0f120f; }
     
-    /* CORREÇÃO DO BLOQUEIO: Permite clique (pointer-events: auto), mas mantém visual "apagado" */
     .week-node.locked-time { opacity: 0.6; filter: grayscale(0.8); transition: 0.3s; }
     .week-node.locked-time:hover { opacity: 0.9; filter: grayscale(0.2); }
 
@@ -354,11 +380,11 @@
         display: flex; align-items: center; justify-content: center; font-weight: bold; color: #555; 
         font-size: 16px; flex-shrink: 0; z-index: 2; margin-left: 5px;
     }
-    .week-node.current .node-marker { border-color: #00ff41; color: #00ff41; background: #000; box-shadow: 0 0 10px #00ff41; }
+    .week-node.current .node-marker { border-color: var(--c-primary); color: var(--c-primary); background: #000; box-shadow: 0 0 10px var(--c-primary); }
 
     .week-content { flex: 1; display: flex; flex-direction: column; gap: 15px; }
 
-    /* LISTA DE TIERS */
+    /* LISTA DE TIERS (Cores protegidas pelo HTML) */
     .tier-list { display: flex; flex-direction: column; gap: 8px; }
 
     .tier-row {
@@ -374,22 +400,21 @@
 
     /* CARD SLOT - ONDE O STORE CARD FICA */
     .card-slot {
-        width: 130px; height: 130px; /* Quadrado */
+        width: 130px; height: 130px; 
         position: relative; border: 1px solid #333; border-radius: 6px; 
         background: #000; cursor: pointer; overflow: hidden;
         transition: 0.2s;
     }
     .card-slot:hover { border-color: #fff; transform: scale(1.05); z-index: 10; box-shadow: 0 0 15px rgba(0,0,0,0.8); }
     .card-slot.locked { border-color: #333; opacity: 0.5; }
-    .card-slot.taken { border-color: #00ff41; box-shadow: 0 0 10px rgba(0,255,65,0.2); }
+    .card-slot.taken { border-color: var(--c-primary); box-shadow: 0 0 10px color-mix(in srgb, var(--c-primary) 20%, transparent); }
 
-    /* ZOOM no StoreCard para ele caber no slot de 130px sem distorcer */
     .card-wrapper {
-        width: 220px; /* Tamanho original do StoreCard aprox */
+        width: 220px; 
         height: 320px; 
-        transform: scale(0.6); /* Reduz proporcionalmente */
+        transform: scale(0.6); 
         transform-origin: top left;
-        pointer-events: none; /* Clique passa para o slot */
+        pointer-events: none; 
     }
 
     .overlay {
@@ -397,7 +422,8 @@
         background: rgba(0,0,0,0.85); color: #fff; font-size: 10px; font-weight: bold; gap: 5px;
         backdrop-filter: blur(2px); z-index: 5;
     }
-    .overlay.taken { color: #00ff41; background: rgba(0,20,0,0.85); border: 1px solid #00ff41; }
+    /* Estilo "Resgatado" mesclando o tema primário de forma sutil */
+    .overlay.taken { color: var(--c-primary); background: color-mix(in srgb, var(--c-primary) 10%, rgba(0,0,0,0.85)); border: 1px solid var(--c-primary); }
     .overlay.lock { color: #888; }
     .overlay i { font-size: 20px; margin-bottom: 5px; }
 
@@ -413,10 +439,10 @@
     .time-lock-display i { color: #888; }
 
     .claim-btn { 
-        background: #00ff41; color: #000; border: none; padding: 10px 20px; font-weight: bold; font-size: 12px; 
+        background: var(--c-primary); color: #000; border: none; padding: 10px 20px; font-weight: bold; font-size: 12px; 
         cursor: pointer; font-family: inherit; clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%); transition: 0.2s; 
     }
-    .claim-btn:hover { background: #fff; box-shadow: 0 0 15px #00ff41; }
+    .claim-btn:hover { background: #fff; box-shadow: 0 0 15px var(--c-primary); }
 
     .admin-wrapper { padding: 20px; height: 100%; display: flex; flex-direction: column; background: #000; }
     .back-btn { background: #222; color: #ccc; padding: 12px; border: 1px solid #444; margin-bottom: 10px; cursor: pointer; text-align: left; }

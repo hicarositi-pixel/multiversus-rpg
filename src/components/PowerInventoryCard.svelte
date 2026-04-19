@@ -47,7 +47,14 @@
   let isExpanded = false;
   let isConfiguring = false;
 
-  $: if (flags && !isConfiguring) syncLocalVars();
+// Verifica se o valor realmente mudou antes de sincronizar
+  $: {
+      if (flags && !isConfiguring) {
+          if (editAlias !== (flags.customAlias || "") || editTheme !== (flags.animationTheme || 'default')) {
+              syncLocalVars();
+          }
+      }
+  }
 
   function syncLocalVars() {
       editAlias = flags.customAlias || "";
@@ -72,8 +79,10 @@
     ui.notifications.info(`Visual salvo!`);
   }
 
+let isUpdating = false;
+
   async function upgradeDice(type) {
-    if (!item) return;
+    if (!item || isUpdating) return;
     
     let cost = (type === 'wiggle') ? baseCost * 4 : (type === 'hard') ? baseCost * 2 : baseCost;
     
@@ -81,6 +90,8 @@
         ui.notifications.warn(`XP Insuficiente! Precisa de ${cost}, tem ${availableXP}.`);
         return;
     }
+
+    isUpdating = true; // Trava o componente
 
     const currentVal = diceData[type] || 0;
     const newVal = currentVal + 1;
@@ -91,7 +102,11 @@
     let newDiceData = { normal: dNormal, hard: dHard, wiggle: dWiggle, ...diceData };
     newDiceData[type] = newVal;
 
+    // Atualiza
     await item.update({ [`flags.${MODULE_ID}.dice`]: newDiceData });
+    
+    // Destrava depois de um curto período para o Foundry processar
+    setTimeout(() => { isUpdating = false; }, 300);
   }
 
   function resetColor() { editColor = ""; }
@@ -154,7 +169,7 @@
   </div>
 
   {#if isConfiguring}
-    <div class="panel-drawer config-panel" transition:slide|local on:click|stopPropagation>
+    <div class="panel-drawer config-panel" transition:slide on:click|stopPropagation>
       <div class="drawer-header">>>> PERSONALIZAÇÃO</div>
       <div class="config-grid">
         <div class="field-group">
@@ -191,7 +206,7 @@
   {/if}
 
   {#if isExpanded}
-    <div class="panel-drawer upgrade-panel" transition:slide|local>
+    <div class="panel-drawer upgrade-panel" transition:slide>
       <div class="xp-hud" class:broke={availableXP <= 0}>
         <div class="xp-label">XP DISPONÍVEL</div>
         <div class="xp-value">{availableXP}</div>

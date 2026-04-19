@@ -109,6 +109,19 @@
         editingNPC = null;
     }
 
+    // --- CONTROLE DE JOGADORES ---
+    async function kickPlayer(playerId) {
+        if (!isGM && !isLeader) return;
+        if (playerId === group.leader) return ui.notifications.warn("Não é possível expulsar o líder da base.");
+
+        // Filtra a lista de membros removendo o ID do jogador alvo
+        const newMembers = group.members.filter(id => id !== playerId);
+        
+        // Salva a nova lista no banco de dados do grupo
+        await GroupDatabase.updateGroupData(group.id, { members: newMembers });
+        ui.notifications.info("Membro removido da base.");
+    }
+
     function getRoleIcon(roleKey) { return groupState.ROLES[roleKey]?.icon || 'fas fa-user'; }
     function getRoleLabel(roleKey) { return groupState.ROLES[roleKey]?.label || roleKey; }
     function getRoleDesc(roleKey) { return groupState.ROLES[roleKey]?.description || ''; }
@@ -266,15 +279,28 @@
                 {/each}
             </div>
 
-        {:else if activeTab === 'players'}
+{:else if activeTab === 'players'}
             <div class="player-grid">
                 {#each playerList as p (p.id)}
                     <div class="player-card" transition:slide|local>
                         <img src={p.character?.img || "icons/svg/mystery-man.svg"} alt="P">
-                        <span>{p.name}</span>
-                        <span class="role" style="background: {p.id === group.leader ? '#004400' : '#222'}; color: {p.id === group.leader ? '#00ff41' : '#aaa'}">
+                        
+                        <div class="player-info" style="display: flex; flex-direction: column; flex: 1;">
+                            <span style="font-weight: bold; font-size: 13px; color: #fff;">
+                                {p.character?.name || 'Sem Personagem Vinculado'}
+                            </span>
+                            <span style="font-size: 10px; color: #888;">Player: {p.name}</span>
+                        </div>
+
+                        <span class="role" style="background: {p.id === group.leader ? '#004400' : '#222'}; color: {p.id === group.leader ? '#00ff41' : '#aaa'}; margin-left: auto;">
                             {p.id === group.leader ? 'LÍDER' : 'MEMBRO'}
                         </span>
+
+                        {#if (isGM || isLeader) && p.id !== group.leader}
+                            <button class="btn-kick" on:click={() => kickPlayer(p.id)} title="Expulsar Membro">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        {/if}
                     </div>
                 {/each}
             </div>
@@ -365,4 +391,21 @@
     
     .custom-scroll::-webkit-scrollbar { width: 5px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #333; }
+
+    .btn-kick { 
+        background: transparent; 
+        border: 1px solid #ef4444; 
+        color: #ef4444; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        padding: 4px 8px; 
+        font-size: 12px; 
+        transition: 0.2s; 
+        margin-left: 10px; 
+    }
+    .btn-kick:hover { 
+        background: #ef4444; 
+        color: #000; 
+        box-shadow: 0 0 10px #ef4444; 
+    }
 </style>

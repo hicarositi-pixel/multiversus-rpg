@@ -21,18 +21,26 @@ export default class PoderesManager extends ApplicationV2 {
     position: { width: 500, height: 700 }
   }
 
-  // --- TRAVA DE SEGURANÇA 1: BLOQUEIO DE RE-RENDER ---
-  /**
-   * O Foundry tenta chamar isso toda vez que o ator muda.
-   * Nós interceptamos. Se o componente Svelte já está vivo,
-   * retornamos imediatamente, impedindo que a janela feche ou pisque.
-   */
-  render(options = {}, _options = {}) {
-    // Se não for um "force render" explícito e o componente já existir...
-    if (!options.force && this.component) {
-        return this; // NÃO FAZ NADA. O Svelte cuida do resto.
+  // ========================================================================
+  // O ESCUDO DE VIBRANIUM: TRAVA ABSOLUTA CONTRA TELA PRETA
+  // ========================================================================
+  async render(options = {}, _options = {}) {
+    // Se a janela já existe e o componente Svelte está vivo...
+    if (this.rendered && this.component) {
+        // Nós IGNORAMOS COMPLETAMENTE até mesmo o "options.force".
+        // O Foundry é proibido de destruir a janela. O Svelte cuidará dos dados sozinho.
+        this.bringToFront(); 
+        return this; // Aborta a renderização do Foundry na hora.
     }
+    
+    // Deixa o Foundry agir APENAS na primeira vez que a janela abre.
     return super.render(options, _options);
+  }
+
+  // Intercepta atualizações silenciosas do cabeçalho da janela também
+  _renderFrame(options) {
+      if (this.rendered) return; 
+      return super._renderFrame(options);
   }
 
   async _renderHTML(context, options) {
@@ -42,13 +50,8 @@ export default class PoderesManager extends ApplicationV2 {
     wrapper.style.display = "flex";       
     wrapper.style.flexDirection = "column";
 
-    // Garante limpeza se for um Force Render
-    if (this.component) {
-        this.component.$destroy();
-        this.component = null;
-    }
-
-    // Inicializa Svelte
+    // Inicializa o Svelte uma única vez. 
+    // Como bloqueamos o re-render lá em cima, ele nunca será interrompido.
     this.component = new PoderesAppShell({
       target: wrapper,
       props: {
@@ -67,6 +70,7 @@ export default class PoderesManager extends ApplicationV2 {
   }
 
   _onClose(options) {
+    // Quando o usuário clica no [X] para fechar a janela, encerramos o Svelte com segurança.
     if (this.component) {
       this.component.$destroy();
       this.component = null;

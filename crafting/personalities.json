@@ -52,7 +52,7 @@
     "narrative_hook": "Afia lâminas compulsivamente ou vigia o perímetro em silêncio absoluto, emanando intenção assassina.",
     "effect": {
       "label": "Solução Final",
-      "desc": "Em combate, o primeiro ataque bem-sucedido de um aliado apoiado por este NPC causa +2 de dano SK.",
+      "desc":"Uma vez por ciclo, Em combate, o primeiro ataque bem-sucedido de um aliado apoiado por este NPC causa +2 de dano K.",
       "type": "combat_buff",
       "value": 2
     }
@@ -79,7 +79,7 @@
     "narrative_hook": "Prepara a fornalha, organiza as camas e garante que o estoque de água não seja corrompido.",
     "effect": {
       "label": "Conforto da Base",
-      "desc": "Jogadores descansando na presença deste NPC recuperam +1 ponto adicional de Sanidade e ignoram 1 nível de Sede.",
+      "desc": "Jogadores descansando na presença deste NPC recuperam +1 ponto adicional de Sanidade.",
       "type": "survival_buff",
       "value": 1
     }
@@ -131,7 +131,7 @@
     "narrative_hook": "Bloqueia entradas durante alertas ou carrega aliados feridos para fora da zona de morte.",
     "effect": {
       "label": "Interposição Absoluta",
-      "desc": "Pode absorver 1 hit de dano físico direcionado a um Ativo por combate, sem necessidade de rolagem de defesa.",
+      "desc": "Uma vez por Ciclo, Pode absorver até 2 de dano físico letal direcionado a um Jogador em combate",
       "type": "defense_buff",
       "value": 1
     }

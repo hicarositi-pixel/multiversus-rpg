@@ -9,6 +9,10 @@
 
   export let item;
   export let application;
+  // --- CONTROLE DE NOTAS DE SISTEMA ---
+    let notesExpanded = false;
+    function openNotes() { notesExpanded = true; }
+    function closeNotes() { notesExpanded = false; }
   
   // Recebe as flags e o system atualizados do JS
   export let flags = item.flags?.["multiversus-rpg"] || {};
@@ -72,6 +76,20 @@
     const extrasCost = (q.extras || []).reduce((sum, e) => sum + ((e.cost || 0) * (e.qty || 1)), 0);
     return total + 2 + (q.level || 0) + extrasCost;
   }, 0);
+
+  // --- CONTROLE DE EXPANSÃO DA DESCRIÇÃO (QUALIDADES) ---
+    let descExpanded = false;
+    let activeDescIndex = -1;
+
+    function openDescNotes(index) {
+        activeDescIndex = index;
+        descExpanded = true;
+    }
+
+    function closeDescNotes() {
+        descExpanded = false;
+        activeDescIndex = -1;
+    }
 
   // --- FUNÇÕES DE ATUALIZAÇÃO ---
   async function updateFlag(key, value) {
@@ -186,7 +204,7 @@
       <div class="avatar-frame">
         <img src={displayImg} alt={name} />
         {#if isGM}
-            <div class="avatar-overlay" on:click={pickLibraryImage}>
+            <div class="avatar-overlay" on:click={pickLibraryImage}>a
             <i class="fas fa-edit"></i>
             </div>
         {/if}
@@ -196,7 +214,7 @@
     <div class="info-section">
       <div class="title-row">
         <div class="input-group grow">
-          <input type="text" value={name} on:change={(e)=>item.update({name: e.target.value})} placeholder=" " disabled={!isGM} />
+          <input type="text" value={name} on:change={(e)=>item.update({name: e.target.value})} placeholder=" "  />
           <label>NOME DO PODER</label>
           <span class="bar"></span>
         </div>
@@ -215,7 +233,7 @@
       <div class="meta-row">
         <div class="custom-select grow">
           <label>CATEGORIA</label>
-          <select value={category} on:change={(e)=>updateFlag('category', e.target.value)} disabled={!isGM}>
+          <select value={category} on:change={(e)=>updateFlag('category', e.target.value)} >
             <option value="principal">PRINCIPAL (8xp)</option>
             <option value="secundario">SECUNDÁRIO (4xp)</option>
             <option value="habilidade">HABILIDADE (2xp)</option>
@@ -225,7 +243,7 @@
 
         <div class="custom-select grow">
           <label>RARIDADE</label>
-          <select value={rarity} on:change={(e)=>updateFlag('rarity', e.target.value)} disabled={!isGM}>
+          <select value={rarity} on:change={(e)=>updateFlag('rarity', e.target.value)} >
             {#each Object.keys(PB_BASE_VALUES) as r} <option value={r}>{r.toUpperCase()}</option> {/each}
           </select>
           <i class="fas fa-chevron-down arrow"></i>
@@ -263,68 +281,111 @@
 
         <div class="dice-matrix">
           <div class="dice-input normal">
-            <input type="number" min="0" value={diceNormal} on:change={(e)=>updateDice('normal', e.target.value)} disabled={!isGM}>
+            <input type="number" min="0" value={diceNormal} on:change={(e)=>updateDice('normal', e.target.value)} >
             <span class="lbl">Normal (1x)</span>
           </div>
           <div class="dice-input hard">
-            <input type="number" min="0" value={diceHard} on:change={(e)=>updateDice('hard', e.target.value)} disabled={!isGM}>
+            <input type="number" min="0" value={diceHard} on:change={(e)=>updateDice('hard', e.target.value)} >
             <span class="lbl">Fixo (2x)</span>
           </div>
           <div class="dice-input wiggle">
-            <input type="number" min="0" value={diceWiggle} on:change={(e)=>updateDice('wiggle', e.target.value)} disabled={!isGM}>
+            <input type="number" min="0" value={diceWiggle} on:change={(e)=>updateDice('wiggle', e.target.value)} >
             <span class="lbl">Variavél (4x)</span>
           </div>
         </div>
 
-        {#if qualities.length > 0}
+{#if qualities.length > 0}
             <div class="visual-qualities">
                 <div class="editor-label">ESTRUTURA DO PODER</div>
+                
                 {#each qualities as q}
                     <div class="vq-card">
+                        
                         <div class="vq-header">
                             <span class="vq-type {q.type}">{QUALITY_MODES.find(m => m.id === q.type)?.label.charAt(0) || '?'}</span>
                             <span class="vq-name">{q.name}</span>
                             <span class="vq-lvl">Nível {q.level || 0}</span>
                         </div>
 
-                        {#if q.extras && q.extras.length > 0}
-                            <div class="vq-tags">
-                                {#each q.extras.filter(e => (e.cost * (e.qty || 1)) > 0) as ext}
-                                    <span class="pill extra" title={ext.name}>{ext.name} <small>+{ext.cost * (ext.qty || 1)}</small></span>
-                                {/each}
-                                {#each q.extras.filter(e => (e.cost * (e.qty || 1)) <= 0) as flaw}
-                                    <span class="pill flaw" title={flaw.name}>{flaw.name} <small>{flaw.cost * (flaw.qty || 1)}</small></span>
-                                {/each}
+                        {#if q.imgUrl}
+                            <div class="vq-banner">
+                                <img src={q.imgUrl} alt="Efeito Visual de {q.name}">
                             </div>
                         {/if}
 
-                        {#if q.capacities && q.capacities.length > 0}
-                            <div class="vq-caps">
-                                {#each q.capacities as cap}
-                                    <div class="cap-box">
-                                        <span class="cap-lbl">{CAPACITY_TYPES.find(t=>t.id === cap.type)?.name || 'Capacidade'}</span>
-                                        <span class="cap-val">{calculateCapacity(totalDice, cap.type, cap.nul, cap.booster)}</span>
+                        <div class="vq-body">
+                            {#if q.description}
+                                <div class="vq-desc-full">
+                                    {q.description}
+                                </div>
+                            {/if}
+
+                            {#if q.capacities && q.capacities.length > 0}
+                                <div class="vq-caps">
+                                    <span class="vq-sec-title">CAPACIDADES MATRIZ:</span>
+                                    <div class="caps-grid">
+                                        {#each q.capacities as cap}
+                                            <div class="cap-box">
+                                                <span class="cap-lbl">{CAPACITY_TYPES.find(t=>t.id === cap.type)?.name || 'Capacidade'}</span>
+                                                <span class="cap-val">{calculateCapacity(totalDice, cap.type, cap.nul, cap.booster)}</span>
+                                            </div>
+                                        {/each}
                                     </div>
-                                {/each}
-                            </div>
-                        {/if}
+                                </div>
+                            {/if}
 
-                        {#if q.description}
-                            <div class="vq-desc">{q.description}</div>
-                        {/if}
+                            {#if q.extras && q.extras.length > 0}
+                                <div class="vq-tags-container">
+                                    <span class="vq-sec-title">MODIFICADORES ATIVOS:</span>
+                                    <div class="vq-tags">
+                                        {#each q.extras.filter(e => (e.cost * (e.qty || 1)) > 0) as ext}
+                                            <span class="pill extra" title={ext.name}>{ext.name} <small>+{ext.cost * (ext.qty || 1)}</small></span>
+                                        {/each}
+                                        {#each q.extras.filter(e => (e.cost * (e.qty || 1)) <= 0) as flaw}
+                                            <span class="pill flaw" title={flaw.name}>{flaw.name} <small>{flaw.cost * (flaw.qty || 1)}</small></span>
+                                        {/each}
+                                    </div>
+                                </div>
+                            {/if}
+                        </div>
+
                     </div>
                 {/each}
             </div>
         {/if}
-
-        <div class="text-editor-container">
-          <div class="editor-label">NOTAS DE SISTEMA (WILD TALENTS)</div>
+<div class="text-editor-container">
+          <div class="editor-header">
+            <span class="editor-label"><i class="fas fa-terminal"></i> NOTAS DE SISTEMA (WILD TALENTS)</span>
+            <button class="btn-expand-notes" on:click={openNotes} title="Expandir Tela">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
           <textarea 
+            class="cyber-textarea custom-scroll"
             value={description} 
             on:change={(e)=>updateDescription(e.target.value)} 
-            placeholder="Anotações extras..."
-            disabled={!isGM}></textarea>
+            placeholder={isGM ? "Descreva mecânicas ocultas, cálculos ou regras específicas do sistema..." : "Nenhuma anotação de sistema disponível."}
+            ></textarea>
         </div>
+
+        {#if notesExpanded}
+        <div class="notes-overlay" transition:fade={{duration: 150}} on:click={closeNotes}>
+            <div class="notes-modal" on:click|stopPropagation>
+                <div class="editor-header modal-header">
+                    <span class="editor-label"><i class="fas fa-terminal"></i> NOTAS DE SISTEMA (MODO TELA CHEIA)</span>
+                    <button class="btn-expand-notes" on:click={closeNotes} title="Minimizar">
+                        <i class="fas fa-compress"></i>
+                    </button>
+                </div>
+                <textarea 
+                    class="cyber-textarea expanded custom-scroll"
+                    value={description} 
+                    on:change={(e)=>updateDescription(e.target.value)} 
+                    placeholder="Área livre para regras e anotações do mestre..."
+                    ></textarea>
+            </div>
+        </div>
+        {/if}
       </div>
     {/if}
 
@@ -340,7 +401,7 @@
           </button>
         </div>
 
-        <div class="cards-list">
+<div class="cards-list">
           {#each qualities as q, i}
             <div class="quality-card" transition:slide|local>
               
@@ -371,14 +432,31 @@
                 </div>
               </div>
 
-              <div class="card-body">
-                <textarea 
-  rows="1" 
-  class="mini-desc" 
-  value={q.description || ""} 
-  on:change={(e)=>updateQuality(i, 'description', e.target.value)} 
-  placeholder="Descrição curta do efeito..."></textarea>
+<div class="card-body">
+                
+                <div class="input-inline" style="margin-bottom: 5px;">
+                  <input type="text" 
+                         style="background: rgba(0,0,0,0.5); border: 1px dashed #444; color: #888; font-size: 11px; padding: 6px; width: 100%; border-radius: 4px;" 
+                         value={q.imgUrl || ""} 
+                         on:change={(e)=>updateQuality(i, 'imgUrl', e.target.value)} 
+                         placeholder="🔗 URL da Imagem ou GIF (Opcional)..." />
+                </div>
 
+                <div class="text-editor-container mini">
+                  <div class="editor-header" style="display: flex; justify-content: space-between; padding: 5px; background: rgba(0, 212, 255, 0.1); border-bottom: 1px solid rgba(0, 212, 255, 0.3);">
+                    <span class="editor-label" style="font-size: 10px; color: #00d4ff;"><i class="fas fa-align-left"></i> EFEITO DA SUB-ROTINA</span>
+                    <button class="btn-expand-notes" style="background: none; border: none; color: #00d4ff; cursor: pointer;" on:click={() => openDescNotes(i)} title="Expandir Descrição">
+                      <i class="fas fa-expand"></i>
+                    </button>
+                  </div>
+                  <textarea 
+                    class="cyber-textarea custom-scroll" 
+                    style="width: 100%; min-height: 60px; background: rgba(0,0,0,0.5); border: none; color: #ccc; padding: 8px; resize: none; font-size: 12px; outline: none; box-sizing: border-box;"
+                    value={q.description || ""} 
+                    on:change={(e)=>updateQuality(i, 'description', e.target.value)} 
+                    placeholder="Descrição curta do efeito..."
+                  ></textarea>
+                </div>
                 <div class="caps-list">
                   <div class="caps-header">
                     <span>CAPACIDADES</span>
@@ -446,6 +524,29 @@
     {/if}
 
   </main>
+  {#if descExpanded && activeDescIndex !== -1}
+  <div class="notes-overlay" transition:fade={{duration: 150}} on:click={closeDescNotes}>
+      <div class="notes-modal" on:click|stopPropagation>
+          <div class="editor-header modal-header">
+              <span class="editor-label">
+                  <i class="fas fa-align-left"></i> 
+                  EDITANDO: {qualities[activeDescIndex].name || 'Sub-rotina Sem Nome'}
+              </span>
+              <button class="btn-expand-notes" on:click={closeDescNotes} title="Concluído">
+                  <i class="fas fa-compress"></i>
+              </button>
+          </div>
+          <textarea 
+              class="cyber-textarea custom-scroll"
+              style="flex: 1; resize: none; font-size: 15px; padding: 25px; background: transparent; color: #ccc; border: none; outline: none; line-height: 1.6;"
+              value={qualities[activeDescIndex].description || ""} 
+              on:change={(e)=>updateQuality(activeDescIndex, 'description', e.target.value)} 
+              placeholder="Área livre para a descrição completa desta sub-rotina..."></textarea>
+          
+          <button class="btn-new" on:click={closeDescNotes} style="margin: 15px; justify-content: center; flex: none;">CONCLUÍDO</button>
+      </div>
+  </div>
+  {/if}
 </div> 
 
 <style>
@@ -527,34 +628,182 @@
   .dice-input.hard input { color: #fbbf24; }
   .dice-input.wiggle input { color: #ef4444; }
   
-  /* VISUAL QUALITIES (TAGS E PILLS - ESTILO FORGE STUDIO) */
-  .visual-qualities { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
-  .vq-card { background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; display: flex; flex-direction: column; gap: 10px; transition: 0.2s; }
-  .vq-card:hover { border-color: var(--accent); box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
-  
-  .vq-header { display: flex; align-items: center; gap: 10px; border-bottom: 1px dashed var(--border); padding-bottom: 5px; }
-  .vq-type { font-family: 'Share Tech Mono', monospace; font-size: 14px; font-weight: bold; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #fff; }
-  .vq-type.atk { background: #ff3333; box-shadow: 0 0 8px #ff3333; }
-  .vq-type.def { background: #0088ff; box-shadow: 0 0 8px #0088ff; }
-  .vq-type.util { background: #ffcc00; box-shadow: 0 0 8px #ffcc00; }
-  .vq-name { font-weight: bold; font-size: 1.1em; flex: 1; color: #eee; }
-  .vq-lvl { font-size: 0.8em; color: var(--accent); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 12px; font-family: 'Share Tech Mono', monospace;}
+ /* =========================================
+    VISUAL QUALITIES (MODO LEITURA / CODEX)
+    ========================================= */
+ .visual-qualities { display: flex; flex-direction: column; gap: 20px; margin-top: 15px; }
+ 
+ .vq-card { 
+    background: rgba(0,0,0,0.4); 
+    border: 1px solid var(--border); 
+    border-radius: var(--radius); 
+    display: flex; 
+    flex-direction: column; 
+    overflow: hidden; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+ }
+ 
+ /* HEADER */
+ .vq-header { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+    padding: 12px 15px; 
+    background: rgba(255,255,255,0.03); 
+    border-bottom: 1px solid var(--border); 
+ }
+ .vq-type { font-family: 'Share Tech Mono', monospace; font-size: 16px; font-weight: bold; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 4px; color: #fff; }
+ .vq-type.atk { background: #ff3333; box-shadow: 0 0 10px rgba(255, 51, 51, 0.5); }
+ .vq-type.def { background: #0088ff; box-shadow: 0 0 10px rgba(0, 136, 255, 0.5); }
+ .vq-type.util { background: #ffcc00; box-shadow: 0 0 10px rgba(255, 204, 0, 0.5); }
+ .vq-name { font-weight: 700; font-size: 1.2em; flex: 1; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+ .vq-lvl { font-size: 0.8em; color: #aaa; background: #000; padding: 4px 10px; border-radius: 12px; font-family: 'Share Tech Mono', monospace; border: 1px solid #333;}
 
-  .vq-tags { display: flex; flex-wrap: wrap; gap: 6px; }
-  .pill { font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid transparent; display: flex; align-items: center; gap: 5px; }
-  .pill small { opacity: 0.8; font-weight: bold; }
-  .pill.extra { background: rgba(0, 255, 65, 0.1); border-color: #00ff41; color: #00ff41; }
-  .pill.flaw { background: rgba(255, 51, 51, 0.1); border-color: #ff3333; color: #ff3333; }
+ /* BANNER DE IMAGEM/GIF */
+ .vq-banner { width: 100%; height: 120px; background: #000; border-bottom: 1px solid var(--border); overflow: hidden; display: flex; align-items: center; justify-content: center;}
+.vq-banner img { width: 100%; height: 100%; object-fit: contain; opacity: 0.8; transition: 0.3s; mix-blend-mode: screen;}
+ .vq-card:hover .vq-banner img { opacity: 1; transform: scale(1.05); }
 
-  .vq-caps { display: flex; flex-wrap: wrap; gap: 10px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; border: 1px solid var(--border); }
-  .cap-box { display: flex; align-items: center; gap: 8px; background: #050505; border: 1px solid #333; padding: 4px 10px; border-radius: 4px; font-family: 'Share Tech Mono', monospace;}
-  .cap-lbl { font-size: 10px; color: #888; text-transform: uppercase; }
-  .cap-val { font-size: 12px; color: var(--accent); font-weight: bold; }
+ /* CORPO (DESCRIÇÃO E TAGS) */
+ .vq-body { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+ 
+.vq-desc-full { 
+    font-size: 1em; 
+    color: #ddd; 
+    line-height: 1.6; 
+    text-align: justify; 
+    padding-left: 10px; 
+    border-left: 3px solid var(--accent); 
+    font-style: italic;
+    white-space: pre-wrap; /* MÁGICA QUE MANTÉM AS QUEBRAS DE LINHA */
+ }
 
-  .vq-desc { font-size: 0.9em; color: #aaa; font-style: italic; line-height: 1.4; padding-left: 5px; border-left: 2px solid var(--border); }
+ .vq-sec-title { font-size: 0.7em; color: var(--text-muted); font-weight: 700; margin-bottom: 8px; display: block; border-bottom: 1px dashed #333; padding-bottom: 4px; }
 
+ /* CAPACIDADES NO MODO VISUAL */
+ .vq-caps { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+ .caps-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+ .cap-box { display: flex; align-items: center; gap: 8px; background: #000; border: 1px solid #333; padding: 5px 12px; border-radius: 4px; font-family: 'Share Tech Mono', monospace;}
+ .cap-lbl { font-size: 11px; color: #888; text-transform: uppercase; }
+ .cap-val { font-size: 13px; color: var(--accent); font-weight: bold; }
+
+ /* TAGS DE MODS */
+ .vq-tags-container { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
+ .vq-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+ .pill { font-family: 'Share Tech Mono', monospace; font-size: 11px; padding: 4px 10px; border-radius: 4px; border: 1px solid transparent; display: flex; align-items: center; gap: 5px; background: #050505; }
+ .pill small { opacity: 0.8; font-weight: bold; }
+ .pill.extra { border-color: #00ff41; color: #00ff41; }
+ .pill.flaw { border-color: #ff3333; color: #ff3333; }
   /* TEXT EDITOR NATIVO */
-  .text-editor-container { background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: var(--radius); padding: 15px; min-height: 150px; display: flex; flex-direction: column; margin-top: 10px; }
+ /* --- CONTAINER DE NOTAS DE SISTEMA --- */
+    .text-editor-container { 
+        background: rgba(0, 0, 0, 0.4); 
+        border: 1px solid var(--border, #333); 
+        border-radius: var(--radius, 4px); 
+        display: flex; 
+        flex-direction: column; 
+        margin-top: 15px; 
+        overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    .editor-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 8px 15px;
+        border-bottom: 1px solid var(--border, #333);
+    }
+
+    .editor-label {
+        font-size: 11px;
+        color: var(--c-primary, #00d4ff);
+        font-weight: bold;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-expand-notes {
+        background: transparent;
+        border: none;
+        color: #888;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 14px;
+        padding: 2px 5px;
+    }
+    .btn-expand-notes:hover {
+        color: var(--c-primary, #fff);
+        transform: scale(1.1);
+        text-shadow: 0 0 8px var(--c-primary, #fff);
+    }
+
+    .cyber-textarea {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #ccc;
+        padding: 15px;
+        min-height: 150px;
+        resize: none;
+        font-family: var(--f-main, 'Share Tech Mono', monospace);
+        font-size: 13px;
+        line-height: 1.6;
+        outline: none;
+    }
+
+    /* Adaptação para o card não ficar esticado demais */
+    .text-editor-container.mini {
+        margin-top: 0;
+        margin-bottom: 15px;
+        min-height: 100px; /* Menor que a nota de sistema geral */
+    }
+    
+    .text-editor-container.mini .cyber-textarea {
+        min-height: 60px;
+        padding: 10px;
+    }
+    .cyber-textarea:focus { background: rgba(0, 212, 255, 0.02); }
+    .cyber-textarea:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* --- MODO EXPANDIDO (MODAL) --- */
+    .notes-overlay {
+        position: absolute; /* ou fixed, dependendo de como sua janela do Foundry se comporta */
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+    }
+    
+    .notes-modal {
+        width: 85%;
+        max-width: 800px;
+        height: 80%;
+        background: #08080a;
+        border: 1px solid var(--c-primary, #00d4ff);
+        border-radius: var(--radius, 4px);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 212, 255, 0.1);
+        overflow: hidden;
+    }
+
+    .notes-modal .modal-header {
+        background: rgba(0, 212, 255, 0.1);
+        border-bottom: 2px solid var(--c-primary, #00d4ff);
+        padding: 12px 20px;
+    }
+
+    .cyber-textarea.expanded {
+        font-size: 15px; /* Fonte ligeiramente maior no modo leitura */
+        padding: 25px;
+    }
   .editor-label { font-size: 0.75em; color: var(--accent); font-weight: 700; margin-bottom: 10px; border-bottom: 1px dashed var(--border); padding-bottom: 5px; }
   textarea { background: transparent; border: none; color: var(--text-main); font-family: inherit; font-size: 1em; resize: none; flex: 1; line-height: 1.6; }
   textarea:focus { outline: none; }

@@ -610,3 +610,31 @@ Hooks.once('ready', () => {
 
 // ... (Seu código de updateScene) ...
 
+// Exemplo de import (ajuste o caminho e o nome da classe conforme seu projeto)
+// import { MobileHudApp } from "./apps/MobileHudApp.js"; 
+
+Hooks.on("chatMessage", (chatLog, messageText, chatData) => {
+  if (messageText.trim().toLowerCase() === "/mv") {
+    
+    // 1. Procuramos se a sua janela principal (onde fica o openApp) está aberta
+    // Substitua "nexus-mobile-hud" pelo ID da sua aplicação principal
+    const hudWindow = Object.values(ui.windows).find(w => w.id === "nexus-mobile-hud-app");
+
+    if (hudWindow) {
+      // Se estiver aberta, apenas trocamos para a aba de dados
+      Hooks.callAll("nexusToggleApp", "dados");
+    } else {
+      // Se estiver fechada, você pode optar por abrir a aplicação 
+      // ou enviar uma notificação. Exemplo abrindo:
+      // const api = game.modules.get("multiversus-rpg")?.api;
+      // if (api?.MobileHudApp) {
+      //    new api.MobileHudApp().render(true, { focus: true });
+      //    // Pequeno delay para dar tempo do Svelte montar e ouvir o hook
+      //    setTimeout(() => Hooks.callAll("nexusToggleApp", "dados"), 100);
+      // }
+      ui.notifications.info("Abra o HUD Tático para usar o motor de dados.");
+    }
+
+    return false; // Impede a mensagem de aparecer no chat
+  }
+});

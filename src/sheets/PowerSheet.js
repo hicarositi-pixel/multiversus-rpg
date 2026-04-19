@@ -13,7 +13,7 @@ export default class MultiversusItemSheet extends ItemSheet {
       height: 650,
       resizable: true,
       template: "modules/multiversus-rpg/templates/power-sheet.html", 
-      submitOnChange: false, // IMPORTANTE: Deixa o Svelte lidar com os saves
+      submitOnChange: false, // Deixa o Svelte lidar com os saves
       closeOnSubmit: false
     });
   }
@@ -22,56 +22,50 @@ export default class MultiversusItemSheet extends ItemSheet {
   /* Ciclo de Vida do Foundry                     */
   /* -------------------------------------------- */
 
-  /** * A Mágica Acontece Aqui:
-   */
   async _render(force, options) {
-    // 1. Se NÃO é forçado e o componente já existe, é apenas uma atualização de dados (Live Update)
+    // 1. LIVE UPDATE: Se não forçado, injeta os dados novos no Svelte sem piscar a tela
     if (!force && this.component) {
-      
       this.component.$set({ 
         item: this.document,
         application: this,
         flags: this.document.flags["multiversus-rpg"] || {}
-        // O item.system já vai dentro de 'item', então o Svelte consegue ler
       });
       
-      // Atualiza título da janela sem recriar
+      // Atualiza título da janela
       if (this.element) {
           this.element.find(".window-title").text(this.title);
       }
       
-      return; // <--- IMPEDE O FOUNDRY DE DESTRUIR O HTML (Evita piscar)
+      return; // <-- IMPEDE O FOUNDRY DE DESTRUIR A JANELA
     }
 
-    // 2. Se chegamos aqui, é a primeira vez ou um hard-reset
+    // 2. O GRANDE FIX: Destrói o Svelte ANTES do Foundry vaporizar o HTML!
+    if (this.component) {
+      this.component.$destroy();
+      this.component = null;
+    }
+
+    // 3. Agora sim, o Foundry pode recriar a carcaça da janela com segurança
     await super._render(force, options);
  
-    // Seleciona o corpo da janela
+    // 4. Seleciona o corpo limpo da janela e monta o Svelte novo
     const target = this.element.find(".window-content")[0];
     
     if (target) {
       target.innerHTML = "";
       target.classList.add("svelte-target"); 
-    }
 
-    if (this.component) {
-      this.component.$destroy();
+      this.component = new PowerSheetShell({
+        target: target,
+        props: {
+          item: this.document,
+          application: this,
+          flags: this.document.flags["multiversus-rpg"] || {}
+        }
+      });
     }
-
-    // Cria a Instância Svelte
-    this.component = new PowerSheetShell({
-      target: target,
-      props: {
-        item: this.document,
-        application: this,
-        flags: this.document.flags["multiversus-rpg"] || {}
-      }
-    });
   }
 
-  /**
-   * Garante que, ao fechar a janela, o componente Svelte morra da memória
-   */
   async close(options = {}) {
     if (this.component) {
       this.component.$destroy();

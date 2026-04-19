@@ -33,6 +33,22 @@
 
     // --- LÓGICA PASSO A PASSO ---
 
+    import { onMount, onDestroy } from 'svelte';
+
+  // ... suas outras variáveis (activeApp, isOpen, etc) ...
+
+  onMount(() => {
+    // Escuta o chamado do chat ou de outros arquivos JS
+    const hookId = Hooks.on("nexusToggleApp", (appId) => {
+      // Abre o app (no seu caso, appId será 'dados')
+      openApp(appId, null);
+    });
+
+    return () => {
+      Hooks.off("nexusToggleApp", hookId);
+    };
+  });
+
     // 1. Inicia a rolagem baseada na configuração atual
     function handleRoll() {
         const actionPool = { d: pool.d, hd: pool.hd, wd: pool.wd, spray: mods.spray };
@@ -121,10 +137,16 @@
         </header>
 
         {#if step === 'setup'}
-            <div class="pool-display">
-                <div class="pd-item" title="Normal Dice"><span>{pool.d}</span> D</div>
-                <div class="pd-item hd" title="Hard Dice"><span>{pool.hd}</span> HD</div>
-                <div class="pd-item wd" title="Wiggle Dice"><span>{pool.wd}</span> WD</div>
+<div class="pool-display">
+                <div class="pd-item" title="Normal Dice">
+                    <input type="number" min="0" bind:value={pool.d}> D
+                </div>
+                <div class="pd-item hd" title="Hard Dice">
+                    <input type="number" min="0" bind:value={pool.hd}> HD
+                </div>
+                <div class="pd-item wd" title="Wiggle Dice">
+                    <input type="number" min="0" bind:value={pool.wd}> WD
+                </div>
             </div>
 
             <div class="mods-section">
@@ -228,11 +250,10 @@
 
     /* Exibição da Pool Base */
     .pool-display { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-    .pd-item { display: flex; flex-direction: column; align-items: center; background: #111; border: 1px solid #333; border-radius: 6px; padding: 10px; width: 60px; font-weight: bold; color: #888; }
-    .pd-item span { font-size: 24px; color: #fff; }
-    .pd-item.hd { border-color: #ffaa00; } .pd-item.hd span { color: #ffaa00; }
-    .pd-item.wd { border-color: #00aaff; } .pd-item.wd span { color: #00aaff; }
-
+.pd-item input { width: 40px; background: transparent; border: none; border-bottom: 2px solid #333; color: #fff; font-size: 24px; font-weight: bold; text-align: center; outline: none; font-family: inherit; transition: 0.2s; }
+    .pd-item input:focus { border-color: var(--primary); }
+    .pd-item.hd input { color: #ffaa00; }
+    .pd-item.wd input { color: #00aaff; }
     /* Controles de Modificadores */
     .mods-section { background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
     .mod-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }

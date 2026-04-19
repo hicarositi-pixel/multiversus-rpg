@@ -1,30 +1,65 @@
 <script>
+import { onMount, onDestroy } from 'svelte';
     import { slide, fade, scale } from 'svelte/transition';
 
     export let actor;
-    export let themeColor;
-    export let flags = {}; // Recebe flags atualizadas do pai
+    export let flags = {}; 
+    export let system = {};
+    export let cssVariables = "";
+    export let themeColor = "#00ff41";
 
     const MODULE_ID = "multiversus-rpg";
-    const isGM = game.user.isGM;
 
-    // === 1. CARREGAMENTO REATIVO ===
-    // Prioriza as flags passadas via prop (mais atual), senão lê do ator
-    $: survivalData = (flags && flags.survival_data) ? flags.survival_data : (actor.flags?.[MODULE_ID]?.survival_data || {});
+    // =======================================================
+    // 1. HERANÇA DE NÍVEL E VONTADE (Regras 6, 7 e 10)
+    // =======================================================
+    // Puxa o nível do sistema/perfil
+// Puxa o nível manual da aba de sobrevivência, ou herda do sistema como base
+$: activeLevel = flags.surv_level !== undefined ? flags.surv_level : (system.level || 1);
 
-    // Inicialização com Fallback (Reativa)
-    $: bio = survivalData.bio || { fome: 10, sede: 10, exaustao: 10, wp: 10 };
-    $: session = survivalData.session || { actions_max: 2, actions_used: 0, day_state: 'DIA', stress_counter: 0 };
-    $: disciplines = survivalData.disciplines || { extracao: 0, engenharia: 0, sintetica: 0, sobrevivencia: 0 };
+    // Calcula os Pontos de Sobrevivência (10 base + 2 por nível)
+    $: totalSurvivalPoints = 10 + (Math.max(0, activeLevel - 1) * 2);
+
+    // Lógica de Sanidade / Base Will (Herdado do Profile)
+    $: statCharm = Number(system.stats?.charm?.value || flags.stats?.charm?.normal || 1);
+    $: statCommand = Number(system.stats?.command?.value || flags.stats?.command?.normal || 1);
+    $: boughtBaseWill = flags.boughtBaseWill || 0;
     
-    // Pockets agora vem do SYSTEM (para consistência com o resto da ficha)
-    // Se não existir, cria vazio
-    $: pockets = actor.system.pockets || { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
+    // O Máximo Base do Perfil
+    $: profileMaxWill = statCharm + statCommand + activeLevel + boughtBaseWill;
+    // O Atual Base do Perfil
+    $: profileCurrWill = flags.currWillpower !== undefined ? flags.currWillpower : profileMaxWill;
 
-    $: level = actor.system.level || 1;
-    $: totalPoints = 10 + ((level - 1) * 2);
-    $: spentPoints = Object.values(disciplines).reduce((a, b) => a + Number(b), 0);
-    $: availablePoints = totalPoints - spentPoints;
+    // Sanidade Local (Pode sobrescrever a do perfil manualmente)
+    $: sanityMax = flags.surv_sanity_max !== undefined ? flags.surv_sanity_max : profileMaxWill;
+    $: sanityCurr = flags.surv_sanity_curr !== undefined ? flags.surv_sanity_curr : profileCurrWill;
+
+    // =======================================================
+    // 2. VITAIS: FOME, SEDE E EXAUSTÃO (Regras 2, 3 e 4)
+    // =======================================================
+    $: hunger = flags.surv_hunger !== undefined ? flags.surv_hunger : 10;
+    $: thirst = flags.surv_thirst !== undefined ? flags.surv_thirst : 10;
+    $: exhaustion = flags.surv_exhaustion !== undefined ? flags.surv_exhaustion : 0;
+
+    // =======================================================
+    // 3. ATRIBUTOS DE SOBREVIVÊNCIA (Regra 9)
+    // =======================================================
+    $: survSkills = flags.surv_skills || {
+        extracao: 0,
+        engenharia: 0,
+        sintetica: 0,
+        sobrevivencia: 0
+    };
+
+    $: spentSkillPoints = Object.values(survSkills).reduce((a, b) => a + Number(b), 0);
+    $: availableSkillPoints = totalSurvivalPoints - spentSkillPoints;
+
+    // =======================================================
+    // 4. INVENTÁRIO (Pockets Originais + Materiais Novos) (Regra 5)
+    // =======================================================
+let pockets = { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
+    $: materialsList = flags.surv_materials_list || [];
+    $: survivalNotes = flags.surv_notes || "";
 
     const RARITY_MAP = {
         1: { label: 'C', color: '#999' }, 2: { label: 'R', color: '#3b82f6' },
@@ -32,381 +67,343 @@
         5: { label: 'U', color: '#10b981' }, 6: { label: 'MV', color: '#7c3aed' }
     };
 
-    let showRequestModal = false;
+    // UI States
+    let notesExpanded = false;
     let showConsumeModal = false;
-    let requestSelection = { type: 'MATERIA', tier: 1, qty: 1 };
+    function openNotes() { notesExpanded = true; }
+    function closeNotes() { notesExpanded = false; }
 
-    // === 2. SAVE BLINDADO ===
-    async function save() {
-        // Atualiza objeto local
-        const dataToSave = { bio, session, disciplines };
+    // =======================================================
+    // RÁDIO COMUNICADOR: LIVE SYNC COM A BASE
+    // =======================================================
+// =======================================================
+    // RÁDIO COMUNICADOR E INICIALIZAÇÃO FORÇADA
+    // =======================================================
+    onMount(() => {
+        // 1. FORÇA O CARREGAMENTO INICIAL IMEDIATO ASSIM QUE A TELA ABRE
+        if (actor?.system?.pockets) {
+            pockets = foundry.utils.deepClone(actor.system.pockets);
+        }
 
-        // Salva Survival Data nas Flags
-        await actor.update({
-            [`flags.${MODULE_ID}.survival_data`]: dataToSave
-        }, { render: false }); // Render false pois o Svelte já atualizou visualmente
-    }
-    
+        const hookActor = Hooks.on("updateActor", (updatedActor) => {
+            if (updatedActor.id === actor.id) {
+                // 2. SINCRONIA EM TEMPO REAL SE MUDAR POR FORA
+                if (updatedActor.system?.pockets) {
+                    pockets = foundry.utils.deepClone(updatedActor.system.pockets);
+                }
+                flags = updatedActor.flags?.[MODULE_ID] || {};
+            }
+        });
+
+        return () => {
+            Hooks.off("updateActor", hookActor);
+        };
+    });
+
     async function savePockets() {
-        // Atualiza o inventário no sistema
         await actor.update({ "system.pockets": pockets }, { render: false });
     }
 
-    async function manualSave() {
-        await save();
-        await savePockets();
-        ui.notifications.info("Dados de Sobrevivência Salvos!");
+    function pocketAdjust(type, tier, amt) {
+        if (!pockets[type]) pockets[type] = {};
+        
+        let newPockets = { ...pockets };
+        newPockets[type][tier] = Math.max(0, (newPockets[type][tier] || 0) + amt);
+        
+        pockets = newPockets; // Atualiza a interface do jogador instantaneamente
+        savePockets();        // Salva silenciosamente no banco de dados
     }
 
-    // === 3. AÇÕES (COM FEEDBACK VISUAL IMEDIATO) ===
-    async function performAction(type) {
-        if (!isGM && session.actions_used >= session.actions_max) {
-            return ui.notifications.warn("Sem ações disponíveis.");
-        }
-
-        let msg = "";
-        let costActions = 0;
-
-        // Clona objetos para reatividade
-        let newBio = { ...bio };
-        let newSession = { ...session };
-
-        if (type === 'NORMAL_ACTION') {
-            costActions = 1;
-            newBio.fome = Math.max(-10, newBio.fome - 1);
-            newBio.sede = Math.max(-10, newBio.sede - 1);
-            msg = `🎲 <b>${actor.name}</b> realizou uma Ação Normal. (-1 Fome, -1 Sede)`;
-        }
-        else if (type === 'EFFORT') {
-            costActions = 1;
-            newBio.fome = Math.max(-10, newBio.fome - 1);
-            newBio.sede = Math.max(-10, newBio.sede - 2); 
-            msg = `😤 <b>${actor.name}</b> realizou um Esforço Físico.`;
-        } 
-        else if (type === 'REST_SIMPLE') {
-            costActions = 1;
-            newBio.exaustao = Math.min(10, newBio.exaustao + 1);
-            newBio.fome = Math.max(-10, newBio.fome - 1); 
-            newBio.sede = Math.max(-10, newBio.sede - 1);
-            newBio.wp = Math.min(20, (newBio.wp || 0) + 1);
-            msg = `☕ <b>${actor.name}</b> descansou (+1 WP).`;
-        } 
-        else if (type === 'REST_DEEP') {
-            if (!isGM && (newSession.actions_max - newSession.actions_used < 2)) {
-                return ui.notifications.warn("Precisa de 2 ações para Sono Profundo.");
-            }
-            costActions = 2;
-            newBio.exaustao = Math.min(10, newBio.exaustao + 2);
-            newBio.fome = Math.max(-10, newBio.fome - 2); 
-            newBio.sede = Math.max(-10, newBio.sede - 2);
-            newBio.wp = Math.min(20, (newBio.wp || 0) + 2);
-            msg = `💤 <b>${actor.name}</b> dormiu profundamente (+2 WP).`;
-        }
-
-        if (!isGM) newSession.actions_used += costActions;
-
-        if (newBio.fome <= 0 || newBio.sede <= 0 || newBio.exaustao <= 0) {
-            msg += `<br><span style="color:red; font-weight:bold;">ALERTA: Sinais Vitais Críticos!</span>`;
-        }
-
-        // Aplica mudanças locais
-        bio = newBio;
-        session = newSession;
-
-        ChatMessage.create({ content: msg });
-        await save(); 
+    // =======================================================
+    // FUNÇÕES DE ATUALIZAÇÃO BLINDADAS (Sem Tela Preta)
+    // =======================================================
+// =======================================================
+    // FUNÇÕES DE ATUALIZAÇÃO BLINDADAS (Sem Tela Preta)
+    // =======================================================
+    async function updateFlag(key, value) {
+        // 1. Atualiza a flag localmente primeiro
+        flags[key] = value; 
+        // 2. Força o Svelte a reagir e desenhar a tela instantaneamente
+        flags = flags;      
+        
+        // 3. Salva no banco de dados do Foundry silenciosamente
+        await actor.update({ [`flags.${MODULE_ID}.${key}`]: value }, { render: false });
     }
 
+    function adjustVital(vital, amount) {
+        if (vital === 'hunger') {
+            updateFlag('surv_hunger', Math.max(-10, Math.min(10, hunger + amount)));
+        } else if (vital === 'thirst') {
+            updateFlag('surv_thirst', Math.max(-10, Math.min(10, thirst + amount)));
+        } else if (vital === 'exhaustion') {
+            updateFlag('surv_exhaustion', Math.max(0, exhaustion + amount));
+        }
+    }
+
+    function adjustSkill(skillKey, amount) {
+        const current = survSkills[skillKey] || 0;
+        const newVal = Math.max(0, current + amount);
+        
+        if (amount > 0 && availableSkillPoints <= 0) {
+            return ui.notifications.warn("Pontos de Sobrevivência Insuficientes!");
+        }
+
+        let newSkills = { ...survSkills };
+        newSkills[skillKey] = newVal;
+        updateFlag('surv_skills', newSkills);
+    }
+
+    // Ações Narrativas
+    function actionNormal() {
+        adjustVital('hunger', -1);
+        adjustVital('thirst', -1);
+        ChatMessage.create({ content: `<div style="background:#050505; border:1px solid var(--c-primary); color:#ccc; padding:10px; font-family:monospace;">🎲 <b>${actor.name}</b> realizou uma <b>Ação Normal</b>.<br><small style="color:#ff3333">(-1 Fome, -1 Sede)</small></div>` });
+    }
+
+    function actionEffort() {
+        adjustVital('exhaustion', 1);
+        ChatMessage.create({ content: `<div style="background:#1a0505; border:1px solid #ff3333; color:#ccc; padding:10px; font-family:monospace;">😤 <b>${actor.name}</b> realizou um <b>Esforço Físico</b>.<br><small style="color:#ff3333">(+1 Exaustão)</small></div>` });
+    }
+
+    // Modal de Consumo (Organismos)
     async function consumeOrganism(tier, mode) {
         if (!pockets.ORGANISMO) pockets.ORGANISMO = {};
         const currentQty = pockets.ORGANISMO[tier] || 0;
         
-        if (currentQty <= 0 && !isGM) return ui.notifications.warn("Sem estoque.");
+        if (currentQty <= 0) return ui.notifications.warn("Sem estoque deste suprimento.");
 
-        // Atualiza Inventário Local
-        if (!isGM) { 
-            let newPockets = { ...pockets };
-            newPockets.ORGANISMO[tier]--; 
-            pockets = newPockets; // Dispara reatividade
-            await savePockets(); 
-        }
+        // Atualiza Inventário
+        let newPockets = { ...pockets };
+        newPockets.ORGANISMO[tier]--; 
+        pockets = newPockets; 
+        await savePockets(); 
 
         const foodVal = tier;
         const waterVal = tier * 2;
-        let newBio = { ...bio };
-        
         let msg = "";
+        
         if (mode === 'EAT') {
-            newBio.fome = Math.min(10, newBio.fome + foodVal);
-            msg = `🍖 <b>${actor.name}</b> comeu T${tier} (+${foodVal} Fome).`;
+            adjustVital('hunger', foodVal);
+            msg = `🍖 <b>${actor.name}</b> consumiu Biomassa T${tier} <span style="color:#00ff41">(+${foodVal} Fome)</span>.`;
         } else {
-            newBio.sede = Math.min(10, newBio.sede + waterVal);
-            msg = `💧 <b>${actor.name}</b> bebeu T${tier} (+${waterVal} Sede).`;
+            adjustVital('thirst', waterVal);
+            msg = `💧 <b>${actor.name}</b> purificou fluidos T${tier} <span style="color:#00aaff">(+${waterVal} Sede)</span>.`;
         }
 
-        bio = newBio; // Dispara reatividade
-
-        ChatMessage.create({ content: msg });
-        showConsumeModal = false;
-        await save(); 
+        ChatMessage.create({ content: `<div style="background:#050505; border:1px solid #555; color:#ccc; padding:10px; font-family:monospace;">${msg}</div>` });
+        if(pockets.ORGANISMO[tier] <= 0) showConsumeModal = false;
     }
 
-    // --- FUNÇÕES ADMIN ---
-    async function gmModifyStat(stat, val) {
-        let newBio = { ...bio };
-        newBio[stat] = Math.max(-10, Math.min(10, newBio[stat] + val));
-        bio = newBio;
-        await save();
+    // Adicionar/Remover Recursos
+function addMaterial() {
+        const newMat = { id: foundry.utils.randomID(), name: "Novo Recurso", qty: 1, desc: "" };
+        updateFlag('surv_materials_list', [...materialsList, newMat]);
     }
-    
-    async function gmAddItem(type, tier, qty) {
-        if (!pockets[type]) pockets[type] = {};
-        
-        let newPockets = { ...pockets };
-        const current = newPockets[type][tier] || 0;
-        newPockets[type][tier] = Math.max(0, current + qty);
-        
-        pockets = newPockets; // Força reatividade
-        await savePockets();
-        ui.notifications.info(`Estoque atualizado.`);
+    function removeMaterial(id) {
+        updateFlag('surv_materials_list', materialsList.filter(m => m.id !== id));
     }
-    
-    async function gmResetSession() {
-        session.actions_used = 0;
-        session = { ...session }; // Reatividade
-        await save();
-        ui.notifications.info("Ações resetadas.");
-    }
-    
-    async function upgradeSkill(key) {
-        if (!isGM && availablePoints <= 0) return ui.notifications.warn("Sem pontos.");
-        
-        let newDisc = { ...disciplines };
-        newDisc[key]++;
-        disciplines = newDisc;
-        
-        await save();
-    }
-    
-    async function downgradeSkill(key) {
-        if (!isGM) return;
-        if (disciplines[key] > 0) {
-            let newDisc = { ...disciplines };
-            newDisc[key]--;
-            disciplines = newDisc;
-            await save();
-        }
-    }
-
-    // --- REQUEST ---
-    async function sendRequest() {
-        const rLabel = RARITY_MAP[requestSelection.tier].label;
-        const content = `
-            <div class="chat-card" style="background:#050505; border:1px solid #00ff41; color:#00ff41; padding:10px;">
-                <h3 style="border-bottom:1px solid #333; margin-bottom:5px;">Requisição de Suprimento</h3>
-                <p><b>${actor.name}</b> solicita:</p>
-                <div style="background:#111; padding:5px; font-weight:bold; text-align:center;">
-                    ${requestSelection.qty}x ${requestSelection.type} [${rLabel}]
-                </div>
-            </div>`;
-        await ChatMessage.create({ content });
-        showRequestModal = false;
-        ui.notifications.info("Enviado.");
+    function updateMaterial(index, field, value) {
+        let newMats = [...materialsList];
+        newMats[index][field] = value;
+        updateFlag('surv_materials_list', newMats);
     }
 </script>
 
-<div class="survival-app" style="--c-local: {themeColor || '#00ff41'}">
+<div class="ark-survival-app" style="{cssVariables}; --c-primary: {themeColor || '#00ff41'};">
     
-    <div class="header-row">
-        <div class="char-id">
-            <img src={actor.img} alt="Avatar"/>
-            <div class="names">
-                <span class="name">{actor.name}</span>
-                <span class="lvl">NÍVEL {level} <span class="pts-tag" class:has-pts={availablePoints > 0}>PTS: {availablePoints}</span></span>
+    <header class="hud-panel sanity-module">
+        <div class="hud-title"><i class="fas fa-brain"></i> ÍNDICE DE SANIDADE (WP)</div>
+        <div class="sanity-controls">
+            <div class="input-hud">
+                <label>ATUAL</label>
+                <input type="number" value={sanityCurr} on:change={(e) => updateFlag('surv_sanity_curr', Number(e.target.value))}>
             </div>
+            <span class="divider">/</span>
+            <div class="input-hud">
+                <label>MÁXIMA</label>
+                <input type="number" value={sanityMax} on:change={(e) => updateFlag('surv_sanity_max', Number(e.target.value))}>
+            </div>
+            <button class="btn-sync" title="Resetar p/ Perfil" on:click={() => {updateFlag('surv_sanity_max', profileMaxWill); updateFlag('surv_sanity_curr', profileCurrWill);}}>
+                <i class="fas fa-sync"></i>
+            </button>
         </div>
+    </header>
+
+    <div class="main-split">
         
-        <div class="session-mini">
-            <div class="cycle-icon" on:click={() => { 
-                if(isGM) { 
-                    session.day_state = session.day_state === 'DIA' ? 'NOITE' : 'DIA'; 
-                    save(); 
-                } 
-            }}>
-                <i class="fas {session.day_state === 'DIA' ? 'fa-sun' : 'fa-moon'}"></i>
+        <div class="column vitals-col">
+            <div class="hud-panel">
+                <div class="hud-title"><i class="fas fa-heartbeat"></i> SINAIS VITAIS</div>
+                
+                <div class="vital-bar-container">
+                    <div class="vital-header">
+                        <span>ESTADO NUTRICIONAL (FOME)</span>
+                        <span class="vital-val" class:danger={hunger < 0}>{hunger}</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width: {((hunger + 10) / 20) * 100}%; background: {hunger < 0 ? '#ff3333' : 'var(--c-primary)'}"></div>
+                    </div>
+                    <div class="vital-controls">
+                        <button class="adj-btn" on:click={() => adjustVital('hunger', -1)}>-</button>
+                        <input type="number" class="manual-input" value={hunger} on:change={(e) => updateFlag('surv_hunger', Number(e.target.value))}>
+                        <button class="adj-btn" on:click={() => adjustVital('hunger', 1)}>+</button>
+                    </div>
+                </div>
+
+                <div class="vital-bar-container">
+                    <div class="vital-header">
+                        <span>HIDRATAÇÃO (SEDE)</span>
+                        <span class="vital-val" class:danger={thirst < 0}>{thirst}</span>
+                    </div>
+                    <div class="bar-bg">
+                        <div class="bar-fill" style="width: {((thirst + 10) / 20) * 100}%; background: {thirst < 0 ? '#ff3333' : '#00aaff'}"></div>
+                    </div>
+                    <div class="vital-controls">
+                        <button class="adj-btn" on:click={() => adjustVital('thirst', -1)}>-</button>
+                        <input type="number" class="manual-input" value={thirst} on:change={(e) => updateFlag('surv_thirst', Number(e.target.value))}>
+                        <button class="adj-btn" on:click={() => adjustVital('thirst', 1)}>+</button>
+                    </div>
+                </div>
+
+<div class="actions-grid">
+                    <button class="action-btn" on:click={actionNormal} title="Ações normais consomem 1 de fome e sede naturalmente, sendo requisitado pelo mestre esse gasto, além da perca padrão de fome e sede ao longo do tempo. Isso é consumido em Ações de sobrevivência.">
+                        <i class="fas fa-dice"></i> AÇÃO NORMAL
+                    </button>
+                    <button class="action-btn consume" on:click={() => showConsumeModal = true}>
+                        <i class="fas fa-utensils"></i> CONSUMIR
+                    </button>
+                </div>
+
+                <div class="exhaustion-container">
+                    <div class="ex-header">
+                        <i class="fas fa-lungs"></i> EXAUSTÃO
+                        <div class="ex-adj">
+                            <button on:click={() => adjustVital('exhaustion', -1)}>-</button>
+                            <input type="number" value={exhaustion} on:change={(e) => updateFlag('surv_exhaustion', Number(e.target.value))}>
+                            <button on:click={() => adjustVital('exhaustion', 1)}>+</button>
+                        </div>
+                    </div>
+                    <div class="ex-penalty" class:active={exhaustion > 0}>
+                        PENALIDADE GLOBAL NAS ROLAGENS: <strong>-{exhaustion}</strong>
+                    </div>
+<div style="font-size: 9px; color: #aaa; text-align: center; margin-bottom: 5px; line-height: 1.2; padding: 0 10px;">
+                        Você recebe 1 de Exaustão, em troca de +1 WD em uma rolagem do sistema de sobrevivência.
+                    </div>
+                    <button class="action-btn alert" on:click={actionEffort} style="margin-top: 0;">
+                        <i class="fas fa-fire"></i> ESFORÇO (+1 Exaustão)
+                    </button>
+                </div>
             </div>
-            <div class="actions-track">
-                <small>AÇÕES {session.actions_used}/{session.actions_max}</small>
-                <div class="dots">
-                    {#each Array(session.actions_max) as _, i}
-                        <div class="dot" class:filled={i >= session.actions_used}></div>
+
+            <div class="hud-panel">
+                <div class="hud-title" style="display: flex; justify-content: space-between;">
+<span style="display: flex; align-items: center; gap: 8px;">
+    <i class="fas fa-dna"></i> GENÉTICA (NVL 
+    <input type="number" class="manual-input" style="width:30px; height:20px; font-size:12px;" value={activeLevel} on:change={(e) => updateFlag('surv_level', Number(e.target.value))}>)
+</span>
+                    <span style="color: {availableSkillPoints < 0 ? '#ff3333' : 'var(--c-primary)'};">PONTOS: {availableSkillPoints} / {totalSurvivalPoints}</span>
+                </div>
+                <div class="skills-list custom-scroll">
+                    {#each Object.keys(survSkills) as skill}
+                        <div class="skill-row">
+                            <span class="skill-name">{skill.replace('_', ' ').toUpperCase()}</span>
+                            <div class="skill-stepper">
+                                <button on:click={() => adjustSkill(skill, -1)}>-</button>
+                                <span class="skill-val">{survSkills[skill]}</span>
+                                <button on:click={() => adjustSkill(skill, 1)}>+</button>
+                            </div>
+                        </div>
                     {/each}
                 </div>
             </div>
-            {#if isGM}
-                <button class="gm-reset-btn" on:click={gmResetSession} title="Resetar"><i class="fas fa-sync"></i></button>
-            {/if}
-        </div>
-    </div>
-
-    <div class="bio-layout">
-        <div class="bio-col">
-            <div class="col-title">METABOLISMO</div>
-            <div class="stat-group">
-                <div class="stat-header">
-                    <label>FOME</label>
-                    <span class:crit={bio.fome <= 0}>{bio.fome}</span>
-                    {#if isGM}
-                         <div class="gm-tiny-ctrl">
-                             <i class="fas fa-minus" on:click={() => gmModifyStat('fome', -1)}></i>
-                             <i class="fas fa-plus" on:click={() => gmModifyStat('fome', 1)}></i>
-                         </div>
-                    {/if}
-                </div>
-                <div class="bar-track"><div class="bar-fill red" style="width: {Math.max(0, bio.fome * 10)}%"></div></div>
-            </div>
-            <div class="stat-group">
-                <div class="stat-header">
-                    <label>SEDE</label>
-                    <span class:crit={bio.sede <= 0}>{bio.sede}</span>
-                    {#if isGM}
-                        <div class="gm-tiny-ctrl">
-                            <i class="fas fa-minus" on:click={() => gmModifyStat('sede', -1)}></i>
-                            <i class="fas fa-plus" on:click={() => gmModifyStat('sede', 1)}></i>
-                        </div>
-                    {/if}
-                </div>
-                <div class="bar-track"><div class="bar-fill blue" style="width: {Math.max(0, bio.sede * 10)}%"></div></div>
-            </div>
-            <div class="action-row">
-                <button class="btn-consume" on:click={() => showConsumeModal = true}>
-                    <i class="fas fa-utensils"></i> COMER / BEBER
-                </button>
-            </div>
         </div>
 
-        <div class="bio-col">
-            <div class="col-title">FADIGA</div>
-            <div class="stat-group">
-                <div class="stat-header">
-                    <label>EXAUSTÃO</label>
-                    <span class:crit={bio.exaustao <= 0}>{bio.exaustao}</span>
-                    {#if isGM}
-                        <div class="gm-tiny-ctrl">
-                            <i class="fas fa-minus" on:click={() => gmModifyStat('exaustao', -1)}></i>
-                            <i class="fas fa-plus" on:click={() => gmModifyStat('exaustao', 1)}></i>
-                        </div>
-                    {/if}
+<div class="column inv-col">
+            
+            <div class="hud-panel" style="padding-bottom: 5px;">
+                <div class="hud-title"><i class="fas fa-box"></i> ARMAZENAMENTO CORE</div>
+                <div class="inv-header-row">
+                    <div class="col-type">RECURSO</div>
+                    {#each Object.values(RARITY_MAP) as r}
+                        <div class="col-rarity" style="color: {r.color}">{r.label}</div>
+                    {/each}
                 </div>
-                <div class="bar-track"><div class="bar-fill purple" style="width: {Math.max(0, bio.exaustao * 10)}%"></div></div>
-            </div>
-            <div class="stat-group">
-                 <div class="stat-header"><label>SANIDADE (WP)</label> <span>{bio.wp || 10}</span></div>
-                 <div class="bar-track"><div class="bar-fill yellow" style="width: {(bio.wp||10)*10}%"></div></div>
-            </div>
-            <div class="action-row vertical">
-                <button class="btn-rest" on:click={() => performAction('REST_SIMPLE')}>
-                    <i class="fas fa-coffee"></i> DESCANSAR <small>(-1 Ação)</small>
-                </button>
-                <button class="btn-sleep" on:click={() => performAction('REST_DEEP')}>
-                    <i class="fas fa-bed"></i> DORMIR <small>(-2 Ações)</small>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <hr class="divider">
-
-    <div class="section-title">PERÍCIAS DE CAMPO</div>
-    <div class="disciplines-container">
-        {#each Object.entries(disciplines) as [key, val]}
-            <div class="disc-row">
-                <button class="roll-btn" on:click={() => new Roll(`${val}d10`).toMessage({flavor: `Teste de ${key.toUpperCase()}`})}>
-                    <i class="fas fa-dice-d20"></i> {key.toUpperCase()}
-                </button>
-                <div class="val-ctrl">
-                    {#if isGM}
-                         <button class="gm-adjust minus" on:click={() => downgradeSkill(key)}>-</button>
-                    {/if}
-                    <span class="val">{val}</span>
-                    {#if availablePoints > 0 || isGM}
-                        <button class="gm-adjust plus" on:click={() => upgradeSkill(key)}>+</button>
-                    {/if}
-                </div>
-            </div>
-        {/each}
-        
-        <div class="action-combo">
-            <button class="btn-normal" on:click={() => performAction('NORMAL_ACTION')}>
-                <i class="fas fa-dice"></i> AÇÃO NORMAL
-            </button>
-            <div class="help-tip">
-                <span>?</span>
-                <div class="tip-content">
-                    <p>A <b>Ação Normal</b> não consome Fadiga, gasta 1 de Fome e 1 de Sede. Rola os dados normais para medir o sucesso.</p>
-                    <hr>
-                    <p>O <b>Esforço</b> é para ações primordiais: gasta mais recursos, gera stress, mas concede <b>+1WD</b>.</p>
-                </div>
-            </div>
-        </div>
-
-        <button class="btn-effort full-width" on:click={() => performAction('EFFORT')}>
-            <i class="fas fa-fist-raised"></i> REALIZAR ESFORÇO <small>(Gasta Bio, +1 Ação)</small>
-        </button>
-    </div>
-
-    <hr class="divider">
-
-    <div class="inv-section">
-        <div class="inv-header-row">
-            <div class="col-type">RECURSO</div>
-            {#each Object.values(RARITY_MAP) as r}
-                <div class="col-rarity" style="color: {r.color}">{r.label}</div>
-            {/each}
-        </div>
-        {#each ['MATERIA', 'ORGANISMO', 'ENERGIA', 'NUCLEO'] as type}
-            <div class="inv-row">
-                <div class="type-name">{type}</div>
-                {#each [1, 2, 3, 4, 5, 6] as tier}
-                    <div class="inv-slot" 
-                         class:has-item={(pockets?.[type]?.[tier] || 0) > 0}
-                         title="{isGM ? 'GM: Clique esquerdo para add, direito para remover' : ''}"
-                         on:click={() => isGM ? gmAddItem(type, tier, 1) : null}
-                         on:contextmenu|preventDefault={() => isGM ? gmAddItem(type, tier, -1) : null}>
-                        {pockets?.[type]?.[tier] || 0}
+                {#each ['MATERIA', 'ORGANISMO', 'ENERGIA', 'NUCLEO'] as type}
+                    <div class="inv-row">
+                        <div class="type-name">{type}</div>
+                        {#each [1, 2, 3, 4, 5, 6] as tier}
+                            <div class="inv-slot" 
+                                 class:has-item={(pockets?.[type]?.[tier] || 0) > 0}
+                                 on:click={() => pocketAdjust(type, tier, 1)}
+                                 on:contextmenu|preventDefault={() => pocketAdjust(type, tier, -1)}>
+                                {pockets?.[type]?.[tier] || 0}
+                            </div>
+                        {/each}
                     </div>
                 {/each}
             </div>
-        {/each}
-    </div>
 
-    <div class="footer-actions">
-        <button class="btn-req" on:click={() => showRequestModal = true}>
-            <i class="fas fa-satellite-dish"></i> REQUISITAR SUPRIMENTO
-        </button>
-        <button class="btn-manual-save" on:click={manualSave}>
-            <i class="fas fa-save"></i> SALVAR DADOS
-        </button>
+            <div class="hud-panel" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="hud-title" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fas fa-briefcase"></i> MATERIAIS COLETADOS</span>
+                    <button class="btn-add-mat" on:click={addMaterial}>+ ADICIONAR</button>
+                </div>
+                
+               <div class="materials-list custom-scroll">
+                    {#each materialsList as mat, i (mat.id)}
+                        <div class="mat-row-new" transition:slide|local>
+                            <div class="mat-top">
+                                <input type="text" class="mat-name-new" value={mat.name} on:change={(e) => updateMaterial(i, 'name', e.target.value)} placeholder="Nome do Material..." />
+                                <div class="mat-qty-box">
+                                    <span>QTD:</span>
+                                    <input type="number" class="mat-qty-new" value={mat.qty} on:change={(e) => updateMaterial(i, 'qty', Number(e.target.value))} min="0" />
+                                </div>
+                                <button class="btn-del-mat-new" on:click={() => removeMaterial(mat.id)} title="Apagar Material"><i class="fas fa-trash"></i></button>
+                            </div>
+                            <textarea class="mat-desc-new custom-scroll" value={mat.desc || ""} on:change={(e) => updateMaterial(i, 'desc', e.target.value)} placeholder="Descrição detalhada do item... (Pressione Enter para quebrar linha)"></textarea>
+                        </div>
+                    {/each}
+                    {#if materialsList.length === 0}
+                        <div class="empty-state">Nenhum recurso extra catalogado.</div>
+                    {/if}
+                </div>
+            </div>
+
+            <div class="text-editor-container mini">
+                <div class="editor-header">
+                    <span class="editor-label"><i class="fas fa-terminal"></i> DIÁRIO DE SOBREVIVÊNCIA</span>
+                    <button class="btn-expand-notes" on:click={openNotes} title="Expandir Tela"><i class="fas fa-expand"></i></button>
+                </div>
+                <textarea 
+                    class="cyber-textarea custom-scroll" 
+                    value={survivalNotes} 
+                    on:change={(e)=>updateFlag('surv_notes', e.target.value)} 
+                    placeholder="Anotações sobre materiais, blueprints, rotas..."
+                ></textarea>
+            </div>
+        </div>
     </div>
 
     {#if showConsumeModal}
-        <div class="modal-overlay" transition:fade>
-            <div class="modal-window" in:scale>
+        <div class="modal-overlay" transition:fade={{duration:150}}>
+            <div class="modal-window" transition:scale>
                 <div class="modal-header">
-                    <span>CONSUMIR ORGANISMO</span>
-                    <i class="fas fa-times close" on:click={() => showConsumeModal = false}></i>
+                    <span><i class="fas fa-utensils"></i> CONSUMIR ORGANISMO</span>
+                    <button class="close-btn" on:click={() => showConsumeModal = false}><i class="fas fa-times"></i></button>
                 </div>
-                <div class="modal-body">
-                    <p>Selecione a qualidade do suprimento:</p>
+                <div class="modal-body custom-scroll">
+                    <p style="font-size: 11px; color:#aaa; margin-bottom: 10px;">O consumo biológico restaura Fome (igual ao Tier) ou Sede (Dobro do Tier).</p>
                     <div class="consumables-list">
                         {#each [1,2,3,4,5,6] as t}
                             {@const qty = pockets?.ORGANISMO?.[t] || 0}
-                            <div class="consumable-item" class:disabled={qty <= 0 && !isGM}>
-                                <span class="badge" style="background:{RARITY_MAP[t].color}">T{t}</span>
-                                <span>Qtd: {qty}</span>
+                            <div class="consumable-item" class:disabled={qty <= 0}>
+                                <div class="c-info">
+                                    <span class="badge" style="background:{RARITY_MAP[t].color}">T{t}</span>
+                                    <span class="qty-txt">Estoque: {qty}</span>
+                                </div>
                                 <div class="c-actions">
                                     <button on:click={() => consumeOrganism(t, 'EAT')}>Comer (+{t})</button>
-                                    <button on:click={() => consumeOrganism(t, 'DRINK')}>Beber (+{t*2})</button>
+                                    <button class="drink" on:click={() => consumeOrganism(t, 'DRINK')}>Beber (+{t*2})</button>
                                 </div>
                             </div>
                         {/each}
@@ -416,26 +413,20 @@
         </div>
     {/if}
 
-    {#if showRequestModal}
-        <div class="modal-overlay" transition:fade>
-            <div class="modal-window" in:scale>
-                <div class="modal-header">
-                    <span>CANAL DE REQUISIÇÃO</span>
-                    <i class="fas fa-times close" on:click={() => showRequestModal = false}></i>
+    {#if notesExpanded}
+        <div class="notes-overlay" transition:fade={{duration: 150}} on:click={closeNotes}>
+            <div class="notes-modal" on:click|stopPropagation>
+                <div class="editor-header modal-header">
+                    <span class="editor-label"><i class="fas fa-terminal"></i> DIÁRIO DE SOBREVIVÊNCIA (TELA CHEIA)</span>
+                    <button class="btn-expand-notes" on:click={closeNotes} title="Minimizar"><i class="fas fa-compress"></i></button>
                 </div>
-                <div class="modal-body">
-                    <label>Tipo:</label>
-                    <select bind:value={requestSelection.type}>
-                        {#each ['MATERIA','ORGANISMO','ENERGIA','NUCLEO'] as k}<option value={k}>{k}</option>{/each}
-                    </select>
-                    <label>Raridade:</label>
-                    <select bind:value={requestSelection.tier}>
-                        {#each Object.entries(RARITY_MAP) as [k, v]}<option value={k}>{v.label} - Tier {k}</option>{/each}
-                    </select>
-                    <label>Quantidade:</label>
-                    <input type="number" min="1" bind:value={requestSelection.qty}>
-                    <button class="send-btn" on:click={sendRequest}>ENVIAR</button>
-                </div>
+                <textarea 
+                    class="cyber-textarea expanded custom-scroll"
+                    style="flex: 1; resize: none; font-size: 15px; padding: 25px; white-space: pre-wrap;"
+                    value={survivalNotes} 
+                    on:change={(e)=>updateFlag('surv_notes', e.target.value)} 
+                    placeholder="Área livre para o diário do sobrevivente..."></textarea>
+                <button class="btn-concluido" on:click={closeNotes}>CONCLUÍDO</button>
             </div>
         </div>
     {/if}
@@ -443,105 +434,198 @@
 </div>
 
 <style>
-    .survival-app { padding: 10px; color: var(--c-local); font-family: 'Share Tech Mono', monospace; height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; position: relative; }
-    .divider { border: 0; border-bottom: 1px dashed #333; margin: 5px 0; width: 100%; opacity: 0.5; }
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-    /* HEADER & SESSION */
-    .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .char-id { display: flex; gap: 10px; align-items: center; }
-    .char-id img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--c-local); object-fit: cover; }
-    .names { display: flex; flex-direction: column; }
-    .name { font-size: 16px; font-weight: bold; }
-    .lvl { font-size: 11px; opacity: 0.8; }
-    .pts-tag { margin-left: 5px; background: var(--c-local); color: #000; padding: 1px 4px; border-radius: 2px; font-size: 10px; font-weight: bold; }
-    .session-mini { display: flex; gap: 8px; background: rgba(0,0,0,0.4); padding: 4px 8px; border: 1px solid #333; border-radius: 4px; align-items: center; }
-    .cycle-icon { font-size: 16px; color: #fbbf24; cursor: pointer; }
-    .actions-track { display: flex; flex-direction: column; align-items: center; }
-    .actions-track small { font-size: 8px; opacity: 0.7; }
-    .dots { display: flex; gap: 3px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #222; border: 1px solid #444; }
-    .dot.filled { background: var(--c-local); box-shadow: 0 0 5px var(--c-local); border-color: var(--c-local); }
-    .gm-reset-btn { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 10px; }
+    /* =========================================================================
+       ESTÉTICA TERMINAL ARK (SURVIVAL TECH)
+       ========================================================================= */
+    .ark-survival-app {
+        height: 100%; display: flex; flex-direction: column; gap: 15px;
+        background: #050508;
+        background-image: 
+            radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+            linear-gradient(rgba(0, 212, 255, 0.02) 1px, transparent 1px);
+        background-size: 20px 20px, 100% 4px;
+        color: #ccc; font-family: var(--font-body, 'Segoe UI', sans-serif);
+        padding: 15px; overflow: hidden;
+    }
 
-    /* BIO LAYOUT */
-    .bio-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .bio-col { background: rgba(0,10,0,0.2); border: 1px solid #333; padding: 5px; display: flex; flex-direction: column; gap: 8px; }
-    .col-title { font-size: 10px; text-align: center; font-weight: bold; opacity: 0.7; border-bottom: 1px solid #222; margin-bottom: 2px; }
-    .stat-group { display: flex; flex-direction: column; gap: 2px; }
-    .stat-header { display: flex; justify-content: space-between; font-size: 11px; }
-    .stat-header .crit { color: #ef4444; font-weight: bold; animation: blink 1s infinite; }
-    .bar-track { height: 5px; background: #111; width: 100%; }
-    .bar-fill { height: 100%; transition: width 0.3s; }
-    .bar-fill.red { background: #ef4444; }
-    .bar-fill.blue { background: #3b82f6; }
-    .bar-fill.purple { background: #a855f7; }
-    .bar-fill.yellow { background: #eab308; }
-    .gm-tiny-ctrl { display: flex; gap: 5px; font-size: 9px; cursor: pointer; color: #888; }
-    .gm-tiny-ctrl i:hover { color: #fff; }
-    .action-row { display: flex; gap: 5px; margin-top: auto; }
-    .action-row.vertical { flex-direction: column; }
-    .btn-consume { width: 100%; background: #002200; color: var(--c-local); border: 1px solid #005500; padding: 5px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-    .btn-consume:hover { background: var(--c-local); color: #000; }
-    .btn-rest, .btn-sleep { width: 100%; background: #111; color: #aaa; border: 1px solid #333; padding: 5px; font-size: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-    .btn-rest:hover { border-color: #3b82f6; color: #3b82f6; }
-    .btn-sleep:hover { border-color: #a855f7; color: #a855f7; }
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: var(--c-primary); border-radius: 4px; }
 
-    /* PERÍCIAS & AÇÕES */
-    .section-title { font-size: 12px; font-weight: bold; margin-bottom: 5px; color: var(--c-local); }
-    .disciplines-container { display: flex; flex-direction: column; gap: 5px; }
-    .disc-row { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); padding: 4px 8px; border-left: 2px solid #333; }
-    .roll-btn { background: none; border: none; color: #ccc; cursor: pointer; font-family: inherit; font-size: 12px; text-align: left; }
-    .roll-btn:hover { color: #fff; text-shadow: 0 0 5px #fff; }
-    .val-ctrl { display: flex; align-items: center; gap: 8px; }
-    .gm-adjust { width: 16px; height: 16px; line-height: 1; border: 1px solid #444; background: #000; color: #888; cursor: pointer; font-size: 10px; }
-    .gm-adjust:hover { border-color: #fff; color: #fff; }
-    .gm-adjust.plus { color: var(--c-local); border-color: var(--c-local); }
+    /* PAINÉIS HUD */
+    .hud-panel {
+        background: rgba(5, 5, 10, 0.85); border: 1px solid #222;
+        border-top: 2px solid var(--c-primary); border-radius: 4px;
+        padding: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.5);
+    }
+    .hud-title {
+        font-family: 'Share Tech Mono', monospace; color: var(--c-primary);
+        font-size: 14px; font-weight: bold; letter-spacing: 2px;
+        margin-bottom: 15px; border-bottom: 1px dashed #333; padding-bottom: 5px;
+    }
+
+    /* MÓDULO SANIDADE */
+    .sanity-module { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; }
+    .sanity-module .hud-title { margin: 0; border: none; padding: 0; font-size: 16px; }
+    .sanity-controls { display: flex; align-items: center; gap: 15px; }
+    .input-hud { display: flex; flex-direction: column; align-items: center; }
+    .input-hud label { font-size: 9px; color: #666; font-weight: bold; letter-spacing: 1px; }
+    .input-hud input { background: #000; border: 1px solid var(--c-primary); color: #fff; text-align: center; width: 60px; padding: 5px; font-size: 16px; font-weight: bold; font-family: 'Share Tech Mono'; border-radius: 4px; box-shadow: 0 0 10px rgba(0,212,255,0.1); }
+    .divider { font-size: 24px; color: #444; font-weight: 100; }
+    .btn-sync { background: transparent; border: 1px solid #555; color: #888; width: 30px; height: 30px; border-radius: 4px; cursor: pointer; transition: 0.2s;}
+    .btn-sync:hover { border-color: var(--c-primary); color: var(--c-primary); }
+
+    /* LAYOUT DE COLUNAS */
+    .main-split { display: flex; gap: 15px; flex: 1; overflow: hidden; }
+    .column { display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 5px;}
+    .vitals-col { flex: 1.2; }
+    .inv-col { flex: 1; }
+
+    /* VITAIS (BARRAS) */
+    .vital-bar-container { margin-bottom: 15px; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 4px; border: 1px solid #111; }
+    .vital-header { display: flex; justify-content: space-between; font-family: 'Share Tech Mono'; font-weight: bold; font-size: 11px; margin-bottom: 5px; color: #aaa; letter-spacing: 1px;}
+    .vital-val { color: var(--c-primary); font-size: 14px; }
+    .vital-val.danger { color: #ff3333; animation: blink 1s infinite; }
     
-    /* COMBO AÇÃO NORMAL + TOOLTIP */
-    .action-combo { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
-    .btn-normal { flex: 1; background: #112211; color: #fff; border: 1px solid #224422; padding: 6px; font-size: 11px; cursor: pointer; font-weight: bold; }
-    .btn-normal:hover { background: #224422; border-color: #fff; }
+    .bar-bg { width: 100%; height: 8px; background: #050505; border-radius: 4px; overflow: hidden; border: 1px solid #333; margin-bottom: 10px;}
+    .bar-fill { height: 100%; transition: width 0.3s ease, background-color 0.3s ease; box-shadow: 0 0 8px currentColor;}
+
+    .vital-controls { display: flex; justify-content: flex-end; align-items: center; gap: 5px; }
+    .adj-btn { background: #111; border: 1px solid #444; color: #fff; width: 24px; height: 24px; cursor: pointer; border-radius: 4px; font-weight: bold; transition: 0.2s;}
+    .adj-btn:hover { background: var(--c-primary); color: #000; border-color: var(--c-primary); }
+    .manual-input { width: 40px; background: #000; border: 1px solid #333; color: #fff; text-align: center; font-family: 'Share Tech Mono'; border-radius: 4px; font-size: 12px; padding: 3px;}
+
+    /* AÇÕES */
+    .actions-grid { display: flex; gap: 10px; margin-bottom: 15px; }
+    .action-btn { flex: 1; padding: 10px; background: #050505; color: #fff; border: 1px solid #444; font-family: 'Share Tech Mono'; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;}
+    .action-btn:hover { background: #222; border-color: var(--c-primary); color: var(--c-primary); }
+    .action-btn.consume { background: rgba(0,212,255,0.05); border-color: #00aaff; color: #00aaff; }
+    .action-btn.consume:hover { background: #00aaff; color: #000; box-shadow: 0 0 10px #00aaff; }
     
-    .help-tip { position: relative; width: 20px; height: 20px; background: #333; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: help; border: 1px solid #555; }
-    .help-tip:hover .tip-content { visibility: visible; opacity: 1; }
-    .tip-content { visibility: hidden; opacity: 0; position: absolute; bottom: 120%; right: 0; width: 220px; background: #050505; border: 1px solid var(--c-local); padding: 10px; border-radius: 4px; z-index: 100; font-size: 10px; transition: 0.2s; box-shadow: 0 0 15px rgba(0,0,0,0.8); line-height: 1.4; color: #ccc; pointer-events: none; }
-    .tip-content p { margin: 0 0 5px 0; }
-    .tip-content hr { border: 0; border-bottom: 1px solid #333; margin: 5px 0; }
+    .action-btn.alert { width: 100%; background: rgba(255,51,51,0.05); color: #ff3333; border-color: #ff3333; margin-top: 10px;}
+    .action-btn.alert:hover { background: #ff3333; color: #000; box-shadow: 0 0 10px #ff3333; }
 
-    .btn-effort { background: #330000; color: #ef4444; border: 1px solid #ef4444; padding: 6px; font-size: 11px; cursor: pointer; margin-top: 5px; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; }
-    .btn-effort:hover { background: #ef4444; color: #000; }
+    /* EXAUSTÃO */
+    .exhaustion-container { border-top: 1px dashed #333; padding-top: 15px; }
+    .ex-header { display: flex; justify-content: space-between; align-items: center; font-family: 'Share Tech Mono'; color: #ffaa00; font-size: 14px; margin-bottom: 10px; font-weight: bold;}
+    .ex-adj { display: flex; align-items: center; gap: 5px; }
+    .ex-adj button { width: 24px; height: 24px; background: #111; border: 1px solid #444; color: #fff; cursor: pointer; border-radius: 4px;}
+    .ex-adj input { width: 40px; background: #000; border: 1px solid #ffaa00; color: #fff; text-align: center; font-family: 'Share Tech Mono'; border-radius: 4px;}
+    .ex-penalty { font-size: 11px; color: #555; background: #050505; padding: 8px; text-align: center; border-radius: 4px; border: 1px solid #222; margin-bottom: 10px; font-weight: bold; }
+    .ex-penalty.active { color: #ff3333; border-color: #ff3333; background: rgba(255,51,51,0.1); animation: blink 2s infinite; }
 
-    /* INVENTÁRIO */
-    .inv-section { display: flex; flex-direction: column; gap: 2px; font-size: 10px; margin-bottom: 5px; }
-    .inv-header-row { display: grid; grid-template-columns: 2fr repeat(6, 1fr); gap: 2px; text-align: center; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 2px; }
-    .inv-row { display: grid; grid-template-columns: 2fr repeat(6, 1fr); gap: 2px; align-items: center; background: rgba(0,0,0,0.2); }
-    .type-name { padding-left: 5px; color: #888; }
-    .inv-slot { background: #050505; text-align: center; padding: 3px 0; border: 1px solid #222; color: #444; cursor: default; }
+    /* CAPACIDADES (SKILLS) */
+    .skills-list { display: flex; flex-direction: column; gap: 8px; }
+    .skill-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 8px 12px; border: 1px solid #222; border-radius: 4px; transition: 0.2s; }
+    .skill-row:hover { border-color: var(--c-primary); background: rgba(0,212,255,0.05); }
+    .skill-name { font-family: 'Share Tech Mono'; font-size: 13px; color: #ccc; font-weight: bold; letter-spacing: 1px;}
+    .skill-stepper { display: flex; align-items: center; gap: 8px; }
+    .skill-stepper button { width: 24px; height: 24px; background: #000; border: 1px solid #444; color: #fff; cursor: pointer; border-radius: 4px;}
+    .skill-stepper button:hover { background: var(--c-primary); color: #000; }
+    .skill-val { font-weight: bold; color: var(--c-primary); width: 20px; text-align: center; font-size: 16px;}
+
+    /* POCKETS (INVENTÁRIO) */
+    .inv-header-row { display: grid; grid-template-columns: 2fr repeat(6, 1fr); gap: 2px; text-align: center; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 10px; margin-bottom: 5px;}
+    .inv-row { display: grid; grid-template-columns: 2fr repeat(6, 1fr); gap: 4px; align-items: center; background: rgba(0,0,0,0.3); margin-bottom: 4px; padding: 2px;}
+    .type-name { padding-left: 5px; color: #888; font-size: 10px; font-weight: bold;}
+    .inv-slot { background: #050505; text-align: center; padding: 5px 0; border: 1px solid #222; color: #444; cursor: pointer; border-radius: 2px; font-family: 'Share Tech Mono'; font-size: 12px;}
     .inv-slot.has-item { color: #fff; border-color: #555; background: #151515; font-weight: bold; }
-    .inv-slot:hover { border-color: var(--c-local); }
+    .inv-slot:hover { border-color: var(--c-primary); color: var(--c-primary); }
 
-    /* FOOTER */
-    .footer-actions { margin-top: auto; display: flex; gap: 5px; }
-    .btn-req { width: 50%; background: #000; border: 1px dashed var(--c-local); color: var(--c-local); padding: 8px; cursor: pointer; font-family: inherit; font-size: 12px; opacity: 0.7; }
-    .btn-req:hover { opacity: 1; background: rgba(255,255,255,0.1); }
-    .btn-manual-save { width: 50%; background: var(--c-local); color: #000; border: none; padding: 8px; cursor: pointer; font-family: inherit; font-size: 12px; font-weight: bold; }
-    .btn-manual-save:hover { filter: brightness(1.2); }
+    /* MATERIAIS ADICIONAIS */
+/* =========================================
+       NOVO LAYOUT DE MATERIAIS
+       ========================================= */
+    .mat-row-new { background: rgba(0,0,0,0.4); border: 1px solid #333; border-radius: 4px; padding: 8px; display: flex; flex-direction: column; gap: 5px; position: relative; padding-right: 35px; }
+    .mat-top { display: flex; gap: 10px; align-items: center; }
+    .mat-name-new { flex: 1; background: transparent; border: none; border-bottom: 1px dashed #555; color: var(--c-primary); font-size: 13px; font-weight: bold; outline: none; font-family: 'Share Tech Mono'; padding-bottom: 2px;}
+    .mat-name-new:focus { border-color: var(--c-primary); }
+    .mat-qty-box { display: flex; align-items: center; gap: 4px; background: #000; border: 1px solid #444; padding: 2px 6px; border-radius: 4px; }
+    .mat-qty-box span { font-size: 9px; color: #888; font-weight: bold; }
+    .mat-qty-new { width: 35px; background: transparent; border: none; color: #fff; font-size: 12px; font-weight: bold; text-align: center; outline: none; }
+    
+.mat-desc-new { 
+        background: rgba(0,0,0,0.5); 
+        border: 1px solid #222; 
+        color: #ccc; 
+        font-size: 11px; 
+        padding: 8px 10px; 
+        border-radius: 4px; 
+        outline: none; 
+        font-family: var(--font-body, sans-serif); 
+        width: 100%; 
+        box-sizing: border-box;
+        min-height: 60px; /* Garante espaço para umas 3 linhas direto */
+        resize: vertical; /* Permite que o jogador estique a caixa para baixo se quiser escrever um livro */
+        line-height: 1.5; /* Deixa o texto respirar */
+        white-space: pre-wrap; /* Garante que os 'Enters' funcionem perfeitamente */
+        transition: border-color 0.2s, background 0.2s;
+    }
+    .mat-desc-new:focus { 
+        border-color: var(--c-primary); /* Brilha com a cor do tema do jogador */
+        color: #fff;
+        background: rgba(0,0,0,0.8); /* Fica mais escuro no fundo pra dar contraste na leitura */
+        box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+    
+.btn-del-mat-new { 
+    background: transparent; 
+    border: none; 
+    color: #555; 
+    cursor: pointer; 
+    font-size: 11px; /* Tamanho exato do ícone */
+    transition: 0.2s; 
+    padding: 0; 
+    margin-left: 5px; 
+    
+    /* Trava de Tamanho */
+    flex: none; /* Proíbe o botão de esticar no Flexbox */
+    width: 24px; /* Largura fixa bem pequena */
+    height: 24px; /* Altura fixa bem pequena */
+    
+    /* Centraliza o ícone dentro desse quadradinho */
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    
+    opacity: 0.6; 
+}
+.btn-del-mat-new:hover { 
+    color: #ff3333; 
+    opacity: 1; 
+}
 
-    /* MODALS */
+    /* NOTAS RÁPIDAS E MODAL */
+    .text-editor-container { background: rgba(0, 0, 0, 0.6); border: 1px solid #222; border-radius: 4px; display: flex; flex-direction: column; overflow: hidden; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); margin-top: 10px;}
+    .text-editor-container.mini { min-height: 150px; flex-shrink: 0;}
+    .editor-header { display: flex; justify-content: space-between; align-items: center; background: rgba(0, 212, 255, 0.05); padding: 8px 12px; border-bottom: 1px solid rgba(0, 212, 255, 0.3); }
+    .editor-label { font-size: 11px; color: var(--c-primary); font-weight: bold; letter-spacing: 1px; font-family: 'Share Tech Mono'; display: flex; align-items: center; gap: 8px; }
+    .btn-expand-notes { background: transparent; border: none; color: var(--c-primary); cursor: pointer; transition: 0.2s; }
+    .btn-expand-notes:hover { color: #fff; transform: scale(1.1); }
+    .cyber-textarea { flex: 1; background: transparent; border: none; color: #ccc; padding: 10px; resize: none; font-family: 'Share Tech Mono', monospace; font-size: 12px; line-height: 1.5; outline: none; }
+    
+    .notes-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+    .notes-modal { width: 90%; max-width: 800px; height: 80%; background: #08080a; border: 1px solid var(--c-primary); border-radius: 4px; display: flex; flex-direction: column; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9); overflow: hidden; }
+    .btn-concluido { margin: 15px; padding: 12px; background: #111; color: var(--c-primary); border: 1px solid var(--c-primary); font-weight: bold; cursor: pointer; border-radius: 4px; font-family: 'Share Tech Mono'; transition: 0.2s; flex: none; }
+    .btn-concluido:hover { background: var(--c-primary); color: #000; box-shadow: 0 0 15px var(--c-primary); }
+
+    /* MODAL DE CONSUMO */
     .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 50; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
-    .modal-window { width: 90%; background: #050505; border: 1px solid var(--c-local); box-shadow: 0 0 20px rgba(0,0,0,0.8); display: flex; flex-direction: column; }
-    .modal-header { background: #001100; padding: 8px; border-bottom: 1px solid var(--c-local); display: flex; justify-content: space-between; font-weight: bold; }
-    .modal-header .close { cursor: pointer; }
-    .modal-body { padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-    .modal-body select, .modal-body input { background: #111; border: 1px solid #444; color: #fff; padding: 5px; font-family: inherit; }
-    .send-btn { background: var(--c-local); color: #000; border: none; padding: 8px; font-weight: bold; cursor: pointer; }
-    .consumables-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
-    .consumable-item { display: flex; align-items: center; justify-content: space-between; background: #111; padding: 5px; border: 1px solid #333; }
-    .consumable-item.disabled { opacity: 0.4; pointer-events: none; }
-    .badge { padding: 1px 5px; color: #000; font-weight: bold; border-radius: 2px; font-size: 10px; }
+    .modal-window { width: 350px; background: #050505; border: 1px solid var(--c-primary); box-shadow: 0 0 20px rgba(0,0,0,0.8); display: flex; flex-direction: column; border-radius: 4px;}
+    .modal-header { background: #001100; padding: 10px 15px; border-bottom: 1px solid var(--c-primary); display: flex; justify-content: space-between; font-weight: bold; color: var(--c-primary); font-family: 'Share Tech Mono';}
+    .modal-header .close-btn { background: transparent; border: none; color: var(--c-primary); cursor: pointer; }
+    .modal-body { padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+    .consumables-list { max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px;}
+    .consumable-item { display: flex; align-items: center; justify-content: space-between; background: #111; padding: 8px; border: 1px solid #333; border-radius: 4px;}
+    .consumable-item.disabled { opacity: 0.3; pointer-events: none; filter: grayscale(1); }
+    .c-info { display: flex; align-items: center; gap: 10px; }
+    .badge { padding: 2px 6px; color: #000; font-weight: bold; border-radius: 2px; font-size: 11px; font-family: 'Share Tech Mono';}
+    .qty-txt { font-size: 11px; color: #ccc; font-weight: bold;}
     .c-actions { display: flex; gap: 5px; }
-    .c-actions button { font-size: 9px; cursor: pointer; background: #222; color: #fff; border: 1px solid #444; padding: 2px 5px; }
-    .c-actions button:hover { border-color: #fff; }
+    .c-actions button { font-size: 10px; cursor: pointer; background: #222; color: #fff; border: 1px solid #444; padding: 4px 8px; border-radius: 2px; font-family: 'Share Tech Mono'; font-weight: bold;}
+    .c-actions button:hover { border-color: #00ff41; color: #00ff41;}
+    .c-actions button.drink:hover { border-color: #00aaff; color: #00aaff;}
 
     @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 </style>

@@ -33,41 +33,49 @@
     $: isGM = game.user.isGM;
 
     // --- REFRESH ---
+   // --- REFRESH INTELIGENTE ---
     async function refreshData() {
         // Busca listas globais
-        allGroups = await GroupDatabase.getGroups() || []; 
+        const fetchedGroups = await GroupDatabase.getGroups() || []; 
+        
+        // Só atualiza a variável reativa se houver mudança real (evita re-render inútil)
+        if (JSON.stringify(allGroups) !== JSON.stringify(fetchedGroups)) {
+             allGroups = fetchedGroups;
+        }
         
         // Busca o grupo do usuário atual
         const foundGroup = await GroupDatabase.getUserGroup(game.user.id);
         
-        // Garante que myGroup seja o objeto ou null, nunca undefined
-        myGroup = foundGroup || null; 
+        // Atualiza myGroup de forma inteligente
+        if (!myGroup && foundGroup) {
+             myGroup = foundGroup; // Primeira vez carregando
+        } else if (myGroup && foundGroup) {
+             // Atualiza os dados internos do objeto sem perder a referência
+             // Isso permite que o Svelte faça updates cirúrgicos (Live Update)
+             Object.assign(myGroup, foundGroup);
+             myGroup = myGroup; // Força reatividade Svelte
+        } else if (myGroup && !foundGroup) {
+             myGroup = null; // Usuário saiu ou grupo foi deletado
+        }
         
-        // Libera a renderização
-        isSystemReady = true; 
+        // Libera a renderização inicial
+        if (!isSystemReady) isSystemReady = true;
     }
 
     onMount(async () => {
         await refreshData();
         
-        // Hooks para manter sincronia em tempo real
+        // Hook primário: Escuta os eventos do nosso próprio socket
         Hooks.on("nexusGroupUpdate", refreshData);
         
-        // Fallback: Se alguém editar as configurações do mundo manualmente
-        Hooks.on("updateSetting", (setting) => {
-            if (setting.key.includes("factions_data")) refreshData();
-        });
+        // REMOVIDO: O Hook "updateSetting" que causava o recarregamento agressivo.
+        // O "nexusGroupUpdate" já é suficiente para manter tudo sincronizado, 
+        // pois nossa classe GroupDatabase dispara ele sempre que uma mudança ocorre.
     });
 
     onDestroy(() => {
         Hooks.off("nexusGroupUpdate", refreshData);
     });
-
-    // Função auxiliar para forçar update visual nos outros clientes
-    function notifyUpdate() {
-        Hooks.callAll("nexusGroupUpdate");
-        refreshData();
-    }
 
     // --- AÇÕES ---
     async function createGroup() {
@@ -191,7 +199,7 @@
                 <div class="login-panel">
                     <header>
                         <i class="fas fa-network-wired pulse-icon"></i>
-                        <h2>NEXUS UPLINK</h2>
+                         <h2>Sistema de Base e Estruturas</h2>
                     </header>
                     <div class="login-body">
                         <div class="action-column">

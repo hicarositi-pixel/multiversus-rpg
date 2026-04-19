@@ -2,6 +2,7 @@
     import { slide, fade } from 'svelte/transition';
     import { GroupDatabase } from '../../database/GroupDatabase.js';
     import materialsDB from '../../../crafting/materials.json';
+    import { onMount, onDestroy } from 'svelte';
 
     // CORREÇÃO 1: Inicializa com null
     export let group = null;
@@ -30,6 +31,21 @@
     // Se group existe mas inventory não, cria objeto vazio
     $: if (group && !group.inventory) group.inventory = { MATERIA:{}, ORGANISMO:{}, ENERGIA:{}, NUCLEO:{} };
 
+    // =======================================================
+    // RÁDIO COMUNICADOR: LIVE SYNC COM O JOGADOR
+    // =======================================================
+    onMount(() => {
+        const hookActor = Hooks.on("updateActor", (updatedActor) => {
+            if (actor && updatedActor.id === actor.id) {
+                // Atualiza o ator localmente para atualizar o "charQty" na tela
+                actor = updatedActor;
+            }
+        });
+
+        return () => {
+            Hooks.off("updateActor", hookActor);
+        };
+    });
     // --- FUNÇÃO DO MESTRE ---
     async function modifyStock(type, tier, amount) {
         if (!group || !group.id) return; // Proteção
@@ -49,8 +65,9 @@
     }
 
     // --- FUNÇÃO DO JOGADOR ---
+// --- FUNÇÃO DO JOGADOR (BLINDADA CONTRA TELA PRETA) ---
     async function executeTransfer(type, tier, qty = null) {
-        if (!group || !group.id) return; // Proteção
+        if (!group || !group.id) return; 
         if (!actor) return ui.notifications.warn("Vincule um personagem para interagir com o cofre.");
 
         const baseInv = group.inventory;
@@ -67,7 +84,8 @@
             if (!baseInv[type]) baseInv[type] = {};
             baseInv[type][tier] = (baseInv[type][tier] || 0) + amount;
 
-            await actor.update({ [`system.pockets.${type}.${tier}`]: available - amount });
+            // A MÁGICA AQUI: { render: false }
+            await actor.update({ [`system.pockets.${type}.${tier}`]: available - amount }, { render: false });
 
         } else { // WITHDRAW
             const available = baseInv[type]?.[tier] || 0;
@@ -77,14 +95,18 @@
 
             baseInv[type][tier] = available - amount;
             const currentActorQty = charPockets[type]?.[tier] || 0;
-            await actor.update({ [`system.pockets.${type}.${tier}`]: currentActorQty + amount });
+            
+            // A MÁGICA AQUI TAMBÉM: { render: false }
+            await actor.update({ [`system.pockets.${type}.${tier}`]: currentActorQty + amount }, { render: false });
         }
 
         group.inventory = baseInv;
         group = group; // Svelte update
+        actor = actor; // Força a tela a ler o novo valor sacado/depositado
         
         await GroupDatabase.updateGroupData(group.id, { inventory: baseInv });
         ui.notifications.info(`${transferMode === 'DEPOSIT' ? 'Depositado' : 'Sacado'}: ${amount}x ${type} T${tier}`);
+        
     }
 
     // --- BLOCO DE NOTAS ---

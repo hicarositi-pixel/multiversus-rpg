@@ -875,9 +875,10 @@ $: strokeDashoffset = 283 - (283 * activeLvlInfo.progress / 100);
         display: block;
         background-color: #050505; 
         
-        /* Como a caixa agora é 16:9, o 'cover' vai encaixar perfeitamente sem dar zoom excessivo */
-        background-size: cover; 
+/* Como a caixa agora usa 'contain', a imagem não sofrerá zoom excessivo */
+        background-size: contain; 
         background-position: center; 
+        background-repeat: no-repeat; /* Impede que a imagem crie um mosaico nos espaços vazios */
         
         position: relative; 
         cursor: pointer; 

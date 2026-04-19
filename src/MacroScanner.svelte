@@ -119,6 +119,19 @@ import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
         isOpen = false;
         showBoardSelector = false;
     }
+
+    onMount(() => {
+        // Liga o rádio: Fica escutando comandos externos
+        const hookId = Hooks.on("nexusToggleApp", (appId) => {
+            // Chama a sua função openApp passando o ID que veio do rádio
+            openApp(appId, null);
+        });
+
+        // Desliga o rádio se a interface for destruída
+        return () => {
+            Hooks.off("nexusToggleApp", hookId);
+        };
+    });
 </script>
 
 <svelte:window on:mousemove={handleMouseMove} on:mouseup={handleMouseUp} />

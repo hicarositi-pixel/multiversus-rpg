@@ -26,6 +26,24 @@
         powerToEdit = null; // Reseta para não ficar em loop infinito de carregamento
     }
 
+    // --- CONTROLE DAS TAGS ---
+    let tagsString = "";
+
+    // --- CONTROLE DO BLOCO DE NOTAS (MODAL) ---
+    let notepadState = { open: false, type: null, text: "" };
+
+    function openNotepad(type) {
+        notepadState.type = type;
+        notepadState.text = type === 'effect' ? draft.effect : draft.qualities[activeQIndex].description;
+        notepadState.open = true;
+    }
+
+    function closeNotepad() {
+        if (notepadState.type === 'effect') draft.effect = notepadState.text;
+        else if (notepadState.type === 'quality') draft.qualities[activeQIndex].description = notepadState.text;
+        notepadState.open = false;
+    }
+
     function loadPowerForEditing(p) {
         // Se vier da Database, os atributos estão em p.category, p.dice, etc.
         // Se vier como uma ficha crua, estão nas flags. O código tenta achar nos dois.
@@ -43,6 +61,7 @@
         
         activeQIndex = draft.qualities.length > 0 ? 0 : -1;
         ui.notifications.info(`Padrão [${draft.name}] carregado no Estúdio para edição.`);
+        tagsString = (rawFlags.tags || []).join(", ");
     }
 
     // --- ESTADO DO RASCUNHO (DRAFT VAZIO PADRÃO) ---
@@ -231,7 +250,7 @@ async function compilePower() {
                         qualities: safeQualities,
                         isInitial: false,
                         themeKey: "neon-operator",
-                        tags: []
+                        tags: safeTags // <--- MUDE AQUI (Antes estava tags: [])
                     }
                 },
                 system: {
@@ -248,6 +267,8 @@ async function compilePower() {
         } else {
             ui.notifications.error(result.msg);
         }
+
+        
     }
 </script>
 
@@ -274,6 +295,11 @@ async function compilePower() {
                     {#each Object.keys(PB_BASE_VALUES) as r} <option value={r}>{r}</option> {/each}
                 </select>
             </div>
+
+            <div class="field" style="padding-top: 0;">
+            <label>TAGS (Separadas por vírgula)</label>
+            <input type="text" class="cyber-input" bind:value={tagsString} placeholder="Ex: fogo, passiva, mutação">
+        </div>
         </div>
 
         <div class="dice-matrix">
@@ -361,8 +387,11 @@ async function compilePower() {
                     </div>
                 </div>
 
-                <div class="field grow" style="margin-top: 15px;">
-                    <label>EFEITO ESPECÍFICO (Opcional)</label>
+<div class="field grow" style="margin-top: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label>EFEITO ESPECÍFICO (Opcional)</label>
+                        <button class="btn-add-sr" style="width: 20px; height: 20px;" on:click={() => openNotepad('quality')} title="Abrir Bloco de Notas"><i class="fas fa-expand"></i></button>
+                    </div>
                     <textarea class="cyber-input desc-input custom-scroll" bind:value={draft.qualities[activeQIndex].description} placeholder="Ex: Este ataque incendeia o alvo..."></textarea>
                 </div>
             </div>
@@ -390,8 +419,11 @@ async function compilePower() {
             </div>
         </div>
 
-        <div class="field grow" style="padding: 10px;">
-            <label>NARRATIVA GERAL DO PODER</label>
+<div class="field grow" style="padding: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label>NARRATIVA GERAL DO PODER</label>
+                <button class="btn-add-sr" style="width: 20px; height: 20px;" on:click={() => openNotepad('effect')} title="Abrir Bloco de Notas"><i class="fas fa-expand"></i></button>
+            </div>
             <textarea class="cyber-input desc-input custom-scroll" bind:value={draft.effect} style="min-height: 60px;"></textarea>
         </div>
 
@@ -410,6 +442,19 @@ async function compilePower() {
             </button>
         </div>
     </div>
+
+    {#if notepadState.open}
+    <div class="notepad-overlay" transition:fade={{duration: 150}} on:click={closeNotepad}>
+        <div class="notepad-modal" on:click|stopPropagation>
+            <div class="notepad-header">
+                <span><i class="fas fa-edit"></i> EDITOR EXPANDIDO: {notepadState.type === 'effect' ? 'Narrativa Geral' : 'Efeito Específico'}</span>
+                <button on:click={closeNotepad}><i class="fas fa-times"></i></button>
+            </div>
+            <textarea class="cyber-input custom-scroll" bind:value={notepadState.text} placeholder="Digite os detalhes aqui..."></textarea>
+<button class="btn-compile-save" on:click={closeNotepad} style="margin-top: 15px; width: 100%; flex: none; padding: 12px;">CONCLUÍDO</button>
+        </div>
+    </div>
+{/if}
 
 </div>
 
@@ -516,6 +561,14 @@ async function compilePower() {
     .custom-scroll::-webkit-scrollbar { width: 4px; }
     .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.3); border-radius: 2px; }
+
+    /* BLOCO DE NOTAS EXPANDIDO */
+    .notepad-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+    .notepad-modal { background: #050505; border: 1px solid #00d4ff; width: 80%; max-width: 600px; height: 70%; display: flex; flex-direction: column; padding: 15px; border-radius: 4px; box-shadow: 0 0 30px rgba(0, 212, 255, 0.2); }
+    .notepad-header { display: flex; justify-content: space-between; color: #00d4ff; font-weight: bold; margin-bottom: 10px; font-size: 14px; align-items: center; border-bottom: 1px dashed #333; padding-bottom: 10px;}
+    .notepad-header button { background: transparent; border: none; color: #ff3333; cursor: pointer; font-size: 16px; transition: 0.2s;}
+    .notepad-header button:hover { color: #fff; text-shadow: 0 0 10px #ff3333; }
+    .notepad-modal textarea { flex: 1; resize: none; font-size: 10px; line-height: 1.5; padding: 15px; }
     
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 </style>

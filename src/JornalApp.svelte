@@ -215,7 +215,7 @@
     // --- CRIAÇÃO E EDIÇÃO ---
     let showCreateOptions = false;
 
-    async function startCreate(type) {
+async function startCreate(type) {
         showCreateOptions = false;
         form = createEmptyForm();
         form.id = foundry.utils.randomID();
@@ -228,22 +228,34 @@
             dataHellForm = createEmptyDataHell();
             viewMode = 'admin-datahell';
         } else if (type === 'book') {
-            // NOVO: Criação Rápida de Livro
-            const newBook = await SystemBookDB.createNewBook("NOVO MANUAL DO SISTEMA");
+            // Apenas prepara o formulário básico, mas NÃO salva nem abre ainda.
             form.type = 'book';
-            form.title = newBook.title;
-            form.bookId = newBook.id;
+            form.title = "Novo Manual do Sistema";
             form.image = "https://placehold.co/400x200/0a0a0c/00ff41?text=SRD+LIVRO+DE+REGRAS";
             form.summary = "Manual de regras interativo. Abra para editar.";
             
-            newsData = [form, ...newsData];
-            await game.settings.set("multiversus-rpg", "worldNewsData", newsData);
-            openNews(form); // Já abre o livro direto
+            // Joga o Mestre para a tela de edição do Jornal para ele alterar os dados acima
+            viewMode = 'admin'; 
         } else {
             form.type = 'standard';
             viewMode = 'admin';
         }
     }
+
+    async function handleBookMetaUpdate(event) {
+        const { title, image, summary } = event.detail;
+        
+        // Encontra o livro na lista do Jornal e atualiza
+        const index = newsData.findIndex(n => n.bookId === activeBookData.id);
+        if (index !== -1) {
+            newsData[index].title = title;
+            newsData[index].image = image;
+            newsData[index].summary = summary;
+            
+            // Salva a lista atualizada
+            await game.settings.set("multiversus-rpg", "worldNewsData", newsData);
+        }
+    } // <--- FALTAVA ESSA CHAVE AQUI
 
     function editNews(news) {
         if (news.type === 'datahell') {
@@ -260,6 +272,12 @@
     }
 
     async function saveNews() {
+        // A lógica de criar o banco de dados do livro entra AQUI dentro do saveNews
+        if (form.type === 'book' && !form.bookId) {
+            const newBook = await SystemBookDB.createNewBook(form.title);
+            form.bookId = newBook.id;
+        }
+
         const index = newsData.findIndex(n => n.id === form.id);
         
         if (form.type === 'datahell') {
@@ -291,14 +309,15 @@
     
     <div class="scanlines"></div>
 
-    {#if viewMode === 'book' && activeBookData}
-        <div class="book-layer" in:fade>
-            <SystemBook 
-                bookData={activeBookData} 
-                isGM={isGM} 
-                on:closeBook={backToList} 
-            />
-        </div>
+{#if viewMode === 'book' && activeBookData}
+    <div class="book-layer" in:fade>
+        <SystemBook 
+            bookData={activeBookData} 
+            isGM={isGM} 
+            on:closeBook={backToList} 
+            on:updateMeta={handleBookMetaUpdate} 
+        />
+    </div>
     {:else}
         <header class="journal-header">
             <div class="brand">

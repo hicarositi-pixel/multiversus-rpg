@@ -344,11 +344,11 @@
 
     /* SIDEBAR */
     .codex-sidebar { width: 220px; background: #0a0a0a; border-right: 1px solid #222; display: flex; flex-direction: column; }
-    .brand { padding: 20px; font-size: 14px; font-weight: bold; color: #00d4ff; border-bottom: 1px dashed #333; letter-spacing: 1px;}
+    .brand { padding: 20px; font-size: 14px; font-weight: bold; color: var(--c-primary); border-bottom: 1px dashed #333; letter-spacing: 1px;}
     .main-nav { display: flex; flex-direction: column; padding: 10px; gap: 5px; }
     .main-nav button { background: transparent; border: 1px solid transparent; color: #888; padding: 12px; text-align: left; cursor: pointer; font-family: inherit; font-size: 12px; transition: 0.2s; border-radius: 4px; display: flex; gap: 10px; align-items: center; }
     .main-nav button:hover { background: #111; color: #fff; }
-    .main-nav button.active { background: rgba(0, 212, 255, 0.1); color: #00d4ff; border-color: rgba(0, 212, 255, 0.3); }
+    .main-nav button.active { background: color-mix(in srgb, var(--c-primary) 10%, transparent); color: var(--c-primary); border-color: color-mix(in srgb, var(--c-primary) 30%, transparent); }
     .main-nav button.memorial-btn { margin-top: 20px; border: 1px solid #300; color: #844; }
     .main-nav button.memorial-btn:hover { background: #200; color: #ff4444; }
     .main-nav button.memorial-btn.active { background: rgba(255, 0, 0, 0.1); color: #ff4444; border-color: #ff4444; }
@@ -357,29 +357,29 @@
     .codex-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative;}
     .codex-header { display: flex; justify-content: space-between; padding: 15px; background: #080808; border-bottom: 1px solid #222;}
     .breadcrumbs { display: flex; align-items: center; gap: 5px; font-size: 12px; }
-    .breadcrumbs button { background: transparent; border: none; color: #00d4ff; cursor: pointer; font-family: inherit; font-weight: bold;}
-    .breadcrumbs button:hover { text-shadow: 0 0 8px #00d4ff; }
+    .breadcrumbs button { background: transparent; border: none; color: var(--c-primary); cursor: pointer; font-family: inherit; font-weight: bold;}
+    .breadcrumbs button:hover { text-shadow: 0 0 8px var(--c-primary); }
     .breadcrumbs .sep { color: #555; }
     
     .actions { display: flex; gap: 5px; }
     .actions button { background: #111; border: 1px solid #333; color: #aaa; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-family: inherit; font-size: 11px; transition: 0.2s;}
-    .actions button:hover { border-color: #00d4ff; color: #fff; }
+    .actions button:hover { border-color: var(--c-primary); color: #fff; }
 
     .codex-body { flex: 1; padding: 20px; overflow-y: auto; }
 
     /* FORMULÁRIO DRAFT */
-    .draft-panel { background: #0a0a0a; border: 1px solid #00d4ff; border-radius: 6px; padding: 20px; margin-bottom: 20px; box-shadow: inset 0 0 20px rgba(0, 212, 255, 0.05); }
-    .draft-header { display: flex; justify-content: space-between; margin-bottom: 15px; color: #00d4ff; font-weight: bold; border-bottom: 1px dashed #333; padding-bottom: 10px;}
+    .draft-panel { background: #0a0a0a; border: 1px solid var(--c-primary); border-radius: 6px; padding: 20px; margin-bottom: 20px; box-shadow: inset 0 0 20px color-mix(in srgb, var(--c-primary) 5%, transparent); }
+    .draft-header { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--c-primary); font-weight: bold; border-bottom: 1px dashed #333; padding-bottom: 10px;}
     .draft-header button { background: transparent; border: none; color: #fff; font-size: 18px; cursor: pointer; }
     .form-row { display: flex; gap: 15px; margin-bottom: 15px; }
     .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 15px;}
     .field.grow { flex: 1; margin-bottom: 0;}
     .field label { font-size: 10px; color: #888; }
     .field input, .field textarea { background: #000; border: 1px solid #333; color: #fff; padding: 10px; font-family: inherit; border-radius: 4px; outline: none;}
-    .field input:focus, .field textarea:focus { border-color: #00d4ff; }
+    .field input:focus, .field textarea:focus { border-color: var(--c-primary); }
     .field textarea { min-height: 100px; resize: vertical; }
-    .btn-save { width: 100%; padding: 12px; background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; color: #00d4ff; font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.2s;}
-    .btn-save:hover { background: #00d4ff; color: #000; }
+    .btn-save { width: 100%; padding: 12px; background: color-mix(in srgb, var(--c-primary) 10%, transparent); border: 1px solid var(--c-primary); color: var(--c-primary); font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 4px; transition: 0.2s;}
+    .btn-save:hover { background: var(--c-primary); color: #000; }
 
     .empty-codex { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #444; opacity: 0.5; font-size: 24px;}
     .empty-codex p { font-size: 12px; margin-top: 10px; letter-spacing: 2px;}
@@ -388,6 +388,8 @@
     
     .visual-card { height: 180px; border-radius: 6px; cursor: pointer; position: relative; overflow: hidden; background-size: cover; background-position: center; border: 1px solid #333; transition: 0.3s; }
     .visual-card:hover { transform: translateY(-4px); box-shadow: 0 5px 15px rgba(0,0,0,0.8); border-color: #555; }
+    
+    /* EXCEÇÕES: Pastas e NPCs preservam suas cores originais */
     .visual-card.folder { border-color: #aa8800; }
     .visual-card.folder:hover { border-color: #ffcc00; box-shadow: 0 5px 15px rgba(255,204,0,0.3); }
     .visual-card.npc:hover { border-color: #00d4ff; box-shadow: 0 5px 15px rgba(0,212,255,0.3); }
@@ -397,21 +399,21 @@
     .visual-card.folder h4 { color: #ffcc00; }
     .card-overlay small { font-size: 10px; color: #aaa; }
 
-    /* DOC CARD (Agora é só um botão grande sem acordeão) */
-    .doc-card { background: #111; border: 1px solid #333; border-left: 4px solid #bb88ff; border-radius: 4px; cursor: pointer; transition: 0.2s;}
-    .doc-card:hover { border-color: #bb88ff; transform: translateY(-2px); box-shadow: 0 5px 10px rgba(187, 136, 255, 0.2);}
+    /* DOC CARD (Variação da cor primária misturada com branco para criar um tom diferente) */
+    .doc-card { background: #111; border: 1px solid #333; border-left: 4px solid color-mix(in srgb, var(--c-primary) 60%, white); border-radius: 4px; cursor: pointer; transition: 0.2s;}
+    .doc-card:hover { border-color: color-mix(in srgb, var(--c-primary) 60%, white); transform: translateY(-2px); box-shadow: 0 5px 10px color-mix(in srgb, var(--c-primary) 20%, transparent);}
     .doc-header { display: flex; align-items: center; padding: 15px; }
-    .doc-icon { font-size: 20px; color: #bb88ff; margin-right: 15px;}
+    .doc-icon { font-size: 20px; color: color-mix(in srgb, var(--c-primary) 60%, white); margin-right: 15px;}
     .doc-title { flex: 1; }
     .doc-title h4 { margin: 0; font-size: 14px; color: #fff; }
 
     .action-bar { position: absolute; top: 10px; right: 10px; display: flex; gap: 5px; opacity: 0; transition: 0.2s; }
     .visual-card:hover .action-bar, .doc-card:hover .action-bar { opacity: 1; }
     .action-bar button { background: rgba(0,0,0,0.8); border: 1px solid #555; color: #fff; width: 30px; height: 30px; border-radius: 4px; cursor: pointer; transition: 0.2s;}
-    .action-bar button:hover { border-color: #00d4ff; color: #00d4ff; }
+    .action-bar button:hover { border-color: var(--c-primary); color: var(--c-primary); }
     .action-bar button.del:hover { border-color: #ff3333; color: #ff3333; }
 
-    /* MEMORIAL */
+    /* EXCEÇÃO: MEMORIAL INTACTO */
     .memorial-container { display: flex; align-items: center; justify-content: center; height: 100%; background: radial-gradient(circle at center, #1a0000 0%, #000 70%); }
     .lock-screen { text-align: center; max-width: 400px; padding: 40px; border: 1px solid #400; background: rgba(0,0,0,0.8); border-radius: 8px; box-shadow: 0 0 30px rgba(255,0,0,0.1); }
     .skull-icon { font-size: 48px; color: #ff3333; margin-bottom: 20px; text-shadow: 0 0 15px #ff3333; }
@@ -438,7 +440,7 @@
 
     .custom-scroll::-webkit-scrollbar { width: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.2); border-radius: 3px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--c-primary) 20%, transparent); border-radius: 3px; }
 
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 </style>

@@ -9,6 +9,7 @@
     export let bookData; 
     export let isGM = false;
 
+    
     const dispatch = createEventDispatcher();
 
     // --- ESTADOS GLOBAIS DO ORQUESTRADOR ---
@@ -55,15 +56,24 @@
         editTab = 'markdown'; // Garante que abra na aba de texto
     }
 
-    async function saveAndExit() {
+async function saveAndExit() {
         if (!isGM) return;
         const allBooks = SystemBookDB.getBooks();
         const index = allBooks.findIndex(b => b.id === bookData.id);
+        
         if (index > -1) {
             allBooks[index] = bookData;
             await SystemBookDB.saveBooks(allBooks);
-            ui.notifications.info("Alterações salvas com sucesso!");
+            ui.notifications.info("Alterações do Livro salvas com sucesso!");
+            
+            // A MÁGICA AQUI: Avisa o Jornal (Componente Pai) para atualizar a capa lá fora
+            dispatch('updateMeta', {
+                title: bookData.title,
+                image: bookData.image,
+                summary: bookData.summary
+            });
         }
+        
         mode = 'view'; // Volta para o SystemBookView.svelte
     }
 
