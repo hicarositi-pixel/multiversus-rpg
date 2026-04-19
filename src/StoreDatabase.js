@@ -72,6 +72,126 @@ export const StoreDatabase = {
         return user.getFlag(MODULE_ID, "passData") || { tier: "cobre" };
     },
 
+    getNextResetTimestamp: () => {
+        let d = new Date();
+        d.setHours(2, 0, 0, 0); // 2 AM
+        let day = d.getDay();
+        let daysUntilSaturday = (6 - day + 7) % 7;
+        
+        if (daysUntilSaturday === 0 && Date.now() > d.getTime()) {
+            daysUntilSaturday = 7;
+        }
+        
+        d.setDate(d.getDate() + daysUntilSaturday);
+        return d.getTime();
+    },
+
+    generateExclusiveStore: async (userId, force = false) => {
+        const user = game.users.get(userId);
+        if (!user) return;
+        
+        let userData = StoreDatabase.getPlayerData(userId);
+        let nextReset = StoreDatabase.getNextResetTimestamp();
+        
+        if (!force && userData.exclusiveStore && userData.exclusiveStore.nextReset === nextReset && userData.exclusiveStore.items.length === 8) {
+            return userData.exclusiveStore.items; // Já gerada para esta semana
+        }
+        
+        let archive = StoreDatabase.getArchive();
+        if (archive.length === 0) return [];
+        
+        // Define categorias e pesos (0-100)
+        const weights = [
+            { rarity: "Comum", weight: 40 },
+            { rarity: "Raro", weight: 30 },
+            { rarity: "Lendário", weight: 15 },
+            { rarity: "Mítico", weight: 10 },
+            { rarity: "Universal", weight: 4 },
+            { rarity: "Multiversal", weight: 1 }
+        ];
+        
+        let totalWeight = weights.reduce((acc, curr) => acc + curr.weight, 0);
+        let storeItems = [];
+        
+        for (let i = 0; i < 8; i++) {
+            let rnd = Math.random() * totalWeight;
+            let acc = 0;
+            let chosenRarity = "Comum";
+            for (let w of weights) {
+                acc += w.weight;
+                if (rnd <= acc) { chosenRarity = w.rarity; break; }
+            }
+            
+            let possibleItems = archive.filter(item => {
+                if (item.rarity !== chosenRarity) return false;
+                let tag = item.systemTag || "Item";
+                let isPower = tag === "Poder Principal" || tag === "Poder Secundario";
+                
+                if (chosenRarity === "Comum" || chosenRarity === "Raro") {
+                    if (isPower) return false;
+                }
+                if (chosenRarity === "Multiversal") {
+                    if (isPower) return false;
+                }
+                return true;
+            });
+            
+            if (possibleItems.length > 0) {
+                let rItem = possibleItems[Math.floor(Math.random() * possibleItems.length)];
+                let clone = JSON.parse(JSON.stringify(rItem));
+                clone.exclusiveId = foundry.utils.randomID();
+                clone.purchased = false;
+                clone.discounted = false;
+                storeItems.push(clone);
+            } else {
+                // Fallback: pega qualquer item que não seja poder
+                let fItems = archive.filter(item => {
+                    let tag = item.systemTag || "Item";
+                    return tag !== "Poder Principal" && tag !== "Poder Secundario";
+                });
+                if (fItems.length > 0) {
+                    let rItem = fItems[Math.floor(Math.random() * fItems.length)];
+                    let clone = JSON.parse(JSON.stringify(rItem));
+                    clone.exclusiveId = foundry.utils.randomID();
+                    clone.purchased = false;
+                    clone.discounted = false;
+                    storeItems.push(clone);
+                }
+            }
+        }
+        
+        if (storeItems.length > 0) {
+            let discountIndex = Math.floor(Math.random() * storeItems.length);
+            storeItems[discountIndex].discounted = true;
+            storeItems[discountIndex].originalPrice = storeItems[discountIndex].price;
+            storeItems[discountIndex].price = Math.floor(storeItems[discountIndex].price * 0.8);
+        }
+        
+        userData.exclusiveStore = {
+            items: storeItems,
+            nextReset: nextReset
+        };
+        
+        await user.setFlag(MODULE_ID, "playerData", userData);
+        return storeItems;
+    },
+
+    rerollExclusiveStore: async (userId) => {
+        const user = game.users.get(userId);
+        if (!user) return { success: false, msg: "Usuário não encontrado." };
+        
+        let userData = StoreDatabase.getPlayerData(userId);
+        if (userData.coins < 200) {
+            return { success: false, msg: "Saldo Insuficiente para Reroll!" };
+        }
+        
+        userData.coins -= 200;
+        await user.setFlag(MODULE_ID, "playerData", userData);
+        
+        await StoreDatabase.generateExclusiveStore(userId, true);
+        return { success: true, msg: "Loja Exclusiva Renovada!" };
+    },
+
     updateSeason: async (data) => {
         if (!game.user.isGM) return;
         const current = StoreDatabase.getSeasonData();
@@ -183,6 +303,46 @@ buyItemLocal: async (itemToBuy) => {
         // ------------------------------------------------
 
         return { success: true, msg: `Adquirido: ${itemToBuy.name}` };
+    },
+
+    buyExclusiveItemLocal: async (exclusiveId) => {
+        const user = game.user;
+        let userData = StoreDatabase.getPlayerData(user.id);
+        
+        if (!userData.exclusiveStore || !userData.exclusiveStore.items) return { success: false, msg: "Loja não encontrada." };
+        
+        let eItem = userData.exclusiveStore.items.find(i => i.exclusiveId === exclusiveId);
+        if (!eItem) return { success: false, msg: "Item não encontrado." };
+        if (eItem.purchased) return { success: false, msg: "Item já adquirido!" };
+        
+        if (userData.coins < eItem.price) {
+            return { success: false, msg: "Saldo Insuficiente!" };
+        }
+        
+        userData.coins -= eItem.price;
+        eItem.purchased = true;
+        
+        const newItem = { 
+            ...eItem, 
+            uniqueId: foundry.utils.randomID(), 
+            purchaseDate: Date.now(), 
+            active: false,
+            isPassItem: false 
+        };
+        
+        delete newItem.exclusiveId;
+        delete newItem.purchased;
+        delete newItem.discounted;
+        delete newItem.originalPrice;
+        
+        if (!userData.items) userData.items = [];
+        userData.items.push(newItem);
+        
+        await user.setFlag(MODULE_ID, "playerData", userData);
+        
+        Hooks.callAll("nexusTransaction", user, newItem);
+        
+        return { success: true, msg: `Adquirido: ${newItem.name} (Exclusivo)` };
     },
 
     injectPassItem: async (userId, item) => {

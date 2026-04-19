@@ -23,8 +23,10 @@
     
     let storeItems = [];      
     let inventoryItems = []; 
+    let exclusiveItems = [];
     let selectedItem = null;
     let viewMode = 'shop';
+    let nextResetFormatted = "";
 
     let pos = { x: 150, y: 50 };
     let isDragging = false;
@@ -88,16 +90,46 @@
         });
     });
 
-    function refreshData() {
+    async function refreshData() {
         // Carrega e Sanitiza IMEDIATAMENTE
         const rawStore = StoreDatabase.getStore() || [];
-        storeItems = rawStore.map(sanitizeItem).filter(i => i); // Remove nulos
+        storeItems = rawStore.map(sanitizeItem).filter(i => i && i.system?.stock !== 0); // Remove nulos e sem estoque
 
         const myData = StoreDatabase.getPlayerData(game.user.id);
         userCoins = myData.coins || 0;
         
         const rawInv = myData.items || [];
         inventoryItems = rawInv.map(sanitizeItem).filter(i => i);
+
+        let eItems = await StoreDatabase.generateExclusiveStore(game.user.id);
+        if (eItems) {
+            exclusiveItems = eItems.map(sanitizeItem).filter(i => i && !i.purchased);
+        }
+        formatNextReset();
+    }
+
+    function formatNextReset() {
+        const myData = StoreDatabase.getPlayerData(game.user.id);
+        if(myData.exclusiveStore && myData.exclusiveStore.nextReset) {
+            let diff = myData.exclusiveStore.nextReset - Date.now();
+            if(diff > 0) {
+                let d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                let h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                nextResetFormatted = `${d}d ${h}h`;
+            } else {
+                nextResetFormatted = "Agora";
+            }
+        }
+    }
+
+    async function rerollStore() {
+        const result = await StoreDatabase.rerollExclusiveStore(game.user.id);
+        if (result.success) {
+            ui.notifications.info(result.msg);
+            refreshData();
+        } else {
+            ui.notifications.warn(result.msg);
+        }
     }
 
     function startDrag() { isDragging = true; }
@@ -112,8 +144,13 @@
 
     async function handleBuy(item) {
         if (!item) return;
-        // Envia para o banco
-        const result = await StoreDatabase.buyItemLocal(item);
+        
+        let result;
+        if (item.exclusiveId) {
+            result = await StoreDatabase.buyExclusiveItemLocal(item.exclusiveId);
+        } else {
+            result = await StoreDatabase.buyItemLocal(item);
+        }
         
         if (result.success) { 
             ui.notifications.info(result.msg); 
@@ -176,6 +213,9 @@
                 <button class:active={activeTab === 'mercado'} on:click={() => activeTab = 'mercado'}>
                     <i class="fas fa-globe"></i> NET_MARKET
                 </button>
+                <button class:active={activeTab === 'exclusiva'} on:click={() => activeTab = 'exclusiva'}>
+                    <i class="fas fa-star"></i> EXCLUSIVE
+                </button>
                 <button class:active={activeTab === 'inventario'} on:click={() => activeTab = 'inventario'}>
                     <i class="fas fa-box-open"></i> LOCAL_STORAGE
                 </button>
@@ -216,6 +256,32 @@
                 {/each}
             </div>
             {#if filteredStoreItems.length === 0} <div class="empty-state">NO_DATA_FOUND</div> {/if}
+
+        {:else if activeTab === 'exclusiva'}
+            <div class="exclusive-header">
+                <span class="reset-timer">NEXT_RESET: {nextResetFormatted}</span>
+                <button class="reroll-btn" on:click={rerollStore}>
+                    <i class="fas fa-sync"></i> REROLL [200 MC]
+                </button>
+            </div>
+            {#if exclusiveItems.length > 0}
+                <div class="exclusive-layout" class:no-featured={!exclusiveItems.some(i => i.discounted)}>
+                    {#if exclusiveItems.some(i => i.discounted)}
+                        <div class="exclusive-featured">
+                            {#each exclusiveItems.filter(i => i.discounted) as item}
+                                <StoreCard {item} {isGM} featured={true} on:click={() => openShopItem(item)} />
+                            {/each}
+                        </div>
+                    {/if}
+                    <div class="exclusive-regular-grid items-grid">
+                        {#each exclusiveItems.filter(i => !i.discounted) as item (item.exclusiveId)}
+                            <StoreCard {item} {isGM} on:click={() => openShopItem(item)} />
+                        {/each}
+                    </div>
+                </div>
+            {:else}
+                <div class="empty-state">NO_EXCLUSIVE_DATA</div>
+            {/if}
 
         {:else if activeTab === 'inventario'}
             <div class="items-grid">
@@ -323,6 +389,21 @@
         text-shadow: 0 0 8px var(--c-theme);
     }
     .cyber-tabs button:hover { color: #fff; border-color: #fff; }
+
+    .exclusive-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px; }
+    .reset-timer { color: var(--c-theme); font-size: 14px; text-shadow: 0 0 5px var(--c-theme); }
+    .reroll-btn { 
+        background: rgba(255, 204, 0, 0.1); border: 1px solid #ffcc00; color: #ffcc00;
+        padding: 5px 15px; cursor: pointer; font-family: inherit; font-size: 12px;
+        transition: 0.3s;
+    }
+    .reroll-btn:hover { background: #ffcc00; color: #000; box-shadow: 0 0 10px #ffcc00; }
+
+    .exclusive-layout {
+        display: grid; grid-template-columns: 320px 1fr; gap: 20px; align-items: start;
+    }
+    .exclusive-layout.no-featured { grid-template-columns: 1fr; }
+    .exclusive-featured { display: flex; flex-direction: column; height: 100%; }
 
     /* COMMAND BAR */
     .command-bar {

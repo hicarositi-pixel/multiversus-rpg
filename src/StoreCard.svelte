@@ -2,6 +2,7 @@
     import { createEventDispatcher } from 'svelte';
     export let item;
     export let isGM = false;
+    export let featured = false;
 
     const dispatch = createEventDispatcher();
 
@@ -19,11 +20,15 @@
 </script>
 
 <div class="matrix-card" 
+     class:featured={featured}
      style="--r-color: {rarityColor};" 
      on:click={() => dispatch('click', item)}>
     
     <div class="holo-frame">
         <img src={item.img} alt={item.name} />
+        {#if item.discounted}
+            <div class="discount-badge">20% OFF</div>
+        {/if}
         <div class="scan-overlay"></div>
         <div class="corner-bracket"></div>
     </div>
@@ -39,7 +44,12 @@
         </div>
 
         <div class="footer-info">
-            <span class="price">{item.price} <small>MC</small></span>
+            <span class="price">
+                {#if item.discounted}
+                    <span class="original-price">{item.originalPrice}</span>
+                {/if}
+                {item.price} <small>MC</small>
+            </span>
             <div class="action-arrow">>></div>
         </div>
     </div>
@@ -72,6 +82,18 @@
         height: 140px; width: 100%; position: relative;
         background: #000; border-bottom: 1px solid #333;
     }
+    .matrix-card.featured {
+        height: 100%; min-height: 400px;
+    }
+    .matrix-card.featured .holo-frame {
+        height: 60%;
+    }
+    .matrix-card.featured .name {
+        font-size: 18px; white-space: normal; overflow: visible;
+    }
+    .matrix-card.featured .discount-badge {
+        font-size: 14px; padding: 5px 45px; top: 20px; left: -40px;
+    }
     .holo-frame img {
         width: 100%; height: 100%; object-fit: cover;
         opacity: 0.8; transition: 0.4s; filter: grayscale(40%);
@@ -84,6 +106,14 @@
         position: absolute; inset: 0; pointer-events: none;
         background: linear-gradient(rgba(18,16,16,0) 50%, rgba(0,0,0,0.2) 50%);
         background-size: 100% 4px;
+    }
+    .discount-badge {
+        position: absolute; top: 15px; left: -30px;
+        background: #ff3333; color: #fff; font-size: 11px; font-weight: bold;
+        padding: 4px 35px; transform: rotate(-45deg);
+        box-shadow: 0 0 10px #ff3333; z-index: 10;
+        text-shadow: 1px 1px 0 #000;
+        letter-spacing: 1px;
     }
     .corner-bracket {
         position: absolute; top: 0; right: 0; width: 0; height: 0;
@@ -117,6 +147,9 @@
     }
     .price {
         font-size: 18px; color: var(--r-color); font-weight: bold;
+    }
+    .original-price {
+        font-size: 12px; color: #888; text-decoration: line-through; margin-right: 5px;
     }
     .price small { font-size: 10px; color: #888; }
     
