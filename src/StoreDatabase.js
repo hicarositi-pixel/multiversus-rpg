@@ -100,6 +100,9 @@ export const StoreDatabase = {
         let archive = StoreDatabase.getArchive();
         if (archive.length === 0) return [];
         
+        let activeStore = StoreDatabase.getStore();
+        let activeStoreIds = activeStore.map(i => i.id);
+        
         // Define categorias e pesos (0-100)
         const weights = [
             { rarity: "Comum", weight: 40 },
@@ -123,8 +126,10 @@ export const StoreDatabase = {
             }
             
             let possibleItems = archive.filter(item => {
+                if (activeStoreIds.includes(item.id)) return false;
                 if (item.rarity !== chosenRarity) return false;
                 let tag = item.systemTag || "Item";
+                if (["Origens", "Portais", "Passe"].includes(tag)) return false;
                 let isPower = tag === "Poder Principal" || tag === "Poder Secundario";
                 
                 if (chosenRarity === "Comum" || chosenRarity === "Raro") {
@@ -146,7 +151,9 @@ export const StoreDatabase = {
             } else {
                 // Fallback: pega qualquer item que não seja poder
                 let fItems = archive.filter(item => {
+                    if (activeStoreIds.includes(item.id)) return false;
                     let tag = item.systemTag || "Item";
+                    if (["Origens", "Portais", "Passe"].includes(tag)) return false;
                     return tag !== "Poder Principal" && tag !== "Poder Secundario";
                 });
                 if (fItems.length > 0) {
