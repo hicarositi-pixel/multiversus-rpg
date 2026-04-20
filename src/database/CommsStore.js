@@ -7,11 +7,21 @@ export const activeChatIdStore = writable('global');
 export const activeChatNameStore = writable('REDE_MUNDIAL');
 export const chatModeStore = writable('ingame'); 
 
-export function loadInitialComms() {
-    const log = game.settings.get("multiversus-rpg", "comms_chat_log") || [];
-    const gs = game.settings.get("multiversus-rpg", "comms_groups") || [];
-    chatStore.set([...log]);
-    groupsStore.set([...gs]);
+export async function loadInitialComms() {
+    const { CommsDatabase } = await import('./CommsDatabase.js');
+    const db = await CommsDatabase.getDB();
+    
+    if (db) {
+        const log = db.getFlag("multiversus-rpg", "chat_log") || [];
+        const gs = db.getFlag("multiversus-rpg", "groups") || [{ id: "global", name: "REDE_MUNDIAL", icon: "fa-globe", isPrivate: false, password: null }];
+        chatStore.set([...log]);
+        groupsStore.set([...gs]);
+    } else {
+        const log = game.settings.get("multiversus-rpg", "comms_chat_log") || [];
+        const gs = game.settings.get("multiversus-rpg", "comms_groups") || [{ id: "global", name: "REDE_MUNDIAL", icon: "fa-globe", isPrivate: false, password: null }];
+        chatStore.set([...log]);
+        groupsStore.set([...gs]);
+    }
 }
 
 // ESTA FUNÇÃO GARANTE QUE A TELA ATUALIZE ANTES MESMO DO BANCO DE DADOS SALVAR

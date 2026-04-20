@@ -6,8 +6,9 @@
     import { SocialHubDatabase } from '../database/SocialHubDatabase.js';
     import { 
         hubChatStore, hubGroupsStore, hubActiveTab, 
-        hubActiveChatId, hubActiveChatName, updateHubStore 
+        hubActiveChatId, hubActiveChatName, hubActiveActorId, updateHubStore 
     } from '../database/SocialHubStore.js';
+    import SocialNetworkFeed from './components/SocialNetworkFeed.svelte';
 
     export let application;
     const MODULE_ID = "multiversus-rpg";
@@ -15,7 +16,13 @@
     // --- REATIVIDADE ---
     $: messages = ($hubChatStore || []).filter(m => m.chatId === $hubActiveChatId);
     $: groups = $hubGroupsStore || [];
-    $: mainActor = game.user.character || Array.from(game.actors).find(a => a.isOwner);
+    $: {
+        if (!$hubActiveActorId) {
+            const defaultActor = game.user.character || Array.from(game.actors).find(a => a.isOwner && a.type === "character");
+            if (defaultActor) hubActiveActorId.set(defaultActor.id);
+        }
+    }
+    $: mainActor = game.actors.get($hubActiveActorId);
     $: allPlayers = game.users.filter(u => !u.isGM || game.user.isGM);
 
     // --- TEMA ---
@@ -34,15 +41,23 @@
     let showDiceLogic = false;
 
     // --- IDENTIDADE ---
-    let identity = { nick: game.user.name, avatar: "", background: "", color: "#ffffff", active: false };
+    let socialProfile = { socialName: "", bio: "", attachments: [], coverImage: "" };
+    let _lastProfileActorId = null;
+
+    $: if ($hubActiveActorId && $hubActiveActorId !== _lastProfileActorId) {
+        _lastProfileActorId = $hubActiveActorId;
+        const a = game.actors.get($hubActiveActorId);
+        if (a) {
+            socialProfile = a.getFlag(MODULE_ID, "social_profile") || { socialName: "", bio: "", attachments: [], coverImage: "" };
+            if (!socialProfile.attachments) socialProfile.attachments = [];
+        }
+    }
 
     onMount(async () => {
         updateHubStore();
         try {
             const theme = game.settings.get(MODULE_ID, "chatTheme");
             if (theme) savedTheme = theme;
-            const savedId = game.user.getFlag(MODULE_ID, "social_identity");
-            if (savedId) identity = { ...identity, ...savedId };
         } catch (e) {}
 
         Hooks.on("socialHubUpdate", () => { updateHubStore(); });
@@ -63,10 +78,11 @@
         hubActiveChatName.set(name);
     }
 
-    function openDM(user) {
-        const ids = [game.user.id, user.id].sort();
+    function openDM(targetActor) {
+        if (!mainActor || !targetActor) return;
+        const ids = [mainActor.id, targetActor.id].sort();
         hubActiveChatId.set(`dm-${ids.join('-')}`);
-        hubActiveChatName.set(user.name);
+        hubActiveChatName.set(targetActor.name);
         hubActiveTab.set('chats');
     }
 
@@ -106,20 +122,19 @@
             newMessage = ""; return;
         }
 
-        let finalAvatar = mainActor?.img || game.user.avatar;
-        if (identity.active && identity.avatar && identity.avatar.length > 5) finalAvatar = identity.avatar;
+        let finalAvatar = mainActor?.img || "icons/svg/mystery-man.svg";
 
         const senderData = {
-            senderName: identity.active ? identity.nick : (mainActor?.name || game.user.name),
+            senderName: socialProfile.socialName || mainActor?.name || "Desconhecido",
             senderImg: finalAvatar,
-            color: identity.active ? identity.color : "#ffffff",
+            color: "#ffffff",
             realName: game.user.name
         };
 
         const content = isRoll ? customContent : formatMessage(newMessage.trim());
 
         await SocialHubDatabase.sendMessage({
-            chatId: $hubActiveChatId, senderId: game.user.id, ...senderData,
+            chatId: $hubActiveChatId, senderId: mainActor?.id || game.user.id, ...senderData,
             text: content, image: img, isRoll: isRoll
         });
         
@@ -131,9 +146,11 @@
         showDiceLogic = false;
     }
 
-    async function saveIdentity() {
-        await game.user.setFlag(MODULE_ID, "social_identity", { ...identity });
-        ui.notifications.info("Perfil Salvo.");
+    async function saveProfile() {
+        if (mainActor) {
+            await mainActor.setFlag(MODULE_ID, "social_profile", socialProfile);
+            ui.notifications.info("Perfil Salvo.");
+        }
     }
 
     async function setChatTheme(key) {
@@ -157,8 +174,7 @@
     }
 </script>
 
-<div class="nexus-hub-root" style="{Object.entries(currentTheme.vars).map(([k,v]) => `${k}:${v}`).join(';')}; --custom-bg: url('{identity.background || ''}');">
-    {#if identity.background}<div class="custom-bg-layer"></div>{/if}
+<div class="nexus-hub-root" style="{Object.entries(currentTheme.vars).map(([k,v]) => `${k}:${v}`).join(';')};">
 
 {#if showDiceLogic}
         <div style="position: absolute; inset: 0; z-index: 100; pointer-events: auto;">
@@ -211,15 +227,17 @@
 
     <aside class="nexus-sidebar">
         <div class="nav-icons">
+            <button class:active={$hubActiveTab === 'personas'} on:click={() => setTab('personas')}><i class="fas fa-id-card"></i></button>
             <button class:active={$hubActiveTab === 'chats'} on:click={() => setTab('chats')}><i class="fas fa-comments"></i></button>
             <button class:active={$hubActiveTab === 'contacts'} on:click={() => setTab('contacts')}><i class="fas fa-users"></i></button>
+            <button class:active={$hubActiveTab === 'network'} on:click={() => setTab('network')}><i class="fas fa-globe"></i></button>
             <button class:active={$hubActiveTab === 'profile'} on:click={() => setTab('profile')}><i class="fas fa-user-circle"></i></button>
             <div class="nav-sep"></div>
             <button class:active={$hubActiveTab === 'settings'} on:click={() => setTab('settings')}><i class="fas fa-paint-brush"></i></button>
         </div>
         <div class="user-mini-status">
-            <img src={identity.active && identity.avatar ? identity.avatar : (mainActor?.img || game.user.avatar)} alt="Me"/>
-            <div class="dot {identity.active ? 'spoof' : 'real'}"></div>
+            <img src={mainActor?.img || "icons/svg/mystery-man.svg"} alt="Me"/>
+            <div class="dot real"></div>
         </div>
     </aside>
 
@@ -243,15 +261,13 @@
                             </div>
                         {/each}
                     </div>
-                    <div class="section-label">JOGADORES</div>
+                    <div class="section-label">FICHAS CONHECIDAS</div>
                     <div class="scroll-list custom-scroll">
-                        {#each allPlayers as u}
-                            {#if u.id !== game.user.id}
-                                <div class="chat-row" role="button" tabindex="0" on:click={() => openDM(u)}>
-                                    <div class="status-dot-mini {u.active ? 'online' : 'offline'}"></div>
-                                    <span>{u.name}</span>
-                                </div>
-                            {/if}
+                        {#each Array.from(game.actors).filter(a => a.hasPlayerOwner && a.id !== mainActor?.id) as act}
+                            <div class="chat-row" role="button" tabindex="0" on:click={() => openDM(act)}>
+                                <div class="status-dot-mini online"></div>
+                                <span>{act.name}</span>
+                            </div>
                         {/each}
                     </div>
                 </aside>
@@ -298,15 +314,35 @@
                 </section>
             </div>
 
+        {:else if $hubActiveTab === 'network'}
+            <div class="app-pane" in:fade>
+                <SocialNetworkFeed actor={mainActor} on:openDM={(e) => openDM(game.actors.get(e.detail))} />
+            </div>
+
+        {:else if $hubActiveTab === 'personas'}
+             <div class="app-pane" in:fade>
+                <div class="settings-grid">
+                    <label>MINHAS PERSONAS (FICHAS)</label>
+                    <div class="player-list-grid">
+                        {#each Array.from(game.actors).filter(a => a.isOwner && a.type === "character") as act}
+                            <div class="player-card {act.id === $hubActiveActorId ? 'on' : 'off'}" on:click={() => hubActiveActorId.set(act.id)}>
+                                <div class="p-avatar"><img src={act.img} alt="user" /><div class="p-dot"></div></div>
+                                <div class="p-info"><b>{act.name}</b><span>Selecionar Persona</span></div>
+                            </div>
+                        {/each}
+                    </div>
+                </div>
+             </div>
+
         {:else if $hubActiveTab === 'contacts'}
              <div class="app-pane" in:fade>
                 <div class="settings-grid">
-                    <label>JOGADORES</label>
+                    <label>FICHAS CONHECIDAS (DMs)</label>
                     <div class="player-list-grid">
-                        {#each allPlayers as u}
-                            <div class="player-card {u.active ? 'on' : 'off'}" on:click={() => openDM(u)}>
-                                <div class="p-avatar"><img src={u.character?.img || u.avatar} alt="user" /><div class="p-dot"></div></div>
-                                <div class="p-info"><b>{u.name}</b><span>{u.character?.name || '---'}</span></div>
+                        {#each Array.from(game.actors).filter(a => a.hasPlayerOwner && a.id !== mainActor?.id) as act}
+                            <div class="player-card off" on:click={() => openDM(act)}>
+                                <div class="p-avatar"><img src={act.img} alt="user" /></div>
+                                <div class="p-info"><b>{act.name}</b></div>
                             </div>
                         {/each}
                     </div>
@@ -316,15 +352,21 @@
         {:else if $hubActiveTab === 'profile'}
             <div class="app-pane centered" in:fade>
                 <div class="spoofer-box">
-                    <h3>IDENTIDADE</h3>
-                    <div class="form-group"><label>Codinome</label><input type="text" bind:value={identity.nick} class="hacker-input" /></div>
-                    <div class="form-group"><label>Avatar URL</label><input type="text" bind:value={identity.avatar} class="hacker-input" placeholder="http://..." />
-                        {#if identity.avatar}<img src={identity.avatar} style="width:40px; height:40px; margin-top:5px; border-radius:50%" alt="pv"/>{/if}
+                    <h3>PERFIL DA REDE SOCIAL</h3>
+                    <div class="form-group"><label>Nome de Exibição</label><input type="text" bind:value={socialProfile.socialName} class="hacker-input" placeholder={mainActor?.name}/></div>
+                    <div class="form-group"><label>Imagem de Capa (URL)</label><input type="text" bind:value={socialProfile.coverImage} class="hacker-input" placeholder="http://..."/></div>
+                    <div class="form-group"><label>Biografia</label><textarea bind:value={socialProfile.bio} class="hacker-input" style="height: 80px; resize: none;"></textarea></div>
+                    <div class="form-group">
+                        <label>Status Fixos (Links de Anexos/Imagens)</label>
+                        {#each socialProfile.attachments as att, i}
+                            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                                <input type="text" bind:value={socialProfile.attachments[i]} class="hacker-input" placeholder="http://..." />
+                                <button class="btn-ghost" on:click={() => socialProfile.attachments.splice(i, 1) && (socialProfile = socialProfile)} style="color:red; border-color:red; padding: 5px 10px;"><i class="fas fa-trash"></i></button>
+                            </div>
+                        {/each}
+                        <button class="btn-ghost" style="width:100%; margin-top:5px;" on:click={() => socialProfile.attachments = [...socialProfile.attachments, ""]}>+ Adicionar Anexo</button>
                     </div>
-                    <div class="form-group"><label>Fundo Janela</label><input type="text" bind:value={identity.background} class="hacker-input" placeholder="URL Imagem/Gif" /></div>
-                    <div class="form-group"><label>Cor Texto</label><div class="color-picker-row"><input type="color" bind:value={identity.color} /></div></div>
-                    <div class="toggle-row"><span>USAR MÁSCARA</span><button class="toggle-btn {identity.active ? 'on' : 'off'}" on:click={()=>{ identity.active = !identity.active; saveIdentity(); }}>{identity.active ? 'ONLINE' : 'OFFLINE'}</button></div>
-                    <button class="btn-full" style="margin-top:10px" on:click={saveIdentity}>SALVAR</button>
+                    <button class="btn-full" style="margin-top:10px" on:click={saveProfile}>SALVAR PERFIL</button>
                 </div>
             </div>
 

@@ -25,7 +25,6 @@
 
     // --- DADOS DA FICHA ---
     $: contacts = actor.getFlag(MODULE_ID, "contacts") || [];
-    $: statusFeed = game.settings.get(MODULE_ID, "comms_status") || [];
     let myCommID = "MV-0000";
 
     // --- ESTADO LOCAL ---
@@ -42,7 +41,6 @@ onMount(async () => {
         
         // Escuta mudanças na ficha e no feed para atualizar a tela
         Hooks.on("commsContactUpdate", () => { contacts = actor.getFlag(MODULE_ID, "contacts") || []; });
-        Hooks.on("commsStatusUpdate", () => { statusFeed = game.settings.get(MODULE_ID, "comms_status") || []; });
     });
 
     // --- AÇÕES DO CÉREBRO ---
@@ -84,7 +82,6 @@ onMount(async () => {
     <nav class="app-nav">
         <button class:active={activeTab === 'chats'} on:click={() => setTab('chats')}><i class="fas fa-terminal"></i><span>REDE</span></button>
         <button class:active={activeTab === 'contacts'} on:click={() => setTab('contacts')}><i class="fas fa-users-cog"></i><span>LINKS</span></button>
-        <button class:active={activeTab === 'status'} on:click={() => setTab('status')}><i class="fas fa-satellite"></i><span>FEED</span></button>
     </nav>
 
     <div class="app-viewport">
@@ -115,20 +112,6 @@ onMount(async () => {
                 </div>
             </div>
 
-        {:else if activeTab === 'status'}
-            <div class="status-panel" in:fade>
-                <button class="btn-status-post" on:click={() => activeModal = 'post_status'}>ATUALIZAR_MEU_FEED</button>
-                <div class="status-list">
-                    {#each statusFeed as s}
-                        <div class="status-card-v2" style="background-image: url({s.image && s.image.length > 3 ? s.image : 'icons/svg/hazard.svg'})">
-                            <div class="card-overlay">
-                                <img src={s.img} class="s-av" alt="av"/>
-                                <div class="s-info"><b>{s.name}</b><p>{s.text}</p></div>
-                            </div>
-                        </div>
-                    {/each}
-                </div>
-            </div>
         {/if}
     </div>
 </div>
@@ -157,17 +140,6 @@ onMount(async () => {
     .contact-card:hover { border-color: var(--c-primary); background: rgba(var(--c-primary), 0.05); }
     .contact-card img { width: 45px; height: 45px; border-radius: 50%; border: 1px solid var(--c-primary); }
     .c-meta { display: flex; flex-direction: column; }
-    
-    .status-panel { padding: 30px; height: 100%; overflow-y: auto; }
-    .btn-status-post { width: 100%; background: transparent; border: 2px dashed #333; color: #555; padding: 25px; font-weight: bold; margin-bottom: 30px; cursor: pointer; transition: 0.2s; font-family: inherit; font-size: 14px;}
-    .btn-status-post:hover { border-color: var(--c-primary); color: var(--c-primary); }
-    .status-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-    .status-card-v2 { aspect-ratio: 9/16; background-size: cover; background-position: center; border-radius: 8px; position: relative; overflow: hidden; border: 1px solid #222; transition: 0.3s; }
-    .status-card-v2:hover { transform: scale(1.02); border-color: var(--c-primary); }
-    .card-overlay { position: absolute; inset: 0; background: linear-gradient(transparent 40%, rgba(0,0,0,0.9)); display: flex; flex-direction: column; justify-content: flex-end; padding: 15px; }
-    .s-av { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--c-primary); position: absolute; top: 12px; left: 12px; }
-    .s-info b { font-size: 13px; color: var(--c-primary); display: block; margin-bottom: 4px; }
-    .s-info p { font-size: 11px; color: #ccc; margin: 0; line-height: 1.2; }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }

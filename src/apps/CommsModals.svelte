@@ -2,6 +2,7 @@
     import { createEventDispatcher } from 'svelte';
     import { fade, scale } from 'svelte/transition';
     import { CommsDatabase } from '../database/CommsDatabase.js';
+    import { OnlineComms } from './OnlineComms.js';
 
     export let activeModal = null;
     export let showWarning = true;
@@ -12,6 +13,15 @@
 
     function closeModal() {
         dispatch('close');
+    }
+
+    function handleAcceptWarning() {
+        const isAuthorized = game.user.isGM || actor.isOwner;
+        if (!isAuthorized) {
+            ui.notifications.error("ACESSO NEGADO: VOCÊ NÃO TEM PERMISSÃO DE ENTRADA.", { permanent: true });
+            return;
+        }
+        dispatch('acceptWarning');
     }
 
     function confirmPassword() {
@@ -30,8 +40,10 @@
             <div class="terminal-card warning" in:scale>
                 <header>⚠️ PROTOCOLO_CANÔNICO</header>
                 <div class="card-content">
-                    {@html CommsDatabase.getRPWarning()}
-                    <button class="btn-full" on:click={() => dispatch('acceptWarning')}>AUTENTICAR</button>
+                    <p style="text-align: center; color: var(--c-primary); font-family: 'Share Tech Mono', monospace; font-size: 14px; margin-bottom: 20px;">
+                        Acesso restrito: exclusiva a entrada apenas para o dono da ficha e para os mestres.
+                    </p>
+                    <button class="btn-full" on:click={handleAcceptWarning}>AUTENTICAR</button>
                 </div>
             </div>
         {:else if activeModal === 'password'}

@@ -5,6 +5,7 @@ export const hubGroupsStore = writable([]);
 export const hubActiveTab = writable('chats'); // Define o valor inicial aqui
 export const hubActiveChatId = writable('nexus-prime');
 export const hubActiveChatName = writable('NEXUS_PRIME');
+export const hubActiveActorId = writable(null);
 
 export function updateHubStore() {
     const MODULE_ID = "multiversus-rpg";

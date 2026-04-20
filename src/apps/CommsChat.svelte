@@ -3,6 +3,7 @@
     import { fade } from 'svelte/transition';
     import { CommsDatabase } from '../database/CommsDatabase.js';
     import { chatModeStore } from '../database/CommsStore.js';
+    import { OnlineComms } from './OnlineComms.js';
 
     export let actor;
     export let myCommID;
