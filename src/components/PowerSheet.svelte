@@ -123,11 +123,11 @@
   }
 
   // --- LÓGICA DE QUALIDADES (Apenas GM) ---
-  async function addQuality() {
+async function addQuality() {
     const newQ = { 
       name: "Nova Sub-rotina", type: "atk", level: 0, 
       description: "", extras: [], 
-      capacities: [{ type: 'mass', nul: 0, booster: 0, collapsed: false }],
+      capacities: [{ type: 'mass', nul: 0, booster: 0, invested: totalDice, collapsed: false }],
       collapsed: false 
     };
     await updateFlag('qualities', [...qualities, newQ]);
@@ -144,10 +144,10 @@
     await updateFlag('qualities', newQs);
   }
 
-  async function addCapacity(qIndex) {
+async function addCapacity(qIndex) {
     const newQs = JSON.parse(JSON.stringify(qualities));
     if (!newQs[qIndex].capacities) newQs[qIndex].capacities = [];
-    newQs[qIndex].capacities.push({ type: 'mass', nul: 0, booster: 0, collapsed: false }); 
+    newQs[qIndex].capacities.push({ type: 'mass', nul: 0, booster: 0, invested: totalDice, collapsed: false }); 
     await updateFlag('qualities', newQs);
   }
 
@@ -464,7 +464,8 @@
                   </div>
 
                   {#each (q.capacities || []) as cap, cIndex}
-                    {@const capResult = calculateCapacity(totalDice, cap.type, cap.nul, cap.booster)}
+                    {@const currentInvested = cap.invested !== undefined ? cap.invested : totalDice}
+    {@const capResult = calculateCapacity(currentInvested, cap.type, cap.nul, cap.booster)}
                     
                     <div class="cap-row {cap.collapsed ? 'collapsed' : ''}">
                       <div class="cap-main" on:click={() => toggleCapCollapse(i, cIndex)}>
@@ -486,6 +487,14 @@
                           </div>
                           
                           <div class="steppers">
+                          <div class="stepper">
+      <label>Dados (Alocados)</label>
+      <div class="step-ctrl">
+        <button on:click={() => updateCapacity(i, cIndex, 'invested', Math.max(0, currentInvested - 1))}>-</button>
+        <span class="accent-text">{currentInvested}</span>
+        <button on:click={() => updateCapacity(i, cIndex, 'invested', currentInvested + 1)}>+</button>
+      </div>
+    </div>
                             <div class="stepper">
                               <label>Sem Limite (x2)</label>
                               <div class="step-ctrl">
@@ -868,6 +877,8 @@
   .cost-badge strong { color: var(--text-main); }
   .btn-extra { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; border-radius: 4px; font-size: 0.8em; cursor: pointer; transition: 0.2s; }
   .btn-extra:hover { border-color: #fff; }
+  .steppers { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .stepper { flex: 1; min-width: 80px; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.4); padding: 5px; border: 1px solid #333; border-radius: 4px;}
   
   @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 </style>
