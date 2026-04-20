@@ -65835,7 +65835,7 @@ function $n(l, e, t = 0, i = 0) {
     let u = $h[9][e], d = l - 10;
     s = u * Math.pow(2, d);
   }
-  let o = Math.pow(2, t), r = i > 0 ? i * 10 : 1, f = s * o * r;
+  let o = Math.pow(2, t), r = Math.pow(10, i), f = s * o * r;
   return nO(f, e);
 }
 function nO(l, e) {

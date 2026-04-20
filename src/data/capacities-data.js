@@ -25,6 +25,9 @@ export const CAPACITY_TYPES = [
 /**
  * Calcula a capacidade com lógica Linear para Boosters.
  */
+/**
+ * Calcula a capacidade com lógica Exponencial para Boosters.
+ */
 export function calculateCapacity(dice, type, nul = 0, booster = 0) {
   if (type === 'touch') return "Toque Físico";
   if (type === 'self') return "Apenas Você";
@@ -47,13 +50,13 @@ export function calculateCapacity(dice, type, nul = 0, booster = 0) {
   // No Upward Limit (NUL): Exponencial (2^N) pois "dobra" a capacidade a cada compra
   let nulMultiplier = Math.pow(2, nul);
 
-  // Booster: Linear (N * 10) conforme solicitado.
-  // Se tiver 0 boosters, multiplica por 1. Se tiver 2, multiplica por 20.
-  let boosterMultiplier = booster > 0 ? (booster * 10) : 1;
+  // Booster: Exponencial (10^N) conforme solicitado.
+  // 0 boosters = x1, 1 booster = x10, 2 boosters = x100, 3 boosters = x1000, etc.
+  let boosterMultiplier = Math.pow(10, booster);
 
   // 3. Aplicação
   // Base * NUL * Booster
-  // Exemplo Base 10, 2 Boosters: 10 * 1 * 20 = 200.
+  // Exemplo Base 10, 2 Boosters: 10 * 1 * 100 = 1000.
   let finalValue = baseVal * nulMultiplier * boosterMultiplier;
 
   return formatUnit(finalValue, type);
