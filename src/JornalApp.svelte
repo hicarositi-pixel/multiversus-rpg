@@ -525,12 +525,15 @@ async function startCreate(type) {
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
     /* LAYOUT GERAL (Herdando as variáveis globais do Menu) */
+/* LAYOUT GERAL (Adaptável para Tela Cheia ou Janelas do Foundry) */
     .journal-container { 
-        position: absolute; inset: 0; 
+        position: relative; /* Mudou de absolute para relative */
+        width: 100%; height: 100%; /* Preenche exatamente o espaço da ficha */
         background: radial-gradient(circle at center, #111 0%, #000 100%); 
-        color: #ddd; display: flex; flex-direction: column; z-index: 100; 
+        color: #ddd; display: flex; flex-direction: column; z-index: 10; 
         font-family: 'Share Tech Mono', monospace; 
         --border-c: rgba(255,255,255,0.1); 
+        overflow: hidden; /* Garante que nada vaze pelas bordas da ficha */
     }
     
     .scanlines { position: absolute; inset: 0; pointer-events: none; z-index: 0; background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1)); background-size: 100% 4px; opacity: 0.6; }

@@ -17,6 +17,7 @@
     import CommsApp from './CommsApp.svelte';
     import TestamentoApp from './TestamentoApp.svelte';
     import BattlePassApp from './BattlePassApp.svelte';
+    import OpeningApp from '../OpeningApp.js';
 
     // --- IMPORTAÇÃO DO BANCO DE TEMAS ---
     import { SHEET_THEMES } from '../data/SheetThemeDB.js';
@@ -77,6 +78,19 @@
 
     function closeSystem() { actor.sheet.close(); }
 
+function openNexusMenu() {
+        try {
+            // Cria e abre a tela de Abertura/Menu
+            new OpeningApp().render(true);
+            
+            // Fecha a ficha automaticamente para não ficar bagunçado
+            closeSystem(); 
+        } catch (error) {
+            console.error("NEXUS | Erro ao abrir o Menu Principal:", error);
+            ui.notifications.error("Erro ao tentar retornar ao Nexus.");
+        }
+    }
+
     function startLoginSequence() {
         loginState = 'verifying';
         bootText = "VERIFICANDO CREDENCIAIS...";
@@ -85,7 +99,7 @@
             bootText = `BEM-VINDO, ${actor.name.toUpperCase()}.`;
             setTimeout(() => { loginState = 'logged_in'; }, 1500);
         }, 2000);
-    }
+    } 
 
     function handleKeydown(e) {
         if (loginState !== 'idle') return;
@@ -190,10 +204,15 @@
         {:else}
             <div class="os-container" in:fade={{duration: 1000, delay: 200, easing: cubicOut}}>
                 
-                <header class="status-bar">
+<header class="status-bar">
                     <div class="bar-left"><span class="led"></span> ONLINE</div>
                     <div class="bar-center">MULTIVERSUS OS // {currentThemeData.label}</div>
-                    <div class="bar-right">{actor.name}</div>
+                    <div class="bar-right" style="display: flex; align-items: center; gap: 10px;">
+                        {actor.name}
+                        <button class="btn-return-menu" on:click={openNexusMenu} title="Abrir Menu Principal">
+                            <i class="fas fa-satellite-dish"></i> Menu Principal
+                        </button>
+                    </div>
                 </header>
 
                 <main class="viewport">
@@ -273,7 +292,28 @@
 
        ========================================================================= */
 
-
+/* BOTÃO DE RETORNO AO MENU NA BARRA DE STATUS */
+    .btn-return-menu {
+        background: rgba(0, 0, 0, 0.5);
+        border: 1px solid var(--c-primary);
+        color: var(--c-primary);
+        padding: 2px 8px;
+        font-size: 10px;
+        font-family: var(--font-head);
+        font-weight: bold;
+        border-radius: 2px;
+        cursor: pointer;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        letter-spacing: 1px;
+    }
+    .btn-return-menu:hover {
+        background: var(--c-primary);
+        color: #000;
+        box-shadow: 0 0 10px var(--c-primary);
+    }
 
     /* A Classe ROOT recebe as variáveis injetadas */
 

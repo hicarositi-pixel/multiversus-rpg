@@ -639,3 +639,42 @@ Hooks.on("chatMessage", (chatLog, messageText, chatData) => {
     return false; // Impede a mensagem de aparecer no chat
   }
 });
+
+// =======================================================
+// RETORNO AO MENU NEXUS (ESC & CHAT)
+// =======================================================
+
+// 1. Injeta o botão na aba de Configurações (Abre com ESC)
+Hooks.on("renderSettings", (app, html) => {
+    // Cria o botão com a nossa classe customizada
+    const nexusBtn = $(`
+        <button class="nexus-return-btn">
+            <i class="fas fa-satellite-dish"></i> RETORNAR AO MENU NEXUS
+        </button>
+    `);
+
+    // Ação de clique do botão
+    nexusBtn.on("click", () => {
+        // Substitua 'OpeningApp' pelo nome correto da classe que abre o seu menu principal
+        const api = game.modules.get("multiversus-rpg")?.api;
+        if (api && api.OpeningApp) {
+            new api.OpeningApp().render(true);
+        } else {
+            ui.notifications.warn("NEXUS OFFLINE: Módulo de interface não encontrado.");
+        }
+    });
+
+    // Injeta o botão logo no topo dos botões de jogo
+    html.find("#settings-game").prepend(nexusBtn);
+});
+
+// 2. Comando de Chat opcional para abrir rapidamente
+Hooks.on("chatMessage", (chatLog, messageText, chatData) => {
+    if (messageText.trim().toLowerCase() === "/nexus" || messageText.trim().toLowerCase() === "/menu") {
+        const api = game.modules.get("multiversus-rpg")?.api;
+        if (api && api.OpeningApp) {
+            new api.OpeningApp().render(true);
+        }
+        return false; // Impede que o comando apareça no chat
+    }
+});

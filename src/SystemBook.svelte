@@ -241,9 +241,9 @@ async function saveAndExit() {
 
         <div class="main-workspace">
             
-            <nav class="nav-sidebar custom-scroll" class:mobile-open={isNavOpen}>
+<nav class="nav-sidebar" class:mobile-open={isNavOpen}>
                 <div class="nav-header-mobile">PÁGINAS <button class="btn-close-nav" on:click={() => isNavOpen=false}>✕</button></div>
-                <div class="nav-group">
+                <div class="nav-group custom-scroll">
                     <div class="nav-group-title">Índice do Livro</div>
                     {#each bookData.chapters as chapter, i (chapter.id)}
                         <div class="nav-link" class:active={currentChapterId === chapter.id} 
@@ -411,6 +411,7 @@ async function saveAndExit() {
     .main-workspace { display: flex; flex: 1; overflow: hidden; position: relative; }
     .nav-sidebar { width: 280px; background: var(--bg-panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 100; transition: transform 0.3s; flex-shrink: 0; }
     .nav-header-mobile { display: none; padding: 15px 20px; border-bottom: 1px solid var(--border); justify-content: space-between; font-weight: bold; color: var(--primary); }
+    .nav-group { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
     .btn-close-nav { background: none; border: none; color: var(--text-main); font-size: 1.5rem; cursor: pointer; }
     
     .nav-group-title { padding: 20px 20px 5px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }

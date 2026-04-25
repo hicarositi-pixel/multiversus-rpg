@@ -376,11 +376,20 @@
     /* =========================================
        BASE & RESPONSIVIDADE
        ========================================= */
+/* =========================================
+       BASE & RESPONSIVIDADE (TELA CHEIA FORÇADA)
+       ========================================= */
     .main-container { 
-        width: 100%; height: 100%; 
-        font-family: var(--font, 'monospace'); color: #fff; 
+        position: fixed !important; 
+        top: 0 !important; 
+        left: 0 !important; 
+        width: 100vw !important; 
+        height: 100vh !important; 
+        z-index: 999999 !important;
+        font-family: var(--font, 'monospace'); 
+        color: #fff; 
         background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
-        overflow: hidden; position: relative; 
+        overflow: hidden; 
     }
 
     .fullscreen-layer { 
