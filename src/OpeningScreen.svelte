@@ -4,8 +4,9 @@
     import { MENU_THEMES } from './data/MainMenuThemeDB.js'; 
     import MinigameStar from './MinigameStar.svelte';
     import JornalApp from './JornalApp.svelte';
+    import MinigameHud from './Game/MinigameHud.svelte';
 
-    export let app;
+    export let app; 
     export let onFinish;
 
     // --- CONFIGURAÇÕES GERAIS E DADOS DO FOUNDRY ---
@@ -174,10 +175,14 @@
         if (!bgAudio) startMusic();
     }
 
-    // --- NAVEGAÇÃO DO MENU PRINCIPAL ---
+// --- NAVEGAÇÃO DO MENU PRINCIPAL ---
     function openJournal() { state = 'journal'; }
     function closeJournal() { state = 'menu'; }
-    function openMinigames() { ui.notifications.info("Acessando Central de Minigames..."); /* Lógica futura aqui */ }
+    
+    // ATUALIZADO:
+    function openMinigames() { state = 'minigames_hud'; }
+    function closeMinigames() { state = 'menu'; }
+    
     function lockedAction() { ui.notifications.warn("ACESSO NEGADO: Módulo não instalado ou nível insuficiente."); }
 
     // --- CONFIGURAÇÕES ---
@@ -343,8 +348,13 @@
         </div>
     {/if}
 
-    {#if state === 'journal'}
+{#if state === 'journal'}
         <JornalApp on:close={closeJournal} />
+    {/if}
+
+    <!-- NOVO BLOCO DO HUD DE MINIGAMES -->
+    {#if state === 'minigames_hud'}
+        <MinigameHud on:close={closeMinigames} themeColor={themeColor} themeBg={themeBg} />
     {/if}
 
     {#if state === 'entering'}

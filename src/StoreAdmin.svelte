@@ -8,22 +8,23 @@
     const dispatch = createEventDispatcher();
 
     // CONFIGURAÇÃO
-    const TAGS = ["Poder Principal", "Poder Secundario", "Habilidade Especial", "Hyper Stat", "Hyper Skill", "Item", "Veiculo", "Portais", "Bases", "Contatos", "Criaturas", "Origens", "Passe"];
+    const TAGS = ["Talentos Principais", "Talentos Secundários", "Habilidades Especiais", "Habilidades Intrínsecas", "Itens", "Veículos", "Portais", "Bases", "Contatos", "Criaturas", "Origens", "Passe"];
     const RARITIES = ["Comum", "Raro", "Lendário", "Mítico", "Universal", "Multiversal"];
 
     // REGRAS
     const PB_RULES = {
-        "Poder Principal": { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 },
-        "Poder Secundario": { "Comum": 1, "Raro": 2, "Lendário": 4, "Mítico": 6, "Universal": 8, "Multiversal": 16 },
-        "Item": { "Comum": 1, "Raro": 2, "Lendário": 4, "Mítico": 6, "Universal": 8, "Multiversal": 16 },
-        "Veiculo": { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 },
-        "Habilidade Especial": { "Comum": 0, "Raro": 1, "Lendário": 2, "Mítico": 3, "Universal": 4, "Multiversal": 8 }
+        "Talentos Principais": { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 },
+        "Talentos Secundários": { "Comum": 1, "Raro": 2, "Lendário": 4, "Mítico": 6, "Universal": 8, "Multiversal": 16 },
+        "Habilidades Intrínsecas": { "Comum": 0.5, "Raro": 1, "Lendário": 2, "Mítico": 3, "Universal": 4, "Multiversal": 8 },
+        "Itens": { "Comum": 1, "Raro": 2, "Lendário": 4, "Mítico": 6, "Universal": 8, "Multiversal": 16 },
+        "Veículos": { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 },
+        "Habilidades Especiais": { "Comum": 0, "Raro": 1, "Lendário": 2, "Mítico": 3, "Universal": 4, "Multiversal": 8 }
     };
-    const XP_RULES = { "Poder Principal": 8, "Poder Secundario": 4, "Habilidade Especial": 2, "Hyper Stat": 0, "Hyper Skill": 0 };
+    const XP_RULES = { "Talentos Principais": 8, "Talentos Secundários": 4, "Habilidades Intrínsecas": 8, "Habilidades Especiais": 2, "Itens": 0 };
 
     // ESTADO
     const emptyItem = {
-        id: null, name: "", systemTag: "Poder Principal", rarity: "Comum", price: 0,
+        id: null, name: "", systemTag: "Talentos Principais", rarity: "Comum", price: 0,
         img: "icons/svg/mystery-man.svg",
         system: { description: "", costPerDie: 0, xpCost: 0, stock: -1 }
     };
@@ -45,6 +46,11 @@
     
     // NOVO: Estado de Inspeção
     let inspectedPlayer = null;
+    let activeTab = 'list';
+    // --- ESTADOS DA LOJA TEMÁTICA E EDIÇÃO RÁPIDA ---
+    let thematicSettings = { isActive: false, closeDate: null };
+    let thematicDateInput = "";
+    let quickEditItem = null;
 
     // ==========================================
     // ESTADOS DE FILTRO E ORDENAÇÃO
@@ -85,8 +91,9 @@
 
     onMount(() => { refreshAllData(); });
 
-    function refreshAllData() {
+function refreshAllData() {
         archiveItems = StoreDatabase.getArchive();
+        thematicSettings = StoreDatabase.getThematicSettings();
         playerList = game.users.filter(u => !u.isGM).map(u => {
             const data = u.getFlag("multiversus-rpg", "playerData") || { coins: 0, items: [] };
             if (transactionValues[u.id] === undefined) transactionValues[u.id] = 0;
@@ -161,13 +168,16 @@
     $: suggPB = (() => {
         let base = 0;
         if (PB_RULES[draft.systemTag]) base = PB_RULES[draft.systemTag][draft.rarity] || 0;
-        if (draft.systemTag === 'Habilidade Especial') base += 2;
-        if (draft.systemTag === 'Hyper Stat') base += 4;
-        if (draft.systemTag === 'Hyper Skill') base += 1;
+        if (draft.systemTag === 'Habilidades Especiais') base += 2;
         return base;
     })();
     $: suggXP = XP_RULES[draft.systemTag] || 0;
-    $: suggPrice = suggPB * 100;
+    $: suggPrice = (() => {
+        if (draft.systemTag === "Habilidades Intrínsecas") {
+            return (PB_RULES["Talentos Principais"][draft.rarity] || 0) * 100;
+        }
+        return suggPB * 100;
+    })();
 
     // PREVIEW
     $: previewHTML = isManualMode ? draft.system.description : generateHTML(simpleDesc, simpleWarn, serialBase, draft.name, draft.rarity, draft.systemTag);
@@ -192,6 +202,11 @@
                 itemToSave.system.rawWarn = simpleWarn;
                 itemToSave.system.serialBase = serialBase;
                 itemToSave.system.isManual = false;
+            }
+
+            // --- NOVO: Marca a data exata que o item virou Temático ---
+            if (itemToSave.system.isThematic && !itemToSave.system.thematicDate) {
+                itemToSave.system.thematicDate = Date.now();
             }
 
             await StoreDatabase.createItem(itemToSave);
@@ -252,12 +267,52 @@
     function openInspector(player) {
         inspectedPlayer = player;
     }
+
+    async function launchThematicDrop() {
+        if (!thematicDateInput) return ui.notifications.warn("Defina a data e hora de encerramento primeiro!");
+        const closeDateMs = new Date(thematicDateInput).getTime();
+        
+        if (closeDateMs <= Date.now()) return ui.notifications.warn("A data de encerramento deve ser no futuro.");
+
+        const count = await StoreDatabase.launchThematicStore(closeDateMs);
+        ui.notifications.info(`DROP INICIADO! ${count} itens saíram do Preview para Lançamento.`);
+        refreshAllData();
+    }
+
+    async function stopThematicDrop() {
+        await StoreDatabase.updateThematicSettings({ isActive: false, closeDate: null });
+        ui.notifications.info("Drop Temático encerrado manualmente.");
+        refreshAllData();
+    }
+
+    async function saveQuickEdit() {
+        if (quickEditItem) {
+            await StoreDatabase.createItem(quickEditItem);
+            quickEditItem = null;
+            ui.notifications.info("Estoque/Limites atualizados!");
+            refreshAllData();
+        }
+    }
 </script>
 
 <div class="admin-panel" in:fade>
+{#if quickEditItem}
+        <div class="modal-backdrop" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;" on:click|self={() => quickEditItem = null}>
+            <div class="quick-edit-box" style="background:#111; border:2px solid #00ff41; padding:20px; width:300px; border-radius:8px;">
+                <h3 style="color:#00ff41; margin-top:0;">EDITAR: {quickEditItem.name}</h3>
+                <div class="field" style="margin-bottom:10px;"><label>PREÇO (NX)</label><input type="number" bind:value={quickEditItem.price}></div>
+                <div class="field" style="margin-bottom:20px;"><label>ESTOQUE GLOBAL (-1 = Infinito)</label><input type="number" bind:value={quickEditItem.system.stock}></div>
+                <div style="display:flex; gap:10px;">
+                    <button class="save-btn" style="flex:1; margin:0; padding:10px;" on:click={saveQuickEdit}>SALVAR</button>
+                    <button style="flex:1; background:#333; color:#fff; border:none; cursor:pointer;" on:click={() => quickEditItem = null}>CANCELAR</button>
+                </div>
+            </div>
+        </div>
+    {/if}
 <nav class="admin-nav">
         <button class:active={activeSection === 'create'} on:click={() => { activeSection = 'create'; }}><i class="fas fa-hammer"></i> CRIAR</button>
         <button class:active={activeSection === 'manage'} on:click={() => { activeSection = 'manage'; searchQuery = ''; selectedFilterTag = 'Todos'; }}><i class="fas fa-list"></i> LOJA ATIVA</button>
+        <button class:active={activeSection === 'thematic'} on:click={() => { activeSection = 'thematic'; refreshAllData(); }}><i class="fas fa-fire"></i> DROP TEMÁTICO</button>
         <button class:active={activeSection === 'archive'} on:click={() => { activeSection = 'archive'; refreshAllData(); searchQuery = ''; selectedFilterTag = 'Todos'; }}><i class="fas fa-database"></i> DB GERAL</button>
         <button class:active={activeSection === 'players'} on:click={() => { activeSection = 'players'; refreshAllData(); }}><i class="fas fa-users"></i> JOGADORES</button>
     </nav>
@@ -283,6 +338,28 @@
                     <div class="field"><label>CUSTO PB (Auto: {suggPB})</label> <input type="number" bind:value={draft.system.costPerDie} /></div>
                     <div class="field"><label>CUSTO XP (Auto: {suggXP})</label> <input type="number" bind:value={draft.system.xpCost} /></div>
                     <div class="field"><label>PREÇO (Auto: {suggPrice})</label> <input type="number" bind:value={draft.price} style="color:#ffcc00" /></div>
+                    <div class="row">
+                    <div class="field">
+                        <label>ITEM TEMÁTICO?</label>
+                        <select bind:value={draft.system.isThematic}>
+                            <option value={false}>NÃO (Loja Normal)</option>
+                            <option value={true}>SIM (Thematic Drop)</option>
+                        </select>
+                    </div>
+                    {#if draft.system.isThematic}
+                        <div class="field">
+                            <label>STATUS TEMÁTICO</label>
+                            <select bind:value={draft.system.thematicStatus}>
+                                <option value="preview">PREVIEW (Visor Apenas)</option>
+                                <option value="active">LANÇAMENTO (Comprável)</option>
+                            </select>
+                        </div>
+                    {/if}
+                </div>--
+
+                <button class:active={activeTab === 'tematica'} on:click={() => activeTab = 'tematica'}>
+                    <i class="fas fa-fire"></i> THEMATIC_DROP
+                </button>
                     <div class="field"><label>ESTOQUE (-1 = Infinito)</label> <input type="number" bind:value={draft.system.stock} placeholder="-1" /></div>
                 </div>
                 <div class="desc-header">
@@ -316,8 +393,32 @@
             </div>
         </div>
 
-{:else if activeSection === 'manage' || activeSection === 'archive'}
+{:else if activeSection === 'manage' || activeSection === 'archive' || activeSection === 'thematic'}
         <div class="archive-view">
+            
+            {#if activeSection === 'thematic'}
+                <div class="thematic-dashboard" style="background: rgba(255, 51, 51, 0.1); border: 1px solid #ff3333; padding: 20px; border-radius: 8px; margin-bottom: 20px; flex-shrink: 0;">
+                    <h2 style="color: #ff3333; margin-top: 0;"><i class="fas fa-fire"></i> CENTRAL DO DROP TEMÁTICO</h2>
+                    <p style="font-size: 12px; color: #ccc;">Itens em Preview não podem ser comprados. Defina o cronômetro abaixo e lance todos de uma vez!</p>
+                    
+                    <div style="display: flex; gap: 15px; align-items: flex-end; margin-top: 15px;">
+                        <div class="field" style="flex: 1;">
+                            <label style="color: #ff3333;">ENCERRAR DROP EM:</label>
+                            <input type="datetime-local" bind:value={thematicDateInput} style="border-color: #ff3333;">
+                        </div>
+                        {#if thematicSettings.isActive}
+                            <button class="save-btn" style="background: #ff3333; color: #fff; margin: 0; flex: 1;" on:click={stopThematicDrop}>
+                                <i class="fas fa-stop-circle"></i> FORÇAR ENCERRAMENTO
+                            </button>
+                        {:else}
+                            <button class="save-btn" style="background: #ffcc00; margin: 0; flex: 1;" on:click={launchThematicDrop}>
+                                <i class="fas fa-rocket"></i> LANÇAR DROP AGORA
+                            </button>
+                        {/if}
+                    </div>
+                </div>
+            {/if}
+
             <div class="filter-bar">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
@@ -336,44 +437,64 @@
             </div>
 
             <div class="header-info">
-                <span>TOTAL DE RESULTADOS: {activeSection === 'archive' ? filteredArchive.length : filteredStore.length}</span>
+                <span>TOTAL DE RESULTADOS: {
+                    activeSection === 'thematic' ? filteredArchive.filter(i => i.system?.isThematic).length :
+                    (activeSection === 'archive' ? filteredArchive.length : filteredStore.length)
+                }</span>
             </div>
 
             <div class="items-list custom-scroll">
-                {#each (activeSection === 'archive' ? filteredArchive : filteredStore) as item (item.id)}
+                {#each (activeSection === 'thematic' ? filteredArchive.filter(i => i.system?.isThematic) : (activeSection === 'archive' ? filteredArchive : filteredStore)) as item (item.id)}
                     {@const inStore = storeItems.some(s => s.id === item.id)}
                     <div class="db-row" class:is-store={inStore}>
                         <img src={item.img} alt="img" />
                         <div class="info">
-                            <span class="name">{item.name}</span>
+                            <span class="name">
+                                {item.name} 
+                                {#if item.system?.isThematic}
+                                    <small style="color: #ff3333; border: 1px solid #ff3333; padding: 1px 4px; border-radius: 2px; margin-left: 5px;">
+                                        {item.system.thematicStatus === 'preview' ? 'PREVIEW' : 'LANÇAMENTO'}
+                                    </small>
+                                {/if}
+                                {#if item.system?.stock === 0}
+                                    <small style="background: #ff3333; color: #000; padding: 1px 4px; border-radius: 2px; margin-left: 5px;">ESGOTADO</small>
+                                {/if}
+                            </span>
                             <div class="tags-row">
-                                <span class="meta tag">{item.systemTag}</span>
+                                <span class="meta tag">
+                                    {item.systemTag} 
+                                    {#if !TAGS.includes(item.systemTag)}
+                                        <i class="fas fa-exclamation-triangle" style="color:#ffcc00; margin-left:5px;" title="Categoria desatualizada. Edite e salve novamente."></i>
+                                    {/if}
+                                </span>
                                 <span class="meta rarity {item.rarity.toLowerCase()}">{item.rarity}</span>
                             </div>
                         </div>
                         <div class="controls">
-                            {#if activeSection === 'archive'}
-                                <button class="toggle-btn" class:active={inStore} on:click={() => toggleStore(item)}>
-                                    {inStore ? "VENDENDO" : "OFFLINE"}
-                                </button>
-                                <button class="icon-btn" on:click={() => editItem(item)} title="Editar"><i class="fas fa-edit"></i></button>
-                                <button class="icon-btn del" on:click={() => deletePermanent(item.id)} title="Deletar BD"><i class="fas fa-trash"></i></button>
-                            {:else}
-                                <button class="icon-btn" on:click={() => editItem(item)} title="Editar"><i class="fas fa-edit"></i></button>
-                                <button class="icon-btn del" style="width:auto; padding:0 10px; font-size:10px; font-weight:bold;" on:click={() => deleteItem(item.id)}>REMOVER DA LOJA</button>
+                            <button class="icon-btn" style="color: #ffcc00;" on:click={() => quickEditItem = JSON.parse(JSON.stringify(item))} title="Estoque / Limites / Preço">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            
+                            <button class="toggle-btn" class:active={inStore} on:click={() => toggleStore(item)}>
+                                {inStore ? "VENDENDO" : "OFFLINE"}
+                            </button>
+
+                            <button class="icon-btn" on:click={() => editItem(item)} title="Editar"><i class="fas fa-edit"></i></button>
+                            
+                            {#if activeSection === 'archive' || activeSection === 'thematic'}
+                                <button class="icon-btn del" on:click={() => deletePermanent(item.id)} title="Deletar Permanentemente"><i class="fas fa-trash"></i></button>
                             {/if}
                         </div>
                     </div>
                 {/each}
                 
-                {#if (activeSection === 'archive' && filteredArchive.length === 0) || (activeSection === 'manage' && filteredStore.length === 0)}
+                {#if (activeSection === 'archive' && filteredArchive.length === 0) || (activeSection === 'manage' && filteredStore.length === 0) || (activeSection === 'thematic' && filteredArchive.filter(i => i.system?.isThematic).length === 0)}
                     <div class="empty-state-msg">
                         <i class="fas fa-ghost"></i> Nenhum item encontrado com estes filtros.
                     </div>
                 {/if}
             </div>
         </div>
-
     {:else if activeSection === 'players'}
         <div class="players-layout">
             <div class="players-sidebar">
@@ -381,7 +502,7 @@
                     <div class="player-tab" class:active={inspectedPlayer?.id === p.id} on:click={() => openInspector(p)}>
                         <div class="tab-indicator" style="background: {p.color}"></div>
                         <span class="p-name">{p.name}</span>
-                        <span class="p-coins">{p.coins} MC</span>
+                        <span class="p-coins">{p.coins} NX</span>
                     </div>
                 {/each}
             </div>
@@ -392,7 +513,7 @@
                         <h2>{inspectedPlayer.name.toUpperCase()}</h2>
                         
                         <div class="coin-ops">
-                            <span class="current-money">{inspectedPlayer.coins} MC</span>
+                            <span class="current-money">{inspectedPlayer.coins} NX</span>
                             <div class="transact-grp">
                                 <input type="number" bind:value={transactionValues[inspectedPlayer.id]} placeholder="0" />
                                 <button class="add" on:click={() => modifyCoins(inspectedPlayer.id, 'add')}>+</button>

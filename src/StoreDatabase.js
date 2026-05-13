@@ -2,8 +2,11 @@ const MODULE_ID = "multiversus-rpg";
 const KEYS = { 
     ARCHIVE: "masterArchive", 
     STORE: "storeCatalog",
-    SEASON: "battlePassSeason" 
+    SEASON: "battlePassSeason",
+    THEMATIC: "thematicStoreData" // <--- NOVA CHAVE
 };
+
+
 
 export const StoreDatabase = {
     // --- INICIALIZAÇÃO PADRÃO ---
@@ -34,6 +37,7 @@ export const StoreDatabase = {
         register(KEYS.ARCHIVE, []);
         register(KEYS.STORE, []);
         register(KEYS.SEASON, { status: 'closed', startDate: null, endDate: null, name: 'Temporada 1', rewardsMap: [] });
+        register(KEYS.THEMATIC, { isActive: false, closeDate: null });
     },
 
     _safeGet: (key) => {
@@ -124,19 +128,32 @@ export const StoreDatabase = {
                 acc += w.weight;
                 if (rnd <= acc) { chosenRarity = w.rarity; break; }
             }
+
             
-            let possibleItems = archive.filter(item => {
+            
+let possibleItems = archive.filter(item => {
+                if (item.system?.stock === 0) return false; // <--- NOVA TRAVA DE ESTOQUE
+                
+                let tag = item.systemTag || "Item";
                 if (activeStoreIds.includes(item.id)) return false;
                 if (item.rarity !== chosenRarity) return false;
-                let tag = item.systemTag || "Item";
-                if (["Origens", "Portais", "Passe"].includes(tag)) return false;
-                let isPower = tag === "Poder Principal" || tag === "Poder Secundario";
+                if (["Origens", "Portais", "Passe", "Habilidades Intrínsecas"].includes(tag)) return false;
+                let isPower = tag === "Talentos Principais" || tag === "Talentos Secundários";
                 
                 if (chosenRarity === "Comum" || chosenRarity === "Raro") {
                     if (isPower) return false;
                 }
                 if (chosenRarity === "Multiversal") {
                     if (isPower) return false;
+                }
+
+                // --- REGRA DE 30 DIAS DA LOJA TEMÁTICA ---
+                if (item.system?.isThematic) {
+                    if (item.system.thematicStatus === 'preview') return false; // Preview nunca vai pra Reroll
+                    if (item.system.thematicDate) {
+                        const ageInDays = (Date.now() - item.system.thematicDate) / (1000 * 60 * 60 * 24);
+                        if (ageInDays < 30) return false; // Tem menos de 30 dias? Fica fora da Exclusiva.
+                    }
                 }
                 return true;
             });
@@ -150,11 +167,12 @@ export const StoreDatabase = {
                 storeItems.push(clone);
             } else {
                 // Fallback: pega qualquer item que não seja poder
-                let fItems = archive.filter(item => {
+let fItems = archive.filter(item => {
+                    if (item.system?.stock === 0) return false; // <--- NOVA TRAVA NO FALLBACK TAMBÉM
                     if (activeStoreIds.includes(item.id)) return false;
                     let tag = item.systemTag || "Item";
-                    if (["Origens", "Portais", "Passe"].includes(tag)) return false;
-                    return tag !== "Poder Principal" && tag !== "Poder Secundario";
+                    if (["Origens", "Portais", "Passe", "Habilidades Intrínsecas"].includes(tag)) return false;
+                    return tag !== "Talentos Principais" && tag !== "Talentos Secundários";
                 });
                 if (fItems.length > 0) {
                     let rItem = fItems[Math.floor(Math.random() * fItems.length)];
@@ -216,6 +234,40 @@ export const StoreDatabase = {
         await user.setFlag(MODULE_ID, "passData", { tier: tierId });
         game.socket.emit(`module.${MODULE_ID}`, { type: "passUpdate" });
         Hooks.callAll("passSystemUpdate");
+    },
+
+    getThematicSettings: () => StoreDatabase._safeGet(KEYS.THEMATIC) || { isActive: false, closeDate: null },
+
+    updateThematicSettings: async (data) => {
+        if (!game.user.isGM) return;
+        const current = StoreDatabase.getThematicSettings();
+        await StoreDatabase._safeSet(KEYS.THEMATIC, { ...current, ...data });
+        Hooks.callAll("storeUpdate");
+    },
+
+    // A mágica do botão "Lançar Tudo":
+    launchThematicStore: async (closeDateMs) => {
+        if (!game.user.isGM) return;
+        let archive = StoreDatabase.getArchive();
+        let store = StoreDatabase.getStore();
+        let count = 0;
+
+        const makeActive = (item) => {
+            if (item.system?.isThematic && item.system?.thematicStatus === 'preview') {
+                item.system.thematicStatus = 'active';
+                item.system.thematicDate = Date.now();
+                count++;
+            }
+        };
+
+        archive.forEach(makeActive);
+        store.forEach(makeActive);
+
+        await StoreDatabase._safeSet(KEYS.ARCHIVE, archive);
+        await StoreDatabase._safeSet(KEYS.STORE, store);
+        await StoreDatabase.updateThematicSettings({ isActive: true, closeDate: closeDateMs });
+        
+        return count;
     },
 
     createItem: async (item) => {
@@ -328,6 +380,10 @@ buyItemLocal: async (itemToBuy) => {
         
         userData.coins -= eItem.price;
         eItem.purchased = true;
+
+        if (eItem.system?.stock !== -1) {
+            game.socket.emit(`module.${MODULE_ID}`, { type: "updateStock", itemId: eItem.id });
+        }
         
         const newItem = { 
             ...eItem, 
@@ -398,24 +454,55 @@ buyItemLocal: async (itemToBuy) => {
             // Se NÃO estava ativo, e agora vai ativar -> DISCORD TRIGGER
             if (!userData.items[idx].active) {
                 userData.items[idx].active = true;
-                await user.setFlag(MODULE_ID, "playerData", userData);
-                ui.notifications.info("Renderização Iniciada...");
+                
+                let item = userData.items[idx];
                 
                 // Dispara o Hook com o Item e o Usuário
-                Hooks.callAll("nexusItemActivated", userData.items[idx], user); // <--- HOOK NOVO
+                Hooks.callAll("nexusItemActivated", item, user);
+                ui.notifications.info("Renderização Iniciada...");
+                
+                // Lógica de Vale Re-roll
+                if (item.name === "Vale Re-roll" && item.systemTag === "Passe") {
+                    await StoreDatabase.generateExclusiveStore(user.id, true);
+                    ui.notifications.info("Vale Re-roll utilizado! Loja Exclusiva renovada gratuitamente.");
+                }
+
+                // Remove do estoque automaticamente ao renderizar
+                userData.items.splice(idx, 1);
+                
+                await user.setFlag(MODULE_ID, "playerData", userData);
             }
-            // Se já estava ativo, nada acontece (ou desativa, dependendo da sua lógica futura)
         }
     },
 
-    decreaseStock: async (itemId) => {
-        if (!game.user.isGM) return;
+decreaseStock: async (itemId) => {
+        if (!game.user.isGM) return; // Só o Mestre processa a matemática real
+
+        let archive = StoreDatabase.getArchive();
         let store = StoreDatabase.getStore();
-        const idx = store.findIndex(i => i.id === itemId);
-        
-        if (idx >= 0 && store[idx].system.stock > 0) {
-            store[idx].system.stock -= 1;
+        let mudouAlgo = false;
+
+        // 1. Tira do estoque da Vitrine (Loja/Thematic)
+        const sIdx = store.findIndex(i => i.id === itemId);
+        if (sIdx >= 0 && store[sIdx].system.stock > 0) {
+            store[sIdx].system.stock -= 1;
+            mudouAlgo = true;
+        }
+
+        // 2. Tira do estoque do Arquivo Global (Para não cair no Reroll)
+        const aIdx = archive.findIndex(i => i.id === itemId);
+        if (aIdx >= 0 && archive[aIdx].system.stock > 0) {
+            archive[aIdx].system.stock -= 1;
+            mudouAlgo = true;
+        }
+
+        // 3. Se houve compra e reduziu o estoque, salva as duas databases e atualiza as telas!
+        if (mudouAlgo) {
             await StoreDatabase._safeSet(KEYS.STORE, store);
+            await StoreDatabase._safeSet(KEYS.ARCHIVE, archive);
+            
+            // Avisa todas as telas de todos os jogadores para recarregarem os números
+            Hooks.callAll("storeUpdate"); 
         }
     }
 };

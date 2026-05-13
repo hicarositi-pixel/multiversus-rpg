@@ -48,7 +48,7 @@
                 {#if item.discounted}
                     <span class="original-price">{item.originalPrice}</span>
                 {/if}
-                {item.price} <small>MC</small>
+                {item.price} <small>NX</small>
             </span>
             <div class="action-arrow">>></div>
         </div>
@@ -83,10 +83,13 @@
         background: #000; border-bottom: 1px solid #333;
     }
     .matrix-card.featured {
-        height: 100%; min-height: 400px;
+        width: 100%; height: 300px; flex-direction: row;
     }
     .matrix-card.featured .holo-frame {
-        height: 60%;
+        width: 65%; height: 100%; border-right: 1px solid #333; border-bottom: none;
+    }
+    .matrix-card.featured .data-block {
+        width: 35%; padding: 20px;
     }
     .matrix-card.featured .name {
         font-size: 18px; white-space: normal; overflow: visible;

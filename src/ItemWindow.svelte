@@ -11,6 +11,7 @@
     
     let pos = { x: window.innerWidth / 2 - 375, y: window.innerHeight / 2 - 250 };
     let isDragging = false;
+    let confirmMode = null;
 
     function startDrag() { isDragging = true; }
     function stopDrag() { isDragging = false; }
@@ -78,21 +79,37 @@
                     </div>
                 </div>
 
-                <div class="actions-area">
+<div class="actions-area">
                     {#if mode === 'shop'}
                         <div class="price-display">
                             <span class="label">UNIT_PRICE:</span>
-                            <span class="amount">{item.price} MC</span>
+                            <span class="amount">{item.price} NX</span>
                         </div>
-                        <button class="cyber-btn buy" on:click={() => dispatch('buy', item)}>
-                            <i class="fas fa-shopping-cart"></i> EXECUTE_TRANSACTION
-                        </button>
+                        {#if confirmMode === 'buy'}
+                            <div class="confirm-prompt">CONFIRMAR COMPRA?</div>
+                            <div class="confirm-actions">
+                                <button class="cyber-btn activate" style="border-color:#00ff41; color:#00ff41;" on:click={() => { confirmMode = null; dispatch('buy', item); }}>[ YES ]</button>
+                                <button class="cyber-btn disabled" style="color:#ff3333; border-color:#ff3333;" on:click={() => confirmMode = null}>[ NO ]</button>
+                            </div>
+                        {:else}
+                            <button class="cyber-btn buy" on:click={() => confirmMode = 'buy'}>
+                                <i class="fas fa-shopping-cart"></i> EXECUTE_TRANSACTION
+                            </button>
+                        {/if}
                     
                     {:else if mode === 'inventory'}
                         {#if !isRendered}
-                            <button class="cyber-btn activate" on:click={() => dispatch('activate', item)}>
-                                <i class="fas fa-power-off"></i> RENDER_ITEM
-                            </button>
+                            {#if confirmMode === 'activate'}
+                                <div class="confirm-prompt">RENDERIZAR ITEM?</div>
+                                <div class="confirm-actions">
+                                    <button class="cyber-btn activate" style="border-color:#00ff41; color:#00ff41;" on:click={() => { confirmMode = null; dispatch('activate', item); }}>[ YES ]</button>
+                                    <button class="cyber-btn disabled" style="color:#ff3333; border-color:#ff3333;" on:click={() => confirmMode = null}>[ NO ]</button>
+                                </div>
+                            {:else}
+                                <button class="cyber-btn activate" on:click={() => confirmMode = 'activate'}>
+                                    <i class="fas fa-power-off"></i> RENDER_ITEM
+                                </button>
+                            {/if}
                         {:else}
                             <button class="cyber-btn disabled" disabled>
                                 <i class="fas fa-check"></i> SYSTEM_ONLINE
@@ -167,6 +184,10 @@
     .price-display .label { font-size: 10px; }
     .price-display .amount { font-size: 22px; color: #ffcc00; text-shadow: 0 0 5px #ffcc00; }
     .info-tag { text-align: center; color: #666; font-size: 10px; border: 1px dashed #333; padding: 5px; }
+
+    .confirm-prompt { text-align: center; font-size: 12px; color: #ffcc00; font-weight: bold; margin-bottom: 5px; }
+    .confirm-actions { display: flex; gap: 10px; }
+    .confirm-actions .cyber-btn { flex: 1; font-size: 12px; }
 
     .cyber-btn { width: 100%; padding: 12px; font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; border: 1px solid transparent; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px); }
     .cyber-btn.buy { background: var(--th); color: #000; }
