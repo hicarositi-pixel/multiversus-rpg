@@ -225,21 +225,32 @@ $: strokeDashoffset = 283 - (283 * activeLvlInfo.progress / 100);
         ui.notifications.info(`Origem alterada.`);
     }
 
-    async function importPlayerXP() {
+async function importPlayerXP() {
         isSyncing = true;
         try {
             const userId = game.user.id; 
+            
+            // 1. O XP continua vindo dos dados globais do Jogador (User Data)
             const xpData = await XPDatabase.getPlayerData(userId);
-            const userOrigin = game.users.get(userId)?.getFlag(MODULE_ID, "origin");
 
+            // 2. A Origem AGORA puxa direto da Ficha (Actor Data)
+            // Se não houver nada na ficha, assume "humano" por segurança
+            const sheetOrigin = actor.getFlag(MODULE_ID, "origin") || flags.origin || "humano";
+
+            // 3. Atualizamos APENAS o XP na ficha, deixando a origem da ficha intacta
             const updates = { [`flags.${MODULE_ID}.xp`]: xpData.earnedXP || 0 };
-            if (userOrigin) updates[`flags.${MODULE_ID}.origin`] = userOrigin;
 
             await actor.update(updates, { render: false });
             currentXP = xpData.earnedXP || 0;
-            if (userOrigin) await loadOriginData(userOrigin);
+            
+            // 4. Carrega os efeitos e dados visuais da origem baseando-se no que está na ficha
+            await loadOriginData(sheetOrigin);
+            
             ui.notifications.info(`Sincronizado: ${currentXP} XP.`);
-        } catch (e) { ui.notifications.warn("Falha de Sincronia."); }
+        } catch (e) { 
+            console.error("NEXUS | Erro na sincronia de XP/Origem:", e);
+            ui.notifications.warn("Falha de Sincronia."); 
+        }
         isSyncing = false;
     }
 

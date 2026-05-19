@@ -109,7 +109,6 @@
   async function updateCustomUrl() { await updateFlag('customUrl', customUrl); }
   
   function pickLibraryImage() { 
-      if (!isGM) return;
       new FilePicker({ 
           type: "image", 
           current: item.img, 
@@ -203,11 +202,9 @@ async function addCapacity(qIndex) {
     <div class="profile-section">
       <div class="avatar-frame">
         <img src={displayImg} alt={name} />
-        {#if isGM}
             <div class="avatar-overlay" on:click={pickLibraryImage}>a
             <i class="fas fa-edit"></i>
             </div>
-        {/if}
       </div>
     </div>
 
@@ -254,9 +251,9 @@ async function addCapacity(qIndex) {
 
   <nav class="sheet-nav">
     <button class:active={activeTab === 'geral'} on:click={() => activeTab = 'geral'}>VISÃO GERAL</button>
-    {#if isGM}
+
         <button class:active={activeTab === 'balanceamento'} on:click={() => activeTab = 'balanceamento'}>ENGENHARIA</button>
-    {/if}
+
   </nav>
 
   <main class="sheet-content custom-scroll">

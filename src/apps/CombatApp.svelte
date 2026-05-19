@@ -77,12 +77,12 @@
     // =========================================================
     
     const DEFAULT_LIMBS = [
-        { id: 'leg-l', name: 'P.ESQ', loc: '1', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 65, y: 75 },
-        { id: 'leg-r', name: 'P.DIR', loc: '2', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 35, y: 75 },
-        { id: 'arm-l', name: 'B.ESQ', loc: '3-4', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 80, y: 40 },
-        { id: 'arm-r', name: 'B.DIR', loc: '5-6', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 20, y: 40 },
-        { id: 'torso', name: 'TORSO', loc: '7-9', hp: 7, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 40 },
-        { id: 'head', name: 'CABEÇA', loc: '10', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 10 }
+        { id: 'leg-l', name: 'P.ESQ', loc: '1', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 65, y: 75, nonPhysicalDef: false },
+        { id: 'leg-r', name: 'P.DIR', loc: '2', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 35, y: 75, nonPhysicalDef: false },
+        { id: 'arm-l', name: 'B.ESQ', loc: '3-4', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 80, y: 40, nonPhysicalDef: false },
+        { id: 'arm-r', name: 'B.DIR', loc: '5-6', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 20, y: 40, nonPhysicalDef: false },
+        { id: 'torso', name: 'TORSO', loc: '7-9', hp: 7, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 40, nonPhysicalDef: false },
+        { id: 'head', name: 'CABEÇA', loc: '10', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 10, nonPhysicalDef: false }
     ];
 
     let activeForm = "base"; // 'base', 'trans', 'gallery'
@@ -114,9 +114,14 @@
     let imgModalType = ''; 
     let imgModalUrl = '';
 
+    // --- NOVAS VARIÁVEIS DE DANO (PERFURAÇÃO E NÃO-FÍSICO) E REGEN ---
     let inputShock = null;
     let inputKilling = null;
     let inputHeal = null;
+    let inputPenetration = null;
+    let inputNonPhysical = false;
+    let inputRegen = null;
+
     let newTrauma = { key: "", label: "", color: "#ffffff", desc: "", icon: "Biohazard" };
 
     $: selectedLimb = currentLimbs.find(l => l.id === selectedLimbId);
@@ -137,17 +142,34 @@
         await actor.update({ [`flags.${MODULE_ID}.${flagKey}`]: activeForm === 'base' ? limbsBase : limbsTrans }, { render: false });
     }
 
+    // --- CÁLCULO DE DANO REVISADO (REGRAS ORE + NÃO FÍSICO E PERFURAÇÃO) ---
     async function applyDamage() {
         if (!selectedLimb) return ui.notifications.warn("Selecione um membro!");
         let S_in = Number(inputShock || 0);
         let K_in = Number(inputKilling || 0);
-        const LAR = Number(selectedLimb.lar || 0);
+        let Pen_in = Number(inputPenetration || 0);
+        let isNonPhysical = inputNonPhysical;
 
-        // HAR APENAS VISUAL: Apenas a LAR reduz o dano mecanicamente.
-        let S_final = Math.max(0, S_in - LAR);
-        let converted_K = Math.min(K_in, LAR);
+        // 1. Lógica de Armadura (Perfuração afeta LAR e HAR)
+        const baseLAR = Number(selectedLimb.lar || 0);
+        
+        // 2. Lógica do Dano Não Físico (Ignora LAR se o membro não possuir Defesa Não Física)
+        let ignoreArmor = isNonPhysical && !selectedLimb.nonPhysicalDef;
+        
+        // LAR efetiva pós-perfuração (Mínimo 0)
+        let effectiveLAR = ignoreArmor ? 0 : Math.max(0, baseLAR - Pen_in);
+        // HAR APENAS VISUAL: Apenas a LAR reduz o dano mecanicamente, HAR é apenas narrativa no Foundry.
+
+        // 3. ORE RULES: LAR reduz Shock para 1.
+        let S_final = S_in;
+        if (effectiveLAR > 0 && S_in > 0) {
+            S_final = 1; 
+        }
+
+        // 4. ORE RULES: LAR converte Killing em Shock.
+        let converted_K = Math.min(K_in, effectiveLAR);
         let K_final = K_in - converted_K;
-        S_final += converted_K;
+        S_final += converted_K; // Shock convertido do Killing não é reduzido para 1
 
         let curK = selectedLimb.killing;
         let curS = selectedLimb.shock;
@@ -175,7 +197,9 @@
         
         triggerReactivity(); // Renderiza instantâneo na UI
         
-        inputShock = null; inputKilling = null;
+        // Limpa as caixas de dano após a aplicação
+        inputShock = null; inputKilling = null; inputPenetration = null; inputNonPhysical = false;
+        
         if (selectedLimb.killing >= selectedLimb.hp) ui.notifications.error(`${selectedLimb.name} DESTRUÍDO!`);
     }
 
@@ -189,6 +213,38 @@
         }
         triggerReactivity();
         inputHeal = null;
+    }
+
+    // --- NOVA LÓGICA DE REGENERAÇÃO DE CORPO INTEIRO ---
+    async function applyRegen() {
+        let amount = Number(inputRegen || 0);
+        if(amount <= 0) return;
+        
+        let totalCured = 0;
+        // Puxa o array atual de acordo com a transformação
+        let forms = activeForm === 'base' ? limbsBase : limbsTrans;
+        
+        // Percorre todos os membros, curando 'amount' em CADA membro (Regra Wild Talents)
+        for (let i = 0; i < forms.length; i++) {
+            let amt = amount;
+            while (amt > 0) {
+                if (forms[i].killing > 0) { forms[i].killing--; amt--; totalCured++; }
+                else if (forms[i].shock > 0) { forms[i].shock--; amt--; totalCured++; }
+                else break;
+            }
+        }
+        
+        triggerReactivity();
+        inputRegen = null;
+
+        if (totalCured > 0) {
+            ChatMessage.create({
+                content: `<div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 10px; color: #fff;"><strong>${actor.name}</strong> ativou <strong style="color: #3b82f6;">Regeneração</strong> e curou um total de <strong>${totalCured}</strong> caixas de dano em todo o corpo!</div>`,
+                speaker: ChatMessage.getSpeaker({actor: actor})
+            });
+        } else {
+            ui.notifications.info("A regeneração concluiu, mas não havia dano a curar.");
+        }
     }
 
     // --- ARRASTAR E SOLTAR ---
@@ -281,9 +337,15 @@
         await actor.update({ [`flags.${MODULE_ID}.combat_gallery`]: galleryItems }, { render: false });
     }
 
+    // --- CORREÇÃO DO ADD LIMB ---
     async function addLimb() {
-        const newLimb = { id: foundry.utils.randomID(), name: 'NOVO', loc: '0', hp: 3, lar:0, har:0, killing:0, shock:0, trauma:[], x: 50, y: 50 };
-        currentLimbs = [...currentLimbs, newLimb]; triggerReactivity();
+        const newLimb = { id: foundry.utils.randomID(), name: 'NOVO', loc: '0', hp: 3, lar:0, har:0, killing:0, shock:0, trauma:[], x: 50, y: 50, nonPhysicalDef: false };
+        if (activeForm === 'base') {
+            limbsBase = [...limbsBase, newLimb];
+        } else {
+            limbsTrans = [...limbsTrans, newLimb];
+        }
+        triggerReactivity();
     }
 
     function getSlotState(limb, i) {
@@ -294,7 +356,6 @@
         return { status: 'empty' };
     }
 </script>
-
 <div class="body-dashboard" style="
     --c-primary: {theme.vars['--c-primary']};
     --c-bg: {theme.vars['--c-bg']};
@@ -431,22 +492,29 @@
                     </div>
                 </div>
 
-                <div class="calc-box">
+<div class="calc-box">
                     <div class="calc-title">{selectedLimb ? selectedLimb.name : "SELECIONE ALVO"}</div>
                     {#if selectedLimb}
                         <div class="armor-edit">
                             <label>Arm. Leve<input type="number" bind:value={selectedLimb.lar} on:change={triggerReactivity}></label>
                             <label>Arm. Pesada<input type="number" bind:value={selectedLimb.har} on:change={triggerReactivity}></label>
                             <label>HP Total<input type="number" bind:value={selectedLimb.hp} on:change={triggerReactivity}></label>
+                            <label style="flex: 0.8; color: #a855f7;">Não-Físico<input type="checkbox" bind:checked={selectedLimb.nonPhysicalDef} on:change={triggerReactivity} style="cursor: pointer;"></label>
                         </div>
                         <div class="dmg-inputs">
                             <div class="grp"><label style="color:var(--c-shock)">Não Letal</label><input type="number" bind:value={inputShock}></div>
                             <div class="grp"><label style="color:var(--c-kill)">Letal</label><input type="number" bind:value={inputKilling}></div>
+                            <div class="grp"><label style="color:#00fbff">Perf.</label><input type="number" bind:value={inputPenetration}></div>
+                            <div class="grp" style="flex: 0.5;"><label style="color: #a855f7;">Não-Físico?</label><input type="checkbox" bind:checked={inputNonPhysical} style="margin-top: 5px; cursor: pointer;"></div>
                         </div>
                         <button class="btn-hit" on:click={applyDamage}>DANO</button>
                         <div class="heal-row">
                             <input type="number" bind:value={inputHeal} placeholder="Cura">
                             <button on:click={applyHeal}>+</button>
+                        </div>
+                        <div class="heal-row" style="margin-top: 5px;">
+                            <input type="number" bind:value={inputRegen} placeholder="Regen" style="border-color: #3b82f6;">
+                            <button style="background: #3b82f6; color: #fff;" on:click={applyRegen}><i class="fas fa-dna"></i> REGEN CORPO TODO</button>
                         </div>
                     {/if}
                 </div>

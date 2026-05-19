@@ -133,8 +133,11 @@ export const PowerParser = {
                 });
             }
 
-            const descMatch = block.match(/>\s*(.*)/);
-            if (descMatch) q.description = descMatch[1].trim();
+// O [\s\S]* garante que ele vai ler o > e capturar TODAS as linhas abaixo dele
+            const descMatch = block.match(/>\s*([\s\S]*)/);
+            if (descMatch) {
+                q.description = descMatch[1].trim();
+            }
 
             flags.qualities.push(q);
         });

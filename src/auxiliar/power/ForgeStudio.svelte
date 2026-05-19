@@ -222,53 +222,85 @@
         return draft.qualities[activeQIndex].capacities.some(c => c.type === type);
     }
 
+    function createNewPower() {
+        // 1. Limpa o Draft para o estado inicial absoluto
+        draft = {
+            id: null, // ID NULO força o database a criar um novo registro
+            name: "Novo Poder",
+            category: "principal",
+            rarity: "Raro",
+            dice: { normal: 0, hard: 0, wiggle: 0 },
+            qualities: [],
+            effect: ""
+        };
+        
+        // 2. Limpa variáveis auxiliares da UI
+        tagsString = "";
+        activeQIndex = -1;
+        
+        // 3. Limpa o Auto-Save do usuário para não recuperar o poder antigo
+        game.user.unsetFlag(MODULE_ID, "powerStudioDraft");
+        
+        ui.notifications.info("Estúdio resetado: Pronto para um novo poder.");
+    }
+    
     // --- SALVAR NO DATA CORE ---
 async function compilePower() {
-        if (draft.qualities.length === 0) return ui.notifications.warn("O poder precisa de pelo menos uma Qualidade (Sub-rotina).");
+        // 1. DEBUG: Verifique se a função está disparando no console
+        console.log("Tentando salvar poder:", draft.name);
+
+        if (draft.qualities.length === 0) {
+            ui.notifications.warn("O poder precisa de pelo menos uma Qualidade (Sub-rotina).");
+            return;
+        }
         
-        // Vamos garantir que não existe nenhuma reatividade bizarra presa nesses arrays
+        // 2. Converta a string de tags em um Array real aqui!
+        const safeTags = tagsString.split(',').map(t => t.trim()).filter(t => t !== "");
+        
+        // 3. Garante que não existe nenhuma reatividade bizarra presa nesses arrays
         const safeDice = JSON.parse(JSON.stringify(draft.dice));
         const safeQualities = JSON.parse(JSON.stringify(draft.qualities));
 
+        // Objeto formatado exatamente como o Foundry e o Parser exigem:
         const itemToSave = {
             id: draft.id, 
             name: draft.name,
-            category: draft.category,
-            rarity: draft.rarity,
+            type: "power", 
             img: "icons/svg/lightning.svg",
-            
-            // rawItem VAI SER O OBJETO CRU E ABSOLUTO. SEM CHAVES DINÂMICAS QUEBRADAS.
-            rawItem: {
-                name: draft.name,
-                img: "icons/svg/lightning.svg",
-                type: "power", // <- MUITO IMPORTANTE! Faltava o type aqui pra Ficha não quebrar.
-                flags: {
-                    "multiversus-rpg": {
-                        category: draft.category,
-                        rarity: draft.rarity,
-                        dice: safeDice,
-                        qualities: safeQualities,
-                        isInitial: false,
-                        themeKey: "neon-operator",
-                        tags: safeTags // <--- MUDE AQUI (Antes estava tags: [])
-                    }
-                },
-                system: {
-                    notes: draft.effect || ""
+            flags: {
+                [MODULE_ID]: {
+                    category: draft.category,
+                    rarity: draft.rarity,
+                    dice: safeDice,
+                    qualities: safeQualities,
+                    isInitial: false,
+                    themeKey: "neon-operator",
+                    tags: safeTags // AGORA A VARIÁVEL EXISTE
                 }
+            },
+            system: {
+                notes: draft.effect || ""
             }
         };
 
-        const result = await PowerDatabase.savePower(itemToSave);
-        if (result.success) {
-            ui.notifications.info(`Poder [${draft.name}] forjado com sucesso!`);
-            draft.id = null; // Reseta o ID para o próximo poder criado ser NOVO e não um overwrite
-            dispatch('save');
-        } else {
-            ui.notifications.error(result.msg);
-        }
+        try {
+const result = await PowerDatabase.savePower(itemToSave);
 
-        
+        if (result.success) {
+            ui.notifications.info(`Poder [${draft.name}] salvo com sucesso!`);
+            
+            // Força o ID para null para que o próximo "Salvar" não seja um overwrite
+            draft.id = null; 
+            
+            // Limpa o auto-save
+            await game.user.unsetFlag(MODULE_ID, "powerStudioDraft"); 
+            
+            dispatch('save');
+        }
+        } catch (err) {
+            console.error("Erro crítico ao salvar:", err);
+            ui.notifications.error("Erro ao salvar no servidor.");
+        }
     }
 </script>
 
@@ -440,6 +472,10 @@ async function compilePower() {
             <button class="btn-compile-save" on:click={compilePower}>
                 <i class="fas fa-microchip"></i> SALVAR
             </button>
+        PARÂMETROS DA MATRIZ
+        <button class="btn-new-power" on:click={createNewPower} title="Criar Novo Poder">
+            <i class="fas fa-plus"></i> NOVO
+        </button>
         </div>
     </div>
 
@@ -460,7 +496,11 @@ async function compilePower() {
 
 <style>
     .forge-studio { display: flex; height: 100%; gap: 15px; padding: 15px; }
-
+.btn-new-power { 
+        background: transparent; border: 1px solid #00d4ff; color: #00d4ff; 
+        padding: 2px 8px; cursor: pointer; border-radius: 4px; font-size: 10px;
+    }
+    .btn-new-power:hover { background: #00d4ff; color: #000; }
     /* COLUNAS */
     .column { display: flex; flex-direction: column; background: rgba(0,0,0,0.6); border: 1px solid rgba(0, 212, 255, 0.2); border-radius: 4px; overflow: hidden; }
     .global-col { flex: 1; min-width: 250px; overflow-y: auto; }

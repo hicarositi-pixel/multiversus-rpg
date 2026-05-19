@@ -281,7 +281,7 @@
                 </button>
 
                 <button class="menu-btn" on:click={openJournal}> 
-                    <div class="btn-content"><i class="fas fa-newspaper"></i> DATA HELL NEWS</div>
+                    <div class="btn-content"><i class="fas fa-newspaper"></i> Sistema</div>
                 </button>
 
                 <button class="menu-btn" on:click={openMinigames}> 
