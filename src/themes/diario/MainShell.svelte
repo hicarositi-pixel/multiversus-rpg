@@ -44,9 +44,7 @@
 <div class="diary-wrapper" style="--theme: {system.themeColor || '#d4af37'}">
     
     {#if !isOpened}
-        <div class="book-cover" 
-             out:fly={{ x: -800, duration: 1000, easing: elasticOut }}
-             in:scale={{ duration: 400 }}>
+        <div class="book-cover">
             
             <div class="leather-texture"></div>
             
@@ -75,7 +73,7 @@
         </div>
 
     {:else}
-        <div class="book-interior" in:fade={{ delay: 400 }}>
+        <div class="book-interior">
             
             <aside class="sidebar">
                 {#each menuItems as item}

@@ -83,10 +83,13 @@
     
     $: maxPB = Math.floor((PB_BASE_VALUES[draft.rarity] || 2) * (PB_MULTIPLIERS[draft.category] || 1));
     
-    $: usedPB = draft.qualities.reduce((total, q) => {
+    function getQualityCost(q) {
         const extrasCost = q.extras.reduce((sum, e) => sum + (e.cost * (e.qty || 1)), 0);
-        return total + 2 + (q.level || 0) + extrasCost;
-    }, 0);
+        const cost = 2 + (q.level || 0) + extrasCost;
+        return Math.max(1, cost);
+    }
+
+    $: usedPB = draft.qualities.reduce((total, q) => total + getQualityCost(q), 0);
 
     // --- PREVIEW VISUAL (HTML Livro) ---
     $: bookFormatHTML = generateBookHTML(draft, usedPB);
@@ -262,7 +265,7 @@ async function compilePower() {
         const safeQualities = JSON.parse(JSON.stringify(draft.qualities));
 
         // Objeto formatado exatamente como o Foundry e o Parser exigem:
-        const itemToSave = {
+        const rawObj = {
             id: draft.id, 
             name: draft.name,
             type: "power", 
@@ -281,6 +284,17 @@ async function compilePower() {
             system: {
                 notes: draft.effect || ""
             }
+        };
+
+        const itemToSave = {
+            id: draft.id, // Manter o ID no topo pro PowerDatabase atualizar o certo
+            name: draft.name,
+            category: draft.category,
+            rarity: draft.rarity,
+            img: rawObj.img,
+            isFicha: false,
+            source: "Estúdio (Nexus_OS)",
+            rawItem: rawObj
         };
 
         try {
@@ -347,9 +361,12 @@ const result = await PowerDatabase.savePower(itemToSave);
             </div>
             <div class="sr-list">
                 {#each draft.qualities as q, i}
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <!-- svelte-ignore a11y-no-static-element-interactions -->
                     <div class="sr-item {activeQIndex === i ? 'active' : ''}" on:click={() => activeQIndex = i}>
                         <div class="sr-type {q.type}">{q.type.charAt(0).toUpperCase()}</div>
                         <span class="sr-name">{q.name}</span>
+                        <span class="sr-cost">{getQualityCost(q)} PB</span>
                         <button class="btn-del-sr" on:click|stopPropagation={() => removeQuality(i)}><i class="fas fa-trash"></i></button>
                     </div>
                 {/each}
@@ -539,6 +556,7 @@ const result = await PowerDatabase.savePower(itemToSave);
     .sr-type { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; border-radius: 3px; color: #fff; }
     .sr-type.atk { background: #ff3333; } .sr-type.def { background: #0088ff; } .sr-type.util { background: #ffcc00; }
     .sr-name { flex: 1; font-size: 12px; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sr-cost { font-size: 10px; color: #00d4ff; font-weight: bold; background: rgba(0, 212, 255, 0.1); padding: 2px 6px; border-radius: 4px; }
     .btn-del-sr { background: transparent; border: none; color: #666; cursor: pointer; transition: 0.2s; }
     .btn-del-sr:hover { color: #ff3333; }
     .empty-msg { font-size: 10px; color: #555; font-style: italic; text-align: center; margin-top: 10px; }

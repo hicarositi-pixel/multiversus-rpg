@@ -29,8 +29,16 @@
 
     $: safeID = form.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-");
     
-    // Gerador de código inclui a variável de Level agora
-    $: generatedCode = `    "${safeID}": {\n        id: "${safeID}",\n        name: "${form.name}",\n        icon: "${form.icon}",\n        type: "${form.type}",\n        desc: \`${form.desc}\`,\n        mechanic: { name: "${form.mechName}", desc: \`${form.mechDesc}\` },\n        traits: [\n${form.traits.map(t => `            { level: ${t.level}, name: "${t.name}", effect: "${t.effect}" }`).join(',\n')}\n        ],\n        powers: \`${form.powers}\`\n    },`;
+    $: newOriginData = {
+        id: safeID,
+        name: form.name,
+        icon: form.icon,
+        type: form.type,
+        desc: form.desc,
+        mechanic: { name: form.mechName, desc: form.mechDesc },
+        traits: form.traits,
+        powers: form.powers
+    };
 
     onMount(async () => {
         await refreshData();
@@ -99,7 +107,12 @@
 
     function addTrait() { form.traits = [...form.traits, { level: 1, name: "", effect: "" }]; }
     function removeTrait(i) { form.traits = form.traits.filter((_, idx) => idx !== i); }
-    function copyCode() { navigator.clipboard.writeText(generatedCode); ui.notifications.info("CÓDIGO COPIADO."); }
+    
+    async function saveOrigin() {
+        await OriginDatabase.save(newOriginData);
+        ui.notifications.info(`Origem [${form.name}] salva com sucesso!`);
+        await refreshData();
+    }
 </script>
 
 <div class="tactical-origin-interface">
@@ -215,8 +228,20 @@
                 </div>
                 
                 <div class="output-pane">
-                    <header><span>KERNEL_BLUEPRINT.js</span><button class="copy-btn" on:click={copyCode}><i class="fas fa-copy"></i> COPIAR_DADOS</button></header>
-                    <pre class="custom-scroll"><code>{generatedCode}</code></pre>
+                    <header><span>SALVAR_NO_BANCO_DE_DADOS</span><button class="copy-btn" on:click={saveOrigin}><i class="fas fa-save"></i> GRAVAR_ORIGEM</button></header>
+                    <div class="preview-box custom-scroll" style="padding: 20px; color: #aaa; font-size: 11px;">
+                        <p>Os dados preenchidos serão salvos diretamente no Data Core do sistema e estarão disponíveis para todos os jogadores imediatamente na aba de Gestão.</p>
+                        <hr style="border-color: #004411; margin: 15px 0;">
+                        <h3 style="color: #00ff41;">{form.name} {form.icon}</h3>
+                        <p><strong>Tipo:</strong> {form.type}</p>
+                        <p><strong>Mecânica:</strong> {form.mechName}</p>
+                        <p><strong>Traits ({form.traits.length}):</strong></p>
+                        <ul>
+                            {#each form.traits as t}
+                                <li>Nv {t.level} - {t.name}</li>
+                            {/each}
+                        </ul>
+                    </div>
                 </div>
             </div>
         {/if}

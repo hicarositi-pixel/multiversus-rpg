@@ -5,17 +5,38 @@
     import { snPostsStore, snUsersStore, updateSNStore } from '../../database/SocialNetworkStore.js';
 
     export let actor; 
+    export let viewMode = "feed"; 
 
     $: currentActorId = actor?.id;
     $: allActors = Array.from(game.actors).filter(a => a.hasPlayerOwner);
 
     let composerText = "";
     let composerMediaArray = [];
+    let isPostPrivate = false;
     
     let activeCommentPost = null;
     let viewingProfileOf = null;
+    let viewingListType = null;
+    let viewingListFor = null;
     let commentText = "";
     let emojiMenuOpenFor = null;
+
+    let editProfileMode = false;
+    let socialProfile = { socialName: "", bio: "", attachments: [], coverImage: "" };
+
+    $: {
+        if (actor) {
+            const sp = actor.getFlag("multiversus-rpg", "social_profile") || {};
+            socialProfile = { socialName: sp.socialName || "", bio: sp.bio || "", attachments: sp.attachments || [], coverImage: sp.coverImage || "" };
+        }
+    }
+
+    async function saveProfile() {
+        if (!actor) return;
+        await actor.setFlag("multiversus-rpg", "social_profile", socialProfile);
+        ui.notifications.info("Perfil atualizado!");
+        editProfileMode = false;
+    }
 
     const EMOJIS = ["👍", "❤️", "😂", "😲", "😢", "😡", "🔥", "🫦"];
 
@@ -28,8 +49,20 @@
 
     $: posts = $snPostsStore || [];
     $: users = $snUsersStore || {};
+    
+    function isMutualFollow(uid1, uid2) {
+        if (!users[uid1] || !users[uid2]) return false;
+        return (users[uid1].following || []).includes(uid2) && (users[uid2].following || []).includes(uid1);
+    }
+    
+    $: visiblePosts = posts.filter(p => {
+        if (!p.isPrivate) return true;
+        if (p.authorId === currentActorId) return true;
+        if (game.user.isGM) return true;
+        return isMutualFollow(currentActorId, p.authorId);
+    });
 
-    const COOLDOWN_MS = 4 * 60 * 60 * 1000;
+    const COOLDOWN_MS = 3 * 60 * 60 * 1000;
     // Opcionalmente, pode ser apenas 1 minuto para testar (comente e descomente para debug):
     // const COOLDOWN_MS = 60 * 1000; 
     
@@ -65,7 +98,21 @@
                 bonus += Math.floor((users[tid].baseFollowers || 0) * 0.25);
             }
         }
-        return base + bonus;
+        return base + bonus + getFollowersList(uid).length;
+    }
+
+    function getFollowersList(uid) {
+        let followers = [];
+        for (const [id, data] of Object.entries(users)) {
+            if ((data.following || []).includes(uid) && game.actors.get(id)) {
+                followers.push(id);
+            }
+        }
+        return followers;
+    }
+
+    function getFollowingList(uid) {
+        return (users[uid]?.following || []).filter(id => game.actors.get(id));
     }
 
     async function handlePublish() {
@@ -91,20 +138,25 @@
             numDice = Math.max(1, Math.floor(sum / 2));
         }
 
-        const roll = new Roll(`${numDice}d4`);
-        await roll.evaluate();
-        const gained = roll.total;
-
-        ChatMessage.create({
-            content: `<b>${actor.name}</b> fez uma postagem na <b>Rede Social</b> e ganhou <b>${gained} Seguidores</b>! (Rolou ${numDice}d4)`
-        });
+        let gained = 0;
+        if (!canPost && game.user.isGM) {
+            ui.notifications.warn("Post publicado sem ganho de seguidores (Cooldown ignorado)");
+        } else {
+            const roll = new Roll(`${numDice}d6`);
+            await roll.evaluate();
+            gained = roll.total;
+        }
 
         const validMedia = composerMediaArray.filter(m => m.trim().length > 0);
-        await SocialNetworkDB.publishPost(currentActorId, composerText, validMedia, gained);
+        await SocialNetworkDB.publishPost(currentActorId, composerText, validMedia, gained, isPostPrivate);
         
         composerText = "";
         composerMediaArray = [];
-        ui.notifications.info(`Postagem enviada! Você ganhou ${gained} seguidores.`);
+        isPostPrivate = false;
+        
+        if (gained > 0) {
+            ui.notifications.info(`Postagem enviada! Você ganhou ${gained} seguidores.`);
+        }
     }
 
     async function toggleFollow(targetId) {
@@ -164,25 +216,158 @@
 
 <div class="sn-root">
     
-    <!-- HEADER PROFILER -->
-    <div class="sn-header">
-        <div class="my-profile">
-            <img src={getUserAvatar(currentActorId)} alt="Eu"/>
-            <div class="my-info">
-                <h3>MEU PERFIL ({getUserName(currentActorId)})</h3>
-                <span><i class="fas fa-users"></i> {calculateTotalFollowers(currentActorId)} Seguidores</span>
-                <span class="base-followers">Base: {myData.baseFollowers || 0}</span>
+    <!-- FEED MODE -->
+    {#if viewMode === 'feed'}
+        <div class="sn-header" style="padding: 10px 15px;">
+            <div class="my-profile" style="border:none;">
+                <img src={getUserAvatar(currentActorId)} alt="Eu" on:click={() => viewingProfileOf = currentActorId} style="cursor:pointer;" title="Meu Perfil"/>
+                <div class="my-info">
+                    <h3>FEED DO NEXUS</h3>
+                    <span>Bem-vindo(a), {getUserName(currentActorId)}</span>
+                </div>
             </div>
         </div>
-        <div class="following-list custom-scroll">
-            <div class="section-title">SUGESTÕES DE FOLLOW (Multiplicador 25%)</div>
-            <div class="user-strip">
+
+        <div class="composer-card">
+            <textarea bind:value={composerText} placeholder="No que você está pensando?"></textarea>
+            
+            {#if composerMediaArray.length > 0}
+                <div class="composer-media-list">
+                    {#each composerMediaArray as m, i}
+                        <div style="display:flex; gap:10px; margin-bottom:5px; align-items:center;">
+                            <input type="text" bind:value={composerMediaArray[i]} class="media-input" placeholder="URL da Mídia (Imagem/Vídeo/YouTube)..." />
+                            <button class="btn-remove-media" on:click={() => composerMediaArray.splice(i, 1) && (composerMediaArray = composerMediaArray)} title="Remover"><i class="fas fa-times"></i></button>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+
+            <div class="composer-actions">
+                <button class="btn-add-media" on:click={() => composerMediaArray = [...composerMediaArray, ""]}><i class="fas fa-paperclip"></i> Adicionar Anexo</button>
+                <label style="color:#aaa; font-size:11px; margin-left:10px; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" bind:checked={isPostPrivate} />
+                    <i class="fas fa-lock"></i> Post Privado
+                </label>
+                
+                <div style="display:flex; gap:10px; align-items:center; margin-left:auto;">
+                    {#if !canPost}
+                        <span class="cooldown-text" title="Tempo até a próxima postagem"><i class="fas fa-clock"></i> {timeLeftObj}</span>
+                    {/if}
+                    
+                    {#if !canPost && game.user.isGM}
+                        <button class="btn-publish force" on:click={handlePublish} title="O Mestre pode pular o cooldown"><i class="fas fa-exclamation-triangle"></i> FORÇAR POST</button>
+                    {:else}
+                        <button class="btn-publish" disabled={!canPost} on:click={handlePublish}>POSTAR</button>
+                    {/if}
+                </div>
+            </div>
+        </div>
+
+        <div class="feed-container custom-scroll">
+            {#each visiblePosts as p (p.id)}
+                <div class="post-card" in:fade>
+                    {#if p.authorId === currentActorId || game.user.isGM}
+                        <button class="btn-delete" on:click={() => SocialNetworkDB.deletePost(p.id)}><i class="fas fa-trash"></i></button>
+                    {/if}
+                    
+                    <div class="post-header">
+                        <img src={getUserAvatar(p.authorId)} alt="av" on:click={() => viewingProfileOf = p.authorId} style="cursor:pointer;" title="Ver Perfil"/>
+                        <div class="post-meta">
+                            <b on:click={() => viewingProfileOf = p.authorId} style="cursor:pointer;">{getUserName(p.authorId)}</b>
+                            <span style="display:flex; align-items:center; gap:5px;">
+                                {new Date(p.timestamp).toLocaleString()}
+                                {#if p.isPrivate}<i class="fas fa-lock" style="color:#ff9800; font-size:10px;" title="Privado (Mutual Followers)"></i>{/if}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="post-content">
+                        {#if p.text}<p>{@html p.text.replace(/\n/g, '<br>')}</p>{/if}
+                        {#if p.attachments && p.attachments.length > 0}
+                            <div class="media-gallery">
+                                {#each p.attachments as att}
+                                    {#if getYoutubeId(att)}
+                                        <iframe class="post-media yt-frame" src="https://www.youtube.com/embed/{getYoutubeId(att)}" frameborder="0" allowfullscreen></iframe>
+                                    {:else if isVideo(att)}
+                                        <!-- svelte-ignore a11y-media-has-caption -->
+                                        <video src={att} controls class="post-media" loop autoplay muted></video>
+                                    {:else}
+                                        <img src={att} class="post-media" alt="post" />
+                                    {/if}
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+
+                    <div class="post-actions">
+                        <!-- REAÇÕES DISPLAY -->
+                        <div class="reactions-list">
+                            {#each Object.entries(p.reactions || {}) as [emoji, usersReacted]}
+                                {#if usersReacted.length > 0}
+                                    <button class="reaction-badge {usersReacted.includes(currentActorId) ? 'mine' : ''}" on:click={() => react(p.id, emoji)}>
+                                        {emoji} {usersReacted.length}
+                                    </button>
+                                {/if}
+                            {/each}
+                        </div>
+
+                        <div class="action-buttons">
+                            <div class="relative-box">
+                                <button class="btn-action" on:click={() => emojiMenuOpenFor = emojiMenuOpenFor === p.id ? null : p.id}><i class="far fa-smile"></i> Reagir</button>
+                                {#if emojiMenuOpenFor === p.id}
+                                    <div class="emoji-popover" in:fade={{duration: 100}}>
+                                        {#each EMOJIS as emoji}
+                                            <button class="emoji-btn" on:click={() => react(p.id, emoji)}>{emoji}</button>
+                                        {/each}
+                                    </div>
+                                {/if}
+                            </div>
+                            <button class="btn-action" on:click={() => activeCommentPost = activeCommentPost === p.id ? null : p.id}>
+                                <i class="far fa-comment"></i> {(p.comments || []).length}
+                            </button>
+                        </div>
+                    </div>
+
+                    {#if activeCommentPost === p.id}
+                        <div class="comments-section" transition:slide={{duration: 200}}>
+                            {#each p.comments || [] as c}
+                                <div class="comment-row">
+                                    <img src={getUserAvatar(c.authorId)} alt="av" />
+                                    <div class="comment-bubble">
+                                        <b>{getUserName(c.authorId)}</b>
+                                        <p>{c.text}</p>
+                                    </div>
+                                </div>
+                            {/each}
+                            <div class="comment-composer">
+                                <input type="text" bind:value={commentText} placeholder="Escreva um comentário..." on:keydown={e => e.key === 'Enter' && sendComment(p.id)} />
+                                <button on:click={() => sendComment(p.id)}><i class="fas fa-paper-plane"></i></button>
+                            </div>
+                        </div>
+                    {/if}
+                </div>
+            {/each}
+        </div>
+    {/if}
+
+    <!-- EXPLORE MODE -->
+    {#if viewMode === 'explore'}
+        <div class="sn-header" style="padding: 10px 15px;">
+            <div class="my-info">
+                <h3>EXPLORAR</h3>
+                <span>Descubra novos personagens para seguir</span>
+            </div>
+        </div>
+        <div class="feed-container custom-scroll">
+            <div class="explore-grid">
                 {#each allActors as a}
                     {#if a.id !== currentActorId}
-                        <div class="user-chip">
+                        <div class="explore-card">
                             <img src={a.img} alt="user" on:click={() => viewingProfileOf = a.id} style="cursor:pointer;" title="Ver Perfil"/>
-                            <span>{getUserName(a.id).split(' ')[0]}</span>
-                            <button class="btn-follow {isFollowing(a.id) ? 'on' : ''}" on:click={() => toggleFollow(a.id)}>
+                            <h4>{getUserName(a.id)}</h4>
+                            <span class="real-name">@{getRealName(a.id)}</span>
+                            <span class="follower-count"><i class="fas fa-users"></i> {calculateTotalFollowers(a.id)} Seguidores</span>
+                            <button class="btn-follow {isFollowing(a.id) ? 'on' : ''}" style="margin-top:10px; width:100%; font-size:12px;" on:click={() => toggleFollow(a.id)}>
                                 {isFollowing(a.id) ? 'Seguindo' : 'Seguir'}
                             </button>
                         </div>
@@ -190,123 +375,83 @@
                 {/each}
             </div>
         </div>
-    </div>
+    {/if}
 
-    <!-- COMPOSER -->
-    <div class="composer-card">
-        <textarea bind:value={composerText} placeholder="No que você está pensando?"></textarea>
-        
-        {#if composerMediaArray.length > 0}
-            <div class="composer-media-list">
-                {#each composerMediaArray as m, i}
-                    <div style="display:flex; gap:10px; margin-bottom:5px; align-items:center;">
-                        <input type="text" bind:value={composerMediaArray[i]} class="media-input" placeholder="URL da Mídia (Imagem/Vídeo/YouTube)..." />
-                        <button class="btn-remove-media" on:click={() => composerMediaArray.splice(i, 1) && (composerMediaArray = composerMediaArray)} title="Remover"><i class="fas fa-times"></i></button>
+    <!-- PROFILE MODE (My Profile) -->
+    {#if viewMode === 'profile'}
+        <div class="profile-page custom-scroll">
+            {#if editProfileMode}
+                <div class="edit-profile-box" in:fade>
+                    <h3>EDITAR PERFIL</h3>
+                    <div class="form-group"><label>Nome de Exibição</label><input type="text" bind:value={socialProfile.socialName} class="hacker-input" placeholder={actor?.name}/></div>
+                    <div class="form-group"><label>Imagem de Capa (URL)</label><input type="text" bind:value={socialProfile.coverImage} class="hacker-input" placeholder="http://..."/></div>
+                    <div class="form-group"><label>Biografia</label><textarea bind:value={socialProfile.bio} class="hacker-input" style="height: 80px; resize: none;"></textarea></div>
+                    <div class="form-group">
+                        <label>Status Fixos (Links de Mídia)</label>
+                        {#each socialProfile.attachments as att, i}
+                            <div style="display:flex; gap:5px; margin-bottom:5px;">
+                                <input type="text" bind:value={socialProfile.attachments[i]} class="hacker-input" placeholder="http://..." />
+                                <button class="btn-ghost" on:click={() => socialProfile.attachments.splice(i, 1) && (socialProfile = socialProfile)} style="color:red; border-color:red; padding: 5px 10px;"><i class="fas fa-trash"></i></button>
+                            </div>
+                        {/each}
+                        <button class="btn-ghost" style="width:100%; margin-top:5px;" on:click={() => socialProfile.attachments = [...socialProfile.attachments, ""]}>+ Adicionar Anexo</button>
                     </div>
-                {/each}
-            </div>
-        {/if}
-
-        <div class="composer-actions">
-            <button class="btn-add-media" on:click={() => composerMediaArray = [...composerMediaArray, ""]}><i class="fas fa-paperclip"></i> Adicionar Anexo</button>
-            
-            <div style="display:flex; gap:10px; align-items:center;">
-                {#if !canPost}
-                    <span class="cooldown-text" title="Tempo até a próxima postagem"><i class="fas fa-clock"></i> {timeLeftObj}</span>
-                {/if}
-                
-                {#if !canPost && game.user.isGM}
-                    <button class="btn-publish force" on:click={handlePublish} title="O Mestre pode pular o cooldown"><i class="fas fa-exclamation-triangle"></i> FORÇAR POST</button>
-                {:else}
-                    <button class="btn-publish" disabled={!canPost} on:click={handlePublish}>POSTAR</button>
-                {/if}
-            </div>
-        </div>
-    </div>
-
-    <!-- FEED -->
-    <div class="feed-container custom-scroll">
-        {#each posts as p (p.id)}
-            <div class="post-card" in:fade>
-                {#if p.authorId === currentActorId || game.user.isGM}
-                    <button class="btn-delete" on:click={() => SocialNetworkDB.deletePost(p.id)}><i class="fas fa-trash"></i></button>
-                {/if}
-                
-                <div class="post-header">
-                    <img src={getUserAvatar(p.authorId)} alt="av" on:click={() => viewingProfileOf = p.authorId} style="cursor:pointer;" title="Ver Perfil"/>
-                    <div class="post-meta">
-                        <b on:click={() => viewingProfileOf = p.authorId} style="cursor:pointer;">{getUserName(p.authorId)}</b>
-                        <span>{new Date(p.timestamp).toLocaleString()}</span>
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        <button class="btn-publish" style="flex:1" on:click={saveProfile}>SALVAR</button>
+                        <button class="btn-ghost" style="flex:1" on:click={() => editProfileMode = false}>CANCELAR</button>
                     </div>
                 </div>
-                
-                <div class="post-content">
-                    {#if p.text}<p>{@html p.text.replace(/\n/g, '<br>')}</p>{/if}
-                    {#if p.attachments && p.attachments.length > 0}
+            {:else}
+                <div class="p-modal-header" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px;">
+                    <img src={getUserAvatar(currentActorId)} alt="avatar" style="width: 100px; height: 100px;" />
+                    <div class="p-modal-info" style="flex:1;">
+                        <h2 style="font-size: 24px;">{getUserName(currentActorId)}</h2>
+                        <span class="real-name">({getRealName(currentActorId)})</span>
+                        <div class="p-stats">
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = currentActorId; }}><i class="fas fa-users"></i> {calculateTotalFollowers(currentActorId)} Seguidores</span>
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = currentActorId; }}> | <b>{getFollowingList(currentActorId).length}</b> Seguindo</span>
+                        </div>
+                        <button class="btn-ghost" style="margin-top:10px; font-size:11px;" on:click={() => editProfileMode = true}><i class="fas fa-edit"></i> Editar Perfil</button>
+                    </div>
+                </div>
+
+                {#if getBio(currentActorId)}
+                    <div class="p-modal-bio" style="margin-top: 15px;">
+                        <label>BIOGRAFIA</label>
+                        <p>{getBio(currentActorId)}</p>
+                    </div>
+                {/if}
+
+                {#if getFixedStatus(currentActorId).length > 0}
+                    <div class="p-modal-fixed" style="margin-top: 15px;">
+                        <label><i class="fas fa-thumbtack"></i> STATUS FIXADOS</label>
                         <div class="media-gallery">
-                            {#each p.attachments as att}
+                            {#each getFixedStatus(currentActorId) as att}
                                 {#if getYoutubeId(att)}
                                     <iframe class="post-media yt-frame" src="https://www.youtube.com/embed/{getYoutubeId(att)}" frameborder="0" allowfullscreen></iframe>
                                 {:else if isVideo(att)}
-                                    <!-- svelte-ignore a11y-media-has-caption -->
                                     <video src={att} controls class="post-media" loop autoplay muted></video>
                                 {:else}
                                     <img src={att} class="post-media" alt="post" />
                                 {/if}
                             {/each}
                         </div>
-                    {/if}
-                </div>
-
-                <div class="post-actions">
-                    <!-- REAÇÕES DISPLAY -->
-                    <div class="reactions-list">
-                        {#each Object.entries(p.reactions || {}) as [emoji, usersReacted]}
-                            {#if usersReacted.length > 0}
-                                <button class="reaction-badge {usersReacted.includes(currentActorId) ? 'mine' : ''}" on:click={() => react(p.id, emoji)}>
-                                    {emoji} {usersReacted.length}
-                                </button>
-                            {/if}
-                        {/each}
-                    </div>
-
-                    <div class="action-buttons">
-                        <div class="relative-box">
-                            <button class="btn-action" on:click={() => emojiMenuOpenFor = emojiMenuOpenFor === p.id ? null : p.id}><i class="far fa-smile"></i> Reagir</button>
-                            {#if emojiMenuOpenFor === p.id}
-                                <div class="emoji-popover" in:fade={{duration: 100}}>
-                                    {#each EMOJIS as emoji}
-                                        <button class="emoji-btn" on:click={() => react(p.id, emoji)}>{emoji}</button>
-                                    {/each}
-                                </div>
-                            {/if}
-                        </div>
-                        <button class="btn-action" on:click={() => activeCommentPost = activeCommentPost === p.id ? null : p.id}>
-                            <i class="far fa-comment"></i> {(p.comments || []).length}
-                        </button>
-                    </div>
-                </div>
-
-                {#if activeCommentPost === p.id}
-                    <div class="comments-section" transition:slide={{duration: 200}}>
-                        {#each p.comments || [] as c}
-                            <div class="comment-row">
-                                <img src={getUserAvatar(c.authorId)} alt="av" />
-                                <div class="comment-bubble">
-                                    <b>{getUserName(c.authorId)}</b>
-                                    <p>{c.text}</p>
-                                </div>
-                            </div>
-                        {/each}
-                        <div class="comment-composer">
-                            <input type="text" bind:value={commentText} placeholder="Escreva um comentário..." on:keydown={e => e.key === 'Enter' && sendComment(p.id)} />
-                            <button on:click={() => sendComment(p.id)}><i class="fas fa-paper-plane"></i></button>
-                        </div>
                     </div>
                 {/if}
-            </div>
-        {/each}
-    </div>
+
+                <div class="p-modal-posts" style="margin-top: 15px; background: transparent; padding:0; border:none;">
+                    <label style="margin-bottom: 10px; font-size: 14px;">MEUS POSTS RECENTES</label>
+                    {#each visiblePosts.filter(p => p.authorId === currentActorId) as p}
+                        <div class="mini-post" style="background: rgba(0,0,0,0.4); padding: 10px; border-radius:6px; border-left: 3px solid var(--chat-accent); margin-bottom: 10px;">
+                            <span>{new Date(p.timestamp).toLocaleString()}</span>
+                            <p style="white-space: normal;">{@html p.text ? p.text.replace(/\n/g, '<br>') : "<i>Post com mídia</i>"}</p>
+                            <span style="font-size: 10px; color:#aaa; margin-top:5px; display:block;"><i class="far fa-heart"></i> {Object.keys(p.reactions||{}).length} Reações | <i class="far fa-comment"></i> {(p.comments||[]).length} Comentários</span>
+                        </div>
+                    {/each}
+                </div>
+            {/if}
+        </div>
+    {/if}
 
     <!-- MODAL DE PERFIL -->
     {#if viewingProfileOf}
@@ -320,8 +465,14 @@
                         <h2>{getUserName(viewingProfileOf)}</h2>
                         <span class="real-name">({getRealName(viewingProfileOf)})</span>
                         <div class="p-stats">
-                            <span><i class="fas fa-users"></i> {calculateTotalFollowers(viewingProfileOf)} Seguidores</span>
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = viewingProfileOf; }}><i class="fas fa-users"></i> {calculateTotalFollowers(viewingProfileOf)} Seguidores</span>
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = viewingProfileOf; }}> | <b>{getFollowingList(viewingProfileOf).length}</b> Seguindo</span>
                         </div>
+                        {#if viewingProfileOf !== currentActorId}
+                            <button class="btn-follow {isFollowing(viewingProfileOf) ? 'on' : ''}" style="margin-top:10px; width:100%; font-size:12px;" on:click={() => toggleFollow(viewingProfileOf)}>
+                                {isFollowing(viewingProfileOf) ? 'Seguindo' : 'Seguir'}
+                            </button>
+                        {/if}
                     </div>
                 </div>
 
@@ -351,12 +502,46 @@
 
                 <div class="p-modal-posts">
                     <label>POSTAGENS RECENTES</label>
-                    {#each posts.filter(p => p.authorId === viewingProfileOf).slice(0, 5) as p}
+                    {#each visiblePosts.filter(p => p.authorId === viewingProfileOf).slice(0, 5) as p}
                         <div class="mini-post">
                             <span>{new Date(p.timestamp).toLocaleDateString()}</span>
-                            <p>{p.text || "Mídia Adicionada"}</p>
+                            <p>{p.text || "Mídia Adicionada"} {#if p.isPrivate}<i class="fas fa-lock" style="color:#ff9800; font-size:9px;"></i>{/if}</p>
                         </div>
                     {/each}
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- MODAL DE LISTA (FOLLOWERS / FOLLOWING) -->
+    {#if viewingListType && viewingListFor}
+        <div class="profile-overlay" transition:fade={{duration: 150}} on:click={() => viewingListType = null} style="z-index: 300;">
+            <div class="profile-modal custom-scroll" on:click|stopPropagation style="max-height: 400px;">
+                <button class="btn-close-modal" on:click={() => viewingListType = null}><i class="fas fa-times"></i></button>
+                <h3 style="margin-top:0; color:var(--chat-accent); font-family:'Share Tech Mono';">
+                    {viewingListType === 'followers' ? 'SEGUIDORES' : 'SEGUINDO'}
+                </h3>
+                <div class="user-list">
+                    {#each (viewingListType === 'followers' ? getFollowersList(viewingListFor) : getFollowingList(viewingListFor)) as id}
+                        {#if game.actors.get(id)}
+                            <div class="user-row" style="display:flex; align-items:center; gap:10px; margin-bottom:15px; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+                                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                <img src={getUserAvatar(id)} style="width:40px; height:40px; border-radius:50%; object-fit:cover; cursor:pointer;" alt="av" on:click={() => { viewingProfileOf = id; viewingListType = null; }} />
+                                <div style="flex:1; cursor:pointer;" on:click={() => { viewingProfileOf = id; viewingListType = null; }}>
+                                    <b style="display:block; font-size:14px; color:#fff;">{getUserName(id)}</b>
+                                    <span style="font-size:10px; color:#888;">@{getRealName(id)}</span>
+                                </div>
+                                {#if id !== currentActorId}
+                                    <button class="btn-follow {isFollowing(id) ? 'on' : ''}" style="font-size:10px; padding: 4px 10px;" on:click={() => toggleFollow(id)}>
+                                        {isFollowing(id) ? 'Seguindo' : 'Seguir'}
+                                    </button>
+                                {/if}
+                            </div>
+                        {/if}
+                    {/each}
+                    {#if (viewingListType === 'followers' ? getFollowersList(viewingListFor) : getFollowingList(viewingListFor)).length === 0}
+                        <p style="font-size:12px; color:#888; text-align:center;">Nenhuma ficha encontrada.</p>
+                    {/if}
                 </div>
             </div>
         </div>
@@ -396,8 +581,8 @@
 
     .feed-container { flex: 1; padding: 0 15px 15px 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
     .post-card { background: rgba(0,0,0,0.5); border: 1px solid var(--chat-border); border-radius: 8px; padding: 15px; position: relative; }
-    .btn-delete { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #ff5555; cursor: pointer; opacity: 0.5; transition: 0.2s; }
-    .btn-delete:hover { opacity: 1; }
+    .btn-delete { position: absolute; top: 10px; right: 10px; background: transparent !important; border: none !important; color: #ff5555 !important; cursor: pointer; opacity: 0.5; transition: 0.2s; box-shadow: none !important; width: auto !important; padding: 5px !important; margin: 0 !important; height: auto !important; line-height: 1 !important;}
+    .btn-delete:hover { opacity: 1; transform: scale(1.2); }
     
     .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .post-header img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
@@ -422,9 +607,21 @@
     .btn-action { background: transparent; border: none; color: #888; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;}
     .btn-action:hover { color: var(--chat-accent); }
     
-    .emoji-popover { position: absolute; bottom: 100%; right: 0; background: #111; border: 1px solid var(--chat-border); border-radius: 8px; display: flex; flex-wrap: wrap; padding: 5px; gap: 5px; margin-bottom: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); z-index: 100; min-width: 150px; justify-content: center;}
-    .emoji-btn { background: transparent; border: none; font-size: 18px; cursor: pointer; padding: 5px; transition: 0.2s; border-radius: 4px; }
+    .emoji-popover { position: absolute; top: 100%; left: 0; background: #111; border: 1px solid var(--chat-border); border-radius: 8px; display: flex; flex-direction: row; flex-wrap: wrap; padding: 5px; gap: 5px; margin-top: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); z-index: 100; max-width: 200px; align-items: center; justify-content: flex-start;}
+    .emoji-btn { background: transparent; border: none; font-size: 16px; cursor: pointer; padding: 5px; transition: 0.2s; border-radius: 4px; }
     .emoji-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.2); }
+
+    .explore-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding: 10px; }
+    .explore-card { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 15px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .explore-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 10px; border: 2px solid rgba(255,255,255,0.1); transition: 0.2s; }
+    .explore-card img:hover { border-color: var(--chat-accent); transform: scale(1.05); }
+    .explore-card h4 { margin: 0 0 2px 0; font-size: 13px; color: #fff; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .follower-count { font-size: 10px; color: #888; margin-top: 5px; }
+
+    .profile-page { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
+    .edit-profile-box { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid var(--chat-border); }
+    .hacker-input { width: 100%; background: #000; border: 1px solid #333; padding: 10px; color: #fff; font-family: inherit; font-size: 13px; border-radius: 4px; margin-bottom: 10px; }
+    .form-group label { display: block; font-size: 11px; color: #aaa; margin-bottom: 5px; }
 
     .comments-section { margin-top: 15px; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }
     .comment-row { display: flex; gap: 10px; margin-bottom: 10px; }
@@ -444,12 +641,15 @@
     /* Modal de Perfil */
     .profile-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center; padding: 20px;}
     .profile-modal { width: 100%; max-width: 400px; background: #111; border: 1px solid var(--chat-accent); border-radius: 8px; padding: 20px; position: relative; max-height: 100%; overflow-y: auto;}
-    .btn-close-modal { position: absolute; top: 10px; right: 10px; background: transparent; border: none; color: #fff; font-size: 16px; cursor: pointer;}
+    .btn-close-modal { position: absolute; top: 10px; right: 10px; background: transparent !important; border: none !important; color: #fff !important; font-size: 16px; cursor: pointer; box-shadow: none !important; width: auto !important; padding: 5px !important; margin: 0 !important; height: auto !important; line-height: 1 !important;}
+    .btn-close-modal:hover { color: var(--chat-accent) !important; transform: scale(1.2); }
     .p-modal-header { display: flex; gap: 15px; align-items: center; margin-bottom: 20px; }
     .p-modal-header img { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--chat-accent); object-fit: cover;}
     .p-modal-info h2 { margin: 0; color: var(--chat-accent); font-family: 'Share Tech Mono';}
     .real-name { font-size: 11px; color: #888; display: block; margin-bottom: 5px;}
     .p-stats { font-size: 12px; color: #ccc;}
+    .clickable-stat { cursor: pointer; transition: 0.2s; }
+    .clickable-stat:hover { color: var(--chat-accent); }
     
     .p-modal-bio, .p-modal-fixed, .p-modal-posts { margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);}
     .p-modal-bio label, .p-modal-fixed label, .p-modal-posts label { display: block; font-size: 10px; color: #888; font-weight: bold; margin-bottom: 5px;}

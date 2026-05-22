@@ -109,7 +109,7 @@
     </div>
 
     {#if loginState !== 'logged_in'}
-        <div class="login-layer" out:fly={{y: -50, duration: 500, easing: cubicIn}}>
+        <div class="login-layer">
             <div class="login-container">
                 <div class="avatar-assembly" class:scanning={loginState === 'verifying'}>
                     <div class="ring-outer"></div>
@@ -129,7 +129,7 @@
                 </div>
 
                 {#if loginState === 'idle'}
-                    <div class="pass-input-box" in:fade>
+                    <div class="pass-input-box">
                         {#each Array(6) as _, i}
                             <div class="digit-box" class:filled={i < inputBuffer.length}>
                                 {i < inputBuffer.length ? '●' : ''}
@@ -144,7 +144,7 @@
         </div>
 
     {:else}
-        <div class="os-container" in:fade={{duration: 800, easing: cubicOut}}>
+        <div class="os-container">
             <header class="status-bar">
                 <div class="bar-left"><span class="led"></span> ONLINE</div>
                 <div class="bar-center">SYSTEM v5.0 // {currentThemeData.label}</div>
@@ -153,7 +153,7 @@
 
             <main class="viewport">
                 {#if activeApp === null}
-                    <div class="desktop-grid" in:fade={{duration: 300}}>
+                    <div class="desktop-grid">
                         {#each desktopIcons as icon}
                             <button class="icon-btn" class:danger={icon.id === 'shutdown'}
                                 on:click={() => icon.action ? icon.action() : activeApp = icon.id}>
@@ -166,7 +166,7 @@
                         {/each}
                     </div>
                 {:else}
-                    <div class="window-frame" in:fly={{ y: 20, duration: 300 }}>
+                    <div class="window-frame">
                         <div class="window-header">
                             <div class="header-left">
                                 <i class="fas fa-terminal"></i>

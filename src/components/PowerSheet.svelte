@@ -74,7 +74,8 @@
   
   $: usedPB = qualities.reduce((total, q) => {
     const extrasCost = (q.extras || []).reduce((sum, e) => sum + ((e.cost || 0) * (e.qty || 1)), 0);
-    return total + 2 + (q.level || 0) + extrasCost;
+    const qCost = Math.max(1, 2 + (q.level || 0) + extrasCost);
+    return total + qCost;
   }, 0);
 
   // --- CONTROLE DE EXPANSÃO DA DESCRIÇÃO (QUALIDADES) ---
@@ -182,10 +183,10 @@ async function addCapacity(qIndex) {
 <div class="rpg-sheet-root" style="{Object.entries(activeTheme.vars).map(([k,v]) => `${k}:${v}`).join(';')}">
   
   {#if showThemeSelector}
-    <div class="modal-backdrop" on:click|self={() => showThemeSelector = false} transition:fade={{duration:150}}>
-      <div class="theme-modal" transition:scale={{start:0.95}}>
-        <h3>SELECIONAR TEMA VISUAL</h3>
-        <div class="theme-grid">
+    <div class="modal-backdrop" on:click|self={() => showThemeSelector = false}>
+      <div class="theme-modal">
+        <h3>SELECIONE UM TEMA</h3>
+        <div class="theme-list">
           {#each Object.entries(THEME_DB) as [key, theme]}
             <button class="theme-btn {currentThemeKey === key ? 'active' : ''}" 
                     style="border-left: 4px solid {theme.vars['--accent']}"
@@ -238,6 +239,20 @@ async function addCapacity(qIndex) {
           <i class="fas fa-chevron-down arrow"></i>
         </div>
 
+        {#if category === 'habilidade'}
+          <div class="custom-select grow">
+            <select value={flags.parentId || ""} on:change={(e)=>updateFlag('parentId', e.target.value)}>
+              <option value="">Nenhum...</option>
+              {#if item.parent}
+                {#each item.parent.items.filter(i => i.type === 'power' && (i.getFlag(MODULE_ID, 'category') || 'principal') === 'principal' && i.id !== item.id) as p}
+                  <option value={p.id}>{p.name}</option>
+                {/each}
+              {/if}
+            </select>
+            <i class="fas fa-chevron-down arrow"></i>
+          </div>
+        {/if}
+
         <div class="custom-select grow">
           <label>RARIDADE</label>
           <select value={rarity} on:change={(e)=>updateFlag('rarity', e.target.value)} >
@@ -259,7 +274,7 @@ async function addCapacity(qIndex) {
   <main class="sheet-content custom-scroll">
     
     {#if activeTab === 'geral'}
-      <div class="tab-pane" in:fade={{duration:200}}>
+      <div class="tab-pane">
         
         <div class="hud-container">
           <div class="hud-card">
@@ -366,7 +381,7 @@ async function addCapacity(qIndex) {
         </div>
 
         {#if notesExpanded}
-        <div class="notes-overlay" transition:fade={{duration: 150}} on:click={closeNotes}>
+        <div class="notes-overlay" on:click={closeNotes}>
             <div class="notes-modal" on:click|stopPropagation>
                 <div class="editor-header modal-header">
                     <span class="editor-label"><i class="fas fa-terminal"></i> NOTAS DE SISTEMA (MODO TELA CHEIA)</span>
@@ -387,7 +402,7 @@ async function addCapacity(qIndex) {
     {/if}
 
     {#if activeTab === 'balanceamento' && isGM}
-      <div class="tab-pane" in:fade={{duration:200}}>
+      <div class="tab-pane">
         
         <div class="toolbar">
           <div class="status-pill {usedPB > maxPB ? 'danger' : 'success'}">
@@ -400,7 +415,7 @@ async function addCapacity(qIndex) {
 
 <div class="cards-list">
           {#each qualities as q, i}
-            <div class="quality-card" transition:slide|local>
+            <div class="quality-card">
               
               <div class="card-header">
                 <div class="header-left">
@@ -475,7 +490,7 @@ async function addCapacity(qIndex) {
                       </div>
 
                       {#if !cap.collapsed}
-                        <div class="cap-tools" transition:slide>
+                        <div class="cap-tools">
                           <div class="custom-select full">
                             <select value={cap.type || 'mass'} on:change={(e) => updateCapacity(i, cIndex, 'type', e.target.value)}>
                                 {#each CAPACITY_TYPES as type} <option value={type.id}>{type.name}</option> {/each}
@@ -516,7 +531,7 @@ async function addCapacity(qIndex) {
                 </div>
 
                 <div class="card-footer">
-                  <div class="cost-badge">CUSTO: <strong>{2 + (q.level || 0)} PB</strong></div>
+                  <div class="cost-badge">CUSTO: <strong>{Math.max(1, 2 + (q.level || 0) + ((q.extras || []).reduce((sum, e) => sum + ((e.cost || 0) * (e.qty || 1)), 0)))} PB</strong></div>
                   <button class="btn-extra" on:click={() => openExtraSelector(i)}>
                     <i class="fas fa-sliders-h"></i> CONFIGURAR EXTRAS
                   </button>
@@ -531,7 +546,7 @@ async function addCapacity(qIndex) {
 
   </main>
   {#if descExpanded && activeDescIndex !== -1}
-  <div class="notes-overlay" transition:fade={{duration: 150}} on:click={closeDescNotes}>
+  <div class="notes-overlay" on:click={closeDescNotes}>
       <div class="notes-modal" on:click|stopPropagation>
           <div class="editor-header modal-header">
               <span class="editor-label">

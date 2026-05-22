@@ -110,8 +110,12 @@
     $: statCharm = Number(system.stats?.charm?.value || system.attributes?.charm?.value || flags.stats?.charm?.normal || 1);
     $: statCommand = Number(system.stats?.command?.value || system.attributes?.command?.value || flags.stats?.command?.normal || 1);
     
+    $: hyperCharm = (Number(flags.stats?.charm?.h_normal) || 0) + (Number(flags.stats?.charm?.h_hard) || 0) + (Number(flags.stats?.charm?.h_wiggle) || 0);
+    $: hyperCommand = (Number(flags.stats?.command?.h_normal) || 0) + (Number(flags.stats?.command?.h_hard) || 0) + (Number(flags.stats?.command?.h_wiggle) || 0);
+    $: nexusEnergyMod = Number(flags.nexusEnergyMod) || 0;
+
     $: maxBaseWill = statCharm + statCommand + activeLevel + boughtBaseWill;
-    $: maxWillpower = maxBaseWill;
+    $: maxWillpower = maxBaseWill + hyperCharm + hyperCommand + nexusEnergyMod;
 
     // Se estiver zero e max for maior, inicializa o atual
     $: {
@@ -268,6 +272,10 @@ async function importPlayerXP() {
     function updateCurrentWP(e) {
         currWillpower = parseInt(e.target.value) || 0;
         actor.update({ [`flags.${MODULE_ID}.currWillpower`]: currWillpower }, {render:false});
+    }
+    function updateNexusMod(e) {
+        let val = parseInt(e.target.value) || 0;
+        actor.update({ [`flags.${MODULE_ID}.nexusEnergyMod`]: val }, {render:false});
     }
 
     // --- Listas Dinâmicas ---
@@ -517,15 +525,22 @@ async function importPlayerXP() {
             <div class="will-row" style="border-left: 2px solid #00aaff;">
                 <div class="will-info">
                     <span class="w-label" style="color: #00aaff;">Energia Nexus</span>
-                    <div class="w-calc">
+                    <div class="w-calc" title="Força de Vontade + Hypers (Charme/Comando) + Modificador">
                         <span style="color: #666; font-style: italic;">O máximo é atrelado a Força de Vontade.</span>
                         = <strong>{maxWillpower}</strong>
                     </div>
                 </div>
                 <div class="will-controls">
                     <div class="current-input-wrapper">
-                        <label style="color: #00aaff;">ATUAL</label>
-                        <input type="number" value={currWillpower} on:change={updateCurrentWP} style="border-color: #00aaff;">
+                        <label style="color: #00aaff;">MAX MOD</label>
+                        <input type="number" value={nexusEnergyMod} on:change={updateNexusMod} style="border-color: #00aaff; width: 40px;">
+                    </div>
+                    <div class="current-input-wrapper">
+                        <label style="color: #00aaff;">ATUAL / MÁX</label>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="number" value={currWillpower} on:change={updateCurrentWP} style="border-color: #00aaff;">
+                            <span style="color: #00aaff; font-weight: bold; font-size: 14px;">/ {maxWillpower}</span>
+                        </div>
                     </div>
                 </div>
             </div>

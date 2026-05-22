@@ -2,6 +2,7 @@
     import { createEventDispatcher } from 'svelte';
     import { fade, slide } from 'svelte/transition';
     import { SHEET_THEMES } from '../data/SheetThemeDB.js'; 
+    import { PassSystem } from '../PassSystem.js';
 
     export let actor;
     export let flags; // Recebe as flags atualizadas e reativas da Ficha Pai
@@ -9,6 +10,11 @@
     const dispatch = createEventDispatcher();
     const MODULE_ID = "multiversus-rpg";
     const isGM = game.user.isGM;
+
+    // --- REGRAS DO PASSE ---
+    $: playerTier = PassSystem.getPlayerTier(game.user.id);
+    const FREE_THEMES = ['terminal', 'chamas', 'blue_magic', 'lobby'];
+    $: isRestricted = (key) => !FREE_THEMES.includes(key) && playerTier.id === 'cobre';
 
     // --- SINCRONIA REATIVA (Lê direto das flags) ---
     $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
@@ -169,13 +175,18 @@
                         <button 
                             class="theme-card" 
                             class:active={activeThemeKey === key}
-                            on:click={() => selectTheme(key)}
+                            class:locked={isRestricted(key)}
+                            disabled={isRestricted(key)}
+                            on:click={() => !isRestricted(key) && selectTheme(key)}
                             style="--preview-primary: {data.vars['--c-primary']}; --preview-bg: {data.vars['--c-bg']}"
                         >
                             <div class="theme-preview"></div>
                             <div class="theme-info">
                                 <span class="theme-name">{data.label}</span>
                                 <span class="theme-desc">{data.desc}</span>
+                                {#if isRestricted(key)}
+                                    <span class="lock-tag"><i class="fas fa-lock"></i> REQUER PASSE PRATA+</span>
+                                {/if}
                             </div>
                             {#if activeThemeKey === key}
                                 <i class="fas fa-check-circle check-icon"></i>
@@ -278,11 +289,27 @@
         display: flex; align-items: center; gap: 10px;
         position: relative; transition: 0.2s;
     }
-    .theme-card:hover { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
+    .theme-card:hover:not(.locked) { background: rgba(255,255,255,0.05); transform: translateY(-2px); }
     .theme-card.active { 
         border-color: var(--c-primary); 
         background: rgba(var(--c-primary), 0.1); /* Fundo sutil com a cor do tema */
         box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+    }
+    .theme-card.locked {
+        opacity: 0.5;
+        cursor: not-allowed;
+        filter: grayscale(1);
+    }
+    .lock-tag {
+        font-size: 0.6em;
+        color: #ff3333;
+        background: rgba(255,0,0,0.2);
+        padding: 2px 4px;
+        border-radius: 2px;
+        margin-top: 4px;
+        font-weight: bold;
+        display: inline-block;
+        width: max-content;
     }
     .theme-preview { width: 12px; height: 12px; border-radius: 50%; background: var(--preview-primary); box-shadow: 0 0 5px var(--preview-primary); }
     .theme-info { display: flex; flex-direction: column; }

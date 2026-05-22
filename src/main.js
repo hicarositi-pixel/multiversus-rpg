@@ -13,7 +13,6 @@ import SocialMenu from './apps/SocialMenu.js';
 import { SocialHubDatabase } from './database/SocialHubDatabase.js';
 import { GroupDatabase } from "./database/GroupDatabase.js";
 import MobileHudApp from './apps/MobileHudApp.js';
-import { OnlineComms } from './apps/OnlineComms.js';
 
 // Sheets JS
 import MultiversusItemSheet from './sheets/MultiversusItemSheet.js';
@@ -26,6 +25,8 @@ import "./DiscordHandler.js";
 import OpeningScreen from "./OpeningScreen.svelte";
 
 import { CardDatabase } from '../Logic/CardDatabase.js';
+import { OriginDatabase } from './OriginDatabase.js';
+import { PowerDatabase } from './auxiliar/PowerDatabase.js';
 
 Hooks.once('init', () => {
     CardDatabase.init();
@@ -37,9 +38,12 @@ const MODULE_ID = "multiversus-rpg";
 // =========================================================
 // 2. INICIALIZAÇÃO (INIT HOOK)
 // =========================================================
+
 Hooks.once('init', async function() {
     console.log(`!!! ${MODULE_ID.toUpperCase()} OS: KERNEL INICIALIZANDO !!!`);
     SocialHubDatabase.init();
+    await OriginDatabase.init();
+    await PowerDatabase.init();
     // --- A. SETTINGS ---
     game.settings.register(MODULE_ID, "battlePassSeason", {
         name: "Dados da Temporada", scope: "world", config: false, type: Object,
@@ -295,34 +299,25 @@ Hooks.once('ready', async function() {
                 }
             }
 
-            // 4. Comms
-            if (payload.type === "COMMS_SEND_MSG") {
-                const { CommsDatabase } = await import('./database/CommsDatabase.js');
-                await CommsDatabase.sendMessage(payload.msg);
-                game.socket.emit(`module.${MODULE_ID}`, { type: "COMMS_REFRESH" });
-                Hooks.callAll("commsUpdate");
-            }
-            if (payload.type === "COMMS_DELETE_MSG") {
-                const { CommsDatabase } = await import('./database/CommsDatabase.js');
-                await CommsDatabase.deleteMessage(payload.msgId);
-                game.socket.emit(`module.${MODULE_ID}`, { type: "COMMS_REFRESH" });
-                Hooks.callAll("commsUpdate");
-            }
-            if (payload.type === "COMMS_CREATE_GROUP") {
-                const { CommsDatabase } = await import('./database/CommsDatabase.js');
-                await CommsDatabase.createGroup(payload.group.name); 
-                game.socket.emit(`module.${MODULE_ID}`, { type: "COMMS_REFRESH" });
-                Hooks.callAll("commsUpdate");
-            }
-            if (payload.type === "COMMS_UPDATE_STATUS") {
-                const { CommsDatabase } = await import('./database/CommsDatabase.js');
-                await CommsDatabase.updateStatus(payload.status.text);
-                game.socket.emit(`module.${MODULE_ID}`, { type: "COMMS_REFRESH" });
-                Hooks.callAll("commsUpdate");
-            }
+            // 4. Player DB Save/Delete
             if (payload.type === "PLAYER_DB_SAVE") {
                 const { PlayerDatabase } = await import('./database/PlayerDatabase.js');
                 await PlayerDatabase.saveEntry(payload.entry);
+                game.socket.emit(`module.${MODULE_ID}`, { type: "PLAYER_DB_UPDATE_NOTIFY" });
+            }
+            if (payload.type === "PLAYER_DB_DELETE") {
+                const { PlayerDatabase } = await import('./database/PlayerDatabase.js');
+                await PlayerDatabase.deleteEntry(payload.id);
+                game.socket.emit(`module.${MODULE_ID}`, { type: "PLAYER_DB_UPDATE_NOTIFY" });
+            }
+            if (payload.type === "PLAYER_DB_SAVE_GROUP") {
+                const { PlayerDatabase } = await import('./database/PlayerDatabase.js');
+                await PlayerDatabase.saveGroup(payload.group);
+                game.socket.emit(`module.${MODULE_ID}`, { type: "PLAYER_DB_UPDATE_NOTIFY" });
+            }
+            if (payload.type === "PLAYER_DB_DELETE_GROUP") {
+                const { PlayerDatabase } = await import('./database/PlayerDatabase.js');
+                await PlayerDatabase.deleteGroup(payload.id);
                 game.socket.emit(`module.${MODULE_ID}`, { type: "PLAYER_DB_UPDATE_NOTIFY" });
             }
         }
@@ -330,7 +325,10 @@ Hooks.once('ready', async function() {
         // >>> LÓGICA CLIENTE <<<
         if (payload.type === "AUXILIAR_REFRESH") Hooks.callAll("auxiliarUpdate");
         if (payload.type === "COMMS_REFRESH") Hooks.callAll("commsUpdate");
-        if (payload.type === "PLAYER_DB_UPDATE_NOTIFY") Hooks.callAll("nexusUpdate");
+        if (payload.type === "PLAYER_DB_UPDATE_NOTIFY") {
+            Hooks.callAll("nexusUpdate");
+            Hooks.callAll("nexusGroupsUpdate");
+        }
         if (payload.type === "passUpdate") Hooks.callAll("passSystemUpdate");
     });
 });
@@ -361,6 +359,13 @@ class FichaSvelte extends ActorSheet {
     async _updateObject(event, formData) { return; } 
 
     async _render(force, options) {
+        if (!force && this.component) {
+            if (window.multiversusMacroHUD) window.multiversusMacroHUD.$set({ actor: this.actor });
+            this.component.$set({ actor: this.actor, system: this.actor.system });
+            if (this.element && this.element.length) this.element.find(".window-title").text(this.title);
+            return;
+        }
+
         // --- MACRO HUD ---
         if (!window.multiversusMacroHUD) {
             const macroRoot = document.createElement('div');

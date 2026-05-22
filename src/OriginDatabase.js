@@ -1,7 +1,33 @@
+const MODULE_ID = "multiversus-rpg";
+const SETTING_NAME = "customOrigins";
+
 export const OriginDatabase = {
-    // Função simples que retorna os dados fixos abaixo
+    init: async () => {
+        if (!game.settings.settings.has(`${MODULE_ID}.${SETTING_NAME}`)) {
+            game.settings.register(MODULE_ID, SETTING_NAME, {
+                name: "Custom Origins Archive",
+                scope: "world",
+                config: false,
+                type: Object,
+                default: {},
+            });
+        }
+    },
+
     load: async () => {
-        return ORIGINS;
+        let customOrigins = {};
+        if (game.settings.settings.has(`${MODULE_ID}.${SETTING_NAME}`)) {
+            customOrigins = game.settings.get(MODULE_ID, SETTING_NAME) || {};
+        }
+        return { ...ORIGINS, ...customOrigins };
+    },
+
+    save: async (originData) => {
+        if (!game.settings.settings.has(`${MODULE_ID}.${SETTING_NAME}`)) return;
+        let customOrigins = game.settings.get(MODULE_ID, SETTING_NAME) || {};
+        customOrigins[originData.id] = originData;
+        await game.settings.set(MODULE_ID, SETTING_NAME, customOrigins);
+        console.log(`NEXUS_OS :: Origem customizada salva: ${originData.id}`);
     }
 };
 

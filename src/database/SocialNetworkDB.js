@@ -27,7 +27,7 @@ export class SocialNetworkDB {
         return { posts, users };
     }
 
-    static async publishPost(authorId, text, attachments, newFollowersGained) {
+    static async publishPost(authorId, text, attachments, newFollowersGained, isPrivate = false) {
         const db = await this.getDB();
         if (!db) return;
         
@@ -45,6 +45,7 @@ export class SocialNetworkDB {
             authorId,
             text,
             attachments,
+            isPrivate,
             timestamp: Date.now(),
             reactions: {},
             comments: []

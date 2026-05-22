@@ -14,6 +14,16 @@ export const PlayerDatabase = {
                 onChange: () => Hooks.callAll("nexusUpdate")
             });
         }
+        if (!game.settings.settings.has(`${MODULE_ID}.player_groups_data`)) {
+            game.settings.register(MODULE_ID, "player_groups_data", {
+                name: "Player Groups Data",
+                scope: "world",
+                config: false,
+                type: Array,
+                default: [],
+                onChange: () => Hooks.callAll("nexusGroupsUpdate")
+            });
+        }
     },
 
     getAll: () => {
@@ -53,6 +63,42 @@ export const PlayerDatabase = {
                 id: id
             });
             ui.notifications.info("Exclusão solicitada ao Mestre...");
+        }
+    },
+
+    // --- GRUPOS (NEXUS DATA) ---
+    getGroups: () => {
+        PlayerDatabase.ensureRegistered();
+        return game.settings.get(MODULE_ID, "player_groups_data") || [];
+    },
+
+    saveGroup: async (group) => {
+        PlayerDatabase.ensureRegistered();
+        if (game.user.isGM) {
+            let groups = PlayerDatabase.getGroups();
+            const index = groups.findIndex(g => g.id === group.id);
+            if (index >= 0) groups[index] = group;
+            else groups.push(group);
+            await game.settings.set(MODULE_ID, "player_groups_data", groups);
+        } else {
+            game.socket.emit(`module.${MODULE_ID}`, {
+                type: "PLAYER_DB_SAVE_GROUP",
+                group: group
+            });
+            ui.notifications.info("Aguardando Mestre atualizar o Grupo...");
+        }
+    },
+
+    deleteGroup: async (groupId) => {
+        PlayerDatabase.ensureRegistered();
+        if (game.user.isGM) {
+            let groups = PlayerDatabase.getGroups().filter(g => g.id !== groupId);
+            await game.settings.set(MODULE_ID, "player_groups_data", groups);
+        } else {
+            game.socket.emit(`module.${MODULE_ID}`, {
+                type: "PLAYER_DB_DELETE_GROUP",
+                id: groupId
+            });
         }
     }
 };

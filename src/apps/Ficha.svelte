@@ -14,7 +14,6 @@
     import StatsSkillsApp from './StatsSkillsApp.svelte'; 
     import OraclePlayerApp from './OraclePlayerApp.svelte';
     import PlayerNexus from '../database/PlayerNexus.svelte';
-    import CommsApp from './CommsApp.svelte';
     import TestamentoApp from './TestamentoApp.svelte';
     import BattlePassApp from './BattlePassApp.svelte';
     import OpeningApp from '../OpeningApp.js';
@@ -134,12 +133,11 @@ function openNexusMenu() {
         { id: 'profile', icon: 'fa-id-card', label: 'PERFIL' },
         { id: 'stats', icon: 'fa-dna', label: 'ATRIBUTOS' },
         { id: 'inv', icon: 'fa-box-open', label: 'INVENTÁRIO' },
-        { id: 'powers', icon: 'fa-bolt', label: 'PODERES' },
+        { id: 'powers', icon: 'fa-bolt', label: 'TALENTOS' },
         { id: 'survival', icon: 'fa-heartbeat', label: 'SOBREVIVENTE' },
         { id: 'oracle', icon: 'fa-terminal', label: 'ORACLE LINK' },
-        { id: 'archives', icon: 'fa-book-dead', label: 'THE ARCHIVES' },
+        { id: 'archives', icon: 'fa-folder-open', label: 'NEXUS / DATA' },
         { id: 'testamento', icon: 'fa-file-signature', label: 'MEMORIAL' },
-        { id: 'comms', icon: 'fa-comments', label: 'ZAP_NET' },
         { id: 'base', icon: 'fa-warehouse', label: 'BASE / GRUPO' },
         { id: 'battlepass', icon: 'fa-trophy', label: 'BATTLE PASS' },
         { id: 'settings', icon: 'fa-cogs', label: 'SISTEMA' },
@@ -168,7 +166,7 @@ function openNexusMenu() {
         <div class="vignette"></div>
 
         {#if loginState !== 'logged_in'}
-            <div class="login-layer" out:fly={{y: -100, duration: 800, easing: cubicIn}}>
+            <div class="login-layer">
                 <div class="login-container">
                     <div class="bio-scanner" class:scanning={loginState === 'verifying'}>
                         <img src={actor.img} class="bio-img" alt="Avatar"/>
@@ -182,7 +180,7 @@ function openNexusMenu() {
                     </div>
 
                     {#if loginState === 'idle'}
-                        <div class="pass-input-box" in:fade>
+                        <div class="pass-input-box">
                             {#each Array(6) as _, i}
                                 <div class="digit-box" class:filled={i < inputBuffer.length}>
                                     {i < inputBuffer.length ? '●' : ''}
@@ -193,7 +191,7 @@ function openNexusMenu() {
                             {inputBuffer.length < 6 ? (savedPassword ? "INSIRA SENHA" : "DEFINA ACESSO TEMPORÁRIO") : "[ PRESSIONE ENTER ]"}
                         </div>
                     {:else}
-                        <div class="boot-sequence" in:fade>
+                        <div class="boot-sequence">
                             {#if loginState === 'verifying'} <div class="spinner"></div> {/if}
                             <span class="boot-text" class:success={loginState === 'welcome'}>{bootText}</span>
                         </div>
@@ -202,7 +200,7 @@ function openNexusMenu() {
             </div>
 
         {:else}
-            <div class="os-container" in:fade={{duration: 1000, delay: 200, easing: cubicOut}}>
+            <div class="os-container">
                 
 <header class="status-bar">
                     <div class="bar-left"><span class="led"></span> ONLINE</div>
@@ -217,7 +215,7 @@ function openNexusMenu() {
 
                 <main class="viewport">
                     {#if activeApp === null}
-                        <div class="desktop-grid" in:fade={{duration: 300}}>
+                        <div class="desktop-grid">
                             {#each desktopIcons as icon}
                                 <button class="icon-btn" class:danger={icon.id === 'shutdown'}
                                     on:click={() => icon.action ? icon.action() : activeApp = icon.id}>
@@ -231,7 +229,7 @@ function openNexusMenu() {
                         </div>
 
                     {:else}
-                        <div class="window-frame" in:fly={{ y: 20, duration: 300 }}>
+                        <div class="window-frame">
                             <div class="window-header">
                                 <div class="header-left">
                                     <i class="fas fa-terminal"></i>
@@ -251,14 +249,12 @@ function openNexusMenu() {
                                     <SettingsApp {actor} {flags} on:close={() => activeApp = null} />
                                 {:else if activeApp === 'survival'} 
                                     <SurvivalApp {actor} {flags} themeColor={themeColor} />
-                                {:else if activeApp === 'comms'} 
-                                    <CommsApp {actor} {flags} themeStyle={cssString} />
+                                {:else if activeApp === 'archives'} 
+                                    <PlayerNexus {actor} />
                                 {:else if activeApp === 'testamento'}
                                     <TestamentoApp {actor} {flags} themeStyle={cssString} />
                                 {:else if activeApp === 'oracle'} 
                                     <OraclePlayerApp {actor} {flags} themeStyle={cssString} />
-                                {:else if activeApp === 'archives'} 
-                                    <PlayerNexus themeStyle={cssString} />
                                 {:else if activeApp === 'base'} 
                                     <BaseApp {actor} {flags} />
                                 {:else if activeApp === 'powers'} 

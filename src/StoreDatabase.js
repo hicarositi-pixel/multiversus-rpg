@@ -155,6 +155,9 @@ let possibleItems = archive.filter(item => {
                         if (ageInDays < 30) return false; // Tem menos de 30 dias? Fica fora da Exclusiva.
                     }
                 }
+                
+                if (!item.system?.inExclusiveRotation) return false; // ITEM DEVE ESTAR ATIVADO PARA EXCLUSIVA
+
                 return true;
             });
             
@@ -169,6 +172,7 @@ let possibleItems = archive.filter(item => {
                 // Fallback: pega qualquer item que não seja poder
 let fItems = archive.filter(item => {
                     if (item.system?.stock === 0) return false; // <--- NOVA TRAVA NO FALLBACK TAMBÉM
+                    if (!item.system?.inExclusiveRotation) return false; // ITEM DEVE ESTAR ATIVADO PARA EXCLUSIVA
                     if (activeStoreIds.includes(item.id)) return false;
                     let tag = item.systemTag || "Item";
                     if (["Origens", "Portais", "Passe", "Habilidades Intrínsecas"].includes(tag)) return false;

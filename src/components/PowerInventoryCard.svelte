@@ -46,8 +46,8 @@
   let editColor = "#ffffff";
   let isExpanded = false;
   let isConfiguring = false;
+  let showHabilidades = false;
 
-// Verifica se o valor realmente mudou antes de sincronizar
   $: {
       if (flags && !isConfiguring) {
           if (editAlias !== (flags.customAlias || "") || editTheme !== (flags.animationTheme || 'default')) {
@@ -79,7 +79,7 @@
     ui.notifications.info(`Visual salvo!`);
   }
 
-let isUpdating = false;
+  let isUpdating = false;
 
   async function upgradeDice(type) {
     if (!item || isUpdating) return;
@@ -91,21 +91,19 @@ let isUpdating = false;
         return;
     }
 
-    isUpdating = true; // Trava o componente
+    isUpdating = true; 
 
     const currentVal = diceData[type] || 0;
     const newVal = currentVal + 1;
     const remaining = availableXP - cost;
 
-    Hooks.call("nexusPointSpent", actor.name, "Poder", `${displayName} (${type}): ${currentVal} ➔ ${newVal}`, cost, remaining);
+    Hooks.call("nexusPointSpent", actor.name, category === "habilidade" ? "Habilidade" : "Talento", `${displayName} (${type}): ${currentVal} ➔ ${newVal}`, cost, remaining);
       
     let newDiceData = { normal: dNormal, hard: dHard, wiggle: dWiggle, ...diceData };
     newDiceData[type] = newVal;
 
-    // Atualiza
     await item.update({ [`flags.${MODULE_ID}.dice`]: newDiceData });
     
-    // Destrava depois de um curto período para o Foundry processar
     setTimeout(() => { isUpdating = false; }, 300);
   }
 
@@ -119,27 +117,68 @@ let isUpdating = false;
   function openSheet() { item?.sheet?.render(true); }
   async function deletePower() { await item.delete(); }
 
-  // ========================================================================
-  // NOVO: PERMITE ARRASTAR A CARTA PARA A DATABASE (OU OUTRA FICHA)
-  // ========================================================================
   function handleDragStart(event) {
-      // Empacota os dados da mesma forma que o Foundry faz nativamente
       const dragData = {
           type: "Item",
           uuid: item.uuid,
           data: item.toObject()
       };
       event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+      event.stopPropagation();
   }
+
+  async function handleDropOnCard(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      if (category === "habilidade") return; // Nao aninha habilidade em habilidade
+
+      const dataText = event.dataTransfer.getData('text/plain');
+      if (!dataText) return;
+
+      try {
+          const dropData = JSON.parse(dataText);
+          if (dropData.type === "Item" && dropData.data) {
+              let itemData = foundry.utils.deepClone(dropData.data);
+              const validTypes = game.documentTypes.Item;
+              if (validTypes.includes("power")) itemData.type = "power";
+
+              if (itemData.type !== "power") return;
+              if (itemData.flags?.[MODULE_ID]?.category !== "habilidade") return;
+
+              if (dropData.uuid && dropData.uuid.includes(actor.id)) {
+                  const existingItem = actor.items.get(itemData._id);
+                  if (existingItem) {
+                      await existingItem.update({ [`flags.${MODULE_ID}.parentId`]: item.id });
+                      ui.notifications.info(`Habilidade anexada ao Talento.`);
+                  }
+                  return;
+              }
+
+              delete itemData._id;
+              if (!itemData.flags) itemData.flags = {};
+              if (!itemData.flags[MODULE_ID]) itemData.flags[MODULE_ID] = {};
+              itemData.flags[MODULE_ID].parentId = item.id;
+
+              await actor.createEmbeddedDocuments("Item", [itemData]);
+              ui.notifications.info(`[${itemData.name}] anexada a [${realName}].`);
+          }
+      } catch (e) {
+          console.error("Falha ao receber habilidade na carta:", e);
+      }
+  }
+
+  $: childHabilidades = item.childHabilidades || [];
 </script>
 
 {#if item}
 <div 
-  class="power-card theme-{activeDisplayTheme}" 
+  class="power-card theme-{activeDisplayTheme} {category === 'habilidade' ? 'is-habilidade' : ''}" 
   style="--glow: {glowColor};"
   class:expanded={isExpanded || isConfiguring}
   draggable="true" 
   on:dragstart={handleDragStart}
+  on:drop={handleDropOnCard}
+  on:dragover={(e) => { if (category !== 'habilidade') e.preventDefault(); }}
 >
   <div class="card-front">
     <div class="icon-box" on:click={openSheet} title="Abrir Ficha Técnica">
@@ -155,6 +194,11 @@ let isUpdating = false;
       <div class="meta-row">
         <span class="meta-tag">{category.toUpperCase()}</span>
         <span class="dice-count">TOTAL: <strong>{totalDice}</strong></span>
+        {#if childHabilidades.length > 0}
+           <button class="hab-count" on:click|stopPropagation={() => showHabilidades = !showHabilidades}>
+               <i class="fas {showHabilidades ? 'fa-chevron-down' : 'fa-link'}"></i> {childHabilidades.length} Habilidades
+           </button>
+        {/if}
       </div>
     </div>
 
@@ -169,7 +213,7 @@ let isUpdating = false;
   </div>
 
   {#if isConfiguring}
-    <div class="panel-drawer config-panel" transition:slide on:click|stopPropagation>
+    <div class="panel-drawer config-panel" on:click|stopPropagation>
       <div class="drawer-header">>>> PERSONALIZAÇÃO</div>
       <div class="config-grid">
         <div class="field-group">
@@ -206,7 +250,7 @@ let isUpdating = false;
   {/if}
 
   {#if isExpanded}
-    <div class="panel-drawer upgrade-panel" transition:slide>
+    <div class="panel-drawer upgrade-panel">
       <div class="xp-hud" class:broke={availableXP <= 0}>
         <div class="xp-label">XP DISPONÍVEL</div>
         <div class="xp-value">{availableXP}</div>
@@ -251,9 +295,17 @@ let isUpdating = false;
       </div>
 
       {#if isGM}
-        <button class="gm-delete" on:click={deletePower}><i class="fas fa-trash"></i> DELETAR PODER (GM)</button>
+        <button class="gm-delete" on:click={deletePower}><i class="fas fa-trash"></i> DELETAR {category.toUpperCase()} (GM)</button>
       {/if}
     </div>
+  {/if}
+
+  {#if childHabilidades.length > 0 && showHabilidades}
+     <div class="habilidades-container">
+        {#each childHabilidades as hab (hab.id)}
+           <svelte:self item={hab} actor={actor} isGM={isGM} />
+        {/each}
+     </div>
   {/if}
 </div>
 {/if}
@@ -261,6 +313,7 @@ let isUpdating = false;
 <style>
 /* CSS do seu código original MANTIDO */
 .power-card { background: #050505; border: 1px solid #333; border-left: 4px solid var(--glow); border-radius: 6px; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: 0.3s; cursor: grab;}
+.power-card.is-habilidade { margin-left: 20px; border-left-width: 2px; opacity: 0.95; transform: scale(0.98); margin-bottom: 5px; box-shadow: none; border: 1px dashed #444; }
 .power-card:active { cursor: grabbing; }
 .power-card:hover { box-shadow: 0 0 15px var(--glow); border-color: var(--glow); }
 .card-front { display: flex; align-items: center; padding: 8px; height: 72px; background: linear-gradient(90deg, #111 0%, #080808 100%); position: relative; z-index: 10; }
@@ -272,6 +325,8 @@ let isUpdating = false;
 .xp-badge { font-size: 0.75em; color: #000; background: var(--glow); padding: 2px 8px; border-radius: 12px; font-weight: bold; }
 .meta-row { display: flex; gap: 10px; margin-top: 4px; font-size: 0.75em; color: #777; align-items: center; }
 .meta-tag { background: #222; padding: 2px 6px; border-radius: 4px; border: 1px solid #333; }
+.hab-count { background: rgba(0,255,255,0.1); color: #0ff; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(0,255,255,0.3); font-size: 0.9em; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 4px;}
+.hab-count:hover { background: rgba(0, 255, 255, 0.2); }
 .dice-count strong { color: #fff; font-size: 1.1em; }
 .action-box { display: flex; flex-direction: column; gap: 6px; padding-left: 10px; border-left: 1px solid #222; }
 .btn-icon { background: transparent; border: none; color: #444; cursor: pointer; font-size: 1.1em; transition: 0.2s; }
@@ -307,4 +362,10 @@ let isUpdating = false;
 .die-card.affordable .btn-buy:hover { background: var(--glow); border-color: var(--glow); color: #000; box-shadow: 0 0 10px var(--glow); }
 .btn-buy .lbl { font-size: 0.6em; font-weight: bold; } .btn-buy .cost { font-size: 0.75em; font-weight: bold; }
 .gm-delete { width: 100%; margin-top: 15px; background: #110000; border: 1px solid #300; color: #844; font-size: 0.7em; padding: 8px; cursor: pointer; border-radius: 4px; }
+
+.habilidades-container {
+    padding: 10px 10px 0 10px;
+    background: rgba(0,0,0,0.3);
+    border-top: 1px dashed #333;
+}
 </style>

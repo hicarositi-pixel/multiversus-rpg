@@ -85,25 +85,42 @@
         { id: 'head', name: 'CABEÇA', loc: '10', hp: 4, lar: 0, har: 0, killing: 0, shock: 0, trauma: [], x: 50, y: 10, nonPhysicalDef: false }
     ];
 
-    let activeForm = "base"; // 'base', 'trans', 'gallery'
+    let activeFormId = 'base'; // Id da forma ativa, ou 'gallery'
 
-    // Carregamento inicial via getFlag (Seguro contra travamentos)
-    let bgBase = actor.getFlag(MODULE_ID, 'bg_base') || ""; 
-    let imgBase = actor.getFlag(MODULE_ID, 'img_base') || "https://i.imgur.com/1DyBPgD.png";
-    let bgTrans = actor.getFlag(MODULE_ID, 'bg_trans') || "";
-    let imgTrans = actor.getFlag(MODULE_ID, 'img_trans') || "https://i.imgur.com/1DyBPgD.png";
-
-    let limbsBase = actor.getFlag(MODULE_ID, 'limbs_base') || JSON.parse(JSON.stringify(DEFAULT_LIMBS));
-    let limbsTrans = actor.getFlag(MODULE_ID, 'limbs_trans') || JSON.parse(JSON.stringify(DEFAULT_LIMBS));
-    let galleryItems = actor.getFlag(MODULE_ID, 'combat_gallery') || [];
+    // Carregamento com Retrocompatibilidade
+    let combatForms = actor.getFlag(MODULE_ID, 'combat_forms');
+    
+    if (!combatForms) {
+        combatForms = [
+            {
+                id: 'base',
+                name: 'Base',
+                bg: actor.getFlag(MODULE_ID, 'bg_base') || "",
+                img: actor.getFlag(MODULE_ID, 'img_base') || "https://i.imgur.com/1DyBPgD.png",
+                limbs: actor.getFlag(MODULE_ID, 'limbs_base') || JSON.parse(JSON.stringify(DEFAULT_LIMBS))
+            },
+            {
+                id: 'trans',
+                name: 'Transformação',
+                bg: actor.getFlag(MODULE_ID, 'bg_trans') || "",
+                img: actor.getFlag(MODULE_ID, 'img_trans') || "https://i.imgur.com/1DyBPgD.png",
+                limbs: actor.getFlag(MODULE_ID, 'limbs_trans') || JSON.parse(JSON.stringify(DEFAULT_LIMBS))
+            }
+        ];
+    }
 
     // Garante array de trauma em caso de dados antigos
-    limbsBase = limbsBase.map(l => ({...l, trauma: l.trauma || []}));
-    limbsTrans = limbsTrans.map(l => ({...l, trauma: l.trauma || []}));
+    combatForms = combatForms.map(f => ({
+        ...f,
+        limbs: f.limbs.map(l => ({ ...l, trauma: l.trauma || [] }))
+    }));
 
-    $: currentLimbs = activeForm === 'base' ? limbsBase : limbsTrans;
-    $: currentImg = activeForm === 'base' ? imgBase : imgTrans;
-    $: currentBg = activeForm === 'base' ? bgBase : bgTrans;
+    let galleryItems = actor.getFlag(MODULE_ID, 'combat_gallery') || [];
+
+    $: activeFormObj = combatForms.find(f => f.id === activeFormId) || combatForms[0];
+    $: currentLimbs = activeFormObj.limbs;
+    $: currentImg = activeFormObj.img;
+    $: currentBg = activeFormObj.bg;
 
     let selectedLimbId = null;
     let editingMode = false;
@@ -132,14 +149,53 @@
 
     // O Segredo: Reatribuir a array local forçando o Svelte a renderizar INSTANTANEAMENTE
     function triggerReactivity() {
-        if (activeForm === 'base') limbsBase = [...limbsBase];
-        else limbsTrans = [...limbsTrans];
-        saveData();
+        const idx = combatForms.findIndex(f => f.id === activeFormId);
+        if (idx !== -1) {
+            combatForms[idx].limbs = [...combatForms[idx].limbs];
+            combatForms = [...combatForms];
+            saveData();
+        }
     }
 
     async function saveData() {
-        const flagKey = activeForm === 'base' ? 'limbs_base' : 'limbs_trans';
-        await actor.update({ [`flags.${MODULE_ID}.${flagKey}`]: activeForm === 'base' ? limbsBase : limbsTrans }, { render: false });
+        await actor.update({ [`flags.${MODULE_ID}.combat_forms`]: combatForms }, { render: false });
+    }
+
+    async function addNewForm() {
+        const newId = foundry.utils.randomID();
+        const newForm = {
+            id: newId,
+            name: `Forma ${combatForms.length + 1}`,
+            bg: "",
+            img: "https://i.imgur.com/1DyBPgD.png",
+            limbs: JSON.parse(JSON.stringify(DEFAULT_LIMBS))
+        };
+        combatForms = [...combatForms, newForm];
+        activeFormId = newForm.id;
+        triggerReactivity();
+        saveData();
+    }
+    
+    async function promptRenameForm(formId) {
+        let form = combatForms.find(f => f.id === formId);
+        if(!form) return;
+        const newName = await Dialog.prompt({
+            title: "Renomear Forma",
+            content: `<input type="text" id="rename-input" value="${form.name}" autofocus />`,
+            callback: html => html.find("#rename-input").val()
+        });
+        if (newName && newName.trim() !== "") {
+            form.name = newName.trim();
+            triggerReactivity();
+            saveData();
+        }
+    }
+
+    function removeForm(formId) {
+        if (combatForms.length <= 1) return ui.notifications.warn("Você não pode deletar a última forma!");
+        combatForms = combatForms.filter(f => f.id !== formId);
+        if (activeFormId === formId) activeFormId = combatForms[0].id;
+        saveData();
     }
 
     // --- CÁLCULO DE DANO REVISADO (REGRAS ORE + NÃO FÍSICO E PERFURAÇÃO) ---
@@ -221,16 +277,16 @@
         if(amount <= 0) return;
         
         let totalCured = 0;
-        // Puxa o array atual de acordo com a transformação
-        let forms = activeForm === 'base' ? limbsBase : limbsTrans;
         
-        // Percorre todos os membros, curando 'amount' em CADA membro (Regra Wild Talents)
-        for (let i = 0; i < forms.length; i++) {
-            let amt = amount;
-            while (amt > 0) {
-                if (forms[i].killing > 0) { forms[i].killing--; amt--; totalCured++; }
-                else if (forms[i].shock > 0) { forms[i].shock--; amt--; totalCured++; }
-                else break;
+        // Percorre todos os membros de TODAS as formas, curando 'amount' em CADA membro (Regra Wild Talents)
+        for (let form of combatForms) {
+            for (let i = 0; i < form.limbs.length; i++) {
+                let amt = amount;
+                while (amt > 0) {
+                    if (form.limbs[i].killing > 0) { form.limbs[i].killing--; amt--; totalCured++; }
+                    else if (form.limbs[i].shock > 0) { form.limbs[i].shock--; amt--; totalCured++; }
+                    else break;
+                }
             }
         }
         
@@ -317,13 +373,13 @@
             await actor.update({ [`flags.${MODULE_ID}.combat_gallery`]: galleryItems }, { render: false });
         }
         else {
-            if (activeForm === 'base') {
-                if (imgModalType === 'sil') imgBase = urlToSave; else bgBase = urlToSave;
-            } else {
-                if (imgModalType === 'sil') imgTrans = urlToSave; else bgTrans = urlToSave;
+            const idx = combatForms.findIndex(f => f.id === activeFormId);
+            if (idx !== -1) {
+                if (imgModalType === 'sil') combatForms[idx].img = urlToSave;
+                else combatForms[idx].bg = urlToSave;
+                combatForms = [...combatForms];
+                saveData();
             }
-            const flagType = imgModalType === 'sil' ? 'img' : 'bg';
-            await actor.update({ [`flags.${MODULE_ID}.${flagType}_${activeForm}`]: urlToSave }, { render: false });
         }
         showImgModal = false;
     }
@@ -340,12 +396,11 @@
     // --- CORREÇÃO DO ADD LIMB ---
     async function addLimb() {
         const newLimb = { id: foundry.utils.randomID(), name: 'NOVO', loc: '0', hp: 3, lar:0, har:0, killing:0, shock:0, trauma:[], x: 50, y: 50, nonPhysicalDef: false };
-        if (activeForm === 'base') {
-            limbsBase = [...limbsBase, newLimb];
-        } else {
-            limbsTrans = [...limbsTrans, newLimb];
+        const idx = combatForms.findIndex(f => f.id === activeFormId);
+        if (idx !== -1) {
+            combatForms[idx].limbs.push(newLimb);
+            triggerReactivity();
         }
-        triggerReactivity();
     }
 
     function getSlotState(limb, i) {
@@ -370,12 +425,28 @@
 
     <div class="dash-header">
         <div class="tabs">
-            <button class="tab {activeForm === 'base' ? 'active' : ''}" on:click={() => activeForm = 'base'}>BASE</button>
-            <button class="tab {activeForm === 'trans' ? 'active trans-mode' : ''}" on:click={() => activeForm = 'trans'}>TRANSFORMAÇÃO</button>
-            <button class="tab {activeForm === 'gallery' ? 'active gallery-mode' : ''}" on:click={() => activeForm = 'gallery'}>GALERIA</button>
+            {#each combatForms as form, idx}
+                <div class="tab-wrapper" style="display:flex; align-items:center;">
+                    <button class="tab {activeFormId === form.id ? 'active trans-mode' : ''}" on:click={() => activeFormId = form.id}>
+                        {form.name}
+                    </button>
+                    {#if editingMode}
+                        <button class="btn-ghost" style="margin-left: 5px; color: #ffeb3b; border: none; padding: 2px 5px; font-size: 10px;" on:click={() => promptRenameForm(form.id)} title="Renomear">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    {/if}
+                    {#if editingMode && combatForms.length > 1}
+                        <button class="tab-del" on:click|stopPropagation={() => removeForm(form.id)} title="Excluir"><i class="fas fa-times"></i></button>
+                    {/if}
+                </div>
+            {/each}
+            {#if editingMode}
+                <button class="tab add-tab" on:click={addNewForm} title="Adicionar Forma">+</button>
+            {/if}
+            <button class="tab {activeFormId === 'gallery' ? 'active gallery-mode' : ''}" style="margin-left:auto;" on:click={() => activeFormId = 'gallery'}>GALERIA</button>
         </div>
         <div class="tools">
-            {#if activeForm !== 'gallery'}
+            {#if activeFormId !== 'gallery'}
                 <button class="tool-btn {editingMode ? 'on' : ''}" on:click={() => editingMode = !editingMode} title="Modo Edição"><i class="fas fa-edit"></i> EDITAR</button>
             {/if}
             <button class="tool-btn" on:click={() => showConfig = true} title="Temas"><i class="fas fa-palette"></i></button>
@@ -384,7 +455,7 @@
 
     <div class="dash-content">
         
-        {#if activeForm === 'gallery'}
+        {#if activeFormId === 'gallery'}
             <div class="gallery-area custom-scroll">
                 <button class="add-gallery-btn" on:click={() => openImageModal('gallery_new')}>
                     <i class="fas fa-plus"></i> INSERIR NOVA ARTE À GALERIA (LINK WEB)
@@ -599,12 +670,17 @@
 
     /* HEADER E ABAS */
     .dash-header { display: flex; justify-content: space-between; background: rgba(0,0,0,0.8); padding: 5px 10px; border-bottom: 2px solid var(--c-primary); z-index: 20; align-items: center; }
-    .tabs { display: flex; gap: 5px; }
+    .tabs { display: flex; gap: 5px; flex: 1; align-items: center; overflow-x: auto;}
+    .tabs::-webkit-scrollbar { height: 4px; }
+    .tabs::-webkit-scrollbar-thumb { background: var(--c-primary); border-radius: 4px; }
     .tab { background: transparent; border: none; border-bottom: 3px solid transparent; color: #888; padding: 10px 15px; cursor: pointer; font-weight: bold; transition: 0.2s;}
     .tab:hover { color: #fff; }
     .tab.active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
     .tab.trans-mode.active { border-color: #a855f7; color: #a855f7; }
     .tab.gallery-mode.active { border-color: #3b82f6; color: #3b82f6; }
+    .tab.add-tab { border: 1px dashed #555; padding: 5px 10px; margin-left: 5px; color: #555; border-radius: 4px;}
+    .tab.add-tab:hover { border-color: var(--c-primary); color: var(--c-primary);}
+    .tab-del { background: transparent; border: none; color: #ff3333; cursor: pointer; padding: 5px; font-size: 10px; margin-left: -5px; }
     
     .tools { display: flex; gap: 5px;}
     .tool-btn { background: #222; border: 1px solid #444; color: #ccc; padding: 6px 12px; cursor: pointer; font-weight: bold; border-radius: 4px; transition: 0.2s;}

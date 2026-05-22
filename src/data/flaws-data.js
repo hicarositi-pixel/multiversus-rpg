@@ -29,5 +29,7 @@ export const FLAWS_DB = [
   { id: 'uncontrollable', name: 'Uncontrollable', cost: -2, icon: '🤪', desc: 'Vontade própria. GM decide o que faz. Desligar requer teste oposto.' },
   { id: 'willbid', name: 'Willpower Bid', cost: -1, icon: '🎲', desc: 'Aposte 1 Willpower. Perde se falhar na ativação.' },
   { id: 'willcost', name: 'Willpower Cost', cost: -2, icon: '💲', desc: 'Custo por dado para ativar (1/Normal, 2/Hard, 4/Wiggle).' },
-  { id: 'willinvest', name: 'Willpower Investment', cost: -1, icon: '🏦', desc: 'Investe Willpower (retorna quando poder termina).' }
+  { id: 'willinvest', name: 'Willpower Investment', cost: -1, icon: '🏦', desc: 'Investe Willpower (retorna quando poder termina).' },
+  { id: 'recursivo', name: 'Recursivo', cost: -2, icon: '🔄', desc: 'Remove o Tamanho do Conjunto em Fome ou Sede no uso de um Talento (-2 PB). Ou com -4 PB, remove Tamanho do Conjunto em Exaustão.' },
+  { id: 'instancias', name: 'Instâncias Limitadas', cost: -1, icon: '🔢', desc: 'Limita a quantidade de instâncias ativas de um Poder em um valor equivalente à sua Willpower.' }
 ];

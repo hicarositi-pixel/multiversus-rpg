@@ -242,6 +242,14 @@ function refreshAllData() {
     async function deleteItem(id) { await StoreDatabase.deleteFromStore(id); dispatch('refresh'); }
     async function deletePermanent(id) { await StoreDatabase.deleteFromArchive(id); refreshAllData(); dispatch('refresh'); }
     async function toggleStore(item) { await StoreDatabase.toggleStoreListing(item); dispatch('refresh'); }
+
+    async function toggleExclusive(item) {
+        if (!item.system) item.system = {};
+        item.system.inExclusiveRotation = !item.system.inExclusiveRotation;
+        await StoreDatabase.createItem(item); // Update
+        refreshAllData();
+        dispatch('refresh');
+    }
     
     // --- GESTÃO DE JOGADORES ---
     async function modifyCoins(userId, mode) {
@@ -250,6 +258,12 @@ function refreshAllData() {
         await StoreDatabase.adminModifyCoins(userId, amount, mode);
         transactionValues[userId] = 0;
         setTimeout(refreshAllData, 200);
+    }
+
+    async function rerollStore(userId) {
+        if (!userId) return;
+        await StoreDatabase.generateExclusiveStore(userId, true);
+        ui.notifications.info("Loja exclusiva re-rolada com sucesso para o jogador!");
     }
 
     async function removeItemFromPlayer(uniqueId) {
@@ -475,6 +489,10 @@ function refreshAllData() {
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             
+                            <button class="toggle-btn {item.system?.inExclusiveRotation ? 'active' : ''}" style="margin-right: 5px; background: {item.system?.inExclusiveRotation ? '#00ff41' : '#333'}; color: {item.system?.inExclusiveRotation ? '#000' : '#fff'};" on:click={() => toggleExclusive(item)} title="Rotação Exclusiva">
+                                <i class="fas fa-star"></i> {item.system?.inExclusiveRotation ? "NA ROTAÇÃO" : "FORA (ROT)"}
+                            </button>
+                            
                             <button class="toggle-btn" class:active={inStore} on:click={() => toggleStore(item)}>
                                 {inStore ? "VENDENDO" : "OFFLINE"}
                             </button>
@@ -519,6 +537,7 @@ function refreshAllData() {
                                 <button class="add" on:click={() => modifyCoins(inspectedPlayer.id, 'add')}>+</button>
                                 <button class="sub" on:click={() => modifyCoins(inspectedPlayer.id, 'remove')}>-</button>
                             </div>
+                            <button class="btn-reroll" on:click={() => rerollStore(inspectedPlayer.id)} title="Re-rolar Loja Exclusiva"><i class="fas fa-dice"></i></button>
                         </div>
                     </div>
 
@@ -621,6 +640,8 @@ function refreshAllData() {
     .transact-grp button { width: 30px; font-weight: bold; cursor: pointer; border: none; }
     .add { background: #00ff41; color: #000; }
     .sub { background: #ff3333; color: #fff; }
+    .btn-reroll { background: #00fbff; color: #000; border: none; padding: 0 15px; font-weight: bold; cursor: pointer; border-radius: 4px; height: 30px; display: flex; align-items: center; justify-content: center; }
+    .btn-reroll:hover { background: #fff; box-shadow: 0 0 10px #00fbff; }
 
     .insp-inventory { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .sec-label { font-size: 11px; color: #666; margin-bottom: 10px; display: block; font-weight: bold; }

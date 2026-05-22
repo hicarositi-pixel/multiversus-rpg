@@ -1,77 +1,63 @@
 <script>
   import { onMount, tick } from 'svelte';
-  import { slide, fade } from 'svelte/transition';
   import PowerInventoryCard from '../components/PowerInventoryCard.svelte';
   import PoderesManager from './PoderesManager.js'; 
 
-  export let actor; // Recebido apenas na criação
+  export let actor;
   export let themeColor;
   export let flags = {}; 
 
   const isGM = game.user.isGM;
   const MODULE_ID = "multiversus-rpg";
   
-  // Guardamos o ID e UUID para as buscas de segurança
   const actorUUID = actor.uuid;
   const actorID = actor.id;
 
-  // --- DADOS REATIVOS ---
   let searchTerm = "";
   let powers = [];
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
   let isReady = false;
 
-  // --- DEBOUNCE (Evita atualizações frenéticas) ---
   let updateTimer = null;
 
   function scheduleRefresh() {
       if (updateTimer) clearTimeout(updateTimer);
-      // 100ms é o ponto ideal entre performance e resposta visual
       updateTimer = setTimeout(() => {
           refreshData();
       }, 100); 
   }
 
-  // --- FUNÇÃO CORE (TRAVA DE SEGURANÇA 2) ---
   async function refreshData() {
     let freshActor = null;
-
     try {
-        // TENTATIVA 1: Busca precisa via UUID (Ideal para Tokens e Atores)
         freshActor = await fromUuid(actorUUID);
-
-        // TENTATIVA 2: Fallback para busca global se o UUID falhar
-        if (!freshActor) {
-            console.warn("[Nexus] UUID falhou, tentando ID direto...");
-            freshActor = game.actors.get(actorID);
-        }
-
-        // TENTATIVA 3: Se for um token não vinculado na cena
+        if (!freshActor) freshActor = game.actors.get(actorID);
         if (!freshActor && canvas.tokens) {
              freshActor = canvas.tokens.placeables.find(t => t.actor?.id === actorID)?.actor;
         }
-
     } catch (e) {
         console.error("Erro crítico buscando ator:", e);
     }
-
-    // Se falhou tudo, aborta para não quebrar a UI
     if (!freshActor) return;
 
-    // --- PROCESSAMENTO DE DADOS ---
-    
-    // Filtra itens
     const rawPowers = freshActor.items.filter(i => i && i.type === "power");
+    const allPowers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
     
-    // Atualiza lista visual (Cria nova referência de array)
-    powers = [...rawPowers].sort((a, b) => a.name.localeCompare(b.name));
+    const habilidades = allPowers.filter(p => p.flags?.[MODULE_ID]?.category === "habilidade");
+    const mainPowers = allPowers.filter(p => p.flags?.[MODULE_ID]?.category !== "habilidade");
+
+    for (let p of mainPowers) {
+        p.childHabilidades = habilidades.filter(h => h.flags?.[MODULE_ID]?.parentId === p.id);
+    }
+
+    const unparentedHabilidades = habilidades.filter(h => !h.flags?.[MODULE_ID]?.parentId);
+    powers = [...mainPowers, ...unparentedHabilidades];
     activePowerCount = powers.length;
 
-    // Recalcula XP
     const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
     
-    calculatedTotalCost = powers.reduce((acc, item) => {
+    calculatedTotalCost = allPowers.reduce((acc, item) => {
         const iFlags = item.flags?.[MODULE_ID] || {};
         const iSys = item.system || {}; 
 
@@ -79,18 +65,16 @@
         const base = XP_RULES[cat] || 8;
         const discount = (iFlags.isInitial) ? (4 * base) : 0;
         
-        // Proteção contra dados vazios/NaN
-        const dN = Number(iFlags.dice?.normal || iSys.dice?.normal || 0);
-        const dH = Number(iFlags.dice?.hard || iSys.dice?.hard || 0);
-        const dW = Number(iFlags.dice?.wiggle || iSys.dice?.wiggle || 0);
+        const dN = Number(iFlags.dice?.normal || iSys.dice?.normal || 0) || 0;
+        const dH = Number(iFlags.dice?.hard || iSys.dice?.hard || 0) || 0;
+        const dW = Number(iFlags.dice?.wiggle || iSys.dice?.wiggle || 0) || 0;
         
         const cost = (dN * base) + (dH * base * 2) + (dW * base * 4);
         return acc + Math.max(0, cost - discount);
     }, 0);
 
-    // Salva XP no Ator (apenas se mudou, para evitar loop)
-    const currentSavedCost = Number(freshActor.flags?.[MODULE_ID]?.powersSpent) || 0;
-    if (calculatedTotalCost !== currentSavedCost) {
+    const currentSavedCost = Number(freshActor.getFlag(MODULE_ID, "powersSpent")) || 0;
+    if (calculatedTotalCost !== currentSavedCost && !isNaN(calculatedTotalCost)) {
         await freshActor.update({ 
             [`flags.${MODULE_ID}.powersSpent`]: calculatedTotalCost 
         }, { render: false });
@@ -100,25 +84,17 @@
     await tick();
   }
 
-  // --- HOOKS ---
   onMount(() => {
     refreshData(); 
-
-    // Hook Global: Monitora qualquer item sendo criado/deletado/alterado
-    // Se o pai do item for nosso ator, atualiza a lista.
     const hookAll = Hooks.on("updateItem", (item) => { 
         if (item.parent?.uuid === actorUUID || item.parent?.id === actorID) scheduleRefresh(); 
     });
-    
     const hookCreate = Hooks.on("createItem", (item) => { 
         if (item.parent?.uuid === actorUUID || item.parent?.id === actorID) scheduleRefresh(); 
     });
-
     const hookDelete = Hooks.on("deleteItem", (item) => { 
         if (item.parent?.uuid === actorUUID || item.parent?.id === actorID) scheduleRefresh(); 
     });
-
-    // Se o ator mudar (nome, imagem, flags)
     const hookActor = Hooks.on("updateActor", (doc) => {
         if (doc.uuid === actorUUID || doc.id === actorID) scheduleRefresh();
     });
@@ -137,7 +113,6 @@
     try { new PoderesManager(actor).render(true); } catch (e) { console.error(e); }
   }
 
-// --- RECEPTOR DE DRAG & DROP (RECEBE DA DATABASE DIRETO NA FICHA) ---
   async function handleDropOnSheet(event) {
       event.preventDefault();
       const dataText = event.dataTransfer.getData('text/plain');
@@ -145,25 +120,26 @@
 
       try {
           const dropData = JSON.parse(dataText);
-          
-          // Ignora se o poder já foi arrastado de dentro do próprio ator (pra não duplicar à toa)
-          if (dropData.uuid && dropData.uuid.includes(actor.id)) return;
+          if (dropData.uuid && dropData.uuid.includes(actor.id)) {
+              // Se arrastou pra fora de um card na area geral, tira o parentId
+              const existingItem = actor.items.get(dropData.data._id);
+              if (existingItem && existingItem.getFlag(MODULE_ID, "parentId")) {
+                  await existingItem.unsetFlag(MODULE_ID, "parentId");
+              }
+              return;
+          }
 
           if (dropData.type === "Item" && dropData.data) {
               let itemData = foundry.utils.deepClone(dropData.data);
-              
-              // Garante que o tipo é o aceito pelo Foundry Local
               const validTypes = game.documentTypes.Item;
               itemData.type = validTypes.includes("power") ? "power" : validTypes[0];
-              
-              // Remove IDs antigos para que o Foundry crie um novo item limpo dentro do Ator
               delete itemData._id;
 
               await actor.createEmbeddedDocuments("Item", [itemData]);
               ui.notifications.info(`[${itemData.name}] inserido na ficha de ${actor.name}.`);
           }
       } catch (e) {
-          console.error("Falha ao receber o poder na ficha:", e);
+          console.error("Falha ao receber o talento na ficha:", e);
       }
   }
 </script>
@@ -180,7 +156,7 @@
       </div>
     </div>
     <div class="hud-module side">
-      <div class="hud-label">Poderes</div>
+      <div class="hud-label">Talentos</div>
       <div class="hud-value">{isReady ? activePowerCount : '...'}</div>
     </div>
   </header>
@@ -191,8 +167,8 @@
       <input type="text" bind:value={searchTerm} placeholder="LOCALIZAR ARQUIVO..." />
       <div class="search-icon"><i class="fas fa-search"></i></div>
     </div>
-    <button class="btn-db" on:click={openLibrary} title="Upe ou Modifique os Poderes por Aqui">
-      <i class="fas fa-database"></i> <span class="btn-text">MODIFICAR PODER</span>
+    <button class="btn-db" on:click={openLibrary} title="Upe ou Modifique os Talentos por Aqui">
+      <i class="fas fa-database"></i> <span class="btn-text">MODIFICAR TALENTOS</span>
     </button>
   </div>
 
@@ -205,7 +181,7 @@
         <div class="powers-grid">
         {#if filteredPowers.length > 0}
             {#each filteredPowers as power (power.id)}
-            <div transition:slide|local={{duration: 200}}>
+            <div>
                 <PowerInventoryCard 
                     item={power} 
                     actor={actor} 
@@ -214,10 +190,10 @@
             </div>
             {/each}
         {:else}
-            <div class="empty-state" in:fade>
+            <div class="empty-state">
             <div class="glitch-wrapper"><i class="fas fa-wifi"></i></div>
-            <span class="empty-title">NENHUM PODER Alocado</span>
-            <span class="empty-sub">Peça a um Auxiliar ou Mestre seu Poder Inicial no canal do Discord Avaliação de Ficha.</span>
+            <span class="empty-title">NENHUM TALENTO Alocado</span>
+            <span class="empty-sub">Peça a um Auxiliar ou Mestre seu Talento Inicial no canal do Discord.</span>
             </div>
         {/if}
         </div>

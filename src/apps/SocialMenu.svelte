@@ -227,11 +227,11 @@
 
     <aside class="nexus-sidebar">
         <div class="nav-icons">
-            <button class:active={$hubActiveTab === 'personas'} on:click={() => setTab('personas')}><i class="fas fa-id-card"></i></button>
-            <button class:active={$hubActiveTab === 'chats'} on:click={() => setTab('chats')}><i class="fas fa-comments"></i></button>
-            <button class:active={$hubActiveTab === 'contacts'} on:click={() => setTab('contacts')}><i class="fas fa-users"></i></button>
-            <button class:active={$hubActiveTab === 'network'} on:click={() => setTab('network')}><i class="fas fa-globe"></i></button>
-            <button class:active={$hubActiveTab === 'profile'} on:click={() => setTab('profile')}><i class="fas fa-user-circle"></i></button>
+            <button class:active={$hubActiveTab === 'network'} on:click={() => setTab('network')} title="Feed"><i class="fas fa-home"></i></button>
+            <button class:active={$hubActiveTab === 'explore'} on:click={() => setTab('explore')} title="Explorar"><i class="fas fa-search"></i></button>
+            <button class:active={$hubActiveTab === 'chats'} on:click={() => setTab('chats')} title="Directs"><i class="fas fa-paper-plane"></i></button>
+            <button class:active={$hubActiveTab === 'profile'} on:click={() => setTab('profile')} title="Perfil"><i class="fas fa-user"></i></button>
+            <button class:active={$hubActiveTab === 'personas'} on:click={() => setTab('personas')} title="Trocar Ficha (OOC)"><i class="fas fa-id-card"></i></button>
             <div class="nav-sep"></div>
             <button class:active={$hubActiveTab === 'settings'} on:click={() => setTab('settings')}><i class="fas fa-paint-brush"></i></button>
         </div>
@@ -245,7 +245,7 @@
         {#if $hubActiveTab === 'chats'}
             <div class="split-view" in:fade>
                 <aside class="chat-list-sidebar">
-                    <div class="section-label">CANAIS <button class="btn-tiny" on:click={()=>activeModal='create_group'}>+</button></div>
+                    <div class="section-label">DIRECTS</div>
                     <div class="scroll-list custom-scroll">
                         {#each groups as g}
                             <div class="chat-row" class:active={$hubActiveChatId === g.id} role="button" tabindex="0"
@@ -261,7 +261,7 @@
                             </div>
                         {/each}
                     </div>
-                    <div class="section-label">FICHAS CONHECIDAS</div>
+                    <div class="section-label">NOVO DIRECT</div>
                     <div class="scroll-list custom-scroll">
                         {#each Array.from(game.actors).filter(a => a.hasPlayerOwner && a.id !== mainActor?.id) as act}
                             <div class="chat-row" role="button" tabindex="0" on:click={() => openDM(act)}>
@@ -293,11 +293,10 @@
                         {/each}
                     </div>
                     
-                    <div class="action-bar">
-                        <button class="vetor-btn" on:click={() => showDiceLogic = true}><i class="fas fa-microchip"></i> VETOR</button>
-                        <div class="quick-roll-box">
-                            <span class="label-mini">ROLAR:</span>
-                            <input type="text" bind:value={simpleRollFormula} placeholder="/r 1d20" on:keydown={async (e) => {
+                    <div class="action-bar" style="justify-content: flex-end;">
+                        <!-- Vetor Rolador Oculto nas DMs para manter visual social limpo -->
+                        <div class="quick-roll-box" style="max-width: 200px;">
+                            <input type="text" bind:value={simpleRollFormula} placeholder="Ex: /r 1d20" on:keydown={async (e) => {
                                 if(e.key === 'Enter' && simpleRollFormula) {
                                     try { let r = new Roll(simpleRollFormula); await r.evaluate(); send(null, await r.render(), true); simpleRollFormula=""; }
                                     catch(err) { ui.notifications.error("Erro na rolagem"); }
@@ -315,8 +314,18 @@
             </div>
 
         {:else if $hubActiveTab === 'network'}
-            <div class="app-pane" in:fade>
-                <SocialNetworkFeed actor={mainActor} on:openDM={(e) => openDM(game.actors.get(e.detail))} />
+            <div class="app-pane" style="padding:0;" in:fade>
+                <SocialNetworkFeed actor={mainActor} viewMode="feed" on:openDM={(e) => openDM(game.actors.get(e.detail))} />
+            </div>
+
+        {:else if $hubActiveTab === 'explore'}
+            <div class="app-pane" style="padding:0;" in:fade>
+                <SocialNetworkFeed actor={mainActor} viewMode="explore" on:openDM={(e) => openDM(game.actors.get(e.detail))} />
+            </div>
+
+        {:else if $hubActiveTab === 'profile'}
+            <div class="app-pane" style="padding:0;" in:fade>
+                <SocialNetworkFeed actor={mainActor} viewMode="profile" on:openDM={(e) => openDM(game.actors.get(e.detail))} />
             </div>
 
         {:else if $hubActiveTab === 'personas'}
@@ -334,41 +343,7 @@
                 </div>
              </div>
 
-        {:else if $hubActiveTab === 'contacts'}
-             <div class="app-pane" in:fade>
-                <div class="settings-grid">
-                    <label>FICHAS CONHECIDAS (DMs)</label>
-                    <div class="player-list-grid">
-                        {#each Array.from(game.actors).filter(a => a.hasPlayerOwner && a.id !== mainActor?.id) as act}
-                            <div class="player-card off" on:click={() => openDM(act)}>
-                                <div class="p-avatar"><img src={act.img} alt="user" /></div>
-                                <div class="p-info"><b>{act.name}</b></div>
-                            </div>
-                        {/each}
-                    </div>
-                </div>
-             </div>
 
-        {:else if $hubActiveTab === 'profile'}
-            <div class="app-pane centered" in:fade>
-                <div class="spoofer-box">
-                    <h3>PERFIL DA REDE SOCIAL</h3>
-                    <div class="form-group"><label>Nome de Exibição</label><input type="text" bind:value={socialProfile.socialName} class="hacker-input" placeholder={mainActor?.name}/></div>
-                    <div class="form-group"><label>Imagem de Capa (URL)</label><input type="text" bind:value={socialProfile.coverImage} class="hacker-input" placeholder="http://..."/></div>
-                    <div class="form-group"><label>Biografia</label><textarea bind:value={socialProfile.bio} class="hacker-input" style="height: 80px; resize: none;"></textarea></div>
-                    <div class="form-group">
-                        <label>Status Fixos (Links de Anexos/Imagens)</label>
-                        {#each socialProfile.attachments as att, i}
-                            <div style="display:flex; gap:5px; margin-bottom:5px;">
-                                <input type="text" bind:value={socialProfile.attachments[i]} class="hacker-input" placeholder="http://..." />
-                                <button class="btn-ghost" on:click={() => socialProfile.attachments.splice(i, 1) && (socialProfile = socialProfile)} style="color:red; border-color:red; padding: 5px 10px;"><i class="fas fa-trash"></i></button>
-                            </div>
-                        {/each}
-                        <button class="btn-ghost" style="width:100%; margin-top:5px;" on:click={() => socialProfile.attachments = [...socialProfile.attachments, ""]}>+ Adicionar Anexo</button>
-                    </div>
-                    <button class="btn-full" style="margin-top:10px" on:click={saveProfile}>SALVAR PERFIL</button>
-                </div>
-            </div>
 
         {:else if $hubActiveTab === 'settings'}
             <div class="app-pane" in:fade>

@@ -17,17 +17,25 @@
 
     const emptyEntry = { 
         id: null, name: "Novo Arquivo", type: "Anotação", tags: "", 
-        img: "icons/svg/book.svg", description: "", author: "" 
+        img: "icons/svg/book.svg", description: "", author: "",
+        visibility: "Publico", groupId: null
     };
+
+    let groups = [];
+    let isGroupManagerOpen = false;
+    let newGroupName = "";
+    let activeGroupForMembers = null;
 
     onMount(() => {
         try { PlayerDatabase.ensureRegistered(); } catch(e) {}
         loadData();
         Hooks.on("nexusUpdate", loadData);
+        Hooks.on("nexusGroupsUpdate", loadData);
     });
 
     function loadData() {
         entries = PlayerDatabase.getAll();
+        groups = PlayerDatabase.getGroups();
         if (activeEntry) {
             const fresh = entries.find(e => e.id === activeEntry.id);
             if (fresh && !isEditing) activeEntry = fresh;
@@ -42,8 +50,40 @@
         const matchText = e.name.toLowerCase().includes(s) || e.description.toLowerCase().includes(s);
         const matchType = selectedType === "TODOS" || e.type === selectedType;
         const matchTag = selectedTag === "TODOS" || (e.tags && e.tags.includes(selectedTag));
-        return matchText && matchType && matchTag;
+        
+        let hasAccess = false;
+        if (game.user.isGM || e.author === game.user.name) {
+            hasAccess = true;
+        } else if (e.visibility === "Publico" || !e.visibility) {
+            hasAccess = true;
+        } else if (e.visibility === "Grupo") {
+            const group = groups.find(g => g.id === e.groupId);
+            if (group && group.members && group.members.includes(game.user.name)) {
+                hasAccess = true;
+            }
+        }
+        
+        return matchText && matchType && matchTag && hasAccess;
     });
+
+    // --- GRUPOS ---
+    async function createNewGroup() {
+        if (!newGroupName) return;
+        const group = { id: foundry.utils.randomID(), name: newGroupName, members: [game.user.name] };
+        await PlayerDatabase.saveGroup(group);
+        newGroupName = "";
+        ui.notifications.info("Grupo criado!");
+    }
+
+    async function toggleGroupMember(group, userName) {
+        if (!group.members) group.members = [];
+        if (group.members.includes(userName)) {
+            group.members = group.members.filter(m => m !== userName);
+        } else {
+            group.members.push(userName);
+        }
+        await PlayerDatabase.saveGroup(group);
+    }
 
     function createNew() {
         activeEntry = { ...emptyEntry, id: foundry.utils.randomID(), author: game.user.name };
@@ -177,6 +217,9 @@
             <button class="create-btn" on:click={createNew}>
                 <i class="fas fa-plus-circle"></i> NOVO REGISTRO
             </button>
+            <button class="create-btn" style="border-color: #555; color: #aaa; margin-top:-5px; font-size: 11px; padding: 8px;" on:click={() => isGroupManagerOpen = true}>
+                <i class="fas fa-users"></i> GERENCIAR GRUPOS
+            </button>
 
             {#each filtered as e (e.id)}
                 <div class="item" class:active={activeEntry?.id === e.id} on:click={() => {activeEntry = JSON.parse(JSON.stringify(e)); isEditing=false;}}>
@@ -208,6 +251,20 @@
                                 <input class="title-input" bind:value={activeEntry.name} placeholder="NOME DO ARQUIVO">
                                 <div class="meta-inputs">
                                     <select bind:value={activeEntry.type}>{#each TYPES as t}<option>{t}</option>{/each}</select>
+                                    
+                                    <select bind:value={activeEntry.visibility}>
+                                        <option value="Publico">Público</option>
+                                        <option value="Privado">Privado</option>
+                                        <option value="Grupo">Grupo</option>
+                                    </select>
+                                    
+                                    {#if activeEntry.visibility === 'Grupo'}
+                                        <select bind:value={activeEntry.groupId}>
+                                            <option value={null}>Selecione...</option>
+                                            {#each groups as g}<option value={g.id}>{g.name}</option>{/each}
+                                        </select>
+                                    {/if}
+
                                     <input bind:value={activeEntry.tags} placeholder="Tags (Ex: Sangue, Corporação...)">
                                     <button class="img-btn" on:click={changeImage}><i class="fas fa-image"></i> CAPA</button>
                                 </div>
@@ -272,6 +329,57 @@
             </div>
         {/if}
     </main>
+
+    {#if isGroupManagerOpen}
+        <div class="group-overlay" transition:fade={{duration: 200}} on:click={() => isGroupManagerOpen = false}>
+            <div class="group-modal" on:click|stopPropagation>
+                <h2><i class="fas fa-users"></i> GERENCIADOR DE GRUPOS</h2>
+                <div class="group-create-row">
+                    <input bind:value={newGroupName} placeholder="Nome do Novo Grupo..." />
+                    <button on:click={createNewGroup}><i class="fas fa-plus"></i> CRIAR</button>
+                </div>
+                
+                <div class="group-list custom-scroll">
+                    {#each groups as g}
+                        <div class="group-item">
+                            <div class="group-item-header">
+                                <b>{g.name}</b>
+                                {#if game.user.isGM || (g.members && g.members.includes(game.user.name))}
+                                    <button class="btn-group-del" on:click={() => PlayerDatabase.deleteGroup(g.id)} title="Excluir"><i class="fas fa-trash"></i></button>
+                                {/if}
+                            </div>
+                            
+                            <div class="group-members-summary">
+                                <span style="font-size: 11px; color: #888;">{g.members?.length || 1} Membro(s)</span>
+                                <button class="btn-add-member" on:click={() => activeGroupForMembers = g}><i class="fas fa-user-plus"></i> Gerenciar Membros</button>
+                            </div>
+                        </div>
+                    {/each}
+                    {#if groups.length === 0}
+                        <p style="color:#666; text-align:center; font-size: 12px;">Nenhum grupo criado.</p>
+                    {/if}
+                </div>
+                <button class="btn cancel" style="width: 100%; justify-content:center; margin-top:15px;" on:click={() => isGroupManagerOpen = false}>FECHAR</button>
+            </div>
+        </div>
+    {/if}
+
+    {#if activeGroupForMembers}
+        <div class="group-overlay" transition:fade={{duration: 200}} on:click={() => activeGroupForMembers = null} style="z-index: 1001;">
+            <div class="group-modal" on:click|stopPropagation>
+                <h2><i class="fas fa-user-plus"></i> MEMBROS DO GRUPO</h2>
+                <div class="group-members custom-scroll" style="max-height: 250px; overflow-y: auto;">
+                    {#each game.users as u}
+                        <label class="member-check" class:active={activeGroupForMembers.members && activeGroupForMembers.members.includes(u.name)}>
+                            <input type="checkbox" checked={activeGroupForMembers.members && activeGroupForMembers.members.includes(u.name)} on:change={() => { toggleGroupMember(activeGroupForMembers, u.name); activeGroupForMembers = activeGroupForMembers; }}>
+                            {u.name}
+                        </label>
+                    {/each}
+                </div>
+                <button class="btn cancel" style="width: 100%; justify-content:center; margin-top:15px;" on:click={() => activeGroupForMembers = null}>FECHAR</button>
+            </div>
+        </div>
+    {/if}
 </div>
 
 <style>
@@ -429,4 +537,26 @@
     
     .scanline { position: absolute; top:0; left:0; width: 100%; height: 50px; background: linear-gradient(to bottom, transparent, var(--c-primary), transparent); opacity: 0.1; animation: scan 4s linear infinite; pointer-events: none;}
     @keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
+
+    /* GROUPS MODAL */
+    .group-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px);}
+    .group-modal { background: #0a0a0a; border: 1px solid var(--c-primary); border-radius: 8px; width: 400px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.9); }
+    .group-modal h2 { margin: 0 0 15px 0; color: var(--c-primary); font-size: 18px; text-align: center;}
+    .group-create-row { display: flex; gap: 10px; margin-bottom: 20px; }
+    .group-create-row input { flex: 1; background: #000; border: 1px solid #333; color: #fff; padding: 8px; border-radius: 4px; outline: none; font-family: inherit;}
+    .group-create-row input:focus { border-color: var(--c-primary); }
+    .group-create-row button { background: var(--c-primary); color: #000; border: none; font-weight: bold; cursor: pointer; padding: 0 15px; border-radius: 4px;}
+    .group-list { max-height: 300px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;}
+    .group-item { background: #111; border: 1px solid #333; padding: 10px; border-radius: 6px; }
+    .group-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; color: var(--c-primary); border-bottom: 1px solid #222; padding-bottom: 5px;}
+    .group-members-summary { display: flex; justify-content: space-between; align-items: center; }
+    .btn-add-member { background: rgba(0, 212, 255, 0.1); border: 1px solid var(--c-primary); color: var(--c-primary); cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 11px; transition: 0.2s;}
+    .btn-add-member:hover { background: var(--c-primary); color: #000; }
+    .btn-group-del { background: transparent !important; border: none !important; color: #ff5555 !important; cursor: pointer; font-size: 14px; opacity: 0.7; transition: 0.2s; width: 30px !important; height: 30px !important; padding: 0 !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; box-shadow: none !important;}
+    .btn-group-del:hover { opacity: 1; transform: scale(1.1); }
+    
+    .group-members { display: flex; flex-wrap: wrap; gap: 5px;}
+    .member-check { font-size: 11px; display: flex; align-items: center; gap: 5px; background: #000; padding: 6px 12px; border-radius: 4px; border: 1px solid #333; cursor: pointer; transition: 0.2s; flex: 1; min-width: 120px; justify-content: center;}
+    .member-check.active { border-color: var(--c-primary); color: var(--c-primary); background: rgba(0, 212, 255, 0.05); }
+    .member-check input { display: none; }
 </style>
