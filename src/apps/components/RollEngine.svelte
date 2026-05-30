@@ -9,6 +9,8 @@
     export let theme = { primary: '#00ff41', bg: 'rgba(5, 5, 10, 0.95)' };
     export let onClose; // Função para fechar o modal
 
+    let rollMode = "publicroll"; // publicroll, gmroll, blindroll
+
     // --- ESTADOS DO MOTOR ---
     // Etapas: 'setup' -> 'wiggle' (se necessário) -> 'done'
     let step = 'setup'; 
@@ -120,11 +122,20 @@
 
         html += `</div></div>`;
 
-        ChatMessage.create({
+        let chatData = {
             user: game.user.id,
             speaker: ChatMessage.getSpeaker({ actor }),
             content: html
-        });
+        };
+
+        if (rollMode === "gmroll") {
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM");
+        } else if (rollMode === "blindroll") {
+            chatData.whisper = ChatMessage.getWhisperRecipients("GM");
+            chatData.blind = true;
+        }
+
+        ChatMessage.create(chatData);
     }
 </script>
 
@@ -175,6 +186,15 @@
                     <div class="mod-row"><label>Reação (WD):</label><input type="number" min="0" bind:value={mods.reactionWD}></div>
                 </div>
             {/if}
+
+            <div class="roll-mode-selector" style="margin: 10px 0; display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-size: 0.8em; color: var(--accent); font-weight: bold;">MODO DE ROLAGEM:</label>
+                <select bind:value={rollMode} class="cyber-input" style="width: 100%; padding: 8px; font-size: 0.9em; cursor: pointer; color: #000; background: #fff;">
+                    <option value="publicroll">Público (Todos veem)</option>
+                    <option value="gmroll">Privado (Apenas para o Mestre)</option>
+                    <option value="blindroll">Rolagem Cega (Apenas o Mestre vê)</option>
+                </select>
+            </div>
 
             <button class="execute-btn" on:click={handleRoll}>
                 <i class="fas fa-dice-d20"></i> INICIAR ROLAGEM

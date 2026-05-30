@@ -18,6 +18,7 @@ import MobileHudApp from './apps/MobileHudApp.js';
 import MultiversusItemSheet from './sheets/MultiversusItemSheet.js';
 
 // Databases e Sistemas
+import { PlayerDatabase } from './database/PlayerDatabase.js';
 import { StoreDatabase } from './classes/StoreDatabase.js'; 
 import { PassSystem } from './PassSystem.js';
 import { AuxiliarSystem } from './auxiliar/AuxiliarSystem.js'; 
@@ -45,6 +46,28 @@ Hooks.once('init', async function() {
     await OriginDatabase.init();
     await PowerDatabase.init();
     // --- A. SETTINGS ---
+    game.settings.register(MODULE_ID, "chatThemeBg", {
+        name: "Cor de Fundo do Chat", hint: "Cor de fundo das mensagens no chat. Padrão: rgba(45, 45, 50, 0.4)",
+        scope: "client", config: true, type: String, default: "rgba(45, 45, 50, 0.4)",
+        onChange: val => document.documentElement.style.setProperty('--mv-chat-bg', val)
+    });
+    game.settings.register(MODULE_ID, "chatThemeNeon", {
+        name: "Cor Neon do Chat", hint: "Cor da borda e dos detalhes das mensagens. Padrão: #00bfff",
+        scope: "client", config: true, type: String, default: "#00bfff",
+        onChange: val => document.documentElement.style.setProperty('--mv-chat-neon', val)
+    });
+    game.settings.register(MODULE_ID, "chatThemeScanlines", {
+        name: "Ativar Scanlines no Chat", hint: "Adiciona o efeito de monitor antigo no fundo do chat.",
+        scope: "client", config: true, type: Boolean, default: true,
+        onChange: val => document.body.classList.toggle('mv-chat-scanlines-off', !val)
+    });
+
+    // Inject initial variables
+    Hooks.once('ready', () => {
+        document.documentElement.style.setProperty('--mv-chat-bg', game.settings.get(MODULE_ID, 'chatThemeBg'));
+        document.documentElement.style.setProperty('--mv-chat-neon', game.settings.get(MODULE_ID, 'chatThemeNeon'));
+        document.body.classList.toggle('mv-chat-scanlines-off', !game.settings.get(MODULE_ID, 'chatThemeScanlines'));
+    });
     game.settings.register(MODULE_ID, "battlePassSeason", {
         name: "Dados da Temporada", scope: "world", config: false, type: Object,
         default: { status: 'closed', startDate: null, endDate: null, name: 'Temporada Inicial', rewardsMap: [] }
@@ -85,6 +108,14 @@ game.settings.register("multiversus-rpg", "openingVideoUrl", {
         config: false, // Escondido do menu padrão
         type: Object,
         default: [] // Array vazio inicial
+    });
+
+    game.settings.register("multiversus-rpg", "socialVisibleActors", {
+        name: "Atores Visíveis no Nexus Hub",
+        scope: "world",
+        config: false,
+        type: Object,
+        default: []
     });
 
     // No seu Hooks.once("init", ...) junto com a config do vídeo:
@@ -403,6 +434,15 @@ class FichaSvelte extends ActorSheet {
         }
     }
 
+    async maximize() {
+        let result = await super.maximize();
+        if (this.element && this.element.length) {
+            const windowContent = this.element.find(".window-content")[0];
+            if (windowContent) windowContent.style.display = "flex";
+        }
+        return result;
+    }
+
     async close(options) {
         if (this.component) { this.component.$destroy(); this.component = null; }
         return super.close(options);
@@ -588,7 +628,7 @@ class NexusOpeningClass extends Application {
         if (this.completed) {
             // Pequeno delay para garantir transição suave
             setTimeout(() => {
-                new NexusLoading(true).render(true);
+                // new NexusLoading(true).render(true);
             }, 50);
         }
 
@@ -611,7 +651,7 @@ Hooks.once('ready', async function() {
 });
 
 Hooks.once('ready', () => {
-    OnlineComms.init();
+    // OnlineComms.init();
 });
 
 // ... (Seu código de updateScene) ...
@@ -670,7 +710,7 @@ Hooks.on("renderSettings", (app, html) => {
     });
 
     // Injeta o botão logo no topo dos botões de jogo
-    html.find("#settings-game").prepend(nexusBtn);
+    $(html).find("#settings-game").prepend(nexusBtn);
 });
 
 // 2. Comando de Chat opcional para abrir rapidamente

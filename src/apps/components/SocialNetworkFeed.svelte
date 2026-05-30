@@ -1,5 +1,5 @@
 <script>
-    import { onMount } from 'svelte';
+    import { onMount, createEventDispatcher } from 'svelte';
     import { slide, fade } from 'svelte/transition';
     import { SocialNetworkDB } from '../../database/SocialNetworkDB.js';
     import { snPostsStore, snUsersStore, updateSNStore } from '../../database/SocialNetworkStore.js';
@@ -14,6 +14,10 @@
     let composerMediaArray = [];
     let isPostPrivate = false;
     
+    const dispatch = createEventDispatcher();
+    let socialVisibleActors = [];
+    try { socialVisibleActors = game.settings.get("multiversus-rpg", "socialVisibleActors") || []; } catch(e){}
+    
     let activeCommentPost = null;
     let viewingProfileOf = null;
     let viewingListType = null;
@@ -23,12 +27,14 @@
 
     let editProfileMode = false;
     let socialProfile = { socialName: "", bio: "", attachments: [], coverImage: "" };
+    let followerEditAmount = 10;
 
-    $: {
+    function startEditProfile() {
         if (actor) {
             const sp = actor.getFlag("multiversus-rpg", "social_profile") || {};
             socialProfile = { socialName: sp.socialName || "", bio: sp.bio || "", attachments: sp.attachments || [], coverImage: sp.coverImage || "" };
         }
+        editProfileMode = true;
     }
 
     async function saveProfile() {
@@ -60,6 +66,11 @@
         if (p.authorId === currentActorId) return true;
         if (game.user.isGM) return true;
         return isMutualFollow(currentActorId, p.authorId);
+    }).sort((a, b) => {
+        const fa = calculateTotalFollowers(a.authorId, users);
+        const fb = calculateTotalFollowers(b.authorId, users);
+        if (fb !== fa) return fb - fa; // Decrescente em seguidores
+        return b.timestamp - a.timestamp; // Decrescente em data (mais recente primeiro)
     });
 
     const COOLDOWN_MS = 3 * 60 * 60 * 1000;
@@ -89,12 +100,12 @@
         return () => clearInterval(timerInterval);
     });
 
-    function calculateTotalFollowers(uid) {
-        if (!users[uid]) return 0;
-        const base = users[uid].baseFollowers || 0;
+    function calculateTotalFollowers(uid, _u = users) {
+        if (!_u[uid]) return 0;
+        const base = _u[uid].baseFollowers || 0;
         let bonus = 0;
-        for (const tid of (users[uid].following || [])) {
-            if (users[tid]) {
+        for (const tid of (_u[uid].following || [])) {
+            if (_u[tid]) {
                 bonus += Math.floor((users[tid].baseFollowers || 0) * 0.25);
             }
         }
@@ -111,40 +122,74 @@
         return followers;
     }
 
-    function getFollowingList(uid) {
-        return (users[uid]?.following || []).filter(id => game.actors.get(id));
+    function getFollowingList(uid, _u = users) {
+        return (_u[uid]?.following || []).filter(id => game.actors.get(id));
     }
 
     async function handlePublish() {
         if (!canPost && !game.user.isGM) return ui.notifications.warn("Aguarde o cooldown da rede social.");
         if (!composerText && composerMediaArray.filter(m => m.trim().length > 0).length === 0) return;
 
-        let numDice = 1;
+        let modMult = 1;
+        let currentFollowers = calculateTotalFollowers(currentActorId, users);
+        let hyperSum = 0;
+
         if (actor) {
             const stats = actor.getFlag("multiversus-rpg", "stats") || {};
             const skills = actor.getFlag("multiversus-rpg", "skills") || {};
             
-            const charm = stats.charm?.normal || 0;
-            const command = stats.command?.normal || 0;
+            const charmNormal = Number(stats.charm?.normal) || 0;
+            const commandNormal = Number(stats.command?.normal) || 0;
+            
+            const hyperCharm = (Number(stats.charm?.h_normal) || 0) + (Number(stats.charm?.h_hard) || 0) + (Number(stats.charm?.h_wiggle) || 0);
+            const hyperCommand = (Number(stats.command?.h_normal) || 0) + (Number(stats.command?.h_hard) || 0) + (Number(stats.command?.h_wiggle) || 0);
             
             const skC = skills.charm || [];
             const skCmd = skills.command || [];
             
-            const persuada = skC.find(s => s.name === "Persuasão")?.normal || 0;
-            const mentir = skC.find(s => s.name === "Mentir")?.normal || 0;
-            const liderar = skCmd.find(s => s.name === "Liderar")?.normal || 0;
+            const getSkillNormal = (list, name) => {
+                const s = list.find(x => x.name === name);
+                return s ? (Number(s.normal) || 0) : 0;
+            };
+            const getSkillHyper = (list, name) => {
+                const s = list.find(x => x.name === name);
+                if (!s) return 0;
+                return (Number(s.h_normal) || 0) + (Number(s.h_hard) || 0) + (Number(s.h_wiggle) || 0);
+            };
 
-            const sum = charm + command + persuada + mentir + liderar;
-            numDice = Math.max(1, Math.floor(sum / 2));
+            const normalSum = charmNormal + commandNormal + getSkillNormal(skC, "Persuasão") + getSkillNormal(skC, "Mentir") + getSkillNormal(skCmd, "Liderar");
+            hyperSum = hyperCharm + hyperCommand + getSkillHyper(skC, "Persuasão") + getSkillHyper(skC, "Mentir") + getSkillHyper(skCmd, "Liderar");
+
+            modMult = Math.max(1, Math.floor(normalSum / 2) + hyperSum);
         }
 
+        let baseDiceQty = 1, baseDiceType = 6, extraPercent = 0;
+        
+        if (currentFollowers < 250) { baseDiceQty = 1; baseDiceType = 6; }
+        else if (currentFollowers < 500) { baseDiceQty = 1; baseDiceType = 12; }
+        else if (currentFollowers < 1000) { baseDiceQty = 2; baseDiceType = 6; }
+        else if (currentFollowers < 2000) { baseDiceQty = 2; baseDiceType = 12; }
+        else if (currentFollowers < 4000) { baseDiceQty = 4; baseDiceType = 12; }
+        else if (currentFollowers < 8000) { baseDiceQty = 8; baseDiceType = 12; }
+        else if (currentFollowers < 16000) { baseDiceQty = 8; baseDiceType = 12; extraPercent = 10; }
+        else if (currentFollowers < 32000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 10; }
+        else if (currentFollowers < 1000000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 10; }
+        else {
+            baseDiceQty = 10; baseDiceType = 12;
+            if (hyperSum > 0) extraPercent = 10 + (hyperSum * 1);
+            else extraPercent = 0;
+        }
+
+        let finalDiceQty = baseDiceQty * modMult;
         let gained = 0;
+
         if (!canPost && game.user.isGM) {
             ui.notifications.warn("Post publicado sem ganho de seguidores (Cooldown ignorado)");
         } else {
-            const roll = new Roll(`${numDice}d6`);
+            const roll = new Roll(`${finalDiceQty}d${baseDiceType}`);
             await roll.evaluate();
-            gained = roll.total;
+            let percentBonus = Math.floor(currentFollowers * (extraPercent / 100));
+            gained = roll.total + percentBonus;
         }
 
         const validMedia = composerMediaArray.filter(m => m.trim().length > 0);
@@ -211,6 +256,10 @@
 
     function getFixedStatus(uid) {
         return game.actors.get(uid)?.getFlag("multiversus-rpg", "social_profile")?.attachments || [];
+    }
+    
+    function getReactorsNames(usersReacted) {
+        return usersReacted.map(id => getUserName(id)).join(', ');
     }
 </script>
 
@@ -304,7 +353,7 @@
                         <div class="reactions-list">
                             {#each Object.entries(p.reactions || {}) as [emoji, usersReacted]}
                                 {#if usersReacted.length > 0}
-                                    <button class="reaction-badge {usersReacted.includes(currentActorId) ? 'mine' : ''}" on:click={() => react(p.id, emoji)}>
+                                    <button class="reaction-badge {usersReacted.includes(currentActorId) ? 'mine' : ''}" title={getReactorsNames(usersReacted)} on:click={() => react(p.id, emoji)}>
                                         {emoji} {usersReacted.length}
                                     </button>
                                 {/if}
@@ -361,14 +410,14 @@
         <div class="feed-container custom-scroll">
             <div class="explore-grid">
                 {#each allActors as a}
-                    {#if a.id !== currentActorId}
+                    {#if a.id !== currentActorId && (game.user.isGM || socialVisibleActors.includes(a.id))}
                         <div class="explore-card">
                             <img src={a.img} alt="user" on:click={() => viewingProfileOf = a.id} style="cursor:pointer;" title="Ver Perfil"/>
                             <h4>{getUserName(a.id)}</h4>
                             <span class="real-name">@{getRealName(a.id)}</span>
-                            <span class="follower-count"><i class="fas fa-users"></i> {calculateTotalFollowers(a.id)} Seguidores</span>
-                            <button class="btn-follow {isFollowing(a.id) ? 'on' : ''}" style="margin-top:10px; width:100%; font-size:12px;" on:click={() => toggleFollow(a.id)}>
-                                {isFollowing(a.id) ? 'Seguindo' : 'Seguir'}
+                            <span class="follower-count"><i class="fas fa-users"></i> {calculateTotalFollowers(a.id, users)} Seguidores</span>
+                            <button class="btn-follow {isFollowing(a.id, users) ? 'on' : ''}" style="margin-top:10px; width:100%; font-size:12px;" on:click={() => toggleFollow(a.id)}>
+                                {isFollowing(a.id, users) ? 'Seguindo' : 'Seguir'}
                             </button>
                         </div>
                     {/if}
@@ -408,10 +457,17 @@
                         <h2 style="font-size: 24px;">{getUserName(currentActorId)}</h2>
                         <span class="real-name">({getRealName(currentActorId)})</span>
                         <div class="p-stats">
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = currentActorId; }}><i class="fas fa-users"></i> {calculateTotalFollowers(currentActorId)} Seguidores</span>
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = currentActorId; }}> | <b>{getFollowingList(currentActorId).length}</b> Seguindo</span>
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = currentActorId; }}><i class="fas fa-users"></i> {calculateTotalFollowers(currentActorId, users)} Seguidores</span>
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = currentActorId; }}> | <b>{getFollowingList(currentActorId, users).length}</b> Seguindo</span>
                         </div>
-                        <button class="btn-ghost" style="margin-top:10px; font-size:11px;" on:click={() => editProfileMode = true}><i class="fas fa-edit"></i> Editar Perfil</button>
+                        {#if game.user.isGM}
+                            <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">
+                                <input type="number" bind:value={followerEditAmount} class="hacker-input" style="width:60px; height:26px; padding:0; text-align:center;">
+                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#00ff41; border-color:#00ff41;" on:click={() => SocialNetworkDB.updateBaseFollowers(currentActorId, followerEditAmount)}><i class="fas fa-plus"></i></button>
+                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#ff4444; border-color:#ff4444;" on:click={() => SocialNetworkDB.updateBaseFollowers(currentActorId, -followerEditAmount)}><i class="fas fa-minus"></i></button>
+                            </div>
+                        {/if}
+                        <button class="btn-ghost" style="margin-top:10px; font-size:11px;" on:click={startEditProfile}><i class="fas fa-edit"></i> Editar Perfil</button>
                     </div>
                 </div>
 
@@ -465,12 +521,22 @@
                         <h2>{getUserName(viewingProfileOf)}</h2>
                         <span class="real-name">({getRealName(viewingProfileOf)})</span>
                         <div class="p-stats">
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = viewingProfileOf; }}><i class="fas fa-users"></i> {calculateTotalFollowers(viewingProfileOf)} Seguidores</span>
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = viewingProfileOf; }}> | <b>{getFollowingList(viewingProfileOf).length}</b> Seguindo</span>
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = viewingProfileOf; }}><i class="fas fa-users"></i> {calculateTotalFollowers(viewingProfileOf, users)} Seguidores</span>
+                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = viewingProfileOf; }}> | <b>{getFollowingList(viewingProfileOf, users).length}</b> Seguindo</span>
                         </div>
+                        {#if game.user.isGM}
+                            <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">
+                                <input type="number" bind:value={followerEditAmount} class="hacker-input" style="width:60px; height:26px; padding:0; text-align:center;">
+                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#00ff41; border-color:#00ff41;" on:click={() => SocialNetworkDB.updateBaseFollowers(viewingProfileOf, followerEditAmount)}><i class="fas fa-plus"></i></button>
+                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#ff4444; border-color:#ff4444;" on:click={() => SocialNetworkDB.updateBaseFollowers(viewingProfileOf, -followerEditAmount)}><i class="fas fa-minus"></i></button>
+                            </div>
+                        {/if}
                         {#if viewingProfileOf !== currentActorId}
                             <button class="btn-follow {isFollowing(viewingProfileOf) ? 'on' : ''}" style="margin-top:10px; width:100%; font-size:12px;" on:click={() => toggleFollow(viewingProfileOf)}>
                                 {isFollowing(viewingProfileOf) ? 'Seguindo' : 'Seguir'}
+                            </button>
+                            <button class="btn-ghost" style="margin-top:5px; width:100%; font-size:12px; color:var(--chat-accent); border-color:var(--chat-accent);" on:click={() => dispatch('openDM', viewingProfileOf)}>
+                                <i class="fas fa-paper-plane"></i> Mensagem (DM)
                             </button>
                         {/if}
                     </div>
@@ -607,7 +673,7 @@
     .btn-action { background: transparent; border: none; color: #888; font-size: 13px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;}
     .btn-action:hover { color: var(--chat-accent); }
     
-    .emoji-popover { position: absolute; top: 100%; left: 0; background: #111; border: 1px solid var(--chat-border); border-radius: 8px; display: flex; flex-direction: row; flex-wrap: wrap; padding: 5px; gap: 5px; margin-top: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); z-index: 100; max-width: 200px; align-items: center; justify-content: flex-start;}
+    .emoji-popover { position: absolute; bottom: 100%; top: auto; right: 0; left: auto; background: #111; border: 1px solid var(--chat-border); border-radius: 8px; display: flex; flex-direction: row; flex-wrap: nowrap; padding: 5px; gap: 5px; margin-bottom: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: flex-end;}
     .emoji-btn { background: transparent; border: none; font-size: 16px; cursor: pointer; padding: 5px; transition: 0.2s; border-radius: 4px; }
     .emoji-btn:hover { background: rgba(255,255,255,0.1); transform: scale(1.2); }
 
@@ -620,7 +686,7 @@
 
     .profile-page { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
     .edit-profile-box { background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid var(--chat-border); }
-    .hacker-input { width: 100%; background: #000; border: 1px solid #333; padding: 10px; color: #fff; font-family: inherit; font-size: 13px; border-radius: 4px; margin-bottom: 10px; }
+    .hacker-input { width: 100%; background: #000; border: 1px solid #333; padding: 10px; color: #fff; font-family: inherit; font-size: 13px; border-radius: 4px; margin-bottom: 10px; pointer-events: auto; user-select: text; }
     .form-group label { display: block; font-size: 11px; color: #aaa; margin-bottom: 5px; }
 
     .comments-section { margin-top: 15px; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 10px; border: 1px solid rgba(255,255,255,0.05); }

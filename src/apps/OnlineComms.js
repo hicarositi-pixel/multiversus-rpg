@@ -1,5 +1,5 @@
-import { appendMessage, loadInitialComms, groupsStore, chatStore } from '../database/CommsStore.js';
-import { CommsDatabase } from '../database/CommsDatabase.js';
+import { appendMessage, loadInitialComms, groupsStore, chatStore } from './CommsStore.js';
+import { CommsDatabase } from './CommsDatabase.js';
 
 const MODULE_ID = "multiversus-rpg";
 
@@ -34,7 +34,8 @@ export const OnlineComms = {
                     await CommsDatabase.ensureContactSaved(myActor, payload.msg);
                 }
                 
-                // Ninguém precisa fazer backup porque quem envia já salva!
+                // Mestre faz o Backup
+                if (game.user.isGM) CommsDatabase.saveMessageLog(payload.msg);
             } 
             
             // 2. NOVO GRUPO
@@ -43,6 +44,7 @@ export const OnlineComms = {
                     if (gs.find(g => g.id === payload.group.id)) return gs;
                     return [...gs, payload.group];
                 });
+                if (game.user.isGM) CommsDatabase.saveGroup(payload.group);
             }
             
             // 3. NOVO STATUS
@@ -60,8 +62,7 @@ export const OnlineComms = {
         appendMessage(finalMsg); // Mostra na minha tela via Store
         game.socket.emit(`module.${MODULE_ID}`, { type: "COMMS_NEW_MSG", msg: finalMsg }); // Manda pra rede
 
-        // O PRÓPRIO REMETENTE SALVA NO BANCO DE DADOS
-        CommsDatabase.saveMessageLog(finalMsg);
+        if (game.user.isGM) CommsDatabase.saveMessageLog(finalMsg);
     },
 
     createGroup: async (name, password = null) => {
@@ -70,8 +71,7 @@ export const OnlineComms = {
         groupsStore.update(gs => [...gs, newGroup]);
         game.socket.emit(`module.${MODULE_ID}`, { type: "COMMS_NEW_GROUP", group: newGroup });
         
-        // O PRÓPRIO CRIADOR SALVA
-        CommsDatabase.saveGroup(newGroup);
+        if (game.user.isGM) CommsDatabase.saveGroup(newGroup);
     },
 
     updateStatus: async (actor, statusData) => {
@@ -80,7 +80,6 @@ export const OnlineComms = {
         game.socket.emit(`module.${MODULE_ID}`, { type: "COMMS_UPDATE_STATUS", status: finalStatus });
         Hooks.callAll("commsStatusUpdate");
 
-        // O PRÓPRIO ATOR SALVA
-        CommsDatabase.saveStatus(finalStatus);
+        if (game.user.isGM) CommsDatabase.saveStatus(finalStatus);
     }
 };

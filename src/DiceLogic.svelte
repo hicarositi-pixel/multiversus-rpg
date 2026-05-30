@@ -161,7 +161,9 @@
             await externalHandler(content);
         } else if (typeof ChatMessage !== 'undefined') {
             const speaker = character ? ChatMessage.getSpeaker({actor: character}) : {};
-            ChatMessage.create({ content, speaker });
+            let messageData = { content, speaker };
+            ChatMessage.applyRollMode(messageData, game.settings.get("core", "rollMode"));
+            ChatMessage.create(messageData);
         }
         
         dispatch('close');

@@ -62,6 +62,7 @@
                 hasAccess = true;
             }
         }
+        // "Particular" is already covered by the first condition (isGM or author)
         
         return matchText && matchType && matchTag && hasAccess;
     });
@@ -254,7 +255,7 @@
                                     
                                     <select bind:value={activeEntry.visibility}>
                                         <option value="Publico">Público</option>
-                                        <option value="Privado">Privado</option>
+                                        <option value="Particular">Particular</option>
                                         <option value="Grupo">Grupo</option>
                                     </select>
                                     

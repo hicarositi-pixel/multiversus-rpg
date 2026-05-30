@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
   import { slide } from 'svelte/transition';
   import { THEME_DB } from '../data/ThemeDB.js';
   import { loadPowerThemes } from '../utils/ThemeLoader.js';
@@ -8,6 +8,7 @@
   export let actor;
   export let isGM = false;
 
+  const dispatch = createEventDispatcher();
   const MODULE_ID = "multiversus-rpg";
 
   onMount(() => {
@@ -203,6 +204,9 @@
     </div>
 
     <div class="action-box">
+      <button class="btn-icon roll" style="color:var(--c-primary, #00ff41)" title="Rolar Talento" on:click|stopPropagation={() => dispatch('roll', item)}>
+        <i class="fas fa-dice-d20"></i>
+      </button>
       <button class="btn-icon gear" class:active={isConfiguring} on:click|stopPropagation={toggleConfig}>
         <i class="fas fa-cog"></i>
       </button>
@@ -316,7 +320,7 @@
 .power-card.is-habilidade { margin-left: 20px; border-left-width: 2px; opacity: 0.95; transform: scale(0.98); margin-bottom: 5px; box-shadow: none; border: 1px dashed #444; }
 .power-card:active { cursor: grabbing; }
 .power-card:hover { box-shadow: 0 0 15px var(--glow); border-color: var(--glow); }
-.card-front { display: flex; align-items: center; padding: 8px; height: 72px; background: linear-gradient(90deg, #111 0%, #080808 100%); position: relative; z-index: 10; }
+.card-front { display: flex; align-items: center; padding: 10px 8px; min-height: 72px; background: linear-gradient(90deg, #111 0%, #080808 100%); position: relative; z-index: 10; }
 .icon-box { width: 52px; height: 52px; margin-right: 12px; cursor: pointer; border: 1px solid #444; border-radius: 8px; overflow: hidden; position: relative; }
 .power-img { width: 100%; height: 100%; object-fit: cover; }
 .info-box { flex: 1; cursor: pointer; }

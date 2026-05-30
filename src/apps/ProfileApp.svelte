@@ -150,7 +150,8 @@ $: strokeDashoffset = 283 - (283 * activeLvlInfo.progress / 100);
     let isSyncing = false;
     let activePopup = null;
     let allOriginsList = {}; // Para o Dropdown do GM
-    let originData = { name: "Desconhecido", icon: "❓", mechanic: {name: "N/A", desc: ""}, traits: [], desc: "", powers: "" };
+    let originData = { name: "Desconhecido", icon: "❓", mechanic: {name: "N/A", desc: ""}, traits: [], enhancements: [], initialKit: "", desc: "", powers: "" };
+    let expandTraits = false;
     
     // === 10. EDITOR FULLSCREEN, VIEWER & GLOSSÁRIO ===
     let activeViewer = null; 
@@ -558,9 +559,16 @@ async function importPlayerXP() {
                     <small>ORIGEM:</small>
                     <span>{originData.name.toUpperCase()}</span>
                 </div>
-                <button class="btn-info" on:click={() => activePopup = {title: originData.name, desc: originData.desc + "<hr>" + originData.powers}}>
-                    <i class="fas fa-file-alt"></i> Descrição da Origem
-                </button>
+                <div style="display: flex; gap: 5px;">
+                    {#if originData.initialKit}
+                    <button class="btn-info" on:click={() => activePopup = {title: "Kit Inicial", desc: originData.initialKit}}>
+                        <i class="fas fa-box-open"></i> KIT INICIAL
+                    </button>
+                    {/if}
+                    <button class="btn-info" on:click={() => activePopup = {title: originData.name, desc: originData.desc + "<hr>" + originData.powers}}>
+                        <i class="fas fa-file-alt"></i> DESCRIÇÃO DA ORIGEM
+                    </button>
+                </div>
             </div>
             
             <div class="origin-details">
@@ -568,13 +576,47 @@ async function importPlayerXP() {
                     <span class="lbl">MECÂNICA ÚNICA</span>
                     <span class="val">{originData.mechanic.name}</span>
                 </div>
-                <div class="detail-box traits">
-                    <span class="lbl">TRAÇOS ESPECIAIS</span>
-                    <div class="traits-list">
-                        {#each originData.traits as t}
-                            <span class="trait-tag" on:click={() => activePopup = {title: t.name, desc: t.effect}}>{t.name}</span>
-                        {/each}
+                <div class="detail-box traits" style="flex: 2;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <span class="lbl" style="margin-bottom: 0;">HABILIDADES DE ORIGEM</span>
+                        <button class="expand-traits-btn" on:click={() => expandTraits = !expandTraits}>
+                            <i class="fas {expandTraits ? 'fa-chevron-up' : 'fa-chevron-down'}"></i> {expandTraits ? 'OCULTAR' : 'EXPANDIR'}
+                        </button>
                     </div>
+                    
+                    {#if expandTraits}
+                        <div class="traits-list expanded" transition:slide|local>
+                            {#each originData.traits as t}
+                                <div class="trait-card" on:click={() => activePopup = {title: t.name, desc: t.effect}}>
+                                    <strong>{t.name}</strong>
+                                    <p>{t.effect}</p>
+                                </div>
+                            {/each}
+                            {#if originData.enhancements && originData.enhancements.length > 0}
+                                <div class="enhancements-separator">APRIMORAMENTOS DESBLOQUEADOS</div>
+                                {#each originData.enhancements.filter(e => activeLevel >= e.level) as e}
+                                    <div class="trait-card enhancement" on:click={() => activePopup = {title: e.name, desc: e.desc}}>
+                                        <strong>[Nv {e.level}] {e.name}</strong>
+                                        <p>{e.desc}</p>
+                                    </div>
+                                {/each}
+                                {#if originData.enhancements.filter(e => activeLevel >= e.level).length === 0}
+                                    <p style="font-size: 10px; color: #555; font-style: italic; margin-top: 5px;">Nenhum aprimoramento desbloqueado pelo nível atual.</p>
+                                {/if}
+                            {/if}
+                        </div>
+                    {:else}
+                        <div class="traits-list">
+                            {#each originData.traits as t}
+                                <span class="trait-tag" on:click={() => activePopup = {title: t.name, desc: t.effect}}>{t.name}</span>
+                            {/each}
+                            {#if originData.enhancements && originData.enhancements.length > 0}
+                                {#each originData.enhancements.filter(e => activeLevel >= e.level) as e}
+                                    <span class="trait-tag enhancement" on:click={() => activePopup = {title: e.name, desc: e.desc}}><i class="fas fa-star" style="font-size: 8px;"></i> {e.name}</span>
+                                {/each}
+                            {/if}
+                        </div>
+                    {/if}
                 </div>
             </div>
         </section>
@@ -774,14 +816,29 @@ async function importPlayerXP() {
     .origin-title small { font-size: 9px; color: #666; font-weight: bold;}
     .btn-info { background: transparent; border: 1px solid var(--c-primary); color: var(--c-primary); font-family: inherit; font-size: 10px; font-weight: bold; cursor: pointer; padding: 4px 10px; border-radius: 4px;}
     .btn-info:hover { background: var(--c-primary); color: #000; }
-    .origin-details { display: flex; padding: 10px; gap: 10px; }
-    .detail-box { flex: 1; background: #000; border: 1px solid #222; padding: 8px; cursor: help; transition: 0.2s; border-radius: 4px;}
-    .detail-box:hover { border-color: var(--c-primary); }
-    .detail-box .lbl { font-size: 9px; color: #555; display: block; margin-bottom: 4px; font-weight: bold;}
+    .origin-details { display: flex; padding: 10px; gap: 10px; align-items: stretch; }
+    .detail-box { flex: 1; background: #000; border: 1px solid #222; padding: 8px; transition: 0.2s; border-radius: 4px; display: flex; flex-direction: column;}
+    .detail-box.mechanic { cursor: help; }
+    .detail-box.mechanic:hover { border-color: var(--c-primary); }
+    .detail-box .lbl { font-size: 9px; color: #555; display: block; font-weight: bold;}
     .detail-box .val { font-size: 12px; color: #ddd; font-weight: bold;}
     .traits-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .traits-list.expanded { flex-direction: column; flex-wrap: nowrap; gap: 8px; margin-top: 5px;}
+    
+    .expand-traits-btn { background: transparent; border: 1px dashed #444; color: #888; cursor: pointer; font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-family: inherit;}
+    .expand-traits-btn:hover { border-color: var(--c-primary); color: var(--c-primary); }
+    
     .trait-tag { background: #111; border: 1px solid #333; padding: 2px 6px; font-size: 10px; color: #aaa; cursor: help; border-radius: 4px;}
     .trait-tag:hover { color: var(--c-primary); border-color: var(--c-primary); }
+    .trait-tag.enhancement { border-color: #bb8800; color: #ffaa00; }
+    
+    .trait-card { background: #111; border: 1px solid #333; padding: 8px; border-radius: 4px; cursor: help; display: flex; flex-direction: column; gap: 4px;}
+    .trait-card:hover { border-color: var(--c-primary); }
+    .trait-card strong { color: var(--c-primary); font-size: 11px; }
+    .trait-card p { font-size: 10px; color: #888; margin: 0; line-height: 1.3;}
+    .trait-card.enhancement { border-color: rgba(255, 170, 0, 0.3); background: rgba(255, 170, 0, 0.05); }
+    .trait-card.enhancement strong { color: #ffaa00; }
+    .enhancements-separator { font-size: 9px; color: #555; font-weight: bold; border-bottom: 1px dashed #333; padding-bottom: 2px; margin-top: 4px; }
 
     .dual-lists { display: flex; gap: 20px; }
     .cyber-list { flex: 1; border: var(--border); background: rgba(0,0,0,0.5); display: flex; flex-direction: column; border-radius: 4px;}

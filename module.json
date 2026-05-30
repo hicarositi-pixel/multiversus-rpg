@@ -1,13 +1,14 @@
 {
   "id": "multiversus-rpg",
   "title": "Multiversus RPG",
-  "version": "1.4.8",
+  "description": "Um Sistema Operacional futurista (Kernel) projetado para o cenário Multiversus RPG.",
+  "version": "1.5.0",
   "compatibility": {
     "minimum": "11",
     "verified": "12"
   },
   "esmodules": ["index.js"],
-  "styles": ["style.css", "nexus-hud.css"],
+  "styles": ["style.css", "nexus-hud.css", "chat-theme.css"],
   "url": "https://multiversusrpg.forge-vtt.com",
 "url": "https://github.com/hicarositi-pixel/multiversus-rpg",
 "manifest": "https://raw.githubusercontent.com/hicarositi-pixel/multiversus-rpg/refs/heads/main/module.json",

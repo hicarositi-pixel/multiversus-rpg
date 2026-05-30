@@ -1,5 +1,5 @@
 <script>
-    import { onMount, tick, afterUpdate } from 'svelte';
+    import { onMount, tick, afterUpdate, createEventDispatcher } from 'svelte';
     import { fade, scale } from 'svelte/transition';
     import DiceLogic from '../DiceLogic.svelte';
     import { CHAT_THEME_DB } from '../components/ChatThemeDB.js';
@@ -12,6 +12,10 @@
 
     export let application;
     const MODULE_ID = "multiversus-rpg";
+    const dispatch = createEventDispatcher();
+    const currentUserId = game.user.id;
+    let personaSearchTerm = "";
+    let gmSearchTerm = "";
 
     // --- REATIVIDADE ---
     $: messages = ($hubChatStore || []).filter(m => m.chatId === $hubActiveChatId);
@@ -24,6 +28,49 @@
     }
     $: mainActor = game.actors.get($hubActiveActorId);
     $: allPlayers = game.users.filter(u => !u.isGM || game.user.isGM);
+
+    $: activeDMs = Array.from(new Set(
+        ($hubChatStore || [])
+            .filter(m => m.chatId.startsWith('dm-') && m.chatId.includes(mainActor?.id))
+            .map(m => m.chatId)
+    )).map(chatId => {
+        const otherId = chatId.replace('dm-', '').split('-').find(id => id !== mainActor?.id);
+        const otherActor = game.actors.get(otherId);
+        return {
+            id: chatId,
+            name: otherActor?.name || 'Desconhecido',
+            actorId: otherId
+        };
+    });
+
+    let socialVisibleActors = [];
+    try { socialVisibleActors = game.settings.get("multiversus-rpg", "socialVisibleActors") || []; } catch(e){}
+
+    function toggleVisibility(actorId) {
+        if (!game.user.isGM) return;
+        let current = game.settings.get("multiversus-rpg", "socialVisibleActors") || [];
+        if (current.includes(actorId)) current = current.filter(id => id !== actorId);
+        else current.push(actorId);
+        game.settings.set("multiversus-rpg", "socialVisibleActors", current);
+        socialVisibleActors = current;
+    }
+
+    $: filteredActors = Array.from(game.actors).filter(a => {
+        if (!a.isOwner || a.type !== "character") return false;
+        if (!personaSearchTerm) return true;
+        const term = personaSearchTerm.toLowerCase();
+        const flag = a.getFlag("multiversus-rpg", "social_profile");
+        const socialName = (flag && flag.socialName ? flag.socialName : "").toLowerCase();
+        return a.name.toLowerCase().includes(term) || socialName.includes(term);
+    }).map(a => {
+        const flag = a.getFlag("multiversus-rpg", "social_profile");
+        return {
+            id: a.id,
+            name: a.name,
+            img: a.img,
+            socialName: flag && flag.socialName ? flag.socialName : a.name
+        };
+    });
 
     // --- TEMA ---
     let savedTheme = "neon-link";
@@ -232,6 +279,9 @@
             <button class:active={$hubActiveTab === 'chats'} on:click={() => setTab('chats')} title="Directs"><i class="fas fa-paper-plane"></i></button>
             <button class:active={$hubActiveTab === 'profile'} on:click={() => setTab('profile')} title="Perfil"><i class="fas fa-user"></i></button>
             <button class:active={$hubActiveTab === 'personas'} on:click={() => setTab('personas')} title="Trocar Ficha (OOC)"><i class="fas fa-id-card"></i></button>
+            {#if game.user.isGM}
+                <button class:active={$hubActiveTab === 'gm_visibility'} on:click={() => setTab('gm_visibility')} title="Visão do Mestre"><i class="fas fa-eye"></i></button>
+            {/if}
             <div class="nav-sep"></div>
             <button class:active={$hubActiveTab === 'settings'} on:click={() => setTab('settings')}><i class="fas fa-paint-brush"></i></button>
         </div>
@@ -261,12 +311,15 @@
                             </div>
                         {/each}
                     </div>
-                    <div class="section-label">NOVO DIRECT</div>
-                    <div class="scroll-list custom-scroll">
-                        {#each Array.from(game.actors).filter(a => a.hasPlayerOwner && a.id !== mainActor?.id) as act}
-                            <div class="chat-row" role="button" tabindex="0" on:click={() => openDM(act)}>
-                                <div class="status-dot-mini online"></div>
-                                <span>{act.name}</span>
+
+                    <div class="section-label">MENSAGENS DIRETAS</div>
+                    <div class="scroll-list custom-scroll" style="margin-bottom:15px;">
+                        {#each activeDMs as dm}
+                            <div class="chat-row" class:active={$hubActiveChatId === dm.id} role="button" tabindex="0" on:click={() => switchChat(dm.id, dm.name)}>
+                                <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                                    <i class="fas fa-user"></i>
+                                    <span>{dm.name}</span>
+                                </div>
                             </div>
                         {/each}
                     </div>
@@ -332,18 +385,39 @@
              <div class="app-pane" in:fade>
                 <div class="settings-grid">
                     <label>MINHAS PERSONAS (FICHAS)</label>
-                    <div class="player-list-grid">
-                        {#each Array.from(game.actors).filter(a => a.isOwner && a.type === "character") as act}
+                    <input type="text" bind:value={personaSearchTerm} class="hacker-input" placeholder="Pesquisar por nome de ficha ou perfil..." style="margin-bottom: 15px; width: 100%;" />
+                    <div class="player-list-grid custom-scroll" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                        {#each filteredActors as act}
                             <div class="player-card {act.id === $hubActiveActorId ? 'on' : 'off'}" on:click={() => hubActiveActorId.set(act.id)}>
                                 <div class="p-avatar"><img src={act.img} alt="user" /><div class="p-dot"></div></div>
-                                <div class="p-info"><b>{act.name}</b><span>Selecionar Persona</span></div>
+                                <div class="p-info">
+                                    <b>{act.socialName}</b>
+                                    <span>{act.name}</span>
+                                </div>
                             </div>
                         {/each}
                     </div>
                 </div>
              </div>
-
-
+             {:else if $hubActiveTab === 'gm_visibility' && game.user.isGM}
+             <div class="app-pane" in:fade>
+                 <div class="settings-grid">
+                     <label>VISÃO DO MESTRE (PERFIS NO HUB)</label>
+                     <p style="font-size: 11px; color: #aaa; margin-bottom: 5px;">Marque as fichas que podem aparecer nas pesquisas e serem vistas pelos jogadores.</p>
+                     <input type="text" bind:value={gmSearchTerm} class="hacker-input" placeholder="Pesquisar por nome de ficha..." style="margin-bottom: 15px; width: 100%;" />
+                     <div class="player-list-grid custom-scroll" style="max-height: 500px; overflow-y: auto; padding-right: 5px;">
+                         {#each Array.from(game.actors).filter(a => a.type === "character" && a.name.toLowerCase().includes(gmSearchTerm.toLowerCase())) as act}
+                             <div class="player-card {socialVisibleActors.includes(act.id) ? 'on' : 'off'}" on:click={() => toggleVisibility(act.id)}>
+                                 <div class="p-avatar"><img src={act.img} alt="user" /><div class="p-dot"></div></div>
+                                 <div class="p-info">
+                                     <b>{act.name}</b>
+                                     <span style="font-size:10px; color:#888;">{socialVisibleActors.includes(act.id) ? 'Visível' : 'Oculto'}</span>
+                                 </div>
+                             </div>
+                         {/each}
+                     </div>
+                 </div>
+             </div>
 
         {:else if $hubActiveTab === 'settings'}
             <div class="app-pane" in:fade>

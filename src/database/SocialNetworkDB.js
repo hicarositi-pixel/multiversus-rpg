@@ -61,6 +61,22 @@ export class SocialNetworkDB {
         return newPost;
     }
 
+    static async updateBaseFollowers(userId, amount) {
+        const db = await this.getDB();
+        if (!db) return;
+        let { users } = await this.getData();
+        
+        if (!users[userId]) {
+            users[userId] = { id: userId, baseFollowers: 0, following: [], lastPostTime: 0 };
+        }
+        
+        users[userId].baseFollowers += amount;
+        if (users[userId].baseFollowers < 0) users[userId].baseFollowers = 0;
+        
+        await db.setFlag(MODULE_ID, "users", users);
+        this.notifyUpdate();
+    }
+
     static async addComment(postId, authorId, text) {
         const db = await this.getDB();
         if (!db) return;

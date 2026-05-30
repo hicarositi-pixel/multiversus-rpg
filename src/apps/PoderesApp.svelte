@@ -1,6 +1,7 @@
 <script>
   import { onMount, tick } from 'svelte';
   import PowerInventoryCard from '../components/PowerInventoryCard.svelte';
+  import RollEngine from './components/RollEngine.svelte';
   import PoderesManager from './PoderesManager.js'; 
 
   export let actor;
@@ -18,6 +19,19 @@
   let calculatedTotalCost = 0;
   let activePowerCount = 0;
   let isReady = false;
+
+  let rollState = { open: false, title: "", pool: { d:0, hd:0, wd:0 } };
+
+  function handleRoll(event) {
+    const item = event.detail;
+    const flags = item?.flags?.[MODULE_ID] || {};
+    const dice = flags.dice || {};
+    rollState = {
+      open: true,
+      title: item.name.toUpperCase(),
+      pool: { d: dice.normal || 0, hd: dice.hard || 0, wd: dice.wiggle || 0 }
+    };
+  }
 
   let updateTimer = null;
 
@@ -186,6 +200,7 @@
                     item={power} 
                     actor={actor} 
                     isGM={isGM} 
+                    on:roll={handleRoll}
                 />
             </div>
             {/each}
@@ -205,6 +220,17 @@
     <div class="footer-right">SYNC_MODE: <span style="color:var(--c-primary)">AUTO</span></div>
   </footer>
 </div>
+
+{#if rollState.open}
+    <div style="position: absolute; inset: 0; z-index: 10000; pointer-events: auto;">
+        <RollEngine 
+            actor={actor} 
+            pool={rollState.pool}
+            actionName={rollState.title}
+            onClose={() => rollState.open = false}
+        />
+    </div>
+{/if}
 
 <style>
 /* CSS ORIGINIAL MANTIDO */

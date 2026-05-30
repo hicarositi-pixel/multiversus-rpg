@@ -1,18 +1,52 @@
 <script>
     import { fade } from 'svelte/transition';
     import { onMount } from 'svelte';
+    import { snPostsStore } from '../database/SocialNetworkStore.js';
+    import { hubChatStore, hubActiveActorId } from '../database/SocialHubStore.js';
 
     // Estados de posição
     let x = window.innerWidth - 80;
     let y = window.innerHeight - 150;
     let isDragging = false;
+    let unreadCount = 0;
+
+    $: {
+        let count = 0;
+        if ($hubActiveActorId) {
+            let act = game.actors.get($hubActiveActorId);
+            let lastRead = act ? (act.getFlag("multiversus-rpg", "lastSocialReadTime") || 0) : 0;
+            let posts = $snPostsStore || [];
+            let msgs = $hubChatStore || [];
+            
+            posts.forEach(p => { if (p.timestamp > lastRead) count++; });
+            msgs.forEach(m => { 
+                if (m.timestamp > lastRead && m.senderId !== $hubActiveActorId) {
+                    if (m.chatId.startsWith('dm-') && m.chatId.includes($hubActiveActorId)) count++;
+                    // Optional: If in groups, we should check if actor is in group. But for now, DMs and Posts are main.
+                    else if (!m.chatId.startsWith('dm-')) count++;
+                }
+            });
+        }
+        unreadCount = count;
+    }
 
     // Função para abrir o Hub
-    const toggleHub = () => {
+    const toggleHub = async () => {
         if (isDragging) return; // Não abre se estiver apenas arrastando
         if (window.NexusHub) {
-            if (window.NexusHub.rendered) window.NexusHub.close();
-            else window.NexusHub.render(true, { focus: true });
+            if (window.NexusHub.rendered) {
+                if ($hubActiveActorId) {
+                    let act = game.actors.get($hubActiveActorId);
+                    if (act) await act.setFlag("multiversus-rpg", "lastSocialReadTime", Date.now());
+                }
+                window.NexusHub.close();
+            } else {
+                if ($hubActiveActorId) {
+                    let act = game.actors.get($hubActiveActorId);
+                    if (act) await act.setFlag("multiversus-rpg", "lastSocialReadTime", Date.now());
+                }
+                window.NexusHub.render(true, { focus: true });
+            }
         }
     };
 
@@ -48,6 +82,9 @@
     <div class="inner-hex">
         <i class="fas fa-network-wired"></i>
         <div class="glitch-line"></div>
+        {#if unreadCount > 0}
+            <div class="notif-badge">{unreadCount > 99 ? '99+' : unreadCount}</div>
+        {/if}
     </div>
     <div class="pulse-effect"></div>
     <span class="label">NEXUS</span>
@@ -131,5 +168,19 @@
     @keyframes pulse {
         0% { transform: scale(0.95); opacity: 0.5; }
         100% { transform: scale(1.2); opacity: 0; }
+    }
+
+    .notif-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #ff3333;
+        color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        padding: 2px 5px;
+        border-radius: 10px;
+        box-shadow: 0 0 5px #ff3333;
+        font-family: sans-serif;
     }
 </style>

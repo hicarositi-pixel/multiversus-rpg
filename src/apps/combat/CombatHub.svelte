@@ -138,10 +138,8 @@ hookIdScene = Hooks.on("updateScene", (scene, data) => {
 
     async function saveGmState() {
         if (!isGM || !canvas.scene) return;
-        await canvas.scene.update({
-            [`flags.${MODULE_ID}.combatNpcs`]: npcs,
-            [`flags.${MODULE_ID}.combatPhase`]: phase
-        });
+        await canvas.scene.setFlag(MODULE_ID, "combatNpcs", npcs);
+        await canvas.scene.setFlag(MODULE_ID, "combatPhase", phase);
     }
 
     function buildQueue() {

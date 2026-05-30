@@ -14,20 +14,33 @@
     let editingGroupActor = null;
     let newGroupName = "";
 
-    // Formulário do Arquiteto (Atualizado para Níveis)
-    let form = {
-        name: "Nova Raça", icon: "🧬", type: "Mítico (80+)",
-        desc: "<p>História aqui...</p>", mechName: "Mecânica", mechDesc: "<p>Regras aqui...</p>",
-        traits: [
-            { level: 1, name: "Passiva Base", effect: "Efeito inicial..." },
-            { level: 3, name: "Despertar (Nv 3)", effect: "Efeito..." },
-            { level: 6, name: "Evolução (Nv 6)", effect: "Efeito..." },
-            { level: 9, name: "Ápice (Nv 9)", effect: "Efeito..." }
-        ], 
-        powers: "<h3>Poderes Aqui</h3>"
-    };
+    let originSearchQuery = "";
+    let editingOriginId = null;
 
-    $: safeID = form.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-");
+    function getEmptyForm() {
+        return {
+            name: "Nova Origem", icon: "🧬", type: "Mítico (80+)",
+            desc: "<p>Descrição Geral aqui...</p>", 
+            initialKit: "<p>Ex: 1 Poder Principal e 1 Kit com 3 Talentos...</p>",
+            mechName: "Mecânica", mechDesc: "<p>Regras aqui...</p>",
+            traits: [
+                { name: "Habilidade 1", effect: "Efeito..." },
+                { name: "Habilidade 2", effect: "Efeito..." },
+                { name: "Habilidade 3", effect: "Efeito..." },
+                { name: "Habilidade 4", effect: "Efeito..." },
+                { name: "Habilidade 5", effect: "Efeito..." }
+            ], 
+            enhancements: [
+                { level: 2, name: "Aprimoramento 1", desc: "Efeito..." }
+            ],
+            powers: "<h3>Poderes Aqui</h3>"
+        };
+    }
+
+    // Formulário do Arquiteto (Atualizado para Níveis)
+    let form = getEmptyForm();
+
+    $: safeID = editingOriginId ? editingOriginId : form.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-");
     
     $: newOriginData = {
         id: safeID,
@@ -35,8 +48,10 @@
         icon: form.icon,
         type: form.type,
         desc: form.desc,
+        initialKit: form.initialKit,
         mechanic: { name: form.mechName, desc: form.mechDesc },
         traits: form.traits,
+        enhancements: form.enhancements || [],
         powers: form.powers
     };
 
@@ -105,14 +120,39 @@
         refreshData();
     }
 
-    function addTrait() { form.traits = [...form.traits, { level: 1, name: "", effect: "" }]; }
+    function addTrait() { form.traits = [...form.traits, { name: "", effect: "" }]; }
     function removeTrait(i) { form.traits = form.traits.filter((_, idx) => idx !== i); }
+
+    function addEnhancement() { form.enhancements = [...form.enhancements, { level: 2, name: "", desc: "" }]; }
+    function removeEnhancement(i) { form.enhancements = form.enhancements.filter((_, idx) => idx !== i); }
     
     async function saveOrigin() {
         await OriginDatabase.save(newOriginData);
         ui.notifications.info(`Origem [${form.name}] salva com sucesso!`);
+        editingOriginId = newOriginData.id; // Mantém no modo de edição da origem salva
         await refreshData();
     }
+
+    function createNewOrigin() {
+        editingOriginId = null;
+        form = getEmptyForm();
+    }
+
+    function loadOriginForEdit(origin) {
+        editingOriginId = origin.id;
+        form = {
+            name: origin.name, icon: origin.icon || "🧬", type: origin.type || "Mítico",
+            desc: origin.desc || "",
+            initialKit: origin.initialKit || "",
+            mechName: origin.mechanic?.name || "Mecânica", 
+            mechDesc: origin.mechanic?.desc || "",
+            traits: (origin.traits || []).map(t => ({ name: t.name, effect: t.effect })), // Retrocompatibilidade sem nível
+            enhancements: origin.enhancements || [],
+            powers: origin.powers || ""
+        };
+    }
+
+    $: filteredOrigins = originList.filter(o => o.name.toLowerCase().includes(originSearchQuery.toLowerCase()));
 </script>
 
 <div class="tactical-origin-interface">
@@ -193,52 +233,85 @@
             
         {:else}
             <div class="architect-view" in:fade>
+                <div class="origin-list-pane custom-scroll">
+                    <button class="new-origin-btn" on:click={createNewOrigin}>+ CRIAR NOVA ORIGEM</button>
+                    <input type="text" bind:value={originSearchQuery} placeholder="Buscar origem..." class="search-input" />
+                    <div class="origins-scroll">
+                        {#each filteredOrigins as org}
+                            <div class="origin-item {editingOriginId === org.id ? 'active' : ''}" on:click={() => loadOriginForEdit(org)}>
+                                {org.icon} {org.name}
+                            </div>
+                        {/each}
+                    </div>
+                </div>
+
                 <div class="editor-pane custom-scroll">
                     <div class="form-row">
-                        <div class="f-group"><label>NOME_DA_RAÇA</label><input type="text" bind:value={form.name} /></div>
+                        <div class="f-group"><label>NOME DA ORIGEM</label><input type="text" bind:value={form.name} /></div>
                         <div class="f-group mini"><label>ICON</label><input type="text" bind:value={form.icon} /></div>
-                        <div class="f-group"><label>TIPO_CUSTO</label><input type="text" bind:value={form.type} /></div>
+                        <div class="f-group"><label>TIPO</label><input type="text" bind:value={form.type} /></div>
                     </div>
-                    <label>ARQUIVO_HISTÓRICO (HTML)</label><textarea bind:value={form.desc}></textarea>
+                    
+                    <label>DESCRIÇÃO GERAL (HTML)</label><textarea bind:value={form.desc}></textarea>
+                    
+                    <label>KIT INICIAL (HTML)</label><textarea bind:value={form.initialKit}></textarea>
                     
                     <div class="sub-panel">
-                        <label>MECÂNICA_EXCLUSIVA</label>
+                        <label>MECÂNICA EXCLUSIVA</label>
                         <input type="text" bind:value={form.mechName} placeholder="Nome..." />
                         <textarea bind:value={form.mechDesc} placeholder="Regras..."></textarea>
                     </div>
                     
                     <div class="sub-panel">
-                        <div class="panel-header-btn"><label>TRAITS_GENÉTICAS (POR NÍVEL)</label><button on:click={addTrait}>+ ADICIONAR</button></div>
+                        <div class="panel-header-btn"><label>HABILIDADES DE ORIGEM (FIXAS)</label><button on:click={addTrait}>+ ADICIONAR</button></div>
                         {#each form.traits as t, i}
-                            <div class="trait-row" transition:slide|local>
-                                <select bind:value={t.level} class="lvl-select" title="Nível de Desbloqueio">
-                                    <option value={1}>Nv 1</option>
-                                    <option value={3}>Nv 3</option>
-                                    <option value={6}>Nv 6</option>
-                                    <option value={9}>Nv 9</option>
-                                </select>
-                                <input type="text" bind:value={t.name} placeholder="Nome da Habilidade" />
-                                <input type="text" bind:value={t.effect} placeholder="Efeito mecânico" />
-                                <button class="del-btn" on:click={() => removeTrait(i)}><i class="fas fa-times"></i></button>
+                            <div class="trait-block" transition:slide|local>
+                                <div class="trait-top">
+                                    <input type="text" bind:value={t.name} placeholder="Nome da Habilidade" />
+                                    <button class="del-btn" on:click={() => removeTrait(i)}><i class="fas fa-times"></i></button>
+                                </div>
+                                <textarea bind:value={t.effect} placeholder="Efeito mecânico" class="mini-area"></textarea>
                             </div>
                         {/each}
                     </div>
-                    
-                    <label>PODERES_REGRAS (HTML)</label><textarea bind:value={form.powers}></textarea>
+
+                    <div class="sub-panel">
+                        <div class="panel-header-btn"><label>APRIMORAMENTOS DE ORIGEM</label><button on:click={addEnhancement}>+ ADICIONAR</button></div>
+                        {#each form.enhancements as e, i}
+                            <div class="trait-block" transition:slide|local>
+                                <div class="trait-top">
+                                    <input type="text" bind:value={e.name} placeholder="Nome do Aprimoramento" />
+                                    <select bind:value={e.level} class="lvl-select" title="Nível de Desbloqueio">
+                                        {#each Array(20) as _, lvlIdx}
+                                            <option value={lvlIdx+1}>Nv {lvlIdx+1}</option>
+                                        {/each}
+                                    </select>
+                                    <button class="del-btn" on:click={() => removeEnhancement(i)}><i class="fas fa-times"></i></button>
+                                </div>
+                                <textarea bind:value={e.desc} placeholder="Efeito mecânico" class="mini-area"></textarea>
+                            </div>
+                        {/each}
+                    </div>
                 </div>
                 
                 <div class="output-pane">
-                    <header><span>SALVAR_NO_BANCO_DE_DADOS</span><button class="copy-btn" on:click={saveOrigin}><i class="fas fa-save"></i> GRAVAR_ORIGEM</button></header>
+                    <header><span>SALVAR NO BANCO DE DADOS</span><button class="copy-btn" on:click={saveOrigin}><i class="fas fa-save"></i> GRAVAR ORIGEM</button></header>
                     <div class="preview-box custom-scroll" style="padding: 20px; color: #aaa; font-size: 11px;">
                         <p>Os dados preenchidos serão salvos diretamente no Data Core do sistema e estarão disponíveis para todos os jogadores imediatamente na aba de Gestão.</p>
                         <hr style="border-color: #004411; margin: 15px 0;">
                         <h3 style="color: #00ff41;">{form.name} {form.icon}</h3>
                         <p><strong>Tipo:</strong> {form.type}</p>
                         <p><strong>Mecânica:</strong> {form.mechName}</p>
-                        <p><strong>Traits ({form.traits.length}):</strong></p>
+                        <p><strong>Habilidades ({form.traits.length}):</strong></p>
                         <ul>
                             {#each form.traits as t}
-                                <li>Nv {t.level} - {t.name}</li>
+                                <li>{t.name}</li>
+                            {/each}
+                        </ul>
+                        <p><strong>Aprimoramentos ({form.enhancements.length}):</strong></p>
+                        <ul>
+                            {#each form.enhancements as e}
+                                <li>Nv {e.level} - {e.name}</li>
                             {/each}
                         </ul>
                     </div>
@@ -315,12 +388,21 @@
     .empty-state { text-align: center; color: #008822; margin-top: 40px; font-style: italic; }
 
     /* --- ARCHITECT VIEW --- */
-    .architect-view { display: grid; grid-template-columns: 1fr 1fr; height: 100%; overflow: hidden;}
+    .architect-view { display: grid; grid-template-columns: 250px 1.5fr 1fr; height: 100%; overflow: hidden;}
+    .origin-list-pane { border-right: 1px solid #004411; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; background: rgba(0,20,0,0.5); }
+    .new-origin-btn { background: #00ff41; color: #000; border: none; padding: 10px; font-weight: bold; cursor: pointer; width: 100%; font-family: inherit;}
+    .new-origin-btn:hover { background: #fff; }
+    .search-input { width: 100%; background: #000; border: 1px solid #00ff41; color: #00ff41; padding: 8px; font-family: inherit; font-size: 11px;}
+    .origins-scroll { display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto; }
+    .origin-item { background: rgba(255,255,255,0.02); border: 1px solid rgba(0,255,65,0.2); padding: 10px; cursor: pointer; font-size: 12px; transition: 0.2s; color: #aaa; display: flex; align-items: center; gap: 10px;}
+    .origin-item:hover { border-color: #00ff41; color: #00ff41; background: rgba(0,255,65,0.05);}
+    .origin-item.active { background: #004411; border-color: #00ff41; color: #fff; font-weight: bold; }
+
     .editor-pane { padding: 30px; overflow-y: auto; border-right: 1px solid #004411; display: flex; flex-direction: column; gap: 15px; }
     .form-row { display: grid; grid-template-columns: 1.5fr 60px 1.2fr; gap: 15px; }
     .f-group { display: flex; flex-direction: column; gap: 5px; }
     
-    input, textarea { background: #080808; border: 1px solid #004411; color: #fff; padding: 10px; font-family: inherit; font-size: 13px; outline: none;}
+    input, textarea { background: #080808; border: 1px solid #004411; color: #fff; padding: 10px; font-family: inherit; font-size: 13px; outline: none; box-sizing: border-box; width: 100%;}
     input:focus, textarea:focus { border-color: #00ff41; }
     textarea { resize: vertical; min-height: 80px; }
     
@@ -329,9 +411,14 @@
     .panel-header-btn button { background: #00ff41; color: #000; border: none; font-size: 10px; padding: 4px 12px; cursor: pointer; font-weight: bold; }
 
     /* Trait Grid: Atualizado para Select do Level */
-    .trait-row { display: grid; grid-template-columns: 60px 140px 1fr 30px; gap: 8px; }
-    .lvl-select { padding: 8px; font-size: 11px; }
-    .del-btn { background: #300; color: #f44; border: 1px solid #f44; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .trait-block { display: flex; flex-direction: column; gap: 5px; border-bottom: 1px dashed rgba(0,255,65,0.3); padding-bottom: 10px; margin-bottom: 5px; }
+    .trait-block:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+    .trait-top { display: flex; gap: 8px; align-items: stretch; width: 100%; }
+    .trait-top input { flex: 1 1 auto; min-width: 50px; }
+    .mini-area { min-height: 50px; font-size: 12px; padding: 8px; width: 100%; box-sizing: border-box; }
+    
+    .lvl-select { padding: 8px; font-size: 11px; background: #080808; border: 1px solid #004411; color: #00ff41; outline: none; flex: 0 0 70px; text-align: center; }
+    .del-btn { background: #300; color: #f44; border: 1px solid #f44; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 35px; flex: 0 0 35px; }
     .del-btn:hover { background: #f44; color: #000; }
 
     .output-pane { background: #000; display: flex; flex-direction: column; overflow: hidden; }

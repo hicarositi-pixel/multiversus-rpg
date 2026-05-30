@@ -2,6 +2,7 @@
     import { onMount } from 'svelte';
     import { slide, fade } from 'svelte/transition';
     import { cubicOut } from 'svelte/easing';
+    import RollEngine from './components/RollEngine.svelte';
 
     export let actor;
     export let flags = {}; 
@@ -81,7 +82,43 @@
     let tempIconUrl = "";
 
     // Estado visual do Hyper (Quem está com a gaveta de edição aberta)
-    let editingHyper = {}; 
+    let editingHyper = {};
+    
+    // --- ROLAGENS ---
+    let showDiceLogic = false;
+    let rollPool = { d: 0, hd: 0, wd: 0 };
+    let rollTitle = "";
+    let pendingSkillRoll = null;
+
+    function rollStat(key) {
+        let s = stats[key];
+        rollPool = { d: (s.normal || 0) + (s.h_normal || 0), hd: (s.h_hard || 0), wd: (s.h_wiggle || 0) };
+        rollTitle = ATTR_CONFIG[key]?.label || key.toUpperCase();
+        showDiceLogic = true;
+    }
+
+    function promptSkillRoll(key, skillIndex) {
+        pendingSkillRoll = { key, skillIndex };
+    }
+
+    function confirmSkillRoll(addStat) {
+        if (!pendingSkillRoll) return;
+        let s = stats[pendingSkillRoll.key];
+        let sk = skills[pendingSkillRoll.key][pendingSkillRoll.skillIndex];
+        
+        let pool = { d: (sk.normal || 0) + (sk.h_normal || 0), hd: (sk.h_hard || 0), wd: (sk.h_wiggle || 0) };
+
+        if (addStat) {
+            pool.d += (s.normal || 0) + (s.h_normal || 0);
+            pool.hd += (s.h_hard || 0);
+            pool.wd += (s.h_wiggle || 0);
+        }
+
+        rollTitle = sk.name.toUpperCase();
+        rollPool = pool;
+        showDiceLogic = true;
+        pendingSkillRoll = null;
+    } 
 
     // --- DADOS REATIVOS (Sincronia Exata com Profile) ---
     $: xpEarned = flags.xp || 0; 
@@ -290,10 +327,15 @@
                     <div class="stat-head" on:click={() => expandedStats[key] = !expandedStats[key]}>
                         <div class="head-title">
                             <div class="icon-box"><i class="fas {ATTR_CONFIG[key].icon}"></i></div>
-                            <span class="label">{ATTR_CONFIG[key].label}</span>
-                            <button class="btn-hyper" on:click|stopPropagation={() => toggleHyperDrawer(key)}>
-                                <i class="fas fa-bolt"></i>
-                            </button>
+                            <div class="stat-main">
+                                <span class="stat-name">{ATTR_CONFIG[key].label}</span>
+                                <button class="btn-hyper" style="color:var(--c-primary, #00ff41)" on:click|stopPropagation={() => rollStat(key)} title="Rolar Atributo">
+                                    <i class="fas fa-dice-d20"></i>
+                                </button>
+                                <button class="btn-hyper" on:click|stopPropagation={() => toggleHyperDrawer(key)}>
+                                    <i class="fas fa-bolt"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div class="head-controls" on:click|stopPropagation>
@@ -372,6 +414,9 @@
                                                 {:else} 
                                                     <span class="skill-name">{skill.name}</span> 
                                                 {/if}
+                                                <button class="btn-hyper skill-size" style="color:var(--c-primary, #00ff41)" on:click={() => promptSkillRoll(key, i)} title="Rolar Perícia">
+                                                    <i class="fas fa-dice-d20"></i>
+                                                </button>
                                                 <button class="btn-hyper skill-size" on:click={() => toggleHyperDrawer(s_id)}>
                                                     <i class="fas fa-bolt"></i>
                                                 </button>
@@ -447,7 +492,38 @@
     </div>
 </div>
 
+{#if pendingSkillRoll}
+    <div class="modal-layer" transition:fade={{duration: 150}}>
+        <div class="terminal-card small" style="border: 1px solid var(--c-primary, #00ff41); box-shadow: 0 0 20px rgba(0,255,65,0.2);">
+            <header style="background: var(--c-primary, #00ff41); color: #000; font-family:'Share Tech Mono';">ROLAGEM DE PERÍCIA</header>
+            <div class="card-content" style="text-align: center; color: #fff; padding: 20px;">
+                Deseja adicionar os dados do Atributo raiz <b>({ATTR_CONFIG[pendingSkillRoll.key].label})</b> à rolagem?
+            </div>
+            <div class="card-footer" style="display:flex; gap:10px; padding:15px; border-top:1px solid #333; justify-content:center;">
+                <button style="background: transparent; border: 1px solid #555; color: #aaa; padding: 8px 15px; cursor:pointer;" on:click={() => pendingSkillRoll = null}>Cancelar</button>
+                <button style="background: #222; border: 1px solid var(--c-primary, #00ff41); color: #fff; padding: 8px 15px; cursor:pointer;" on:click={() => confirmSkillRoll(false)}>Apenas Perícia</button>
+                <button style="background: var(--c-primary, #00ff41); border: none; color: #000; padding: 8px 15px; font-weight:bold; cursor:pointer;" on:click={() => confirmSkillRoll(true)}>Somar Atributo</button>
+            </div>
+        </div>
+    </div>
+{/if}
+
+{#if showDiceLogic}
+    <div style="position: absolute; inset: 0; z-index: 10000; pointer-events: auto;">
+        <RollEngine 
+            actor={actor} 
+            pool={rollPool}
+            actionName={rollTitle}
+            onClose={() => showDiceLogic = false}
+        />
+    </div>
+{/if}
+
 <style>
+    .modal-layer { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center; }
+    .terminal-card.small { width: 300px; background: #111; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+    .terminal-card header { padding: 10px; font-weight: bold; text-align: center; }
+
     /* RESET E FONTES */
     .app-container { display: flex; flex-direction: column; height: 100%; gap: 15px; color: #eee; font-family: 'Segoe UI', sans-serif; --bg-panel: rgba(10, 10, 10, 0.5); --border: rgba(255, 255, 255, 0.1); }
     .val, .label, .skill-name { font-family: 'Share Tech Mono', monospace; }

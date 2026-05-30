@@ -393,12 +393,21 @@
         await actor.update({ [`flags.${MODULE_ID}.combat_gallery`]: galleryItems }, { render: false });
     }
 
-    // --- CORREÇÃO DO ADD LIMB ---
+    // --- CORREÇÃO DO ADD E DEL LIMB ---
     async function addLimb() {
         const newLimb = { id: foundry.utils.randomID(), name: 'NOVO', loc: '0', hp: 3, lar:0, har:0, killing:0, shock:0, trauma:[], x: 50, y: 50, nonPhysicalDef: false };
         const idx = combatForms.findIndex(f => f.id === activeFormId);
         if (idx !== -1) {
             combatForms[idx].limbs.push(newLimb);
+            triggerReactivity();
+        }
+    }
+
+    function deleteLimb(limbId) {
+        const idx = combatForms.findIndex(f => f.id === activeFormId);
+        if (idx !== -1) {
+            combatForms[idx].limbs = combatForms[idx].limbs.filter(l => l.id !== limbId);
+            if (selectedLimbId === limbId) selectedLimbId = null;
             triggerReactivity();
         }
     }
@@ -540,7 +549,7 @@
                         </div>
                         
                         {#if editingMode}
-                            <button class="node-del" on:click|stopPropagation={() => { currentLimbs = currentLimbs.filter(l => l.id !== limb.id); triggerReactivity(); }}>×</button>
+                            <button class="node-del" on:click|stopPropagation={() => deleteLimb(limb.id)}>X</button>
                         {/if}
                     </div>
                 {/each}
@@ -678,7 +687,7 @@
     .tab.active { color: var(--c-primary); border-bottom-color: var(--c-primary); }
     .tab.trans-mode.active { border-color: #a855f7; color: #a855f7; }
     .tab.gallery-mode.active { border-color: #3b82f6; color: #3b82f6; }
-    .tab.add-tab { border: 1px dashed #555; padding: 5px 10px; margin-left: 5px; color: #555; border-radius: 4px;}
+    .tab.add-tab { border: 1px dashed #555; padding: 5px 10px; margin-left: 5px; color: #555; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-grow: 0 !important; flex-shrink: 0 !important; width: 40px !important; max-width: 40px !important; min-width: 40px !important;}
     .tab.add-tab:hover { border-color: var(--c-primary); color: var(--c-primary);}
     .tab-del { background: transparent; border: none; color: #ff3333; cursor: pointer; padding: 5px; font-size: 10px; margin-left: -5px; }
     
