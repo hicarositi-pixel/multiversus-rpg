@@ -62497,23 +62497,43 @@ function WO(l, e, t) {
     charm: { name: "Charme", val: 1 },
     command: { name: "Comando", val: 1 }
   }, T = {
+    // BODY
     atletismo: { name: "Atletismo", val: 0 },
     briga: { name: "Briga", val: 0 },
+    resistencia: { name: "Resistência", val: 0 },
     bloqueio: { name: "Bloqueio", val: 0 },
+    arma_corpo: { name: "Arma Corpo a Corpo", val: 0 },
+    // COORDINATION
     esquiva: { name: "Esquiva", val: 0 },
-    conducao: { name: "Condução", val: 0 },
     furtividade: { name: "Furtividade", val: 0 },
+    acrobacias: { name: "Acrobacias", val: 0 },
     prestidigitacao: { name: "Prestidigitação", val: 0 },
-    percepcao: { name: "Percepção", val: 0 },
+    pilotagem: { name: "Pilotagem", val: 0 },
+    arma_distancia: { name: "Arma a Distância", val: 0 },
+    // SENSE
     empatia: { name: "Empatia", val: 0 },
-    investigacao: { name: "Investigação", val: 0 },
-    tecnologia: { name: "Tecnologia", val: 0 },
+    percepcao: { name: "Percepção", val: 0 },
+    intuicao: { name: "Intuição", val: 0 },
+    procura: { name: "Procura", val: 0 },
+    // MIND
+    primeiros_socorros: { name: "Primeiros Socorros", val: 0 },
+    conhecimento: { name: "Conhecimento", val: 0 },
+    cultura: { name: "Cultura", val: 0 },
+    linguagem: { name: "Linguagem", val: 0 },
     medicina: { name: "Medicina", val: 0 },
+    navegacao: { name: "Navegação", val: 0 },
+    investigar: { name: "Investigar", val: 0 },
     sobrevivencia: { name: "Sobrevivência", val: 0 },
+    tatica: { name: "Tática", val: 0 },
+    // CHARM
+    mentir: { name: "Mentir", val: 0 },
     persuasao: { name: "Persuasão", val: 0 },
-    mentira: { name: "Mentira", val: 0 },
-    intimidacao: { name: "Intimidação", val: 0 },
-    lideranca: { name: "Liderança", val: 0 }
+    performance: { name: "Performance", val: 0 },
+    // COMMAND
+    interrogar: { name: "Interrogar", val: 0 },
+    intimidar: { name: "Intimidar", val: 0 },
+    liderar: { name: "Liderar", val: 0 },
+    estabilidade: { name: "Estabilidade", val: 0 }
   };
   el(async () => {
     const ce = await tn.load();
@@ -62612,8 +62632,16 @@ function WO(l, e, t) {
                 },
                 { name: "Briga", normal: T.briga.val },
                 {
+                  name: "Resistência",
+                  normal: T.resistencia.val
+                },
+                {
                   name: "Bloqueio",
                   normal: T.bloqueio.val
+                },
+                {
+                  name: "Arma Corpo a Corpo",
+                  normal: T.arma_corpo.val
                 }
               ],
               coordination: [
@@ -62622,64 +62650,112 @@ function WO(l, e, t) {
                   normal: T.esquiva.val
                 },
                 {
-                  name: "Condução",
-                  normal: T.conducao.val
-                },
-                {
                   name: "Furtividade",
                   normal: T.furtividade.val
                 },
                 {
+                  name: "Acrobacias",
+                  normal: T.acrobacias.val
+                },
+                {
                   name: "Prestidigitação",
                   normal: T.prestidigitacao.val
+                },
+                {
+                  name: "Pilotagem",
+                  normal: T.pilotagem.val
+                },
+                {
+                  name: "Arma a Distância",
+                  normal: T.arma_distancia.val
                 }
               ],
               sense: [
+                {
+                  name: "Empatia",
+                  normal: T.empatia.val
+                },
                 {
                   name: "Percepção",
                   normal: T.percepcao.val
                 },
                 {
-                  name: "Empatia",
-                  normal: T.empatia.val
+                  name: "Intuição",
+                  normal: T.intuicao.val
+                },
+                {
+                  name: "Procura",
+                  normal: T.procura.val
                 }
               ],
               mind: [
                 {
-                  name: "Investigação",
-                  normal: T.investigacao.val
+                  name: "Primeiros Socorros",
+                  normal: T.primeiros_socorros.val
                 },
                 {
-                  name: "Tecnologia",
-                  normal: T.tecnologia.val
+                  name: "Conhecimento",
+                  normal: T.conhecimento.val
+                },
+                {
+                  name: "Cultura",
+                  normal: T.cultura.val
+                },
+                {
+                  name: "Linguagem",
+                  normal: T.linguagem.val
                 },
                 {
                   name: "Medicina",
                   normal: T.medicina.val
                 },
                 {
+                  name: "Navegação",
+                  normal: T.navegacao.val
+                },
+                {
+                  name: "Investigar",
+                  normal: T.investigar.val
+                },
+                {
                   name: "Sobrevivência",
                   normal: T.sobrevivencia.val
+                },
+                {
+                  name: "Tática",
+                  normal: T.tatica.val
                 }
               ],
               charm: [
+                {
+                  name: "Mentir",
+                  normal: T.mentir.val
+                },
                 {
                   name: "Persuasão",
                   normal: T.persuasao.val
                 },
                 {
-                  name: "Mentira",
-                  normal: T.mentira.val
+                  name: "Performance",
+                  normal: T.performance.val
                 }
               ],
               command: [
                 {
-                  name: "Intimidação",
-                  normal: T.intimidacao.val
+                  name: "Interrogar",
+                  normal: T.interrogar.val
                 },
                 {
-                  name: "Liderança",
-                  normal: T.lideranca.val
+                  name: "Intimidar",
+                  normal: T.intimidar.val
+                },
+                {
+                  name: "Liderar",
+                  normal: T.liderar.val
+                },
+                {
+                  name: "Estabilidade",
+                  normal: T.estabilidade.val
                 }
               ]
             }
