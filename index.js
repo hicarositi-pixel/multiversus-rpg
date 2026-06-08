@@ -52260,6 +52260,7 @@ class Ps {
       img: t.img,
       type: t.type,
       system: foundry.utils.duplicate(t.system || t.data || {}),
+      flags: foundry.utils.duplicate(t.flags || {}),
       cost: ((r = t.system) == null ? void 0 : r.cost) || 1,
       // Ex: talent point cost
       maxLevel: ((f = t.system) == null ? void 0 : f.maxLevel) || 5
