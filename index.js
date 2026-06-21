@@ -1081,12 +1081,12 @@ function scale(node, { delay = 0, duration = 400, easing = cubicOut, start = 0, 
 		`
   };
 }
-const MODULE_ID$F = "multiversus-rpg";
+const MODULE_ID$G = "multiversus-rpg";
 const XPDatabase = {
   getPlayerData: (userId) => {
     const user = game.users.get(userId);
     if (!user) return { initialPoints: 150, earnedXP: 0, spentXP: 0, group: "Sem Grupo", log: [] };
-    const data = user.getFlag(MODULE_ID$F, "xpData") || {};
+    const data = user.getFlag(MODULE_ID$G, "xpData") || {};
     return {
       initialPoints: data.initialPoints ?? 150,
       earnedXP: data.earnedXP ?? 0,
@@ -1099,13 +1099,13 @@ const XPDatabase = {
     const user = game.users.get(userId);
     let data = XPDatabase.getPlayerData(userId);
     data.spentXP += amount;
-    await user.setFlag(MODULE_ID$F, "xpData", data);
+    await user.setFlag(MODULE_ID$G, "xpData", data);
   },
   setGroup: async (userId, groupName) => {
     const user = game.users.get(userId);
     let data = XPDatabase.getPlayerData(userId);
     data.group = groupName;
-    await user.setFlag(MODULE_ID$F, "xpData", data);
+    await user.setFlag(MODULE_ID$G, "xpData", data);
   },
   addXP: async (userId, amount, reason = "Sessão") => {
     if (!game.user.isGM) return;
@@ -1114,7 +1114,7 @@ const XPDatabase = {
     data.earnedXP += amount;
     data.log.unshift({ date: Date.now(), amount, reason });
     if (data.log.length > 20) data.log.pop();
-    await user.setFlag(MODULE_ID$F, "xpData", data);
+    await user.setFlag(MODULE_ID$G, "xpData", data);
     Hooks.callAll("nexusXPGain", user, amount, reason, data.earnedXP);
     ui.notifications.info(`XP concedido a ${user.name}`);
   }
@@ -1229,12 +1229,12 @@ const LevelCalculator = {
     };
   }
 };
-const MODULE_ID$E = "multiversus-rpg";
+const MODULE_ID$F = "multiversus-rpg";
 const SETTING_NAME$1 = "customOrigins";
 const OriginDatabase = {
   init: async () => {
-    if (!game.settings.settings.has(`${MODULE_ID$E}.${SETTING_NAME$1}`)) {
-      game.settings.register(MODULE_ID$E, SETTING_NAME$1, {
+    if (!game.settings.settings.has(`${MODULE_ID$F}.${SETTING_NAME$1}`)) {
+      game.settings.register(MODULE_ID$F, SETTING_NAME$1, {
         name: "Custom Origins Archive",
         scope: "world",
         config: false,
@@ -1245,16 +1245,16 @@ const OriginDatabase = {
   },
   load: async () => {
     let customOrigins = {};
-    if (game.settings.settings.has(`${MODULE_ID$E}.${SETTING_NAME$1}`)) {
-      customOrigins = game.settings.get(MODULE_ID$E, SETTING_NAME$1) || {};
+    if (game.settings.settings.has(`${MODULE_ID$F}.${SETTING_NAME$1}`)) {
+      customOrigins = game.settings.get(MODULE_ID$F, SETTING_NAME$1) || {};
     }
     return { ...ORIGINS, ...customOrigins };
   },
   save: async (originData) => {
-    if (!game.settings.settings.has(`${MODULE_ID$E}.${SETTING_NAME$1}`)) return;
-    let customOrigins = game.settings.get(MODULE_ID$E, SETTING_NAME$1) || {};
+    if (!game.settings.settings.has(`${MODULE_ID$F}.${SETTING_NAME$1}`)) return;
+    let customOrigins = game.settings.get(MODULE_ID$F, SETTING_NAME$1) || {};
     customOrigins[originData.id] = originData;
-    await game.settings.set(MODULE_ID$E, SETTING_NAME$1, customOrigins);
+    await game.settings.set(MODULE_ID$F, SETTING_NAME$1, customOrigins);
     console.log(`NEXUS_OS :: Origem customizada salva: ${originData.id}`);
   }
 };
@@ -2059,20 +2059,20 @@ const ORIGINS = {
     powers: `<h3>Poderes Aqui</h3>`
   }
 };
-const MODULE_ID$D = "multiversus-rpg";
+const MODULE_ID$E = "multiversus-rpg";
 const SystemBookDB = {
   // Inicializa a configuração no Foundry VTT
   init: () => {
-    if (!game.settings.settings.has(`${MODULE_ID$D}.srd_books`)) {
-      game.settings.register(MODULE_ID$D, "srd_books", {
+    if (!game.settings.settings.has(`${MODULE_ID$E}.srd_books`)) {
+      game.settings.register(MODULE_ID$E, "srd_books", {
         scope: "world",
         config: false,
         type: Array,
         default: []
       });
     }
-    if (!game.settings.settings.has(`${MODULE_ID$D}.srd_glossary`)) {
-      game.settings.register(MODULE_ID$D, "srd_glossary", {
+    if (!game.settings.settings.has(`${MODULE_ID$E}.srd_glossary`)) {
+      game.settings.register(MODULE_ID$E, "srd_glossary", {
         scope: "world",
         config: false,
         type: Object,
@@ -2081,16 +2081,16 @@ const SystemBookDB = {
     }
   },
   getBooks: () => {
-    return game.settings.get(MODULE_ID$D, "srd_books") || [];
+    return game.settings.get(MODULE_ID$E, "srd_books") || [];
   },
   saveBooks: async (booksArray) => {
-    await game.settings.set(MODULE_ID$D, "srd_books", booksArray);
+    await game.settings.set(MODULE_ID$E, "srd_books", booksArray);
   },
   getGlossary: () => {
-    return game.settings.get(MODULE_ID$D, "srd_glossary") || {};
+    return game.settings.get(MODULE_ID$E, "srd_glossary") || {};
   },
   saveGlossary: async (glossaryObj) => {
-    await game.settings.set(MODULE_ID$D, "srd_glossary", glossaryObj);
+    await game.settings.set(MODULE_ID$E, "srd_glossary", glossaryObj);
   },
   // Cria um livro novo estruturado
   createNewBook: async (title = "Novo Livro do Sistema") => {
@@ -5000,34 +5000,34 @@ const SHEET_THEMES = {
     `
   }
 };
-function get_each_context$T(ctx, list, i) {
+function get_each_context$U(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[136] = list[i];
   child_ctx[138] = i;
   return child_ctx;
 }
-function get_each_context_1$J(ctx, list, i) {
+function get_each_context_1$K(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[139] = list[i];
   child_ctx[138] = i;
   return child_ctx;
 }
-function get_each_context_4$k(ctx, list, i) {
+function get_each_context_4$l(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[141] = list[i];
   return child_ctx;
 }
-function get_each_context_5$d(ctx, list, i) {
+function get_each_context_5$e(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[144] = list[i];
   return child_ctx;
 }
-function get_each_context_2$q(ctx, list, i) {
+function get_each_context_2$r(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[141] = list[i];
   return child_ctx;
 }
-function get_each_context_3$m(ctx, list, i) {
+function get_each_context_3$n(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[144] = list[i];
   return child_ctx;
@@ -5483,7 +5483,7 @@ function create_if_block_17$7(ctx) {
     }
   };
 }
-function create_if_block_16$9(ctx) {
+function create_if_block_16$a(ctx) {
   let div9;
   let header;
   let div0;
@@ -5788,7 +5788,7 @@ function create_if_block_16$9(ctx) {
     }
   };
 }
-function create_if_block_14$b(ctx) {
+function create_if_block_14$c(ctx) {
   let div1;
   let div0;
   let t0_value = (
@@ -5814,7 +5814,7 @@ function create_if_block_14$b(ctx) {
   let div1_intro;
   let if_block = (
     /*activeTerm*/
-    ctx[31].img && create_if_block_15$a(ctx)
+    ctx[31].img && create_if_block_15$b(ctx)
   );
   return {
     c() {
@@ -5864,7 +5864,7 @@ function create_if_block_14$b(ctx) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
-          if_block = create_if_block_15$a(ctx2);
+          if_block = create_if_block_15$b(ctx2);
           if_block.c();
           if_block.m(div1, null);
         }
@@ -5892,7 +5892,7 @@ function create_if_block_14$b(ctx) {
     }
   };
 }
-function create_if_block_15$a(ctx) {
+function create_if_block_15$b(ctx) {
   let img;
   let img_src_value;
   return {
@@ -5920,7 +5920,7 @@ function create_if_block_15$a(ctx) {
     }
   };
 }
-function create_if_block_13$c(ctx) {
+function create_if_block_13$d(ctx) {
   let div1;
   let img;
   let img_src_value;
@@ -6007,7 +6007,7 @@ function create_if_block_13$c(ctx) {
     }
   };
 }
-function create_if_block_12$d(ctx) {
+function create_if_block_12$e(ctx) {
   let button;
   let button_transition;
   let current;
@@ -6062,7 +6062,7 @@ function create_if_block_12$d(ctx) {
     }
   };
 }
-function create_if_block_10$h(ctx) {
+function create_if_block_10$i(ctx) {
   let div;
   let button;
   let t1;
@@ -6070,7 +6070,7 @@ function create_if_block_10$h(ctx) {
   let dispose;
   let if_block = (
     /*gmMode*/
-    ctx[2] && create_if_block_11$f(ctx)
+    ctx[2] && create_if_block_11$g(ctx)
   );
   return {
     c() {
@@ -6125,7 +6125,7 @@ function create_if_block_10$h(ctx) {
             transition_in(if_block, 1);
           }
         } else {
-          if_block = create_if_block_11$f(ctx2);
+          if_block = create_if_block_11$g(ctx2);
           if_block.c();
           transition_in(if_block, 1);
           if_block.m(div, null);
@@ -6148,7 +6148,7 @@ function create_if_block_10$h(ctx) {
     }
   };
 }
-function create_if_block_11$f(ctx) {
+function create_if_block_11$g(ctx) {
   let div;
   let label0;
   let t0;
@@ -6337,7 +6337,7 @@ function create_each_block_6$9(ctx) {
     }
   };
 }
-function create_if_block_9$m(ctx) {
+function create_if_block_9$n(ctx) {
   let div;
   let t0;
   let t1_value = (
@@ -6392,7 +6392,7 @@ function create_if_block_9$m(ctx) {
     }
   };
 }
-function create_if_block_8$p(ctx) {
+function create_if_block_8$q(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -6424,7 +6424,7 @@ function create_if_block_8$p(ctx) {
     }
   };
 }
-function create_if_block_7$u(ctx) {
+function create_if_block_7$v(ctx) {
   let div1;
   let div0;
   let div1_transition;
@@ -6490,7 +6490,7 @@ function create_if_block_7$u(ctx) {
     }
   };
 }
-function create_if_block_6$y(ctx) {
+function create_if_block_6$z(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -6522,7 +6522,7 @@ function create_if_block_6$y(ctx) {
     }
   };
 }
-function create_else_block$L(ctx) {
+function create_else_block$M(ctx) {
   let div;
   let t_1;
   let each_value_5 = ensure_array_like(
@@ -6531,12 +6531,12 @@ function create_else_block$L(ctx) {
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_5.length; i += 1) {
-    each_blocks[i] = create_each_block_5$d(get_each_context_5$d(ctx, each_value_5, i));
+    each_blocks[i] = create_each_block_5$e(get_each_context_5$e(ctx, each_value_5, i));
   }
   let if_block = (
     /*originData*/
     ctx[25].enhancements && /*originData*/
-    ctx[25].enhancements.length > 0 && create_if_block_5$B(ctx)
+    ctx[25].enhancements.length > 0 && create_if_block_5$C(ctx)
   );
   return {
     c() {
@@ -6567,11 +6567,11 @@ function create_else_block$L(ctx) {
         );
         let i;
         for (i = 0; i < each_value_5.length; i += 1) {
-          const child_ctx = get_each_context_5$d(ctx2, each_value_5, i);
+          const child_ctx = get_each_context_5$e(ctx2, each_value_5, i);
           if (each_blocks[i]) {
             each_blocks[i].p(child_ctx, dirty);
           } else {
-            each_blocks[i] = create_each_block_5$d(child_ctx);
+            each_blocks[i] = create_each_block_5$e(child_ctx);
             each_blocks[i].c();
             each_blocks[i].m(div, t_1);
           }
@@ -6589,7 +6589,7 @@ function create_else_block$L(ctx) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
-          if_block = create_if_block_5$B(ctx2);
+          if_block = create_if_block_5$C(ctx2);
           if_block.c();
           if_block.m(div, null);
         }
@@ -6609,7 +6609,7 @@ function create_else_block$L(ctx) {
     }
   };
 }
-function create_if_block_2$S(ctx) {
+function create_if_block_2$T(ctx) {
   let div;
   let t_1;
   let div_transition;
@@ -6620,12 +6620,12 @@ function create_if_block_2$S(ctx) {
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_3.length; i += 1) {
-    each_blocks[i] = create_each_block_3$m(get_each_context_3$m(ctx, each_value_3, i));
+    each_blocks[i] = create_each_block_3$n(get_each_context_3$n(ctx, each_value_3, i));
   }
   let if_block = (
     /*originData*/
     ctx[25].enhancements && /*originData*/
-    ctx[25].enhancements.length > 0 && create_if_block_3$M(ctx)
+    ctx[25].enhancements.length > 0 && create_if_block_3$N(ctx)
   );
   return {
     c() {
@@ -6657,11 +6657,11 @@ function create_if_block_2$S(ctx) {
         );
         let i;
         for (i = 0; i < each_value_3.length; i += 1) {
-          const child_ctx = get_each_context_3$m(ctx2, each_value_3, i);
+          const child_ctx = get_each_context_3$n(ctx2, each_value_3, i);
           if (each_blocks[i]) {
             each_blocks[i].p(child_ctx, dirty);
           } else {
-            each_blocks[i] = create_each_block_3$m(child_ctx);
+            each_blocks[i] = create_each_block_3$n(child_ctx);
             each_blocks[i].c();
             each_blocks[i].m(div, t_1);
           }
@@ -6679,7 +6679,7 @@ function create_if_block_2$S(ctx) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
-          if_block = create_if_block_3$M(ctx2);
+          if_block = create_if_block_3$N(ctx2);
           if_block.c();
           if_block.m(div, null);
         }
@@ -6716,7 +6716,7 @@ function create_if_block_2$S(ctx) {
     }
   };
 }
-function create_each_block_5$d(ctx) {
+function create_each_block_5$e(ctx) {
   let span;
   let t_1_value = (
     /*t*/
@@ -6763,7 +6763,7 @@ function create_each_block_5$d(ctx) {
     }
   };
 }
-function create_if_block_5$B(ctx) {
+function create_if_block_5$C(ctx) {
   let each_1_anchor;
   let each_value_4 = ensure_array_like(
     /*originData*/
@@ -6774,7 +6774,7 @@ function create_if_block_5$B(ctx) {
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_4.length; i += 1) {
-    each_blocks[i] = create_each_block_4$k(get_each_context_4$k(ctx, each_value_4, i));
+    each_blocks[i] = create_each_block_4$l(get_each_context_4$l(ctx, each_value_4, i));
   }
   return {
     c() {
@@ -6804,11 +6804,11 @@ function create_if_block_5$B(ctx) {
         );
         let i;
         for (i = 0; i < each_value_4.length; i += 1) {
-          const child_ctx = get_each_context_4$k(ctx2, each_value_4, i);
+          const child_ctx = get_each_context_4$l(ctx2, each_value_4, i);
           if (each_blocks[i]) {
             each_blocks[i].p(child_ctx, dirty);
           } else {
-            each_blocks[i] = create_each_block_4$k(child_ctx);
+            each_blocks[i] = create_each_block_4$l(child_ctx);
             each_blocks[i].c();
             each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
           }
@@ -6827,7 +6827,7 @@ function create_if_block_5$B(ctx) {
     }
   };
 }
-function create_each_block_4$k(ctx) {
+function create_each_block_4$l(ctx) {
   let span;
   let i;
   let t0;
@@ -6883,7 +6883,7 @@ function create_each_block_4$k(ctx) {
     }
   };
 }
-function create_each_block_3$m(ctx) {
+function create_each_block_3$n(ctx) {
   let div;
   let strong;
   let t0_value = (
@@ -6951,7 +6951,7 @@ function create_each_block_3$m(ctx) {
     }
   };
 }
-function create_if_block_3$M(ctx) {
+function create_if_block_3$N(ctx) {
   let div;
   let t1;
   let t2;
@@ -6972,9 +6972,9 @@ function create_if_block_3$M(ctx) {
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_2.length; i += 1) {
-    each_blocks[i] = create_each_block_2$q(get_each_context_2$q(ctx, each_value_2, i));
+    each_blocks[i] = create_each_block_2$r(get_each_context_2$r(ctx, each_value_2, i));
   }
-  let if_block = show_if && create_if_block_4$E();
+  let if_block = show_if && create_if_block_4$F();
   return {
     c() {
       div = element("div");
@@ -7013,11 +7013,11 @@ function create_if_block_3$M(ctx) {
         );
         let i;
         for (i = 0; i < each_value_2.length; i += 1) {
-          const child_ctx = get_each_context_2$q(ctx2, each_value_2, i);
+          const child_ctx = get_each_context_2$r(ctx2, each_value_2, i);
           if (each_blocks[i]) {
             each_blocks[i].p(child_ctx, dirty);
           } else {
-            each_blocks[i] = create_each_block_2$q(child_ctx);
+            each_blocks[i] = create_each_block_2$r(child_ctx);
             each_blocks[i].c();
             each_blocks[i].m(t2.parentNode, t2);
           }
@@ -7037,7 +7037,7 @@ function create_if_block_3$M(ctx) {
       if (show_if) {
         if (if_block) ;
         else {
-          if_block = create_if_block_4$E();
+          if_block = create_if_block_4$F();
           if_block.c();
           if_block.m(if_block_anchor.parentNode, if_block_anchor);
         }
@@ -7058,7 +7058,7 @@ function create_if_block_3$M(ctx) {
     }
   };
 }
-function create_each_block_2$q(ctx) {
+function create_each_block_2$r(ctx) {
   let div;
   let strong;
   let t0;
@@ -7145,7 +7145,7 @@ function create_each_block_2$q(ctx) {
     }
   };
 }
-function create_if_block_4$E(ctx) {
+function create_if_block_4$F(ctx) {
   let p;
   return {
     c() {
@@ -7166,7 +7166,7 @@ function create_if_block_4$E(ctx) {
     }
   };
 }
-function create_if_block_1$W(ctx) {
+function create_if_block_1$X(ctx) {
   let span;
   return {
     c() {
@@ -7185,7 +7185,7 @@ function create_if_block_1$W(ctx) {
     }
   };
 }
-function create_each_block_1$J(ctx) {
+function create_each_block_1$K(ctx) {
   let div2;
   let div0;
   let input0;
@@ -7226,7 +7226,7 @@ function create_each_block_1$J(ctx) {
   }
   let if_block = (
     /*i*/
-    ctx[138] > 0 && create_if_block_1$W()
+    ctx[138] > 0 && create_if_block_1$X()
   );
   function click_handler_25() {
     return (
@@ -7334,7 +7334,7 @@ function create_each_block_1$J(ctx) {
     }
   };
 }
-function create_each_block$T(ctx) {
+function create_each_block$U(ctx) {
   let div1;
   let input0;
   let input0_value_value;
@@ -7483,7 +7483,7 @@ function create_each_block$T(ctx) {
     }
   };
 }
-function create_if_block$10(ctx) {
+function create_if_block$11(ctx) {
   let div3;
   let div0;
   let span;
@@ -7648,7 +7648,7 @@ function create_if_block$10(ctx) {
     }
   };
 }
-function create_fragment$14(ctx) {
+function create_fragment$15(ctx) {
   let div54;
   let t0;
   let t1;
@@ -7932,35 +7932,35 @@ function create_fragment$14(ctx) {
   );
   let if_block3 = (
     /*activeEditor*/
-    ctx[28] && create_if_block_16$9(ctx)
+    ctx[28] && create_if_block_16$a(ctx)
   );
   let if_block4 = (
     /*activeTerm*/
-    ctx[31] && create_if_block_14$b(ctx)
+    ctx[31] && create_if_block_14$c(ctx)
   );
   let if_block5 = (
     /*showImages*/
-    ctx[40] && create_if_block_13$c(ctx)
+    ctx[40] && create_if_block_13$d(ctx)
   );
   let if_block6 = !/*gmMode*/
   ctx[2] && /*missingXP*/
-  ctx[35] <= 0 && create_if_block_12$d(ctx);
+  ctx[35] <= 0 && create_if_block_12$e(ctx);
   let if_block7 = (
     /*isGM*/
-    ctx[48] && create_if_block_10$h(ctx)
+    ctx[48] && create_if_block_10$i(ctx)
   );
   let if_block8 = !/*gmMode*/
-  ctx[2] && create_if_block_9$m(ctx);
-  let if_block9 = game.user.isGM && create_if_block_8$p(ctx);
+  ctx[2] && create_if_block_9$n(ctx);
+  let if_block9 = game.user.isGM && create_if_block_8$q(ctx);
   let if_block10 = (
     /*showImages*/
-    ctx[40] && create_if_block_7$u(ctx)
+    ctx[40] && create_if_block_7$v(ctx)
   );
   let if_block11 = (
     /*originData*/
-    ctx[25].initialKit && create_if_block_6$y(ctx)
+    ctx[25].initialKit && create_if_block_6$z(ctx)
   );
-  const if_block_creators = [create_if_block_2$S, create_else_block$L];
+  const if_block_creators = [create_if_block_2$T, create_else_block$M];
   const if_blocks = [];
   function select_block_type(ctx2, dirty) {
     if (
@@ -7977,7 +7977,7 @@ function create_fragment$14(ctx) {
   );
   let each_blocks_1 = [];
   for (let i = 0; i < each_value_1.length; i += 1) {
-    each_blocks_1[i] = create_each_block_1$J(get_each_context_1$J(ctx, each_value_1, i));
+    each_blocks_1[i] = create_each_block_1$K(get_each_context_1$K(ctx, each_value_1, i));
   }
   const out = (i) => transition_out(each_blocks_1[i], 1, 1, () => {
     each_blocks_1[i] = null;
@@ -7988,14 +7988,14 @@ function create_fragment$14(ctx) {
   );
   let each_blocks = [];
   for (let i = 0; i < each_value.length; i += 1) {
-    each_blocks[i] = create_each_block$T(get_each_context$T(ctx, each_value, i));
+    each_blocks[i] = create_each_block$U(get_each_context$U(ctx, each_value, i));
   }
   const out_1 = (i) => transition_out(each_blocks[i], 1, 1, () => {
     each_blocks[i] = null;
   });
   let if_block13 = (
     /*showImages*/
-    ctx[40] && create_if_block$10(ctx)
+    ctx[40] && create_if_block$11(ctx)
   );
   return {
     c() {
@@ -8981,7 +8981,7 @@ function create_fragment$14(ctx) {
             transition_in(if_block3, 1);
           }
         } else {
-          if_block3 = create_if_block_16$9(ctx2);
+          if_block3 = create_if_block_16$a(ctx2);
           if_block3.c();
           transition_in(if_block3, 1);
           if_block3.m(div54, t3);
@@ -9004,7 +9004,7 @@ function create_fragment$14(ctx) {
             transition_in(if_block4, 1);
           }
         } else {
-          if_block4 = create_if_block_14$b(ctx2);
+          if_block4 = create_if_block_14$c(ctx2);
           if_block4.c();
           transition_in(if_block4, 1);
           if_block4.m(div1, null);
@@ -9038,7 +9038,7 @@ function create_fragment$14(ctx) {
             transition_in(if_block5, 1);
           }
         } else {
-          if_block5 = create_if_block_13$c(ctx2);
+          if_block5 = create_if_block_13$d(ctx2);
           if_block5.c();
           transition_in(if_block5, 1);
           if_block5.m(div6, t11);
@@ -9074,7 +9074,7 @@ function create_fragment$14(ctx) {
             transition_in(if_block6, 1);
           }
         } else {
-          if_block6 = create_if_block_12$d(ctx2);
+          if_block6 = create_if_block_12$e(ctx2);
           if_block6.c();
           transition_in(if_block6, 1);
           if_block6.m(div4, null);
@@ -9122,7 +9122,7 @@ function create_fragment$14(ctx) {
         if (if_block8) {
           if_block8.p(ctx2, dirty);
         } else {
-          if_block8 = create_if_block_9$m(ctx2);
+          if_block8 = create_if_block_9$n(ctx2);
           if_block8.c();
           if_block8.m(div10, null);
         }
@@ -9229,7 +9229,7 @@ function create_fragment$14(ctx) {
             transition_in(if_block10, 1);
           }
         } else {
-          if_block10 = create_if_block_7$u(ctx2);
+          if_block10 = create_if_block_7$v(ctx2);
           if_block10.c();
           transition_in(if_block10, 1);
           if_block10.m(div53, t95);
@@ -9254,7 +9254,7 @@ function create_fragment$14(ctx) {
         if (if_block11) {
           if_block11.p(ctx2, dirty);
         } else {
-          if_block11 = create_if_block_6$y(ctx2);
+          if_block11 = create_if_block_6$z(ctx2);
           if_block11.c();
           if_block11.m(div31, t102);
         }
@@ -9307,12 +9307,12 @@ function create_fragment$14(ctx) {
         );
         let i;
         for (i = 0; i < each_value_1.length; i += 1) {
-          const child_ctx = get_each_context_1$J(ctx2, each_value_1, i);
+          const child_ctx = get_each_context_1$K(ctx2, each_value_1, i);
           if (each_blocks_1[i]) {
             each_blocks_1[i].p(child_ctx, dirty);
             transition_in(each_blocks_1[i], 1);
           } else {
-            each_blocks_1[i] = create_each_block_1$J(child_ctx);
+            each_blocks_1[i] = create_each_block_1$K(child_ctx);
             each_blocks_1[i].c();
             transition_in(each_blocks_1[i], 1);
             each_blocks_1[i].m(div38, null);
@@ -9333,12 +9333,12 @@ function create_fragment$14(ctx) {
         );
         let i;
         for (i = 0; i < each_value.length; i += 1) {
-          const child_ctx = get_each_context$T(ctx2, each_value, i);
+          const child_ctx = get_each_context$U(ctx2, each_value, i);
           if (each_blocks[i]) {
             each_blocks[i].p(child_ctx, dirty);
             transition_in(each_blocks[i], 1);
           } else {
-            each_blocks[i] = create_each_block$T(child_ctx);
+            each_blocks[i] = create_each_block$U(child_ctx);
             each_blocks[i].c();
             transition_in(each_blocks[i], 1);
             each_blocks[i].m(div41, null);
@@ -9367,7 +9367,7 @@ function create_fragment$14(ctx) {
             transition_in(if_block13, 1);
           }
         } else {
-          if_block13 = create_if_block$10(ctx2);
+          if_block13 = create_if_block$11(ctx2);
           if_block13.c();
           transition_in(if_block13, 1);
           if_block13.m(div51, null);
@@ -9451,12 +9451,12 @@ function create_fragment$14(ctx) {
     }
   };
 }
-const MODULE_ID$C = "multiversus-rpg";
+const MODULE_ID$D = "multiversus-rpg";
 const BASE_POINTS_CAP$1 = 150;
 function getStars(c) {
   return "★".repeat(Math.min(5, Math.max(1, c))) + "☆".repeat(5 - Math.min(5, Math.max(1, c)));
 }
-function instance$14($$self, $$props, $$invalidate) {
+function instance$15($$self, $$props, $$invalidate) {
   let activeThemeKey;
   let currentThemeData;
   let cssVariables;
@@ -9519,7 +9519,7 @@ function instance$14($$self, $$props, $$invalidate) {
     if (activeImagePrompt === "token") {
       actor.update(
         {
-          [`flags.${MODULE_ID$C}.tokenImg`]: urlToSave,
+          [`flags.${MODULE_ID$D}.tokenImg`]: urlToSave,
           "prototypeToken.texture.src": urlToSave
         },
         { render: false }
@@ -9527,7 +9527,7 @@ function instance$14($$self, $$props, $$invalidate) {
     } else if (activeImagePrompt === "banner") {
       actor.update(
         {
-          [`flags.${MODULE_ID$C}.originBanner`]: urlToSave
+          [`flags.${MODULE_ID$D}.originBanner`]: urlToSave
         },
         { render: false }
       );
@@ -9535,7 +9535,7 @@ function instance$14($$self, $$props, $$invalidate) {
       const flagName = isFullBody ? "fullBodyImg" : "halfBodyImg";
       actor.update(
         {
-          [`flags.${MODULE_ID$C}.${flagName}`]: urlToSave
+          [`flags.${MODULE_ID$D}.${flagName}`]: urlToSave
         },
         { render: false }
       );
@@ -9546,7 +9546,7 @@ function instance$14($$self, $$props, $$invalidate) {
     $$invalidate(40, showImages = !showImages);
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.showImages`]: showImages
+        [`flags.${MODULE_ID$D}.showImages`]: showImages
       },
       { render: false }
     );
@@ -9555,7 +9555,7 @@ function instance$14($$self, $$props, $$invalidate) {
     $$invalidate(39, isFullBody = !isFullBody);
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.isFullBody`]: isFullBody
+        [`flags.${MODULE_ID$D}.isFullBody`]: isFullBody
       },
       { render: false }
     );
@@ -9597,8 +9597,8 @@ function instance$14($$self, $$props, $$invalidate) {
     else $$invalidate(77, localAppearance = editorContent);
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.bio_psyche`]: localPsyche,
-        [`flags.${MODULE_ID$C}.bio_appearance`]: localAppearance
+        [`flags.${MODULE_ID$D}.bio_psyche`]: localPsyche,
+        [`flags.${MODULE_ID$D}.bio_appearance`]: localAppearance
       },
       { render: false }
     );
@@ -9630,13 +9630,13 @@ ${prefix}TextoAqui${suffix}`);
   async function updateFlag(key, value) {
     if (key === "bio_universes") $$invalidate(7, originUniverses = value);
     if (key === "bio_motivations") $$invalidate(19, motivations = value);
-    await actor.update({ [`flags.${MODULE_ID$C}.${key}`]: value }, { render: false });
+    await actor.update({ [`flags.${MODULE_ID$D}.${key}`]: value }, { render: false });
   }
   function toggleGMMode() {
     $$invalidate(2, gmMode = !gmMode);
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.gmOverride`]: gmMode
+        [`flags.${MODULE_ID$D}.gmOverride`]: gmMode
       },
       { render: false }
     );
@@ -9645,14 +9645,14 @@ ${prefix}TextoAqui${suffix}`);
     $$invalidate(3, customPoints = Number(e.target.value));
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.customPoints`]: customPoints
+        [`flags.${MODULE_ID$D}.customPoints`]: customPoints
       },
       { render: false }
     );
   }
   function changeOriginGM(e) {
     const newOrigin = e.target.value;
-    actor.update({ [`flags.${MODULE_ID$C}.origin`]: newOrigin }, { render: false });
+    actor.update({ [`flags.${MODULE_ID$D}.origin`]: newOrigin }, { render: false });
     loadOriginData(newOrigin);
     ui.notifications.info(`Origem alterada.`);
   }
@@ -9661,9 +9661,9 @@ ${prefix}TextoAqui${suffix}`);
     try {
       const userId = game.user.id;
       const xpData = await XPDatabase.getPlayerData(userId);
-      const sheetOrigin = actor.getFlag(MODULE_ID$C, "origin") || flags.origin || "humano";
+      const sheetOrigin = actor.getFlag(MODULE_ID$D, "origin") || flags.origin || "humano";
       const updates = {
-        [`flags.${MODULE_ID$C}.xp`]: xpData.earnedXP || 0
+        [`flags.${MODULE_ID$D}.xp`]: xpData.earnedXP || 0
       };
       await actor.update(updates, { render: false });
       $$invalidate(80, currentXP = xpData.earnedXP || 0);
@@ -9681,7 +9681,7 @@ ${prefix}TextoAqui${suffix}`);
     $$invalidate(4, boughtBaseWill = Math.max(0, boughtBaseWill + amount));
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.boughtBaseWill`]: boughtBaseWill
+        [`flags.${MODULE_ID$D}.boughtBaseWill`]: boughtBaseWill
       },
       { render: false }
     );
@@ -9690,7 +9690,7 @@ ${prefix}TextoAqui${suffix}`);
     $$invalidate(5, currBaseWill = parseInt(e.target.value) || 0);
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.currBaseWill`]: currBaseWill
+        [`flags.${MODULE_ID$D}.currBaseWill`]: currBaseWill
       },
       { render: false }
     );
@@ -9699,7 +9699,7 @@ ${prefix}TextoAqui${suffix}`);
     $$invalidate(6, currWillpower = parseInt(e.target.value) || 0);
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.currWillpower`]: currWillpower
+        [`flags.${MODULE_ID$D}.currWillpower`]: currWillpower
       },
       { render: false }
     );
@@ -9708,7 +9708,7 @@ ${prefix}TextoAqui${suffix}`);
     let val = parseInt(e.target.value) || 0;
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.nexusEnergyMod`]: val
+        [`flags.${MODULE_ID$D}.nexusEnergyMod`]: val
       },
       { render: false }
     );
@@ -9738,7 +9738,7 @@ ${prefix}TextoAqui${suffix}`);
   function saveBioText() {
     actor.update(
       {
-        [`flags.${MODULE_ID$C}.bio_lore`]: loreContent
+        [`flags.${MODULE_ID$D}.bio_lore`]: loreContent
       },
       { render: false }
     );
@@ -9987,9 +9987,9 @@ ${prefix}TextoAqui${suffix}`);
           () => {
             actor.update(
               {
-                [`flags.${MODULE_ID$C}.bioSpent`]: universeCost,
-                [`flags.${MODULE_ID$C}.willSpent`]: totalWillCost,
-                [`flags.${MODULE_ID$C}.totalSpent`]: spentPoints
+                [`flags.${MODULE_ID$D}.bioSpent`]: universeCost,
+                [`flags.${MODULE_ID$D}.willSpent`]: totalWillCost,
+                [`flags.${MODULE_ID$D}.totalSpent`]: spentPoints
               },
               { render: false }
             );
@@ -10147,10 +10147,10 @@ ${prefix}TextoAqui${suffix}`);
 class ProfileApp extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$14, create_fragment$14, safe_not_equal, { actor: 0, flags: 1, system: 75 }, null, [-1, -1, -1, -1, -1]);
+    init(this, options, instance$15, create_fragment$15, safe_not_equal, { actor: 0, flags: 1, system: 75 }, null, [-1, -1, -1, -1, -1]);
   }
 }
-const MODULE_ID$B = "multiversus-rpg";
+const MODULE_ID$C = "multiversus-rpg";
 const PASS_TIERS = {
   COBRE: { id: "cobre", label: "🥉 COBRE (Padrão)", color: "#cd7f32" },
   PRATA: { id: "prata", label: "🥈 PRATA", color: "#e0e0e0" },
@@ -10162,7 +10162,7 @@ const PassSystem = {
   // INICIALIZAÇÃO (Registra a Setting no Foundry)
   init: () => {
     if (!game.settings) return;
-    game.settings.register(MODULE_ID$B, "battlePassSeason", {
+    game.settings.register(MODULE_ID$C, "battlePassSeason", {
       name: "Dados da Temporada",
       scope: "world",
       config: false,
@@ -10176,7 +10176,7 @@ const PassSystem = {
   // --- MÉTODOS DE TEMPORADA (Global) ---
   getSeasonData: () => {
     try {
-      return game.settings.get(MODULE_ID$B, "battlePassSeason");
+      return game.settings.get(MODULE_ID$C, "battlePassSeason");
     } catch (e) {
       return { status: "closed", startDate: null, endDate: null, name: "Temporada X" };
     }
@@ -10185,21 +10185,21 @@ const PassSystem = {
     if (!game.user.isGM) return;
     const current = PassSystem.getSeasonData();
     const updated = { ...current, ...data };
-    await game.settings.set(MODULE_ID$B, "battlePassSeason", updated);
-    game.socket.emit(`module.${MODULE_ID$B}`, { type: "passUpdate" });
+    await game.settings.set(MODULE_ID$C, "battlePassSeason", updated);
+    game.socket.emit(`module.${MODULE_ID$C}`, { type: "passUpdate" });
   },
   // --- MÉTODOS DE JOGADOR (Individual via Flags) ---
   getPlayerTier: (userId) => {
     const user = game.users.get(userId);
     if (!user) return PASS_TIERS.COBRE;
-    const savedId = user.getFlag(MODULE_ID$B, "passTier");
+    const savedId = user.getFlag(MODULE_ID$C, "passTier");
     return Object.values(PASS_TIERS).find((t) => t.id === savedId) || PASS_TIERS.COBRE;
   },
   async setPlayerTier(userId, tierId) {
     if (!game.user.isGM) return;
     const user = game.users.get(userId);
     if (!user) return;
-    await user.setFlag(MODULE_ID$B, "passTier", tierId);
+    await user.setFlag(MODULE_ID$C, "passTier", tierId);
     Hooks.callAll("passSystemUpdate");
   },
   // --- UTILITÁRIOS (Matemática) ---
@@ -10245,13 +10245,13 @@ const PassSystem = {
     return order.slice(0, playerIndex + 1);
   }
 };
-function get_each_context$S(ctx, list, i) {
+function get_each_context$T(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[30] = list[i][0];
   child_ctx[31] = list[i][1];
   return child_ctx;
 }
-function create_if_block_4$D(ctx) {
+function create_if_block_4$E(ctx) {
   let span;
   return {
     c() {
@@ -10269,7 +10269,7 @@ function create_if_block_4$D(ctx) {
     }
   };
 }
-function create_else_block$K(ctx) {
+function create_else_block$L(ctx) {
   let t;
   return {
     c() {
@@ -10285,7 +10285,7 @@ function create_else_block$K(ctx) {
     }
   };
 }
-function create_if_block_3$L(ctx) {
+function create_if_block_3$M(ctx) {
   let t;
   return {
     c() {
@@ -10301,7 +10301,7 @@ function create_if_block_3$L(ctx) {
     }
   };
 }
-function create_if_block_2$R(ctx) {
+function create_if_block_2$S(ctx) {
   let div;
   return {
     c() {
@@ -10319,7 +10319,7 @@ function create_if_block_2$R(ctx) {
     }
   };
 }
-function create_if_block_1$V(ctx) {
+function create_if_block_1$W(ctx) {
   let span;
   return {
     c() {
@@ -10337,7 +10337,7 @@ function create_if_block_1$V(ctx) {
     }
   };
 }
-function create_if_block$$(ctx) {
+function create_if_block$10(ctx) {
   let i;
   return {
     c() {
@@ -10354,7 +10354,7 @@ function create_if_block$$(ctx) {
     }
   };
 }
-function create_each_block$S(ctx) {
+function create_each_block$T(ctx) {
   let button;
   let div0;
   let t0;
@@ -10375,11 +10375,11 @@ function create_each_block$S(ctx) {
   let button_disabled_value;
   let mounted;
   let dispose;
-  let if_block0 = show_if && create_if_block_1$V();
+  let if_block0 = show_if && create_if_block_1$W();
   let if_block1 = (
     /*activeThemeKey*/
     ctx[2] === /*key*/
-    ctx[30] && create_if_block$$()
+    ctx[30] && create_if_block$10()
   );
   function click_handler() {
     return (
@@ -10476,7 +10476,7 @@ function create_each_block$S(ctx) {
       if (show_if) {
         if (if_block0) ;
         else {
-          if_block0 = create_if_block_1$V();
+          if_block0 = create_if_block_1$W();
           if_block0.c();
           if_block0.m(div1, null);
         }
@@ -10491,7 +10491,7 @@ function create_each_block$S(ctx) {
       ) {
         if (if_block1) ;
         else {
-          if_block1 = create_if_block$$();
+          if_block1 = create_if_block$10();
           if_block1.c();
           if_block1.m(button, t6);
         }
@@ -10541,7 +10541,7 @@ function create_each_block$S(ctx) {
     }
   };
 }
-function create_fragment$13(ctx) {
+function create_fragment$14(ctx) {
   let div18;
   let header;
   let div0;
@@ -10636,25 +10636,25 @@ function create_fragment$13(ctx) {
   let dispose;
   let if_block0 = (
     /*isGM*/
-    ctx[12] && create_if_block_4$D()
+    ctx[12] && create_if_block_4$E()
   );
   function select_block_type(ctx2, dirty) {
     if (
       /*isGM*/
       ctx2[12]
-    ) return create_if_block_3$L;
-    return create_else_block$K;
+    ) return create_if_block_3$M;
+    return create_else_block$L;
   }
   let current_block_type = select_block_type(ctx);
   let if_block1 = current_block_type(ctx);
   let if_block2 = (
     /*isGM*/
-    ctx[12] && create_if_block_2$R()
+    ctx[12] && create_if_block_2$S()
   );
   let each_value = ensure_array_like(Object.entries(SHEET_THEMES));
   let each_blocks = [];
   for (let i = 0; i < each_value.length; i += 1) {
-    each_blocks[i] = create_each_block$S(get_each_context$S(ctx, each_value, i));
+    each_blocks[i] = create_each_block$T(get_each_context$T(ctx, each_value, i));
   }
   return {
     c() {
@@ -11015,11 +11015,11 @@ function create_fragment$13(ctx) {
         each_value = ensure_array_like(Object.entries(SHEET_THEMES));
         let i;
         for (i = 0; i < each_value.length; i += 1) {
-          const child_ctx = get_each_context$S(ctx2, each_value, i);
+          const child_ctx = get_each_context$T(ctx2, each_value, i);
           if (each_blocks[i]) {
             each_blocks[i].p(child_ctx, dirty);
           } else {
-            each_blocks[i] = create_each_block$S(child_ctx);
+            each_blocks[i] = create_each_block$T(child_ctx);
             each_blocks[i].c();
             each_blocks[i].m(div11, null);
           }
@@ -11097,8 +11097,8 @@ function create_fragment$13(ctx) {
     }
   };
 }
-const MODULE_ID$A = "multiversus-rpg";
-function instance$13($$self, $$props, $$invalidate) {
+const MODULE_ID$B = "multiversus-rpg";
+function instance$14($$self, $$props, $$invalidate) {
   let playerTier;
   let isRestricted;
   let activeThemeKey;
@@ -11119,7 +11119,7 @@ function instance$13($$self, $$props, $$invalidate) {
   async function updateConfig(key, value) {
     await actor.update(
       {
-        [`flags.${MODULE_ID$A}.sheetConfig.${key}`]: value
+        [`flags.${MODULE_ID$B}.sheetConfig.${key}`]: value
       },
       { render: false }
     );
@@ -11159,7 +11159,7 @@ function instance$13($$self, $$props, $$invalidate) {
     actor.sheet.setPosition({ width: w, height: h });
     await actor.update(
       {
-        [`flags.${MODULE_ID$A}.sheetConfig.windowSize`]: { width: w, height: h }
+        [`flags.${MODULE_ID$B}.sheetConfig.windowSize`]: { width: w, height: h }
       },
       { render: false }
     );
@@ -11254,7 +11254,4449 @@ function instance$13($$self, $$props, $$invalidate) {
 class SettingsApp extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$13, create_fragment$13, safe_not_equal, { actor: 0, flags: 21 }, null, [-1, -1]);
+    init(this, options, instance$14, create_fragment$14, safe_not_equal, { actor: 0, flags: 21 }, null, [-1, -1]);
+  }
+}
+const CombatThemes = {
+  "nexus": {
+    name: "NEXUS OS (Tech)",
+    vars: {
+      "--c-primary": "#00ff41",
+      "--c-bg": "#050505",
+      "--c-panel": "rgba(10, 10, 10, 0.95)",
+      "--c-border": "#333",
+      "--c-shock": "#eab308",
+      "--c-kill": "#ef4444",
+      "--f-main": "'Share Tech Mono', monospace",
+      "--r-node": "4px",
+      // Arredondamento do node
+      "--r-slot": "0px"
+      // Arredondamento do HP (quadrado)
+    },
+    // CSS Customizado para este tema (Muda formas e comportamentos)
+    css: `
+            .limb-node { border: 1px solid var(--c-border); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+            .hp-slot { border: 1px solid #444; }
+            .hp-slot.shock { box-shadow: 0 0 5px var(--c-shock); }
+            .loc-tag { text-transform: uppercase; letter-spacing: 1px; }
+        `
+  },
+  "ether": {
+    name: "ETHER CRYSTAL (Magic)",
+    vars: {
+      "--c-primary": "#00ffff",
+      "--c-bg": "#0a0a15",
+      "--c-panel": "rgba(20, 30, 50, 0.8)",
+      "--c-border": "#4466aa",
+      "--c-shock": "#d8b4fe",
+      // Roxo claro
+      "--c-kill": "#ff0055",
+      // Magenta
+      "--f-main": "'Cinzel', serif",
+      "--r-node": "0px",
+      "--r-slot": "0px"
+    },
+    css: `
+            /* Transforma caixas em CRISTAIS */
+            .hp-slot { 
+                transform: rotate(45deg); 
+                margin: 4px; 
+                box-shadow: inset 0 0 2px rgba(255,255,255,0.3);
+                border: 1px solid rgba(255,255,255,0.2);
+            }
+            .hp-grid { padding: 5px; } /* Espaço extra para a rotação */
+            
+            .limb-node { 
+                background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,30,60,0.9));
+                border: 1px solid var(--c-primary);
+                box-shadow: 0 0 15px var(--c-primary);
+            }
+            .loc-tag { background: transparent; border: 1px solid var(--c-primary); color: var(--c-primary); }
+        `
+  },
+  "heroking": {
+    name: "HERO KING (Tesouro)",
+    vars: {
+      "--c-primary": "#ffcc00",
+      // Ouro Babilônico
+      "--c-bg": "#0a0101",
+      // Fundo Escuro Carmesim
+      "--c-panel": "rgba(20, 2, 2, 0.95)",
+      "--c-border": "#ff0033",
+      // Vermelho Enuma Elish
+      "--c-shock": "#c0c0c0",
+      // Prata
+      "--c-kill": "#cd7f32",
+      // Bronze
+      "--f-main": "'Cinzel', serif",
+      // Fonte Imperial
+      "--r-node": "6px",
+      // Borda do card do membro
+      "--r-slot": "50%"
+      // Deixa o slot perfeitamente redondo (Moeda)
+    },
+    css: `
+            /* Caixa do membro (Placa Imperial) */
+            .limb-node { 
+                border: 1px solid var(--c-border) !important; 
+                background: radial-gradient(circle at top, #1a0202 0%, #000 100%) !important;
+                box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 0 10px rgba(255,0,51,0.2) !important;
+            }
+            
+            /* Nome do Membro */
+            .loc-tag { 
+                color: var(--c-primary) !important; 
+                font-weight: bold !important; 
+                letter-spacing: 1px !important; 
+                text-shadow: 0 0 5px rgba(255, 204, 0, 0.5) !important;
+            }
+
+            /* HP Cheio: MOEDA DE OURO */
+            .hp-slot { 
+                border: 1px solid #b8860b !important; 
+                background: radial-gradient(circle at 35% 35%, #ffea00, #daa520) !important; 
+                box-shadow: inset 0 -2px 4px rgba(0,0,0,0.6) !important; 
+            }
+
+            /* Dano Shock: MOEDA DE PRATA */
+            .hp-slot.shock, .hp-slot.bashing { 
+                border: 1px solid #888888 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffffff, #a0a0a0) !important; 
+                box-shadow: inset 0 -2px 4px rgba(0,0,0,0.6) !important; 
+            }
+
+            /* Dano Killing: MOEDA DE BRONZE */
+            .hp-slot.kill, .hp-slot.lethal, .hp-slot.killing { 
+                border: 1px solid #8b4513 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffa07a, #cd7f32) !important; 
+                box-shadow: inset 0 -2px 4px rgba(0,0,0,0.6) !important; 
+            }
+        `
+  },
+  "novoimortal": {
+    name: "NOVO IMORTAL (Hogyoku)",
+    vars: {
+      "--c-primary": "#00d4ff",
+      // Azul Hogyoku
+      "--c-bg": "#020406",
+      // Preto vácuo
+      "--c-panel": "rgba(10, 15, 20, 0.85)",
+      "--c-border": "#00d4ff",
+      // Borda Azul
+      "--c-shock": "#ffea00",
+      // Amarelo
+      "--c-kill": "#ff0000",
+      // Vermelho
+      "--f-main": "'Orbitron', sans-serif",
+      "--r-node": "12px",
+      // Card do membro arredondado
+      "--r-slot": "50%"
+      // Células de energia redondas
+    },
+    css: `
+            /* Caixa do membro (Cápsula de Energia) */
+            .limb-node { 
+                border: 1px solid var(--c-border) !important; 
+                background: rgba(5, 10, 15, 0.8) !important;
+                box-shadow: 0 0 15px rgba(0, 212, 255, 0.1), inset 0 0 10px rgba(0, 212, 255, 0.05) !important; 
+                backdrop-filter: blur(5px) !important;
+            }
+            
+            /* Nome do Membro */
+            .loc-tag { 
+                color: #ffffff !important; 
+                font-weight: bold !important; 
+                text-shadow: 0 0 5px var(--c-primary) !important; 
+            }
+
+            /* HP Cheio: BOLINHA AZUL (Energia Hogyoku) */
+            .hp-slot { 
+                border: 1px solid #0055aa !important; 
+                background: radial-gradient(circle at 35% 35%, #ffffff, #00d4ff) !important; 
+                box-shadow: 0 0 5px rgba(0, 212, 255, 0.5) !important; 
+            }
+
+            /* Dano Shock: BOLINHA AMARELA (Energia Corrompida) */
+            .hp-slot.shock, .hp-slot.bashing { 
+                border: 1px solid #aa8800 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffffff, var(--c-shock)) !important; 
+                box-shadow: 0 0 5px var(--c-shock) !important; 
+            }
+
+            /* Dano Killing: BOLINHA VERMELHA (Morte Celular) */
+            .hp-slot.kill, .hp-slot.lethal, .hp-slot.killing { 
+                border: 1px solid #880000 !important; 
+                background: radial-gradient(circle at 35% 35%, #ffcccc, var(--c-kill)) !important; 
+                box-shadow: 0 0 5px var(--c-kill) !important; 
+            }
+        `
+  }
+};
+function get_each_context$S(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[121] = list[i][0];
+  child_ctx[122] = list[i][1];
+  return child_ctx;
+}
+function get_each_context_2$q(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[121] = list[i][0];
+  child_ctx[128] = list[i][1];
+  return child_ctx;
+}
+function get_each_context_3$m(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[131] = list[i];
+  child_ctx[132] = list;
+  child_ctx[133] = i;
+  return child_ctx;
+}
+function get_each_context_4$k(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[134] = list[i];
+  child_ctx[137] = i;
+  const constants_0 = (
+    /*getSlotState*/
+    child_ctx[47](
+      /*limb*/
+      child_ctx[131],
+      /*i*/
+      child_ctx[137]
+    )
+  );
+  child_ctx[135] = constants_0;
+  return child_ctx;
+}
+function get_each_context_1$J(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[125] = list[i];
+  child_ctx[126] = list;
+  child_ctx[127] = i;
+  return child_ctx;
+}
+function get_each_context_5$d(ctx, list, i) {
+  const child_ctx = ctx.slice();
+  child_ctx[138] = list[i];
+  child_ctx[127] = i;
+  return child_ctx;
+}
+function create_if_block_16$9(ctx) {
+  let button;
+  let mounted;
+  let dispose;
+  function click_handler_4() {
+    return (
+      /*click_handler_4*/
+      ctx[65](
+        /*form*/
+        ctx[138]
+      )
+    );
+  }
+  return {
+    c() {
+      button = element("button");
+      button.innerHTML = `<i class="fas fa-edit"></i>`;
+      attr(button, "class", "btn-ghost");
+      set_style(button, "margin-left", "5px");
+      set_style(button, "color", "#ffeb3b");
+      set_style(button, "border", "none");
+      set_style(button, "padding", "2px 5px");
+      set_style(button, "font-size", "10px");
+      attr(button, "title", "Renomear");
+    },
+    m(target, anchor) {
+      insert(target, button, anchor);
+      if (!mounted) {
+        dispose = listen(button, "click", click_handler_4);
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(button);
+      }
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_if_block_15$a(ctx) {
+  let button;
+  let mounted;
+  let dispose;
+  function click_handler_5() {
+    return (
+      /*click_handler_5*/
+      ctx[66](
+        /*form*/
+        ctx[138]
+      )
+    );
+  }
+  return {
+    c() {
+      button = element("button");
+      button.innerHTML = `<i class="fas fa-times"></i>`;
+      attr(button, "class", "tab-del svelte-4zg1bt");
+      attr(button, "title", "Excluir");
+    },
+    m(target, anchor) {
+      insert(target, button, anchor);
+      if (!mounted) {
+        dispose = listen(button, "click", stop_propagation(click_handler_5));
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(button);
+      }
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_each_block_5$d(ctx) {
+  let div;
+  let button;
+  let t0_value = (
+    /*form*/
+    ctx[138].name + ""
+  );
+  let t0;
+  let button_class_value;
+  let t1;
+  let t2;
+  let mounted;
+  let dispose;
+  function click_handler_3() {
+    return (
+      /*click_handler_3*/
+      ctx[64](
+        /*form*/
+        ctx[138]
+      )
+    );
+  }
+  let if_block0 = (
+    /*editingMode*/
+    ctx[9] && create_if_block_16$9(ctx)
+  );
+  let if_block1 = (
+    /*editingMode*/
+    ctx[9] && /*combatForms*/
+    ctx[3].length > 1 && create_if_block_15$a(ctx)
+  );
+  return {
+    c() {
+      div = element("div");
+      button = element("button");
+      t0 = text(t0_value);
+      t1 = space();
+      if (if_block0) if_block0.c();
+      t2 = space();
+      if (if_block1) if_block1.c();
+      attr(button, "class", button_class_value = "tab " + /*activeFormId*/
+      (ctx[2] === /*form*/
+      ctx[138].id ? "active trans-mode" : "") + " svelte-4zg1bt");
+      attr(div, "class", "tab-wrapper");
+      set_style(div, "display", "flex");
+      set_style(div, "align-items", "center");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      append(div, button);
+      append(button, t0);
+      append(div, t1);
+      if (if_block0) if_block0.m(div, null);
+      append(div, t2);
+      if (if_block1) if_block1.m(div, null);
+      if (!mounted) {
+        dispose = listen(button, "click", click_handler_3);
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (dirty[0] & /*combatForms*/
+      8 && t0_value !== (t0_value = /*form*/
+      ctx[138].name + "")) set_data(t0, t0_value);
+      if (dirty[0] & /*activeFormId, combatForms*/
+      12 && button_class_value !== (button_class_value = "tab " + /*activeFormId*/
+      (ctx[2] === /*form*/
+      ctx[138].id ? "active trans-mode" : "") + " svelte-4zg1bt")) {
+        attr(button, "class", button_class_value);
+      }
+      if (
+        /*editingMode*/
+        ctx[9]
+      ) {
+        if (if_block0) {
+          if_block0.p(ctx, dirty);
+        } else {
+          if_block0 = create_if_block_16$9(ctx);
+          if_block0.c();
+          if_block0.m(div, t2);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (
+        /*editingMode*/
+        ctx[9] && /*combatForms*/
+        ctx[3].length > 1
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx, dirty);
+        } else {
+          if_block1 = create_if_block_15$a(ctx);
+          if_block1.c();
+          if_block1.m(div, null);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div);
+      }
+      if (if_block0) if_block0.d();
+      if (if_block1) if_block1.d();
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_if_block_14$b(ctx) {
+  let button;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      button = element("button");
+      button.textContent = "+";
+      attr(button, "class", "tab add-tab svelte-4zg1bt");
+      attr(button, "title", "Adicionar Forma");
+    },
+    m(target, anchor) {
+      insert(target, button, anchor);
+      if (!mounted) {
+        dispose = listen(
+          button,
+          "click",
+          /*addNewForm*/
+          ctx[29]
+        );
+        mounted = true;
+      }
+    },
+    p: noop,
+    d(detaching) {
+      if (detaching) {
+        detach(button);
+      }
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_if_block_13$c(ctx) {
+  let button;
+  let i;
+  let t;
+  let button_class_value;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      button = element("button");
+      i = element("i");
+      t = text(" EDITAR");
+      attr(i, "class", "fas fa-edit");
+      attr(button, "class", button_class_value = "tool-btn " + /*editingMode*/
+      (ctx[9] ? "on" : "") + " svelte-4zg1bt");
+      attr(button, "title", "Modo Edição");
+    },
+    m(target, anchor) {
+      insert(target, button, anchor);
+      append(button, i);
+      append(button, t);
+      if (!mounted) {
+        dispose = listen(
+          button,
+          "click",
+          /*click_handler_7*/
+          ctx[68]
+        );
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*editingMode*/
+      512 && button_class_value !== (button_class_value = "tool-btn " + /*editingMode*/
+      (ctx2[9] ? "on" : "") + " svelte-4zg1bt")) {
+        attr(button, "class", button_class_value);
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(button);
+      }
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_else_block$K(ctx) {
+  let div0;
+  let t0;
+  let img;
+  let img_src_value;
+  let t1;
+  let t2;
+  let each_blocks_1 = [];
+  let each0_lookup = /* @__PURE__ */ new Map();
+  let t3;
+  let div11;
+  let div5;
+  let div1;
+  let span0;
+  let t5;
+  let span1;
+  let t6;
+  let t7;
+  let t8;
+  let t9;
+  let div3;
+  let div2;
+  let t10;
+  let div4;
+  let button0;
+  let t12;
+  let input;
+  let t13;
+  let button1;
+  let t15;
+  let div7;
+  let div6;
+  let t16_value = (
+    /*selectedLimb*/
+    (ctx[22] ? (
+      /*selectedLimb*/
+      ctx[22].name
+    ) : "SELECIONE ALVO") + ""
+  );
+  let t16;
+  let t17;
+  let t18;
+  let div10;
+  let div8;
+  let span2;
+  let t20;
+  let button2;
+  let t22;
+  let div9;
+  let mounted;
+  let dispose;
+  let if_block0 = (
+    /*currentBg*/
+    ctx[23] && create_if_block_12$d(ctx)
+  );
+  let if_block1 = (
+    /*editingMode*/
+    ctx[9] && create_if_block_11$f(ctx)
+  );
+  let each_value_3 = ensure_array_like(
+    /*currentLimbs*/
+    ctx[5]
+  );
+  const get_key = (ctx2) => (
+    /*limb*/
+    ctx2[131].id
+  );
+  for (let i = 0; i < each_value_3.length; i += 1) {
+    let child_ctx = get_each_context_3$m(ctx, each_value_3, i);
+    let key = get_key(child_ctx);
+    each0_lookup.set(key, each_blocks_1[i] = create_each_block_3$m(key, child_ctx));
+  }
+  let if_block2 = (
+    /*selectedLimb*/
+    ctx[22] && create_if_block_5$B(ctx)
+  );
+  let each_value_2 = ensure_array_like(Object.entries(
+    /*traumaDB*/
+    ctx[7]
+  ));
+  let each_blocks = [];
+  for (let i = 0; i < each_value_2.length; i += 1) {
+    each_blocks[i] = create_each_block_2$q(get_each_context_2$q(ctx, each_value_2, i));
+  }
+  return {
+    c() {
+      div0 = element("div");
+      if (if_block0) if_block0.c();
+      t0 = space();
+      img = element("img");
+      t1 = space();
+      if (if_block1) if_block1.c();
+      t2 = space();
+      for (let i = 0; i < each_blocks_1.length; i += 1) {
+        each_blocks_1[i].c();
+      }
+      t3 = space();
+      div11 = element("div");
+      div5 = element("div");
+      div1 = element("div");
+      span0 = element("span");
+      span0.textContent = "ENERGIA NEXUS";
+      t5 = space();
+      span1 = element("span");
+      t6 = text(
+        /*localMana*/
+        ctx[1]
+      );
+      t7 = text(" / ");
+      t8 = text(
+        /*maxWillpower*/
+        ctx[6]
+      );
+      t9 = space();
+      div3 = element("div");
+      div2 = element("div");
+      t10 = space();
+      div4 = element("div");
+      button0 = element("button");
+      button0.textContent = "-";
+      t12 = space();
+      input = element("input");
+      t13 = space();
+      button1 = element("button");
+      button1.textContent = "+";
+      t15 = space();
+      div7 = element("div");
+      div6 = element("div");
+      t16 = text(t16_value);
+      t17 = space();
+      if (if_block2) if_block2.c();
+      t18 = space();
+      div10 = element("div");
+      div8 = element("div");
+      span2 = element("span");
+      span2.textContent = "CONDIÇÕES & TRAUMAS";
+      t20 = space();
+      button2 = element("button");
+      button2.textContent = "+";
+      t22 = space();
+      div9 = element("div");
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].c();
+      }
+      if (!src_url_equal(img.src, img_src_value = /*currentImg*/
+      ctx[24])) attr(img, "src", img_src_value);
+      attr(img, "class", "silhouette-layer svelte-4zg1bt");
+      attr(img, "alt", "silhouette");
+      attr(div0, "class", "canvas-area svelte-4zg1bt");
+      set_style(span0, "color", "var(--c-shock)");
+      set_style(span0, "font-weight", "bold");
+      set_style(span1, "color", "#fff");
+      attr(div1, "class", "mana-head svelte-4zg1bt");
+      attr(div2, "class", "mana-bar-fill svelte-4zg1bt");
+      set_style(
+        div2,
+        "width",
+        /*localMana*/
+        ctx[1] / /*maxWillpower*/
+        ctx[6] * 100 + "%"
+      );
+      set_style(div2, "background", "var(--c-shock)");
+      attr(div3, "class", "mana-bar-bg svelte-4zg1bt");
+      attr(button0, "class", "m-btn svelte-4zg1bt");
+      attr(input, "type", "number");
+      attr(input, "class", "m-input svelte-4zg1bt");
+      attr(button1, "class", "m-btn svelte-4zg1bt");
+      attr(div4, "class", "mana-controls svelte-4zg1bt");
+      attr(div5, "class", "mana-module svelte-4zg1bt");
+      attr(div6, "class", "calc-title svelte-4zg1bt");
+      attr(div7, "class", "calc-box svelte-4zg1bt");
+      attr(button2, "class", "add-cond svelte-4zg1bt");
+      attr(div8, "class", "box-title svelte-4zg1bt");
+      attr(div9, "class", "t-list custom-scroll svelte-4zg1bt");
+      attr(div10, "class", "trauma-box svelte-4zg1bt");
+      attr(div11, "class", "sidebar custom-scroll svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div0, anchor);
+      if (if_block0) if_block0.m(div0, null);
+      append(div0, t0);
+      append(div0, img);
+      append(div0, t1);
+      if (if_block1) if_block1.m(div0, null);
+      append(div0, t2);
+      for (let i = 0; i < each_blocks_1.length; i += 1) {
+        if (each_blocks_1[i]) {
+          each_blocks_1[i].m(div0, null);
+        }
+      }
+      insert(target, t3, anchor);
+      insert(target, div11, anchor);
+      append(div11, div5);
+      append(div5, div1);
+      append(div1, span0);
+      append(div1, t5);
+      append(div1, span1);
+      append(span1, t6);
+      append(span1, t7);
+      append(span1, t8);
+      append(div5, t9);
+      append(div5, div3);
+      append(div3, div2);
+      append(div5, t10);
+      append(div5, div4);
+      append(div4, button0);
+      append(div4, t12);
+      append(div4, input);
+      set_input_value(
+        input,
+        /*localMana*/
+        ctx[1]
+      );
+      append(div4, t13);
+      append(div4, button1);
+      append(div11, t15);
+      append(div11, div7);
+      append(div7, div6);
+      append(div6, t16);
+      append(div7, t17);
+      if (if_block2) if_block2.m(div7, null);
+      append(div11, t18);
+      append(div11, div10);
+      append(div10, div8);
+      append(div8, span2);
+      append(div8, t20);
+      append(div8, button2);
+      append(div10, t22);
+      append(div10, div9);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        if (each_blocks[i]) {
+          each_blocks[i].m(div9, null);
+        }
+      }
+      if (!mounted) {
+        dispose = [
+          listen(div0, "dragover", prevent_default(
+            /*dragover_handler*/
+            ctx[62]
+          )),
+          listen(
+            div0,
+            "drop",
+            /*onCanvasDrop*/
+            ctx[36]
+          ),
+          listen(
+            button0,
+            "click",
+            /*click_handler_16*/
+            ctx[86]
+          ),
+          listen(
+            input,
+            "input",
+            /*input_input_handler_1*/
+            ctx[87]
+          ),
+          listen(
+            input,
+            "change",
+            /*setMana*/
+            ctx[27]
+          ),
+          listen(
+            button1,
+            "click",
+            /*click_handler_17*/
+            ctx[88]
+          ),
+          listen(
+            button2,
+            "click",
+            /*click_handler_18*/
+            ctx[99]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (
+        /*currentBg*/
+        ctx2[23]
+      ) {
+        if (if_block0) {
+          if_block0.p(ctx2, dirty);
+        } else {
+          if_block0 = create_if_block_12$d(ctx2);
+          if_block0.c();
+          if_block0.m(div0, t0);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (dirty[0] & /*currentImg*/
+      16777216 && !src_url_equal(img.src, img_src_value = /*currentImg*/
+      ctx2[24])) {
+        attr(img, "src", img_src_value);
+      }
+      if (
+        /*editingMode*/
+        ctx2[9]
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx2, dirty);
+        } else {
+          if_block1 = create_if_block_11$f(ctx2);
+          if_block1.c();
+          if_block1.m(div0, t2);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+      if (dirty[0] & /*selectedLimbId, currentLimbs, editingMode, triggerReactivity*/
+      268436016 | dirty[1] & /*onNodeDragStart, deleteLimb, getSlotState, onTraumaDrop, removeTrauma*/
+      98512) {
+        each_value_3 = ensure_array_like(
+          /*currentLimbs*/
+          ctx2[5]
+        );
+        each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx2, each_value_3, each0_lookup, div0, destroy_block, create_each_block_3$m, null, get_each_context_3$m);
+      }
+      if (dirty[0] & /*localMana*/
+      2) set_data(
+        t6,
+        /*localMana*/
+        ctx2[1]
+      );
+      if (dirty[0] & /*maxWillpower*/
+      64) set_data(
+        t8,
+        /*maxWillpower*/
+        ctx2[6]
+      );
+      if (dirty[0] & /*localMana, maxWillpower*/
+      66) {
+        set_style(
+          div2,
+          "width",
+          /*localMana*/
+          ctx2[1] / /*maxWillpower*/
+          ctx2[6] * 100 + "%"
+        );
+      }
+      if (dirty[0] & /*localMana*/
+      2 && to_number(input.value) !== /*localMana*/
+      ctx2[1]) {
+        set_input_value(
+          input,
+          /*localMana*/
+          ctx2[1]
+        );
+      }
+      if (dirty[0] & /*selectedLimb*/
+      4194304 && t16_value !== (t16_value = /*selectedLimb*/
+      (ctx2[22] ? (
+        /*selectedLimb*/
+        ctx2[22].name
+      ) : "SELECIONE ALVO") + "")) set_data(t16, t16_value);
+      if (
+        /*selectedLimb*/
+        ctx2[22]
+      ) {
+        if (if_block2) {
+          if_block2.p(ctx2, dirty);
+        } else {
+          if_block2 = create_if_block_5$B(ctx2);
+          if_block2.c();
+          if_block2.m(div7, null);
+        }
+      } else if (if_block2) {
+        if_block2.d(1);
+        if_block2 = null;
+      }
+      if (dirty[0] & /*draggingTrauma, traumaDB*/
+      2097280 | dirty[1] & /*deleteGlobalTrauma*/
+      512) {
+        each_value_2 = ensure_array_like(Object.entries(
+          /*traumaDB*/
+          ctx2[7]
+        ));
+        let i;
+        for (i = 0; i < each_value_2.length; i += 1) {
+          const child_ctx = get_each_context_2$q(ctx2, each_value_2, i);
+          if (each_blocks[i]) {
+            each_blocks[i].p(child_ctx, dirty);
+          } else {
+            each_blocks[i] = create_each_block_2$q(child_ctx);
+            each_blocks[i].c();
+            each_blocks[i].m(div9, null);
+          }
+        }
+        for (; i < each_blocks.length; i += 1) {
+          each_blocks[i].d(1);
+        }
+        each_blocks.length = each_value_2.length;
+      }
+    },
+    i(local) {
+      for (let i = 0; i < each_value_3.length; i += 1) {
+        transition_in(each_blocks_1[i]);
+      }
+    },
+    o: noop,
+    d(detaching) {
+      if (detaching) {
+        detach(div0);
+        detach(t3);
+        detach(div11);
+      }
+      if (if_block0) if_block0.d();
+      if (if_block1) if_block1.d();
+      for (let i = 0; i < each_blocks_1.length; i += 1) {
+        each_blocks_1[i].d();
+      }
+      if (if_block2) if_block2.d();
+      destroy_each(each_blocks, detaching);
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_3$L(ctx) {
+  let div1;
+  let button;
+  let t1;
+  let div0;
+  let t2;
+  let current;
+  let mounted;
+  let dispose;
+  let each_value_1 = ensure_array_like(
+    /*galleryItems*/
+    ctx[8]
+  );
+  let each_blocks = [];
+  for (let i = 0; i < each_value_1.length; i += 1) {
+    each_blocks[i] = create_each_block_1$J(get_each_context_1$J(ctx, each_value_1, i));
+  }
+  const out = (i) => transition_out(each_blocks[i], 1, 1, () => {
+    each_blocks[i] = null;
+  });
+  let if_block = (
+    /*galleryItems*/
+    ctx[8].length === 0 && create_if_block_4$D()
+  );
+  return {
+    c() {
+      div1 = element("div");
+      button = element("button");
+      button.innerHTML = `<i class="fas fa-plus"></i> INSERIR NOVA ARTE À GALERIA (LINK WEB)`;
+      t1 = space();
+      div0 = element("div");
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].c();
+      }
+      t2 = space();
+      if (if_block) if_block.c();
+      attr(button, "class", "add-gallery-btn svelte-4zg1bt");
+      attr(div0, "class", "gallery-grid svelte-4zg1bt");
+      attr(div1, "class", "gallery-area custom-scroll svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div1, anchor);
+      append(div1, button);
+      append(div1, t1);
+      append(div1, div0);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        if (each_blocks[i]) {
+          each_blocks[i].m(div0, null);
+        }
+      }
+      append(div0, t2);
+      if (if_block) if_block.m(div0, null);
+      current = true;
+      if (!mounted) {
+        dispose = listen(
+          button,
+          "click",
+          /*click_handler_9*/
+          ctx[70]
+        );
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*galleryItems*/
+      256 | dirty[1] & /*removeGalleryItem, updateGalleryItem, openImageModal*/
+      13312) {
+        each_value_1 = ensure_array_like(
+          /*galleryItems*/
+          ctx2[8]
+        );
+        let i;
+        for (i = 0; i < each_value_1.length; i += 1) {
+          const child_ctx = get_each_context_1$J(ctx2, each_value_1, i);
+          if (each_blocks[i]) {
+            each_blocks[i].p(child_ctx, dirty);
+            transition_in(each_blocks[i], 1);
+          } else {
+            each_blocks[i] = create_each_block_1$J(child_ctx);
+            each_blocks[i].c();
+            transition_in(each_blocks[i], 1);
+            each_blocks[i].m(div0, t2);
+          }
+        }
+        group_outros();
+        for (i = each_value_1.length; i < each_blocks.length; i += 1) {
+          out(i);
+        }
+        check_outros();
+      }
+      if (
+        /*galleryItems*/
+        ctx2[8].length === 0
+      ) {
+        if (if_block) ;
+        else {
+          if_block = create_if_block_4$D();
+          if_block.c();
+          if_block.m(div0, null);
+        }
+      } else if (if_block) {
+        if_block.d(1);
+        if_block = null;
+      }
+    },
+    i(local) {
+      if (current) return;
+      for (let i = 0; i < each_value_1.length; i += 1) {
+        transition_in(each_blocks[i]);
+      }
+      current = true;
+    },
+    o(local) {
+      each_blocks = each_blocks.filter(Boolean);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        transition_out(each_blocks[i]);
+      }
+      current = false;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div1);
+      }
+      destroy_each(each_blocks, detaching);
+      if (if_block) if_block.d();
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_if_block_12$d(ctx) {
+  let img;
+  let img_src_value;
+  return {
+    c() {
+      img = element("img");
+      if (!src_url_equal(img.src, img_src_value = /*currentBg*/
+      ctx[23])) attr(img, "src", img_src_value);
+      attr(img, "class", "bg-layer svelte-4zg1bt");
+      attr(img, "alt", "bg");
+    },
+    m(target, anchor) {
+      insert(target, img, anchor);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentBg*/
+      8388608 && !src_url_equal(img.src, img_src_value = /*currentBg*/
+      ctx2[23])) {
+        attr(img, "src", img_src_value);
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(img);
+      }
+    }
+  };
+}
+function create_if_block_11$f(ctx) {
+  let div;
+  let button0;
+  let t1;
+  let button1;
+  let t3;
+  let button2;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      div = element("div");
+      button0 = element("button");
+      button0.innerHTML = `<i class="fas fa-user"></i> IMG CORPO`;
+      t1 = space();
+      button1 = element("button");
+      button1.innerHTML = `<i class="fas fa-image"></i> IMG FUNDO`;
+      t3 = space();
+      button2 = element("button");
+      button2.innerHTML = `<i class="fas fa-plus"></i> NOVO MEMBRO`;
+      attr(button0, "class", "svelte-4zg1bt");
+      attr(button1, "class", "svelte-4zg1bt");
+      attr(button2, "class", "add svelte-4zg1bt");
+      attr(div, "class", "edit-overlay-controls svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      append(div, button0);
+      append(div, t1);
+      append(div, button1);
+      append(div, t3);
+      append(div, button2);
+      if (!mounted) {
+        dispose = [
+          listen(
+            button0,
+            "click",
+            /*click_handler_12*/
+            ctx[77]
+          ),
+          listen(
+            button1,
+            "click",
+            /*click_handler_13*/
+            ctx[78]
+          ),
+          listen(
+            button2,
+            "click",
+            /*addLimb*/
+            ctx[45]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p: noop,
+    d(detaching) {
+      if (detaching) {
+        detach(div);
+      }
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_else_block_1$p(ctx) {
+  let span0;
+  let t0_value = (
+    /*limb*/
+    ctx[131].loc + ""
+  );
+  let t0;
+  let t1;
+  let span1;
+  let t2_value = (
+    /*limb*/
+    ctx[131].name + ""
+  );
+  let t2;
+  return {
+    c() {
+      span0 = element("span");
+      t0 = text(t0_value);
+      t1 = space();
+      span1 = element("span");
+      t2 = text(t2_value);
+      attr(span0, "class", "loc svelte-4zg1bt");
+      attr(span1, "class", "name svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, span0, anchor);
+      append(span0, t0);
+      insert(target, t1, anchor);
+      insert(target, span1, anchor);
+      append(span1, t2);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentLimbs*/
+      32 && t0_value !== (t0_value = /*limb*/
+      ctx2[131].loc + "")) set_data(t0, t0_value);
+      if (dirty[0] & /*currentLimbs*/
+      32 && t2_value !== (t2_value = /*limb*/
+      ctx2[131].name + "")) set_data(t2, t2_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span0);
+        detach(t1);
+        detach(span1);
+      }
+    }
+  };
+}
+function create_if_block_10$h(ctx) {
+  let input0;
+  let t;
+  let input1;
+  let mounted;
+  let dispose;
+  function input0_input_handler() {
+    ctx[79].call(
+      input0,
+      /*each_value_3*/
+      ctx[132],
+      /*limb_index*/
+      ctx[133]
+    );
+  }
+  function input1_input_handler() {
+    ctx[80].call(
+      input1,
+      /*each_value_3*/
+      ctx[132],
+      /*limb_index*/
+      ctx[133]
+    );
+  }
+  return {
+    c() {
+      input0 = element("input");
+      t = space();
+      input1 = element("input");
+      attr(input0, "class", "mini-edit svelte-4zg1bt");
+      attr(input0, "placeholder", "Loc");
+      attr(input1, "class", "mini-edit svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, input0, anchor);
+      set_input_value(
+        input0,
+        /*limb*/
+        ctx[131].loc
+      );
+      insert(target, t, anchor);
+      insert(target, input1, anchor);
+      set_input_value(
+        input1,
+        /*limb*/
+        ctx[131].name
+      );
+      if (!mounted) {
+        dispose = [
+          listen(input0, "input", input0_input_handler),
+          listen(
+            input0,
+            "change",
+            /*triggerReactivity*/
+            ctx[28]
+          ),
+          listen(input1, "input", input1_input_handler),
+          listen(
+            input1,
+            "change",
+            /*triggerReactivity*/
+            ctx[28]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (dirty[0] & /*currentLimbs*/
+      32 && input0.value !== /*limb*/
+      ctx[131].loc) {
+        set_input_value(
+          input0,
+          /*limb*/
+          ctx[131].loc
+        );
+      }
+      if (dirty[0] & /*currentLimbs*/
+      32 && input1.value !== /*limb*/
+      ctx[131].name) {
+        set_input_value(
+          input1,
+          /*limb*/
+          ctx[131].name
+        );
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(input0);
+        detach(t);
+        detach(input1);
+      }
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_9$m(ctx) {
+  let i;
+  return {
+    c() {
+      i = element("i");
+      attr(i, "class", "fas fa-biohazard");
+      set_style(
+        i,
+        "color",
+        /*slot*/
+        ctx[135].data.color
+      );
+    },
+    m(target, anchor) {
+      insert(target, i, anchor);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentLimbs*/
+      32) {
+        set_style(
+          i,
+          "color",
+          /*slot*/
+          ctx2[135].data.color
+        );
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(i);
+      }
+    }
+  };
+}
+function create_each_block_4$k(ctx) {
+  let div;
+  let t;
+  let div_class_value;
+  let div_title_value;
+  let mounted;
+  let dispose;
+  let if_block = (
+    /*slot*/
+    ctx[135].status === "trauma" && create_if_block_9$m(ctx)
+  );
+  function drop_handler(...args) {
+    return (
+      /*drop_handler*/
+      ctx[81](
+        /*limb*/
+        ctx[131],
+        /*i*/
+        ctx[137],
+        ...args
+      )
+    );
+  }
+  function contextmenu_handler() {
+    return (
+      /*contextmenu_handler*/
+      ctx[82](
+        /*limb*/
+        ctx[131],
+        /*slot*/
+        ctx[135]
+      )
+    );
+  }
+  return {
+    c() {
+      div = element("div");
+      if (if_block) if_block.c();
+      t = space();
+      attr(div, "class", div_class_value = "hp-slot " + /*slot*/
+      ctx[135].status + " svelte-4zg1bt");
+      attr(div, "title", div_title_value = /*slot*/
+      ctx[135].status === "trauma" ? (
+        /*slot*/
+        ctx[135].data.label
+      ) : "");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      if (if_block) if_block.m(div, null);
+      append(div, t);
+      if (!mounted) {
+        dispose = [
+          listen(div, "dragover", prevent_default(
+            /*dragover_handler_1*/
+            ctx[63]
+          )),
+          listen(div, "drop", stop_propagation(drop_handler)),
+          listen(div, "contextmenu", stop_propagation(prevent_default(contextmenu_handler)))
+        ];
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (
+        /*slot*/
+        ctx[135].status === "trauma"
+      ) {
+        if (if_block) {
+          if_block.p(ctx, dirty);
+        } else {
+          if_block = create_if_block_9$m(ctx);
+          if_block.c();
+          if_block.m(div, t);
+        }
+      } else if (if_block) {
+        if_block.d(1);
+        if_block = null;
+      }
+      if (dirty[0] & /*currentLimbs*/
+      32 && div_class_value !== (div_class_value = "hp-slot " + /*slot*/
+      ctx[135].status + " svelte-4zg1bt")) {
+        attr(div, "class", div_class_value);
+      }
+      if (dirty[0] & /*currentLimbs*/
+      32 && div_title_value !== (div_title_value = /*slot*/
+      ctx[135].status === "trauma" ? (
+        /*slot*/
+        ctx[135].data.label
+      ) : "")) {
+        attr(div, "title", div_title_value);
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div);
+      }
+      if (if_block) if_block.d();
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_8$p(ctx) {
+  let span;
+  let t_value = (
+    /*limb*/
+    ctx[131].lar + ""
+  );
+  let t;
+  return {
+    c() {
+      span = element("span");
+      t = text(t_value);
+      attr(span, "class", "a-flag l svelte-4zg1bt");
+      attr(span, "title", "Leve");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentLimbs*/
+      32 && t_value !== (t_value = /*limb*/
+      ctx2[131].lar + "")) set_data(t, t_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_7$u(ctx) {
+  let span;
+  let t_value = (
+    /*limb*/
+    ctx[131].har + ""
+  );
+  let t;
+  return {
+    c() {
+      span = element("span");
+      t = text(t_value);
+      attr(span, "class", "a-flag h svelte-4zg1bt");
+      attr(span, "title", "Pesada (Visual)");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentLimbs*/
+      32 && t_value !== (t_value = /*limb*/
+      ctx2[131].har + "")) set_data(t, t_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_6$y(ctx) {
+  let button;
+  let mounted;
+  let dispose;
+  function click_handler_14() {
+    return (
+      /*click_handler_14*/
+      ctx[83](
+        /*limb*/
+        ctx[131]
+      )
+    );
+  }
+  return {
+    c() {
+      button = element("button");
+      button.textContent = "X";
+      attr(button, "class", "node-del svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, button, anchor);
+      if (!mounted) {
+        dispose = listen(button, "click", stop_propagation(click_handler_14));
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(button);
+      }
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_each_block_3$m(key_2, ctx) {
+  let div3;
+  let div0;
+  let t0;
+  let div1;
+  let t1;
+  let div2;
+  let t2;
+  let t3;
+  let t4;
+  let div3_class_value;
+  let div3_intro;
+  let mounted;
+  let dispose;
+  function select_block_type_1(ctx2, dirty) {
+    if (
+      /*editingMode*/
+      ctx2[9]
+    ) return create_if_block_10$h;
+    return create_else_block_1$p;
+  }
+  let current_block_type = select_block_type_1(ctx);
+  let if_block0 = current_block_type(ctx);
+  let each_value_4 = ensure_array_like(Array(
+    /*limb*/
+    ctx[131].hp
+  ));
+  let each_blocks = [];
+  for (let i = 0; i < each_value_4.length; i += 1) {
+    each_blocks[i] = create_each_block_4$k(get_each_context_4$k(ctx, each_value_4, i));
+  }
+  let if_block1 = (
+    /*limb*/
+    ctx[131].lar > 0 && create_if_block_8$p(ctx)
+  );
+  let if_block2 = (
+    /*limb*/
+    ctx[131].har > 0 && create_if_block_7$u(ctx)
+  );
+  let if_block3 = (
+    /*editingMode*/
+    ctx[9] && create_if_block_6$y(ctx)
+  );
+  function dragstart_handler(...args) {
+    return (
+      /*dragstart_handler*/
+      ctx[84](
+        /*limb*/
+        ctx[131],
+        ...args
+      )
+    );
+  }
+  function click_handler_15() {
+    return (
+      /*click_handler_15*/
+      ctx[85](
+        /*limb*/
+        ctx[131]
+      )
+    );
+  }
+  return {
+    key: key_2,
+    first: null,
+    c() {
+      div3 = element("div");
+      div0 = element("div");
+      if_block0.c();
+      t0 = space();
+      div1 = element("div");
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].c();
+      }
+      t1 = space();
+      div2 = element("div");
+      if (if_block1) if_block1.c();
+      t2 = space();
+      if (if_block2) if_block2.c();
+      t3 = space();
+      if (if_block3) if_block3.c();
+      t4 = space();
+      attr(div0, "class", "node-header svelte-4zg1bt");
+      attr(div1, "class", "hp-grid svelte-4zg1bt");
+      attr(div2, "class", "armor-flags svelte-4zg1bt");
+      attr(div3, "class", div3_class_value = "limb-node " + /*selectedLimbId*/
+      (ctx[4] === /*limb*/
+      ctx[131].id ? "selected" : "") + " svelte-4zg1bt");
+      set_style(
+        div3,
+        "left",
+        /*limb*/
+        ctx[131].x + "%"
+      );
+      set_style(
+        div3,
+        "top",
+        /*limb*/
+        ctx[131].y + "%"
+      );
+      attr(
+        div3,
+        "draggable",
+        /*editingMode*/
+        ctx[9]
+      );
+      this.first = div3;
+    },
+    m(target, anchor) {
+      insert(target, div3, anchor);
+      append(div3, div0);
+      if_block0.m(div0, null);
+      append(div3, t0);
+      append(div3, div1);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        if (each_blocks[i]) {
+          each_blocks[i].m(div1, null);
+        }
+      }
+      append(div3, t1);
+      append(div3, div2);
+      if (if_block1) if_block1.m(div2, null);
+      append(div2, t2);
+      if (if_block2) if_block2.m(div2, null);
+      append(div3, t3);
+      if (if_block3) if_block3.m(div3, null);
+      append(div3, t4);
+      if (!mounted) {
+        dispose = [
+          listen(div3, "dragstart", dragstart_handler),
+          listen(div3, "click", click_handler_15)
+        ];
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (current_block_type === (current_block_type = select_block_type_1(ctx)) && if_block0) {
+        if_block0.p(ctx, dirty);
+      } else {
+        if_block0.d(1);
+        if_block0 = current_block_type(ctx);
+        if (if_block0) {
+          if_block0.c();
+          if_block0.m(div0, null);
+        }
+      }
+      if (dirty[0] & /*currentLimbs*/
+      32 | dirty[1] & /*getSlotState, onTraumaDrop, removeTrauma*/
+      65728) {
+        each_value_4 = ensure_array_like(Array(
+          /*limb*/
+          ctx[131].hp
+        ));
+        let i;
+        for (i = 0; i < each_value_4.length; i += 1) {
+          const child_ctx = get_each_context_4$k(ctx, each_value_4, i);
+          if (each_blocks[i]) {
+            each_blocks[i].p(child_ctx, dirty);
+          } else {
+            each_blocks[i] = create_each_block_4$k(child_ctx);
+            each_blocks[i].c();
+            each_blocks[i].m(div1, null);
+          }
+        }
+        for (; i < each_blocks.length; i += 1) {
+          each_blocks[i].d(1);
+        }
+        each_blocks.length = each_value_4.length;
+      }
+      if (
+        /*limb*/
+        ctx[131].lar > 0
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx, dirty);
+        } else {
+          if_block1 = create_if_block_8$p(ctx);
+          if_block1.c();
+          if_block1.m(div2, t2);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+      if (
+        /*limb*/
+        ctx[131].har > 0
+      ) {
+        if (if_block2) {
+          if_block2.p(ctx, dirty);
+        } else {
+          if_block2 = create_if_block_7$u(ctx);
+          if_block2.c();
+          if_block2.m(div2, null);
+        }
+      } else if (if_block2) {
+        if_block2.d(1);
+        if_block2 = null;
+      }
+      if (
+        /*editingMode*/
+        ctx[9]
+      ) {
+        if (if_block3) {
+          if_block3.p(ctx, dirty);
+        } else {
+          if_block3 = create_if_block_6$y(ctx);
+          if_block3.c();
+          if_block3.m(div3, t4);
+        }
+      } else if (if_block3) {
+        if_block3.d(1);
+        if_block3 = null;
+      }
+      if (dirty[0] & /*selectedLimbId, currentLimbs*/
+      48 && div3_class_value !== (div3_class_value = "limb-node " + /*selectedLimbId*/
+      (ctx[4] === /*limb*/
+      ctx[131].id ? "selected" : "") + " svelte-4zg1bt")) {
+        attr(div3, "class", div3_class_value);
+      }
+      if (dirty[0] & /*currentLimbs*/
+      32) {
+        set_style(
+          div3,
+          "left",
+          /*limb*/
+          ctx[131].x + "%"
+        );
+      }
+      if (dirty[0] & /*currentLimbs*/
+      32) {
+        set_style(
+          div3,
+          "top",
+          /*limb*/
+          ctx[131].y + "%"
+        );
+      }
+      if (dirty[0] & /*editingMode*/
+      512) {
+        attr(
+          div3,
+          "draggable",
+          /*editingMode*/
+          ctx[9]
+        );
+      }
+    },
+    i(local) {
+      if (local) {
+        if (!div3_intro) {
+          add_render_callback(() => {
+            div3_intro = create_in_transition(div3, fade, {});
+            div3_intro.start();
+          });
+        }
+      }
+    },
+    o: noop,
+    d(detaching) {
+      if (detaching) {
+        detach(div3);
+      }
+      if_block0.d();
+      destroy_each(each_blocks, detaching);
+      if (if_block1) if_block1.d();
+      if (if_block2) if_block2.d();
+      if (if_block3) if_block3.d();
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_5$B(ctx) {
+  let div0;
+  let label0;
+  let t0;
+  let input0;
+  let t1;
+  let label1;
+  let t2;
+  let input1;
+  let t3;
+  let label2;
+  let t4;
+  let input2;
+  let t5;
+  let label3;
+  let t6;
+  let input3;
+  let t7;
+  let div5;
+  let div1;
+  let label4;
+  let input4;
+  let t9;
+  let div2;
+  let label5;
+  let input5;
+  let t11;
+  let div3;
+  let label6;
+  let input6;
+  let t13;
+  let div4;
+  let label7;
+  let input7;
+  let t15;
+  let button0;
+  let t17;
+  let div6;
+  let input8;
+  let t18;
+  let button1;
+  let t20;
+  let div7;
+  let input9;
+  let t21;
+  let button2;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      div0 = element("div");
+      label0 = element("label");
+      t0 = text("Arm. Leve");
+      input0 = element("input");
+      t1 = space();
+      label1 = element("label");
+      t2 = text("Arm. Pesada");
+      input1 = element("input");
+      t3 = space();
+      label2 = element("label");
+      t4 = text("HP Total");
+      input2 = element("input");
+      t5 = space();
+      label3 = element("label");
+      t6 = text("Não-Físico");
+      input3 = element("input");
+      t7 = space();
+      div5 = element("div");
+      div1 = element("div");
+      label4 = element("label");
+      label4.textContent = "Não Letal";
+      input4 = element("input");
+      t9 = space();
+      div2 = element("div");
+      label5 = element("label");
+      label5.textContent = "Letal";
+      input5 = element("input");
+      t11 = space();
+      div3 = element("div");
+      label6 = element("label");
+      label6.textContent = "Perf.";
+      input6 = element("input");
+      t13 = space();
+      div4 = element("div");
+      label7 = element("label");
+      label7.textContent = "Não-Físico?";
+      input7 = element("input");
+      t15 = space();
+      button0 = element("button");
+      button0.textContent = "DANO";
+      t17 = space();
+      div6 = element("div");
+      input8 = element("input");
+      t18 = space();
+      button1 = element("button");
+      button1.textContent = "+";
+      t20 = space();
+      div7 = element("div");
+      input9 = element("input");
+      t21 = space();
+      button2 = element("button");
+      button2.innerHTML = `<i class="fas fa-dna"></i> REGEN CORPO TODO`;
+      attr(input0, "type", "number");
+      attr(input0, "class", "svelte-4zg1bt");
+      attr(label0, "class", "svelte-4zg1bt");
+      attr(input1, "type", "number");
+      attr(input1, "class", "svelte-4zg1bt");
+      attr(label1, "class", "svelte-4zg1bt");
+      attr(input2, "type", "number");
+      attr(input2, "class", "svelte-4zg1bt");
+      attr(label2, "class", "svelte-4zg1bt");
+      attr(input3, "type", "checkbox");
+      set_style(input3, "cursor", "pointer");
+      set_style(label3, "flex", "0.8");
+      set_style(label3, "color", "#a855f7");
+      attr(label3, "class", "svelte-4zg1bt");
+      attr(div0, "class", "armor-edit svelte-4zg1bt");
+      set_style(label4, "color", "var(--c-shock)");
+      attr(label4, "class", "svelte-4zg1bt");
+      attr(input4, "type", "number");
+      attr(input4, "class", "svelte-4zg1bt");
+      attr(div1, "class", "grp svelte-4zg1bt");
+      set_style(label5, "color", "var(--c-kill)");
+      attr(label5, "class", "svelte-4zg1bt");
+      attr(input5, "type", "number");
+      attr(input5, "class", "svelte-4zg1bt");
+      attr(div2, "class", "grp svelte-4zg1bt");
+      set_style(label6, "color", "#00fbff");
+      attr(label6, "class", "svelte-4zg1bt");
+      attr(input6, "type", "number");
+      attr(input6, "class", "svelte-4zg1bt");
+      attr(div3, "class", "grp svelte-4zg1bt");
+      set_style(label7, "color", "#a855f7");
+      attr(label7, "class", "svelte-4zg1bt");
+      attr(input7, "type", "checkbox");
+      set_style(input7, "margin-top", "5px");
+      set_style(input7, "cursor", "pointer");
+      attr(div4, "class", "grp svelte-4zg1bt");
+      set_style(div4, "flex", "0.5");
+      attr(div5, "class", "dmg-inputs svelte-4zg1bt");
+      attr(button0, "class", "btn-hit svelte-4zg1bt");
+      attr(input8, "type", "number");
+      attr(input8, "placeholder", "Cura");
+      attr(input8, "class", "svelte-4zg1bt");
+      attr(button1, "class", "svelte-4zg1bt");
+      attr(div6, "class", "heal-row svelte-4zg1bt");
+      attr(input9, "type", "number");
+      attr(input9, "placeholder", "Regen");
+      set_style(input9, "border-color", "#3b82f6");
+      attr(input9, "class", "svelte-4zg1bt");
+      set_style(button2, "background", "#3b82f6");
+      set_style(button2, "color", "#fff");
+      attr(button2, "class", "svelte-4zg1bt");
+      attr(div7, "class", "heal-row svelte-4zg1bt");
+      set_style(div7, "margin-top", "5px");
+    },
+    m(target, anchor) {
+      insert(target, div0, anchor);
+      append(div0, label0);
+      append(label0, t0);
+      append(label0, input0);
+      set_input_value(
+        input0,
+        /*selectedLimb*/
+        ctx[22].lar
+      );
+      append(div0, t1);
+      append(div0, label1);
+      append(label1, t2);
+      append(label1, input1);
+      set_input_value(
+        input1,
+        /*selectedLimb*/
+        ctx[22].har
+      );
+      append(div0, t3);
+      append(div0, label2);
+      append(label2, t4);
+      append(label2, input2);
+      set_input_value(
+        input2,
+        /*selectedLimb*/
+        ctx[22].hp
+      );
+      append(div0, t5);
+      append(div0, label3);
+      append(label3, t6);
+      append(label3, input3);
+      input3.checked = /*selectedLimb*/
+      ctx[22].nonPhysicalDef;
+      insert(target, t7, anchor);
+      insert(target, div5, anchor);
+      append(div5, div1);
+      append(div1, label4);
+      append(div1, input4);
+      set_input_value(
+        input4,
+        /*inputShock*/
+        ctx[14]
+      );
+      append(div5, t9);
+      append(div5, div2);
+      append(div2, label5);
+      append(div2, input5);
+      set_input_value(
+        input5,
+        /*inputKilling*/
+        ctx[15]
+      );
+      append(div5, t11);
+      append(div5, div3);
+      append(div3, label6);
+      append(div3, input6);
+      set_input_value(
+        input6,
+        /*inputPenetration*/
+        ctx[17]
+      );
+      append(div5, t13);
+      append(div5, div4);
+      append(div4, label7);
+      append(div4, input7);
+      input7.checked = /*inputNonPhysical*/
+      ctx[18];
+      insert(target, t15, anchor);
+      insert(target, button0, anchor);
+      insert(target, t17, anchor);
+      insert(target, div6, anchor);
+      append(div6, input8);
+      set_input_value(
+        input8,
+        /*inputHeal*/
+        ctx[16]
+      );
+      append(div6, t18);
+      append(div6, button1);
+      insert(target, t20, anchor);
+      insert(target, div7, anchor);
+      append(div7, input9);
+      set_input_value(
+        input9,
+        /*inputRegen*/
+        ctx[19]
+      );
+      append(div7, t21);
+      append(div7, button2);
+      if (!mounted) {
+        dispose = [
+          listen(
+            input0,
+            "input",
+            /*input0_input_handler_1*/
+            ctx[89]
+          ),
+          listen(
+            input0,
+            "change",
+            /*triggerReactivity*/
+            ctx[28]
+          ),
+          listen(
+            input1,
+            "input",
+            /*input1_input_handler_1*/
+            ctx[90]
+          ),
+          listen(
+            input1,
+            "change",
+            /*triggerReactivity*/
+            ctx[28]
+          ),
+          listen(
+            input2,
+            "input",
+            /*input2_input_handler*/
+            ctx[91]
+          ),
+          listen(
+            input2,
+            "change",
+            /*triggerReactivity*/
+            ctx[28]
+          ),
+          listen(
+            input3,
+            "change",
+            /*input3_change_handler*/
+            ctx[92]
+          ),
+          listen(
+            input3,
+            "change",
+            /*triggerReactivity*/
+            ctx[28]
+          ),
+          listen(
+            input4,
+            "input",
+            /*input4_input_handler*/
+            ctx[93]
+          ),
+          listen(
+            input5,
+            "input",
+            /*input5_input_handler*/
+            ctx[94]
+          ),
+          listen(
+            input6,
+            "input",
+            /*input6_input_handler*/
+            ctx[95]
+          ),
+          listen(
+            input7,
+            "change",
+            /*input7_change_handler*/
+            ctx[96]
+          ),
+          listen(
+            button0,
+            "click",
+            /*applyDamage*/
+            ctx[32]
+          ),
+          listen(
+            input8,
+            "input",
+            /*input8_input_handler*/
+            ctx[97]
+          ),
+          listen(
+            button1,
+            "click",
+            /*applyHeal*/
+            ctx[33]
+          ),
+          listen(
+            input9,
+            "input",
+            /*input9_input_handler*/
+            ctx[98]
+          ),
+          listen(
+            button2,
+            "click",
+            /*applyRegen*/
+            ctx[34]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*selectedLimb*/
+      4194304 && to_number(input0.value) !== /*selectedLimb*/
+      ctx2[22].lar) {
+        set_input_value(
+          input0,
+          /*selectedLimb*/
+          ctx2[22].lar
+        );
+      }
+      if (dirty[0] & /*selectedLimb*/
+      4194304 && to_number(input1.value) !== /*selectedLimb*/
+      ctx2[22].har) {
+        set_input_value(
+          input1,
+          /*selectedLimb*/
+          ctx2[22].har
+        );
+      }
+      if (dirty[0] & /*selectedLimb*/
+      4194304 && to_number(input2.value) !== /*selectedLimb*/
+      ctx2[22].hp) {
+        set_input_value(
+          input2,
+          /*selectedLimb*/
+          ctx2[22].hp
+        );
+      }
+      if (dirty[0] & /*selectedLimb*/
+      4194304) {
+        input3.checked = /*selectedLimb*/
+        ctx2[22].nonPhysicalDef;
+      }
+      if (dirty[0] & /*inputShock*/
+      16384 && to_number(input4.value) !== /*inputShock*/
+      ctx2[14]) {
+        set_input_value(
+          input4,
+          /*inputShock*/
+          ctx2[14]
+        );
+      }
+      if (dirty[0] & /*inputKilling*/
+      32768 && to_number(input5.value) !== /*inputKilling*/
+      ctx2[15]) {
+        set_input_value(
+          input5,
+          /*inputKilling*/
+          ctx2[15]
+        );
+      }
+      if (dirty[0] & /*inputPenetration*/
+      131072 && to_number(input6.value) !== /*inputPenetration*/
+      ctx2[17]) {
+        set_input_value(
+          input6,
+          /*inputPenetration*/
+          ctx2[17]
+        );
+      }
+      if (dirty[0] & /*inputNonPhysical*/
+      262144) {
+        input7.checked = /*inputNonPhysical*/
+        ctx2[18];
+      }
+      if (dirty[0] & /*inputHeal*/
+      65536 && to_number(input8.value) !== /*inputHeal*/
+      ctx2[16]) {
+        set_input_value(
+          input8,
+          /*inputHeal*/
+          ctx2[16]
+        );
+      }
+      if (dirty[0] & /*inputRegen*/
+      524288 && to_number(input9.value) !== /*inputRegen*/
+      ctx2[19]) {
+        set_input_value(
+          input9,
+          /*inputRegen*/
+          ctx2[19]
+        );
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div0);
+        detach(t7);
+        detach(div5);
+        detach(t15);
+        detach(button0);
+        detach(t17);
+        detach(div6);
+        detach(t20);
+        detach(div7);
+      }
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_each_block_2$q(ctx) {
+  let div;
+  let i;
+  let t0;
+  let span;
+  let t1_value = (
+    /*data*/
+    ctx[128].label + ""
+  );
+  let t1;
+  let t2;
+  let button;
+  let t4;
+  let mounted;
+  let dispose;
+  function click_handler_19() {
+    return (
+      /*click_handler_19*/
+      ctx[100](
+        /*key*/
+        ctx[121]
+      )
+    );
+  }
+  function dragstart_handler_1(...args) {
+    return (
+      /*dragstart_handler_1*/
+      ctx[101](
+        /*key*/
+        ctx[121],
+        ...args
+      )
+    );
+  }
+  return {
+    c() {
+      div = element("div");
+      i = element("i");
+      t0 = space();
+      span = element("span");
+      t1 = text(t1_value);
+      t2 = space();
+      button = element("button");
+      button.textContent = "×";
+      t4 = space();
+      attr(i, "class", "fas fa-virus");
+      set_style(
+        i,
+        "color",
+        /*data*/
+        ctx[128].color
+      );
+      attr(span, "class", "t-name svelte-4zg1bt");
+      attr(button, "class", "t-del svelte-4zg1bt");
+      attr(div, "class", "t-item svelte-4zg1bt");
+      attr(div, "draggable", "true");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      append(div, i);
+      append(div, t0);
+      append(div, span);
+      append(span, t1);
+      append(div, t2);
+      append(div, button);
+      append(div, t4);
+      if (!mounted) {
+        dispose = [
+          listen(button, "click", click_handler_19),
+          listen(div, "dragstart", dragstart_handler_1)
+        ];
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (dirty[0] & /*traumaDB*/
+      128) {
+        set_style(
+          i,
+          "color",
+          /*data*/
+          ctx[128].color
+        );
+      }
+      if (dirty[0] & /*traumaDB*/
+      128 && t1_value !== (t1_value = /*data*/
+      ctx[128].label + "")) set_data(t1, t1_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div);
+      }
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_each_block_1$J(ctx) {
+  let div3;
+  let div1;
+  let img;
+  let img_src_value;
+  let t0;
+  let div0;
+  let t2;
+  let div2;
+  let input;
+  let t3;
+  let textarea;
+  let t4;
+  let button;
+  let div3_transition;
+  let current;
+  let mounted;
+  let dispose;
+  function click_handler_10() {
+    return (
+      /*click_handler_10*/
+      ctx[71](
+        /*idx*/
+        ctx[127],
+        /*item*/
+        ctx[125]
+      )
+    );
+  }
+  function input_input_handler() {
+    ctx[72].call(
+      input,
+      /*each_value_1*/
+      ctx[126],
+      /*idx*/
+      ctx[127]
+    );
+  }
+  function change_handler() {
+    return (
+      /*change_handler*/
+      ctx[73](
+        /*idx*/
+        ctx[127],
+        /*item*/
+        ctx[125]
+      )
+    );
+  }
+  function textarea_input_handler() {
+    ctx[74].call(
+      textarea,
+      /*each_value_1*/
+      ctx[126],
+      /*idx*/
+      ctx[127]
+    );
+  }
+  function change_handler_1() {
+    return (
+      /*change_handler_1*/
+      ctx[75](
+        /*idx*/
+        ctx[127],
+        /*item*/
+        ctx[125]
+      )
+    );
+  }
+  function click_handler_11() {
+    return (
+      /*click_handler_11*/
+      ctx[76](
+        /*item*/
+        ctx[125]
+      )
+    );
+  }
+  return {
+    c() {
+      div3 = element("div");
+      div1 = element("div");
+      img = element("img");
+      t0 = space();
+      div0 = element("div");
+      div0.innerHTML = `<i class="fas fa-link"></i> TROCAR IMAGEM`;
+      t2 = space();
+      div2 = element("div");
+      input = element("input");
+      t3 = space();
+      textarea = element("textarea");
+      t4 = space();
+      button = element("button");
+      button.innerHTML = `<i class="fas fa-trash"></i> EXCLUIR`;
+      if (!src_url_equal(img.src, img_src_value = /*item*/
+      ctx[125].url)) attr(img, "src", img_src_value);
+      attr(img, "alt", "Arte");
+      attr(img, "class", "svelte-4zg1bt");
+      attr(div0, "class", "overlay-hint svelte-4zg1bt");
+      attr(div1, "class", "art-frame svelte-4zg1bt");
+      attr(input, "type", "text");
+      attr(input, "class", "art-title svelte-4zg1bt");
+      attr(input, "placeholder", "Título/Tema");
+      attr(textarea, "class", "art-desc custom-scroll svelte-4zg1bt");
+      attr(textarea, "placeholder", "Anotações sobre este visual...");
+      attr(button, "class", "art-del svelte-4zg1bt");
+      attr(div2, "class", "art-info svelte-4zg1bt");
+      attr(div3, "class", "gallery-card svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div3, anchor);
+      append(div3, div1);
+      append(div1, img);
+      append(div1, t0);
+      append(div1, div0);
+      append(div3, t2);
+      append(div3, div2);
+      append(div2, input);
+      set_input_value(
+        input,
+        /*item*/
+        ctx[125].title
+      );
+      append(div2, t3);
+      append(div2, textarea);
+      set_input_value(
+        textarea,
+        /*item*/
+        ctx[125].desc
+      );
+      append(div2, t4);
+      append(div2, button);
+      current = true;
+      if (!mounted) {
+        dispose = [
+          listen(div1, "click", click_handler_10),
+          listen(input, "input", input_input_handler),
+          listen(input, "change", change_handler),
+          listen(textarea, "input", textarea_input_handler),
+          listen(textarea, "change", change_handler_1),
+          listen(button, "click", click_handler_11)
+        ];
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (!current || dirty[0] & /*galleryItems*/
+      256 && !src_url_equal(img.src, img_src_value = /*item*/
+      ctx[125].url)) {
+        attr(img, "src", img_src_value);
+      }
+      if (dirty[0] & /*galleryItems*/
+      256 && input.value !== /*item*/
+      ctx[125].title) {
+        set_input_value(
+          input,
+          /*item*/
+          ctx[125].title
+        );
+      }
+      if (dirty[0] & /*galleryItems*/
+      256) {
+        set_input_value(
+          textarea,
+          /*item*/
+          ctx[125].desc
+        );
+      }
+    },
+    i(local) {
+      if (current) return;
+      if (local) {
+        add_render_callback(() => {
+          if (!current) return;
+          if (!div3_transition) div3_transition = create_bidirectional_transition(div3, scale, {}, true);
+          div3_transition.run(1);
+        });
+      }
+      current = true;
+    },
+    o(local) {
+      if (local) {
+        if (!div3_transition) div3_transition = create_bidirectional_transition(div3, scale, {}, false);
+        div3_transition.run(0);
+      }
+      current = false;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div3);
+      }
+      if (detaching && div3_transition) div3_transition.end();
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_4$D(ctx) {
+  let div;
+  return {
+    c() {
+      div = element("div");
+      div.innerHTML = `<i class="fas fa-images"></i> <p>Sua galeria está vazia.</p>`;
+      attr(div, "class", "empty-gallery svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div);
+      }
+    }
+  };
+}
+function create_if_block_2$R(ctx) {
+  let div3;
+  let div2;
+  let div0;
+  let span;
+  let t1;
+  let button0;
+  let t2;
+  let div1;
+  let p;
+  let t4;
+  let input;
+  let t5;
+  let button1;
+  let div2_transition;
+  let div3_transition;
+  let current;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      div3 = element("div");
+      div2 = element("div");
+      div0 = element("div");
+      span = element("span");
+      span.innerHTML = `<i class="fas fa-link"></i> INSERIR LINK DA ARTE`;
+      t1 = space();
+      button0 = element("button");
+      button0.innerHTML = `<i class="fas fa-times"></i>`;
+      t2 = space();
+      div1 = element("div");
+      p = element("p");
+      p.textContent = "Cole um link direto (URL) da internet.";
+      t4 = space();
+      input = element("input");
+      t5 = space();
+      button1 = element("button");
+      button1.textContent = "SALVAR E APLICAR";
+      attr(button0, "class", "close-btn-clean");
+      set_style(button0, "background", "none");
+      set_style(button0, "border", "none");
+      set_style(button0, "cursor", "pointer");
+      attr(div0, "class", "modal-header");
+      set_style(div0, "background", "var(--c-primary)");
+      set_style(div0, "color", "#000");
+      set_style(div0, "padding", "10px");
+      set_style(div0, "font-weight", "bold");
+      set_style(div0, "display", "flex");
+      set_style(div0, "justify-content", "space-between");
+      set_style(p, "font-size", "12px");
+      set_style(p, "color", "#aaa");
+      set_style(p, "margin", "0");
+      set_style(p, "line-height", "1.4");
+      attr(input, "type", "text");
+      attr(input, "placeholder", "https://...");
+      input.autofocus = true;
+      set_style(input, "width", "100%");
+      set_style(input, "background", "#000");
+      set_style(input, "border", "1px solid var(--c-primary)");
+      set_style(input, "color", "#fff");
+      set_style(input, "padding", "10px");
+      set_style(button1, "width", "100%");
+      set_style(button1, "background", "var(--c-primary)");
+      set_style(button1, "color", "#000");
+      set_style(button1, "padding", "10px");
+      set_style(button1, "border", "none");
+      set_style(button1, "font-weight", "bold");
+      set_style(button1, "cursor", "pointer");
+      attr(div1, "class", "modal-body");
+      set_style(div1, "padding", "20px");
+      set_style(div1, "display", "flex");
+      set_style(div1, "flex-direction", "column");
+      set_style(div1, "gap", "10px");
+      attr(div2, "class", "modal-win svelte-4zg1bt");
+      set_style(div2, "width", "450px");
+      attr(div2, "role", "dialog");
+      attr(div3, "class", "modal-overlay svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div3, anchor);
+      append(div3, div2);
+      append(div2, div0);
+      append(div0, span);
+      append(div0, t1);
+      append(div0, button0);
+      append(div2, t2);
+      append(div2, div1);
+      append(div1, p);
+      append(div1, t4);
+      append(div1, input);
+      set_input_value(
+        input,
+        /*imgModalUrl*/
+        ctx[13]
+      );
+      append(div1, t5);
+      append(div1, button1);
+      current = true;
+      input.focus();
+      if (!mounted) {
+        dispose = [
+          listen(
+            button0,
+            "click",
+            /*click_handler_20*/
+            ctx[102]
+          ),
+          listen(
+            input,
+            "input",
+            /*input_input_handler_2*/
+            ctx[103]
+          ),
+          listen(
+            button1,
+            "click",
+            /*applyImageUpdate*/
+            ctx[42]
+          ),
+          listen(div2, "click", stop_propagation(
+            /*click_handler*/
+            ctx[61]
+          )),
+          listen(
+            div3,
+            "click",
+            /*click_handler_21*/
+            ctx[104]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*imgModalUrl*/
+      8192 && input.value !== /*imgModalUrl*/
+      ctx2[13]) {
+        set_input_value(
+          input,
+          /*imgModalUrl*/
+          ctx2[13]
+        );
+      }
+    },
+    i(local) {
+      if (current) return;
+      if (local) {
+        add_render_callback(() => {
+          if (!current) return;
+          if (!div2_transition) div2_transition = create_bidirectional_transition(div2, scale, {}, true);
+          div2_transition.run(1);
+        });
+      }
+      if (local) {
+        add_render_callback(() => {
+          if (!current) return;
+          if (!div3_transition) div3_transition = create_bidirectional_transition(div3, fade, {}, true);
+          div3_transition.run(1);
+        });
+      }
+      current = true;
+    },
+    o(local) {
+      if (local) {
+        if (!div2_transition) div2_transition = create_bidirectional_transition(div2, scale, {}, false);
+        div2_transition.run(0);
+      }
+      if (local) {
+        if (!div3_transition) div3_transition = create_bidirectional_transition(div3, fade, {}, false);
+        div3_transition.run(0);
+      }
+      current = false;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div3);
+      }
+      if (detaching && div2_transition) div2_transition.end();
+      if (detaching && div3_transition) div3_transition.end();
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_1$V(ctx) {
+  let div2;
+  let div1;
+  let h3;
+  let t1;
+  let div0;
+  let t2;
+  let button;
+  let mounted;
+  let dispose;
+  let each_value = ensure_array_like(Object.entries(CombatThemes || {}));
+  let each_blocks = [];
+  for (let i = 0; i < each_value.length; i += 1) {
+    each_blocks[i] = create_each_block$S(get_each_context$S(ctx, each_value, i));
+  }
+  return {
+    c() {
+      div2 = element("div");
+      div1 = element("div");
+      h3 = element("h3");
+      h3.textContent = "TEMAS DE COMBATE";
+      t1 = space();
+      div0 = element("div");
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].c();
+      }
+      t2 = space();
+      button = element("button");
+      button.textContent = "FECHAR";
+      set_style(h3, "color", "var(--c-primary)");
+      set_style(h3, "margin-top", "0");
+      attr(div0, "class", "theme-list custom-scroll svelte-4zg1bt");
+      set_style(div0, "max-height", "300px");
+      attr(button, "class", "close-btn svelte-4zg1bt");
+      attr(div1, "class", "modal-win svelte-4zg1bt");
+      attr(div2, "class", "modal-overlay svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div2, anchor);
+      append(div2, div1);
+      append(div1, h3);
+      append(div1, t1);
+      append(div1, div0);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        if (each_blocks[i]) {
+          each_blocks[i].m(div0, null);
+        }
+      }
+      append(div1, t2);
+      append(div1, button);
+      if (!mounted) {
+        dispose = [
+          listen(
+            button,
+            "click",
+            /*click_handler_23*/
+            ctx[106]
+          ),
+          listen(div1, "click", stop_propagation(
+            /*click_handler_1*/
+            ctx[60]
+          )),
+          listen(
+            div2,
+            "click",
+            /*click_handler_24*/
+            ctx[107]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentThemeKey*/
+      1) {
+        each_value = ensure_array_like(Object.entries(CombatThemes || {}));
+        let i;
+        for (i = 0; i < each_value.length; i += 1) {
+          const child_ctx = get_each_context$S(ctx2, each_value, i);
+          if (each_blocks[i]) {
+            each_blocks[i].p(child_ctx, dirty);
+          } else {
+            each_blocks[i] = create_each_block$S(child_ctx);
+            each_blocks[i].c();
+            each_blocks[i].m(div0, null);
+          }
+        }
+        for (; i < each_blocks.length; i += 1) {
+          each_blocks[i].d(1);
+        }
+        each_blocks.length = each_value.length;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div2);
+      }
+      destroy_each(each_blocks, detaching);
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_each_block$S(ctx) {
+  let button;
+  let t_value = (
+    /*val*/
+    ctx[122].name + ""
+  );
+  let t;
+  let button_class_value;
+  let mounted;
+  let dispose;
+  function click_handler_22() {
+    return (
+      /*click_handler_22*/
+      ctx[105](
+        /*key*/
+        ctx[121]
+      )
+    );
+  }
+  return {
+    c() {
+      button = element("button");
+      t = text(t_value);
+      attr(button, "class", button_class_value = "theme-btn " + /*key*/
+      (ctx[121] === /*currentThemeKey*/
+      ctx[0] ? "selected" : "") + " svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, button, anchor);
+      append(button, t);
+      if (!mounted) {
+        dispose = listen(button, "click", click_handler_22);
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (dirty[0] & /*currentThemeKey*/
+      1 && button_class_value !== (button_class_value = "theme-btn " + /*key*/
+      (ctx[121] === /*currentThemeKey*/
+      ctx[0] ? "selected" : "") + " svelte-4zg1bt")) {
+        attr(button, "class", button_class_value);
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(button);
+      }
+      mounted = false;
+      dispose();
+    }
+  };
+}
+function create_if_block$$(ctx) {
+  let div2;
+  let div1;
+  let h3;
+  let t1;
+  let input0;
+  let t2;
+  let input1;
+  let t3;
+  let input2;
+  let t4;
+  let div0;
+  let input3;
+  let t5;
+  let button0;
+  let t7;
+  let button1;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      div2 = element("div");
+      div1 = element("div");
+      h3 = element("h3");
+      h3.textContent = "NOVA CONDIÇÃO";
+      t1 = space();
+      input0 = element("input");
+      t2 = space();
+      input1 = element("input");
+      t3 = space();
+      input2 = element("input");
+      t4 = space();
+      div0 = element("div");
+      input3 = element("input");
+      t5 = space();
+      button0 = element("button");
+      button0.textContent = "SALVAR";
+      t7 = space();
+      button1 = element("button");
+      button1.textContent = "CANCEL";
+      set_style(h3, "color", "var(--c-primary)");
+      set_style(h3, "margin-top", "0");
+      attr(input0, "type", "text");
+      attr(input0, "placeholder", "ID (ex: acid)");
+      set_style(input0, "width", "100%");
+      set_style(input0, "padding", "8px");
+      set_style(input0, "margin-bottom", "5px");
+      set_style(input0, "background", "#000");
+      set_style(input0, "color", "#fff");
+      set_style(input0, "border", "1px solid #444");
+      attr(input1, "type", "text");
+      attr(input1, "placeholder", "Nome (ex: Ácido)");
+      set_style(input1, "width", "100%");
+      set_style(input1, "padding", "8px");
+      set_style(input1, "margin-bottom", "5px");
+      set_style(input1, "background", "#000");
+      set_style(input1, "color", "#fff");
+      set_style(input1, "border", "1px solid #444");
+      attr(input2, "type", "text");
+      attr(input2, "placeholder", "Desc");
+      set_style(input2, "width", "100%");
+      set_style(input2, "padding", "8px");
+      set_style(input2, "margin-bottom", "10px");
+      set_style(input2, "background", "#000");
+      set_style(input2, "color", "#fff");
+      set_style(input2, "border", "1px solid #444");
+      attr(input3, "type", "color");
+      set_style(input3, "height", "35px");
+      set_style(input3, "width", "40px");
+      set_style(input3, "padding", "0");
+      set_style(input3, "cursor", "pointer");
+      set_style(input3, "border", "none");
+      set_style(button0, "background", "var(--c-primary)");
+      set_style(button0, "color", "#000");
+      set_style(button0, "flex", "1");
+      set_style(button0, "border", "none");
+      set_style(button0, "font-weight", "bold");
+      set_style(button0, "cursor", "pointer");
+      attr(button1, "class", "close-btn svelte-4zg1bt");
+      set_style(button1, "flex", "1");
+      set_style(button1, "border", "none");
+      set_style(button1, "cursor", "pointer");
+      attr(div0, "class", "row");
+      attr(div1, "class", "modal-win trauma-form svelte-4zg1bt");
+      attr(div2, "class", "modal-overlay svelte-4zg1bt");
+    },
+    m(target, anchor) {
+      insert(target, div2, anchor);
+      append(div2, div1);
+      append(div1, h3);
+      append(div1, t1);
+      append(div1, input0);
+      set_input_value(
+        input0,
+        /*newTrauma*/
+        ctx[20].key
+      );
+      append(div1, t2);
+      append(div1, input1);
+      set_input_value(
+        input1,
+        /*newTrauma*/
+        ctx[20].label
+      );
+      append(div1, t3);
+      append(div1, input2);
+      set_input_value(
+        input2,
+        /*newTrauma*/
+        ctx[20].desc
+      );
+      append(div1, t4);
+      append(div1, div0);
+      append(div0, input3);
+      set_input_value(
+        input3,
+        /*newTrauma*/
+        ctx[20].color
+      );
+      append(div0, t5);
+      append(div0, button0);
+      append(div0, t7);
+      append(div0, button1);
+      if (!mounted) {
+        dispose = [
+          listen(
+            input0,
+            "input",
+            /*input0_input_handler_2*/
+            ctx[108]
+          ),
+          listen(
+            input1,
+            "input",
+            /*input1_input_handler_2*/
+            ctx[109]
+          ),
+          listen(
+            input2,
+            "input",
+            /*input2_input_handler_1*/
+            ctx[110]
+          ),
+          listen(
+            input3,
+            "input",
+            /*input3_input_handler*/
+            ctx[111]
+          ),
+          listen(
+            button0,
+            "click",
+            /*createGlobalTrauma*/
+            ctx[39]
+          ),
+          listen(
+            button1,
+            "click",
+            /*click_handler_25*/
+            ctx[112]
+          ),
+          listen(div1, "click", stop_propagation(
+            /*click_handler_2*/
+            ctx[59]
+          )),
+          listen(
+            div2,
+            "click",
+            /*click_handler_26*/
+            ctx[113]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*newTrauma*/
+      1048576 && input0.value !== /*newTrauma*/
+      ctx2[20].key) {
+        set_input_value(
+          input0,
+          /*newTrauma*/
+          ctx2[20].key
+        );
+      }
+      if (dirty[0] & /*newTrauma*/
+      1048576 && input1.value !== /*newTrauma*/
+      ctx2[20].label) {
+        set_input_value(
+          input1,
+          /*newTrauma*/
+          ctx2[20].label
+        );
+      }
+      if (dirty[0] & /*newTrauma*/
+      1048576 && input2.value !== /*newTrauma*/
+      ctx2[20].desc) {
+        set_input_value(
+          input2,
+          /*newTrauma*/
+          ctx2[20].desc
+        );
+      }
+      if (dirty[0] & /*newTrauma*/
+      1048576) {
+        set_input_value(
+          input3,
+          /*newTrauma*/
+          ctx2[20].color
+        );
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div2);
+      }
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_fragment$13(ctx) {
+  let div4;
+  let html_tag;
+  let raw_value = `<style>${/*theme*/
+  ctx[25].css || ""}</style>`;
+  let t0;
+  let div2;
+  let div0;
+  let t1;
+  let t2;
+  let button0;
+  let t3;
+  let button0_class_value;
+  let t4;
+  let div1;
+  let t5;
+  let button1;
+  let t6;
+  let div3;
+  let current_block_type_index;
+  let if_block2;
+  let t7;
+  let t8;
+  let t9;
+  let current;
+  let mounted;
+  let dispose;
+  let each_value_5 = ensure_array_like(
+    /*combatForms*/
+    ctx[3]
+  );
+  let each_blocks = [];
+  for (let i = 0; i < each_value_5.length; i += 1) {
+    each_blocks[i] = create_each_block_5$d(get_each_context_5$d(ctx, each_value_5, i));
+  }
+  let if_block0 = (
+    /*editingMode*/
+    ctx[9] && create_if_block_14$b(ctx)
+  );
+  let if_block1 = (
+    /*activeFormId*/
+    ctx[2] !== "gallery" && create_if_block_13$c(ctx)
+  );
+  const if_block_creators = [create_if_block_3$L, create_else_block$K];
+  const if_blocks = [];
+  function select_block_type(ctx2, dirty) {
+    if (
+      /*activeFormId*/
+      ctx2[2] === "gallery"
+    ) return 0;
+    return 1;
+  }
+  current_block_type_index = select_block_type(ctx);
+  if_block2 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+  let if_block3 = (
+    /*showImgModal*/
+    ctx[12] && create_if_block_2$R(ctx)
+  );
+  let if_block4 = (
+    /*showConfig*/
+    ctx[10] && create_if_block_1$V(ctx)
+  );
+  let if_block5 = (
+    /*showTraumaCreator*/
+    ctx[11] && create_if_block$$(ctx)
+  );
+  return {
+    c() {
+      div4 = element("div");
+      html_tag = new HtmlTag(false);
+      t0 = space();
+      div2 = element("div");
+      div0 = element("div");
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        each_blocks[i].c();
+      }
+      t1 = space();
+      if (if_block0) if_block0.c();
+      t2 = space();
+      button0 = element("button");
+      t3 = text("GALERIA");
+      t4 = space();
+      div1 = element("div");
+      if (if_block1) if_block1.c();
+      t5 = space();
+      button1 = element("button");
+      button1.innerHTML = `<i class="fas fa-palette"></i>`;
+      t6 = space();
+      div3 = element("div");
+      if_block2.c();
+      t7 = space();
+      if (if_block3) if_block3.c();
+      t8 = space();
+      if (if_block4) if_block4.c();
+      t9 = space();
+      if (if_block5) if_block5.c();
+      html_tag.a = t0;
+      attr(button0, "class", button0_class_value = "tab " + /*activeFormId*/
+      (ctx[2] === "gallery" ? "active gallery-mode" : "") + " svelte-4zg1bt");
+      set_style(button0, "margin-left", "auto");
+      attr(div0, "class", "tabs svelte-4zg1bt");
+      attr(button1, "class", "tool-btn svelte-4zg1bt");
+      attr(button1, "title", "Temas");
+      attr(div1, "class", "tools svelte-4zg1bt");
+      attr(div2, "class", "dash-header svelte-4zg1bt");
+      attr(div3, "class", "dash-content svelte-4zg1bt");
+      attr(div4, "class", "body-dashboard svelte-4zg1bt");
+      set_style(
+        div4,
+        "--c-primary",
+        /*theme*/
+        ctx[25].vars["--c-primary"]
+      );
+      set_style(
+        div4,
+        "--c-bg",
+        /*theme*/
+        ctx[25].vars["--c-bg"]
+      );
+      set_style(
+        div4,
+        "--c-panel",
+        /*theme*/
+        ctx[25].vars["--c-panel"]
+      );
+      set_style(
+        div4,
+        "--c-shock",
+        /*theme*/
+        ctx[25].vars["--c-shock"]
+      );
+      set_style(
+        div4,
+        "--c-kill",
+        /*theme*/
+        ctx[25].vars["--c-kill"]
+      );
+      set_style(
+        div4,
+        "--f-main",
+        /*theme*/
+        ctx[25].vars["--f-main"]
+      );
+      set_style(
+        div4,
+        "--r-node",
+        /*theme*/
+        ctx[25].vars["--r-node"]
+      );
+      set_style(
+        div4,
+        "--r-slot",
+        /*theme*/
+        ctx[25].vars["--r-slot"]
+      );
+    },
+    m(target, anchor) {
+      insert(target, div4, anchor);
+      html_tag.m(raw_value, div4);
+      append(div4, t0);
+      append(div4, div2);
+      append(div2, div0);
+      for (let i = 0; i < each_blocks.length; i += 1) {
+        if (each_blocks[i]) {
+          each_blocks[i].m(div0, null);
+        }
+      }
+      append(div0, t1);
+      if (if_block0) if_block0.m(div0, null);
+      append(div0, t2);
+      append(div0, button0);
+      append(button0, t3);
+      append(div2, t4);
+      append(div2, div1);
+      if (if_block1) if_block1.m(div1, null);
+      append(div1, t5);
+      append(div1, button1);
+      append(div4, t6);
+      append(div4, div3);
+      if_blocks[current_block_type_index].m(div3, null);
+      append(div4, t7);
+      if (if_block3) if_block3.m(div4, null);
+      append(div4, t8);
+      if (if_block4) if_block4.m(div4, null);
+      append(div4, t9);
+      if (if_block5) if_block5.m(div4, null);
+      current = true;
+      if (!mounted) {
+        dispose = [
+          listen(
+            button0,
+            "click",
+            /*click_handler_6*/
+            ctx[67]
+          ),
+          listen(
+            button1,
+            "click",
+            /*click_handler_8*/
+            ctx[69]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if ((!current || dirty[0] & /*theme*/
+      33554432) && raw_value !== (raw_value = `<style>${/*theme*/
+      ctx2[25].css || ""}</style>`)) html_tag.p(raw_value);
+      if (dirty[0] & /*combatForms, editingMode, promptRenameForm, activeFormId*/
+      1073742348 | dirty[1] & /*removeForm*/
+      1) {
+        each_value_5 = ensure_array_like(
+          /*combatForms*/
+          ctx2[3]
+        );
+        let i;
+        for (i = 0; i < each_value_5.length; i += 1) {
+          const child_ctx = get_each_context_5$d(ctx2, each_value_5, i);
+          if (each_blocks[i]) {
+            each_blocks[i].p(child_ctx, dirty);
+          } else {
+            each_blocks[i] = create_each_block_5$d(child_ctx);
+            each_blocks[i].c();
+            each_blocks[i].m(div0, t1);
+          }
+        }
+        for (; i < each_blocks.length; i += 1) {
+          each_blocks[i].d(1);
+        }
+        each_blocks.length = each_value_5.length;
+      }
+      if (
+        /*editingMode*/
+        ctx2[9]
+      ) {
+        if (if_block0) {
+          if_block0.p(ctx2, dirty);
+        } else {
+          if_block0 = create_if_block_14$b(ctx2);
+          if_block0.c();
+          if_block0.m(div0, t2);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (!current || dirty[0] & /*activeFormId*/
+      4 && button0_class_value !== (button0_class_value = "tab " + /*activeFormId*/
+      (ctx2[2] === "gallery" ? "active gallery-mode" : "") + " svelte-4zg1bt")) {
+        attr(button0, "class", button0_class_value);
+      }
+      if (
+        /*activeFormId*/
+        ctx2[2] !== "gallery"
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx2, dirty);
+        } else {
+          if_block1 = create_if_block_13$c(ctx2);
+          if_block1.c();
+          if_block1.m(div1, t5);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+      let previous_block_index = current_block_type_index;
+      current_block_type_index = select_block_type(ctx2);
+      if (current_block_type_index === previous_block_index) {
+        if_blocks[current_block_type_index].p(ctx2, dirty);
+      } else {
+        group_outros();
+        transition_out(if_blocks[previous_block_index], 1, 1, () => {
+          if_blocks[previous_block_index] = null;
+        });
+        check_outros();
+        if_block2 = if_blocks[current_block_type_index];
+        if (!if_block2) {
+          if_block2 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
+          if_block2.c();
+        } else {
+          if_block2.p(ctx2, dirty);
+        }
+        transition_in(if_block2, 1);
+        if_block2.m(div3, null);
+      }
+      if (
+        /*showImgModal*/
+        ctx2[12]
+      ) {
+        if (if_block3) {
+          if_block3.p(ctx2, dirty);
+          if (dirty[0] & /*showImgModal*/
+          4096) {
+            transition_in(if_block3, 1);
+          }
+        } else {
+          if_block3 = create_if_block_2$R(ctx2);
+          if_block3.c();
+          transition_in(if_block3, 1);
+          if_block3.m(div4, t8);
+        }
+      } else if (if_block3) {
+        group_outros();
+        transition_out(if_block3, 1, 1, () => {
+          if_block3 = null;
+        });
+        check_outros();
+      }
+      if (
+        /*showConfig*/
+        ctx2[10]
+      ) {
+        if (if_block4) {
+          if_block4.p(ctx2, dirty);
+        } else {
+          if_block4 = create_if_block_1$V(ctx2);
+          if_block4.c();
+          if_block4.m(div4, t9);
+        }
+      } else if (if_block4) {
+        if_block4.d(1);
+        if_block4 = null;
+      }
+      if (
+        /*showTraumaCreator*/
+        ctx2[11]
+      ) {
+        if (if_block5) {
+          if_block5.p(ctx2, dirty);
+        } else {
+          if_block5 = create_if_block$$(ctx2);
+          if_block5.c();
+          if_block5.m(div4, null);
+        }
+      } else if (if_block5) {
+        if_block5.d(1);
+        if_block5 = null;
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--c-primary",
+          /*theme*/
+          ctx2[25].vars["--c-primary"]
+        );
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--c-bg",
+          /*theme*/
+          ctx2[25].vars["--c-bg"]
+        );
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--c-panel",
+          /*theme*/
+          ctx2[25].vars["--c-panel"]
+        );
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--c-shock",
+          /*theme*/
+          ctx2[25].vars["--c-shock"]
+        );
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--c-kill",
+          /*theme*/
+          ctx2[25].vars["--c-kill"]
+        );
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--f-main",
+          /*theme*/
+          ctx2[25].vars["--f-main"]
+        );
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--r-node",
+          /*theme*/
+          ctx2[25].vars["--r-node"]
+        );
+      }
+      if (!current || dirty[0] & /*theme*/
+      33554432) {
+        set_style(
+          div4,
+          "--r-slot",
+          /*theme*/
+          ctx2[25].vars["--r-slot"]
+        );
+      }
+    },
+    i(local) {
+      if (current) return;
+      transition_in(if_block2);
+      transition_in(if_block3);
+      current = true;
+    },
+    o(local) {
+      transition_out(if_block2);
+      transition_out(if_block3);
+      current = false;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div4);
+      }
+      destroy_each(each_blocks, detaching);
+      if (if_block0) if_block0.d();
+      if (if_block1) if_block1.d();
+      if_blocks[current_block_type_index].d();
+      if (if_block3) if_block3.d();
+      if (if_block4) if_block4.d();
+      if (if_block5) if_block5.d();
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+const MODULE_ID$A = "multiversus-rpg";
+function ensureSetting(key, defaultVal, type = Object) {
+  if (!game.settings.settings.has(`${MODULE_ID$A}.${key}`)) {
+    game.settings.register(MODULE_ID$A, key, {
+      name: key,
+      scope: "world",
+      config: false,
+      type,
+      default: defaultVal,
+      onChange: () => {
+      }
+    });
+  }
+  return game.settings.get(MODULE_ID$A, key);
+}
+function instance$13($$self, $$props, $$invalidate) {
+  let theme;
+  let flags;
+  let system;
+  let currentXP;
+  let gmMode;
+  let customPoints;
+  let customXP;
+  let statCharm;
+  let statCommand;
+  let boughtBaseWill;
+  let maxWillpower;
+  let activeFormObj;
+  let currentLimbs;
+  let currentImg;
+  let currentBg;
+  let selectedLimb;
+  let { actor } = $$props;
+  let currentThemeKey = ensureSetting("combatThemeKey", "nexus", String);
+  const defaultTraumas = {
+    "bullet": {
+      icon: "Running Round",
+      color: "#fbbf24",
+      label: "Bala",
+      desc: "Cirurgia."
+    },
+    "cut": {
+      icon: "Bleeding Eye",
+      color: "#ef4444",
+      label: "Corte",
+      desc: "Sutura."
+    },
+    "break": {
+      icon: "Broken Bone",
+      color: "#fff",
+      label: "Fratura",
+      desc: "Tala."
+    }
+  };
+  let traumaDB = ensureSetting("traumaDB", defaultTraumas, Object);
+  const fallbackTheme = {
+    vars: {
+      "--c-primary": "#00ff41",
+      "--c-bg": "#050505",
+      "--c-panel": "#111",
+      "--c-shock": "#eab308",
+      "--c-kill": "#ef4444",
+      "--r-node": "4px",
+      "--r-slot": "2px"
+    },
+    css: ""
+  };
+  let localMana = actor.getFlag(MODULE_ID$A, "currWillpower") ?? 0;
+  function updateMana(amount) {
+    $$invalidate(1, localMana = Math.min(maxWillpower, Math.max(0, localMana + amount)));
+    actor.update(
+      {
+        [`flags.${MODULE_ID$A}.currWillpower`]: localMana
+      },
+      { render: false }
+    );
+  }
+  function setMana(e) {
+    $$invalidate(1, localMana = Math.min(maxWillpower, Math.max(0, parseInt(e.target.value) || 0)));
+    actor.update(
+      {
+        [`flags.${MODULE_ID$A}.currWillpower`]: localMana
+      },
+      { render: false }
+    );
+  }
+  const DEFAULT_LIMBS2 = [
+    {
+      id: "leg-l",
+      name: "P.ESQ",
+      loc: "1",
+      hp: 4,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 65,
+      y: 75,
+      nonPhysicalDef: false
+    },
+    {
+      id: "leg-r",
+      name: "P.DIR",
+      loc: "2",
+      hp: 4,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 35,
+      y: 75,
+      nonPhysicalDef: false
+    },
+    {
+      id: "arm-l",
+      name: "B.ESQ",
+      loc: "3-4",
+      hp: 4,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 80,
+      y: 40,
+      nonPhysicalDef: false
+    },
+    {
+      id: "arm-r",
+      name: "B.DIR",
+      loc: "5-6",
+      hp: 4,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 20,
+      y: 40,
+      nonPhysicalDef: false
+    },
+    {
+      id: "torso",
+      name: "TORSO",
+      loc: "7-9",
+      hp: 7,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 50,
+      y: 40,
+      nonPhysicalDef: false
+    },
+    {
+      id: "head",
+      name: "CABEÇA",
+      loc: "10",
+      hp: 4,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 50,
+      y: 10,
+      nonPhysicalDef: false
+    }
+  ];
+  let activeFormId = "base";
+  let combatForms = actor.getFlag(MODULE_ID$A, "combat_forms");
+  if (!combatForms) {
+    combatForms = [
+      {
+        id: "base",
+        name: "Base",
+        bg: actor.getFlag(MODULE_ID$A, "bg_base") || "",
+        img: actor.getFlag(MODULE_ID$A, "img_base") || "https://i.imgur.com/1DyBPgD.png",
+        limbs: actor.getFlag(MODULE_ID$A, "limbs_base") || JSON.parse(JSON.stringify(DEFAULT_LIMBS2))
+      },
+      {
+        id: "trans",
+        name: "Transformação",
+        bg: actor.getFlag(MODULE_ID$A, "bg_trans") || "",
+        img: actor.getFlag(MODULE_ID$A, "img_trans") || "https://i.imgur.com/1DyBPgD.png",
+        limbs: actor.getFlag(MODULE_ID$A, "limbs_trans") || JSON.parse(JSON.stringify(DEFAULT_LIMBS2))
+      }
+    ];
+  }
+  combatForms = combatForms.map((f) => ({
+    ...f,
+    limbs: f.limbs.map((l) => ({ ...l, trauma: l.trauma || [] }))
+  }));
+  let galleryItems = actor.getFlag(MODULE_ID$A, "combat_gallery") || [];
+  let selectedLimbId = null;
+  let editingMode = false;
+  let showConfig = false;
+  let showTraumaCreator = false;
+  let showImgModal = false;
+  let imgModalType = "";
+  let imgModalUrl = "";
+  let inputShock = null;
+  let inputKilling = null;
+  let inputHeal = null;
+  let inputPenetration = null;
+  let inputNonPhysical = false;
+  let inputRegen = null;
+  let newTrauma = {
+    key: "",
+    label: "",
+    color: "#ffffff",
+    desc: "",
+    icon: "Biohazard"
+  };
+  function triggerReactivity() {
+    const idx = combatForms.findIndex((f) => f.id === activeFormId);
+    if (idx !== -1) {
+      $$invalidate(3, combatForms[idx].limbs = [...combatForms[idx].limbs], combatForms);
+      $$invalidate(3, combatForms = [...combatForms]);
+      saveData();
+    }
+  }
+  async function saveData() {
+    await actor.update(
+      {
+        [`flags.${MODULE_ID$A}.combat_forms`]: combatForms
+      },
+      { render: false }
+    );
+  }
+  async function addNewForm() {
+    const newId = foundry.utils.randomID();
+    const newForm = {
+      id: newId,
+      name: `Forma ${combatForms.length + 1}`,
+      bg: "",
+      img: "https://i.imgur.com/1DyBPgD.png",
+      limbs: JSON.parse(JSON.stringify(DEFAULT_LIMBS2))
+    };
+    $$invalidate(3, combatForms = [...combatForms, newForm]);
+    $$invalidate(2, activeFormId = newForm.id);
+    triggerReactivity();
+    saveData();
+  }
+  async function promptRenameForm(formId) {
+    let form = combatForms.find((f) => f.id === formId);
+    if (!form) return;
+    const newName = await Dialog.prompt({
+      title: "Renomear Forma",
+      content: `<input type="text" id="rename-input" value="${form.name}" autofocus />`,
+      callback: (html) => html.find("#rename-input").val()
+    });
+    if (newName && newName.trim() !== "") {
+      form.name = newName.trim();
+      triggerReactivity();
+      saveData();
+    }
+  }
+  function removeForm(formId) {
+    if (combatForms.length <= 1) return ui.notifications.warn("Você não pode deletar a última forma!");
+    $$invalidate(3, combatForms = combatForms.filter((f) => f.id !== formId));
+    if (activeFormId === formId) $$invalidate(2, activeFormId = combatForms[0].id);
+    saveData();
+  }
+  async function applyDamage() {
+    if (!selectedLimb) return ui.notifications.warn("Selecione um membro!");
+    let S_in = Number(inputShock || 0);
+    let K_in = Number(inputKilling || 0);
+    let Pen_in = Number(inputPenetration || 0);
+    let isNonPhysical = inputNonPhysical;
+    const baseLAR = Number(selectedLimb.lar || 0);
+    let ignoreArmor = isNonPhysical && !selectedLimb.nonPhysicalDef;
+    let effectiveLAR = ignoreArmor ? 0 : Math.max(0, baseLAR - Pen_in);
+    let S_final = S_in;
+    if (effectiveLAR > 0 && S_in > 0) {
+      S_final = 1;
+    }
+    let converted_K = Math.min(K_in, effectiveLAR);
+    let K_final = K_in - converted_K;
+    S_final += converted_K;
+    let curK = selectedLimb.killing;
+    let curS = selectedLimb.shock;
+    const hp = selectedLimb.hp;
+    const occupied = selectedLimb.trauma.length;
+    let tempK = curK + K_final;
+    if (tempK >= hp) {
+      $$invalidate(22, selectedLimb.killing = hp, selectedLimb);
+      $$invalidate(22, selectedLimb.shock = 0, selectedLimb);
+    } else {
+      let tempS = curS + S_final;
+      let totalSpace = hp - occupied;
+      let totalDamage = tempK + tempS;
+      if (totalDamage > totalSpace) {
+        let overflow = totalDamage - totalSpace;
+        tempK += overflow;
+        $$invalidate(22, selectedLimb.killing = Math.min(totalSpace, tempK), selectedLimb);
+        $$invalidate(22, selectedLimb.shock = Math.max(0, totalSpace - selectedLimb.killing), selectedLimb);
+      } else {
+        $$invalidate(22, selectedLimb.killing = tempK, selectedLimb);
+        $$invalidate(22, selectedLimb.shock = tempS, selectedLimb);
+      }
+    }
+    triggerReactivity();
+    $$invalidate(14, inputShock = null);
+    $$invalidate(15, inputKilling = null);
+    $$invalidate(17, inputPenetration = null);
+    $$invalidate(18, inputNonPhysical = false);
+    if (selectedLimb.killing >= selectedLimb.hp) ui.notifications.error(`${selectedLimb.name} DESTRUÍDO!`);
+  }
+  async function applyHeal() {
+    if (!selectedLimb) return;
+    let amount = Number(inputHeal || 0);
+    while (amount > 0) {
+      if (selectedLimb.killing > 0) {
+        $$invalidate(22, selectedLimb.killing--, selectedLimb);
+        amount--;
+      } else if (selectedLimb.shock > 0) {
+        $$invalidate(22, selectedLimb.shock--, selectedLimb);
+        amount--;
+      } else break;
+    }
+    triggerReactivity();
+    $$invalidate(16, inputHeal = null);
+  }
+  async function applyRegen() {
+    let amount = Number(inputRegen || 0);
+    if (amount <= 0) return;
+    let totalCured = 0;
+    for (let form of combatForms) {
+      for (let i = 0; i < form.limbs.length; i++) {
+        let amt = amount;
+        while (amt > 0) {
+          if (form.limbs[i].killing > 0) {
+            form.limbs[i].killing--;
+            amt--;
+            totalCured++;
+          } else if (form.limbs[i].shock > 0) {
+            form.limbs[i].shock--;
+            amt--;
+            totalCured++;
+          } else break;
+        }
+      }
+    }
+    triggerReactivity();
+    $$invalidate(19, inputRegen = null);
+    if (totalCured > 0) {
+      ChatMessage.create({
+        content: `<div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 10px; color: #fff;"><strong>${actor.name}</strong> ativou <strong style="color: #3b82f6;">Regeneração</strong> e curou um total de <strong>${totalCured}</strong> caixas de dano em todo o corpo!</div>`,
+        speaker: ChatMessage.getSpeaker({ actor })
+      });
+    } else {
+      ui.notifications.info("A regeneração concluiu, mas não havia dano a curar.");
+    }
+  }
+  let draggingNode = null;
+  function onNodeDragStart(e, limb) {
+    if (editingMode) draggingNode = limb;
+  }
+  function onCanvasDrop(e) {
+    if (!editingMode || !draggingNode) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const idx = currentLimbs.findIndex((l) => l.id === draggingNode.id);
+    $$invalidate(5, currentLimbs[idx].x = (e.clientX - rect.left) / rect.width * 100, currentLimbs);
+    $$invalidate(5, currentLimbs[idx].y = (e.clientY - rect.top) / rect.height * 100, currentLimbs);
+    draggingNode = null;
+    triggerReactivity();
+  }
+  let draggingTrauma = null;
+  function onTraumaDrop(e, limbId, slotIdx) {
+    if (!draggingTrauma) return;
+    const idx = currentLimbs.findIndex((l) => l.id === limbId);
+    const limb = currentLimbs[idx];
+    limb.trauma = limb.trauma.filter((t) => t.index !== slotIdx);
+    limb.trauma.push({
+      id: foundry.utils.randomID(),
+      type: draggingTrauma,
+      index: slotIdx
+    });
+    if (limb.killing <= slotIdx) limb.killing = slotIdx + 1;
+    $$invalidate(21, draggingTrauma = null);
+    triggerReactivity();
+  }
+  function removeTrauma(limbId, traumaId) {
+    const idx = currentLimbs.findIndex((l) => l.id === limbId);
+    $$invalidate(5, currentLimbs[idx].trauma = currentLimbs[idx].trauma.filter((t) => t.id !== traumaId), currentLimbs);
+    triggerReactivity();
+  }
+  async function createGlobalTrauma() {
+    if (!newTrauma.key || !newTrauma.label) return ui.notifications.warn("Preencha ID e Nome.");
+    const newDB = {
+      ...traumaDB,
+      [newTrauma.key]: { ...newTrauma }
+    };
+    try {
+      await game.settings.set(MODULE_ID$A, "traumaDB", newDB);
+    } catch (e) {
+    }
+    $$invalidate(7, traumaDB = newDB);
+    $$invalidate(11, showTraumaCreator = false);
+    $$invalidate(20, newTrauma = {
+      key: "",
+      label: "",
+      color: "#ffffff",
+      desc: "",
+      icon: "Biohazard"
+    });
+  }
+  async function deleteGlobalTrauma(key) {
+    const newDB = { ...traumaDB };
+    delete newDB[key];
+    try {
+      await game.settings.set(MODULE_ID$A, "traumaDB", newDB);
+    } catch (e) {
+    }
+    $$invalidate(7, traumaDB = newDB);
+  }
+  function openImageModal(type, currentUrl = "") {
+    imgModalType = type;
+    $$invalidate(13, imgModalUrl = currentUrl.includes("1DyBPgD.png") ? "" : currentUrl);
+    $$invalidate(12, showImgModal = true);
+  }
+  async function applyImageUpdate() {
+    const urlToSave = imgModalUrl.trim();
+    if (imgModalType === "gallery_new") {
+      const newItem = {
+        id: foundry.utils.randomID(),
+        title: "Nova Arte",
+        url: urlToSave,
+        desc: ""
+      };
+      $$invalidate(8, galleryItems = [...galleryItems, newItem]);
+      await actor.update(
+        {
+          [`flags.${MODULE_ID$A}.combat_gallery`]: galleryItems
+        },
+        { render: false }
+      );
+    } else if (imgModalType.startsWith("gallery_edit_")) {
+      const idx = parseInt(imgModalType.split("_")[2]);
+      $$invalidate(8, galleryItems[idx].url = urlToSave, galleryItems);
+      $$invalidate(8, galleryItems = [...galleryItems]);
+      await actor.update(
+        {
+          [`flags.${MODULE_ID$A}.combat_gallery`]: galleryItems
+        },
+        { render: false }
+      );
+    } else {
+      const idx = combatForms.findIndex((f) => f.id === activeFormId);
+      if (idx !== -1) {
+        if (imgModalType === "sil") $$invalidate(3, combatForms[idx].img = urlToSave, combatForms);
+        else $$invalidate(3, combatForms[idx].bg = urlToSave, combatForms);
+        $$invalidate(3, combatForms = [...combatForms]);
+        saveData();
+      }
+    }
+    $$invalidate(12, showImgModal = false);
+  }
+  async function updateGalleryItem(idx, field, value) {
+    $$invalidate(8, galleryItems[idx][field] = value, galleryItems);
+    await actor.update(
+      {
+        [`flags.${MODULE_ID$A}.combat_gallery`]: galleryItems
+      },
+      { render: false }
+    );
+  }
+  async function removeGalleryItem(id) {
+    $$invalidate(8, galleryItems = galleryItems.filter((i) => i.id !== id));
+    await actor.update(
+      {
+        [`flags.${MODULE_ID$A}.combat_gallery`]: galleryItems
+      },
+      { render: false }
+    );
+  }
+  async function addLimb() {
+    const newLimb = {
+      id: foundry.utils.randomID(),
+      name: "NOVO",
+      loc: "0",
+      hp: 3,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 50,
+      y: 50,
+      nonPhysicalDef: false
+    };
+    const idx = combatForms.findIndex((f) => f.id === activeFormId);
+    if (idx !== -1) {
+      combatForms[idx].limbs.push(newLimb);
+      triggerReactivity();
+    }
+  }
+  function deleteLimb(limbId) {
+    const idx = combatForms.findIndex((f) => f.id === activeFormId);
+    if (idx !== -1) {
+      $$invalidate(3, combatForms[idx].limbs = combatForms[idx].limbs.filter((l) => l.id !== limbId), combatForms);
+      if (selectedLimbId === limbId) $$invalidate(4, selectedLimbId = null);
+      triggerReactivity();
+    }
+  }
+  function getSlotState(limb, i) {
+    const t = limb.trauma.find((x) => x.index === i);
+    if (t) return {
+      status: "trauma",
+      data: traumaDB[t.type] || traumaDB["bullet"],
+      id: t.id
+    };
+    if (i < limb.killing) return { status: "killing" };
+    if (i < limb.killing + limb.shock) return { status: "shock" };
+    return { status: "empty" };
+  }
+  function click_handler_2(event) {
+    bubble.call(this, $$self, event);
+  }
+  function click_handler_1(event) {
+    bubble.call(this, $$self, event);
+  }
+  function click_handler(event) {
+    bubble.call(this, $$self, event);
+  }
+  function dragover_handler2(event) {
+    bubble.call(this, $$self, event);
+  }
+  function dragover_handler_1(event) {
+    bubble.call(this, $$self, event);
+  }
+  const click_handler_3 = (form) => $$invalidate(2, activeFormId = form.id);
+  const click_handler_4 = (form) => promptRenameForm(form.id);
+  const click_handler_5 = (form) => removeForm(form.id);
+  const click_handler_6 = () => $$invalidate(2, activeFormId = "gallery");
+  const click_handler_7 = () => $$invalidate(9, editingMode = !editingMode);
+  const click_handler_8 = () => $$invalidate(10, showConfig = true);
+  const click_handler_9 = () => openImageModal("gallery_new");
+  const click_handler_10 = (idx, item) => openImageModal("gallery_edit_" + idx, item.url);
+  function input_input_handler(each_value_1, idx) {
+    each_value_1[idx].title = this.value;
+    $$invalidate(8, galleryItems);
+  }
+  const change_handler = (idx, item) => updateGalleryItem(idx, "title", item.title);
+  function textarea_input_handler(each_value_1, idx) {
+    each_value_1[idx].desc = this.value;
+    $$invalidate(8, galleryItems);
+  }
+  const change_handler_1 = (idx, item) => updateGalleryItem(idx, "desc", item.desc);
+  const click_handler_11 = (item) => removeGalleryItem(item.id);
+  const click_handler_12 = () => openImageModal("sil", currentImg);
+  const click_handler_13 = () => openImageModal("bg", currentBg);
+  function input0_input_handler(each_value_3, limb_index) {
+    each_value_3[limb_index].loc = this.value;
+    $$invalidate(5, currentLimbs), $$invalidate(49, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input1_input_handler(each_value_3, limb_index) {
+    each_value_3[limb_index].name = this.value;
+    $$invalidate(5, currentLimbs), $$invalidate(49, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  const drop_handler = (limb, i, e) => onTraumaDrop(e, limb.id, i);
+  const contextmenu_handler = (limb, slot) => removeTrauma(limb.id, slot.id);
+  const click_handler_14 = (limb) => deleteLimb(limb.id);
+  const dragstart_handler = (limb, e) => onNodeDragStart(e, limb);
+  const click_handler_15 = (limb) => $$invalidate(4, selectedLimbId = limb.id);
+  const click_handler_16 = () => updateMana(-1);
+  function input_input_handler_1() {
+    localMana = to_number(this.value);
+    $$invalidate(1, localMana), $$invalidate(6, maxWillpower), $$invalidate(50, flags), $$invalidate(53, statCharm), $$invalidate(52, statCommand), $$invalidate(51, boughtBaseWill), $$invalidate(48, actor), $$invalidate(54, system);
+  }
+  const click_handler_17 = () => updateMana(1);
+  function input0_input_handler_1() {
+    selectedLimb.lar = to_number(this.value);
+    $$invalidate(22, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(49, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input1_input_handler_1() {
+    selectedLimb.har = to_number(this.value);
+    $$invalidate(22, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(49, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input2_input_handler() {
+    selectedLimb.hp = to_number(this.value);
+    $$invalidate(22, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(49, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input3_change_handler() {
+    selectedLimb.nonPhysicalDef = this.checked;
+    $$invalidate(22, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(49, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input4_input_handler() {
+    inputShock = to_number(this.value);
+    $$invalidate(14, inputShock);
+  }
+  function input5_input_handler() {
+    inputKilling = to_number(this.value);
+    $$invalidate(15, inputKilling);
+  }
+  function input6_input_handler() {
+    inputPenetration = to_number(this.value);
+    $$invalidate(17, inputPenetration);
+  }
+  function input7_change_handler() {
+    inputNonPhysical = this.checked;
+    $$invalidate(18, inputNonPhysical);
+  }
+  function input8_input_handler() {
+    inputHeal = to_number(this.value);
+    $$invalidate(16, inputHeal);
+  }
+  function input9_input_handler() {
+    inputRegen = to_number(this.value);
+    $$invalidate(19, inputRegen);
+  }
+  const click_handler_18 = () => $$invalidate(11, showTraumaCreator = true);
+  const click_handler_19 = (key) => deleteGlobalTrauma(key);
+  const dragstart_handler_1 = (key, e) => {
+    $$invalidate(21, draggingTrauma = key);
+  };
+  const click_handler_20 = () => $$invalidate(12, showImgModal = false);
+  function input_input_handler_2() {
+    imgModalUrl = this.value;
+    $$invalidate(13, imgModalUrl);
+  }
+  const click_handler_21 = () => $$invalidate(12, showImgModal = false);
+  const click_handler_22 = async (key) => {
+    await game.settings.set(MODULE_ID$A, "combatThemeKey", key);
+    $$invalidate(0, currentThemeKey = key);
+  };
+  const click_handler_23 = () => $$invalidate(10, showConfig = false);
+  const click_handler_24 = () => $$invalidate(10, showConfig = false);
+  function input0_input_handler_2() {
+    newTrauma.key = this.value;
+    $$invalidate(20, newTrauma);
+  }
+  function input1_input_handler_2() {
+    newTrauma.label = this.value;
+    $$invalidate(20, newTrauma);
+  }
+  function input2_input_handler_1() {
+    newTrauma.desc = this.value;
+    $$invalidate(20, newTrauma);
+  }
+  function input3_input_handler() {
+    newTrauma.color = this.value;
+    $$invalidate(20, newTrauma);
+  }
+  const click_handler_25 = () => $$invalidate(11, showTraumaCreator = false);
+  const click_handler_26 = () => $$invalidate(11, showTraumaCreator = false);
+  $$self.$$set = ($$props2) => {
+    if ("actor" in $$props2) $$invalidate(48, actor = $$props2.actor);
+  };
+  $$self.$$.update = () => {
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
+    if ($$self.$$.dirty[0] & /*currentThemeKey*/
+    1) {
+      $$invalidate(25, theme = (CombatThemes == null ? void 0 : CombatThemes[currentThemeKey]) || (CombatThemes == null ? void 0 : CombatThemes["nexus"]) || fallbackTheme);
+    }
+    if ($$self.$$.dirty[1] & /*actor*/
+    131072) {
+      $$invalidate(50, flags = ((_a = actor == null ? void 0 : actor.flags) == null ? void 0 : _a[MODULE_ID$A]) || {});
+    }
+    if ($$self.$$.dirty[1] & /*actor*/
+    131072) {
+      $$invalidate(54, system = (actor == null ? void 0 : actor.system) || {});
+    }
+    if ($$self.$$.dirty[1] & /*flags*/
+    524288) {
+      $$invalidate(55, currentXP = flags.xp || 0);
+    }
+    if ($$self.$$.dirty[1] & /*flags*/
+    524288) {
+      $$invalidate(57, gmMode = flags.gmOverride || false);
+    }
+    if ($$self.$$.dirty[1] & /*flags*/
+    524288) {
+      $$invalidate(58, customPoints = flags.customPoints || 150);
+    }
+    if ($$self.$$.dirty[1] & /*customPoints*/
+    134217728) {
+      $$invalidate(56, customXP = Math.max(0, customPoints - 150));
+    }
+    if ($$self.$$.dirty[1] & /*gmMode, customXP, currentXP*/
+    117440512) {
+      gmMode ? LevelCalculator.getLevelInfo(customXP).level : LevelCalculator.getLevelInfo(currentXP).level;
+    }
+    if ($$self.$$.dirty[1] & /*system, flags*/
+    8912896) {
+      $$invalidate(53, statCharm = Number(((_c = (_b = system.stats) == null ? void 0 : _b.charm) == null ? void 0 : _c.value) || ((_e = (_d = system.attributes) == null ? void 0 : _d.charm) == null ? void 0 : _e.value) || ((_g = (_f = flags.stats) == null ? void 0 : _f.charm) == null ? void 0 : _g.normal) || 1));
+    }
+    if ($$self.$$.dirty[1] & /*system, flags*/
+    8912896) {
+      $$invalidate(52, statCommand = Number(((_i = (_h = system.stats) == null ? void 0 : _h.command) == null ? void 0 : _i.value) || ((_k = (_j = system.attributes) == null ? void 0 : _j.command) == null ? void 0 : _k.value) || ((_m = (_l = flags.stats) == null ? void 0 : _l.command) == null ? void 0 : _m.normal) || 1));
+    }
+    if ($$self.$$.dirty[1] & /*flags*/
+    524288) {
+      $$invalidate(51, boughtBaseWill = flags.boughtBaseWill || 0);
+    }
+    if ($$self.$$.dirty[1] & /*flags, statCharm, statCommand, boughtBaseWill*/
+    7864320) {
+      $$invalidate(6, maxWillpower = function() {
+        let hCharm = 0;
+        let hCommand = 0;
+        if (flags && flags.stats) {
+          if (flags.stats.charm) {
+            hCharm = (Number(flags.stats.charm.h_normal) || 0) + (Number(flags.stats.charm.h_hard) || 0) + (Number(flags.stats.charm.h_wiggle) || 0);
+          }
+          if (flags.stats.command) {
+            hCommand = (Number(flags.stats.command.h_normal) || 0) + (Number(flags.stats.command.h_hard) || 0) + (Number(flags.stats.command.h_wiggle) || 0);
+          }
+        }
+        return statCharm + hCharm + statCommand + hCommand + boughtBaseWill;
+      }());
+    }
+    if ($$self.$$.dirty[0] & /*localMana, maxWillpower*/
+    66 | $$self.$$.dirty[1] & /*flags*/
+    524288) {
+      {
+        if (localMana === 0 && maxWillpower > 0 && flags.currWillpower === void 0) $$invalidate(1, localMana = maxWillpower);
+      }
+    }
+    if ($$self.$$.dirty[0] & /*combatForms, activeFormId*/
+    12) {
+      $$invalidate(49, activeFormObj = combatForms.find((f) => f.id === activeFormId) || combatForms[0]);
+    }
+    if ($$self.$$.dirty[1] & /*activeFormObj*/
+    262144) {
+      $$invalidate(5, currentLimbs = activeFormObj.limbs);
+    }
+    if ($$self.$$.dirty[1] & /*activeFormObj*/
+    262144) {
+      $$invalidate(24, currentImg = activeFormObj.img);
+    }
+    if ($$self.$$.dirty[1] & /*activeFormObj*/
+    262144) {
+      $$invalidate(23, currentBg = activeFormObj.bg);
+    }
+    if ($$self.$$.dirty[0] & /*currentLimbs, selectedLimbId*/
+    48) {
+      $$invalidate(22, selectedLimb = currentLimbs.find((l) => l.id === selectedLimbId));
+    }
+  };
+  return [
+    currentThemeKey,
+    localMana,
+    activeFormId,
+    combatForms,
+    selectedLimbId,
+    currentLimbs,
+    maxWillpower,
+    traumaDB,
+    galleryItems,
+    editingMode,
+    showConfig,
+    showTraumaCreator,
+    showImgModal,
+    imgModalUrl,
+    inputShock,
+    inputKilling,
+    inputHeal,
+    inputPenetration,
+    inputNonPhysical,
+    inputRegen,
+    newTrauma,
+    draggingTrauma,
+    selectedLimb,
+    currentBg,
+    currentImg,
+    theme,
+    updateMana,
+    setMana,
+    triggerReactivity,
+    addNewForm,
+    promptRenameForm,
+    removeForm,
+    applyDamage,
+    applyHeal,
+    applyRegen,
+    onNodeDragStart,
+    onCanvasDrop,
+    onTraumaDrop,
+    removeTrauma,
+    createGlobalTrauma,
+    deleteGlobalTrauma,
+    openImageModal,
+    applyImageUpdate,
+    updateGalleryItem,
+    removeGalleryItem,
+    addLimb,
+    deleteLimb,
+    getSlotState,
+    actor,
+    activeFormObj,
+    flags,
+    boughtBaseWill,
+    statCommand,
+    statCharm,
+    system,
+    currentXP,
+    customXP,
+    gmMode,
+    customPoints,
+    click_handler_2,
+    click_handler_1,
+    click_handler,
+    dragover_handler2,
+    dragover_handler_1,
+    click_handler_3,
+    click_handler_4,
+    click_handler_5,
+    click_handler_6,
+    click_handler_7,
+    click_handler_8,
+    click_handler_9,
+    click_handler_10,
+    input_input_handler,
+    change_handler,
+    textarea_input_handler,
+    change_handler_1,
+    click_handler_11,
+    click_handler_12,
+    click_handler_13,
+    input0_input_handler,
+    input1_input_handler,
+    drop_handler,
+    contextmenu_handler,
+    click_handler_14,
+    dragstart_handler,
+    click_handler_15,
+    click_handler_16,
+    input_input_handler_1,
+    click_handler_17,
+    input0_input_handler_1,
+    input1_input_handler_1,
+    input2_input_handler,
+    input3_change_handler,
+    input4_input_handler,
+    input5_input_handler,
+    input6_input_handler,
+    input7_change_handler,
+    input8_input_handler,
+    input9_input_handler,
+    click_handler_18,
+    click_handler_19,
+    dragstart_handler_1,
+    click_handler_20,
+    input_input_handler_2,
+    click_handler_21,
+    click_handler_22,
+    click_handler_23,
+    click_handler_24,
+    input0_input_handler_2,
+    input1_input_handler_2,
+    input2_input_handler_1,
+    input3_input_handler,
+    click_handler_25,
+    click_handler_26
+  ];
+}
+class CombatApp extends SvelteComponent {
+  constructor(options) {
+    super();
+    init(this, options, instance$13, create_fragment$13, safe_not_equal, { actor: 48 }, null, [-1, -1, -1, -1, -1]);
   }
 }
 function get_each_context$R(ctx, list, i) {
@@ -71855,13 +76297,57 @@ function create_if_block_6$e(ctx) {
   };
 }
 function create_if_block_5$e(ctx) {
+  let combatapp;
+  let current;
+  combatapp = new CombatApp({
+    props: {
+      actor: (
+        /*actor*/
+        ctx[0]
+      ),
+      system: (
+        /*system*/
+        ctx[11]
+      ),
+      themeColor: (
+        /*themeColor*/
+        ctx[9]
+      )
+    }
+  });
   return {
-    c: noop,
-    m: noop,
-    p: noop,
-    i: noop,
-    o: noop,
-    d: noop
+    c() {
+      create_component(combatapp.$$.fragment);
+    },
+    m(target, anchor) {
+      mount_component(combatapp, target, anchor);
+      current = true;
+    },
+    p(ctx2, dirty) {
+      const combatapp_changes = {};
+      if (dirty & /*actor*/
+      1) combatapp_changes.actor = /*actor*/
+      ctx2[0];
+      if (dirty & /*system*/
+      2048) combatapp_changes.system = /*system*/
+      ctx2[11];
+      if (dirty & /*themeColor*/
+      512) combatapp_changes.themeColor = /*themeColor*/
+      ctx2[9];
+      combatapp.$set(combatapp_changes);
+    },
+    i(local) {
+      if (current) return;
+      transition_in(combatapp.$$.fragment, local);
+      current = true;
+    },
+    o(local) {
+      transition_out(combatapp.$$.fragment, local);
+      current = false;
+    },
+    d(detaching) {
+      destroy_component(combatapp, detaching);
+    }
   };
 }
 function create_each_block_1$o(ctx) {
@@ -72452,7 +76938,7 @@ function instance$A($$self, $$props, $$invalidate) {
     {
       id: "combat",
       icon: "fa-crosshairs",
-      label: "COMBATE"
+      label: "ESTATÍSTICAS DE COMBATE"
     },
     {
       id: "profile",
