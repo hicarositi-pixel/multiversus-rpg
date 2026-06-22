@@ -109964,6 +109964,17 @@ function create_fragment$p(ctx) {
   };
 }
 const MODULE_ID$g = "multiversus-rpg";
+function getStatValue(a, statName) {
+  var _a, _b, _c;
+  if (!a) return 1;
+  const act = a instanceof Actor ? a : game.actors.get(a.id || a.actorId || a._id);
+  if (!act) return ((_c = (_b = (_a = a.system) == null ? void 0 : _a.stats) == null ? void 0 : _b[statName]) == null ? void 0 : _c.value) || 1;
+  const base = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.normal`)) || Number(foundry.utils.getProperty(act, `system.stats.${statName}.value`)) || Number(foundry.utils.getProperty(act, `system.stats.${statName}.normal`)) || Number(foundry.utils.getProperty(act, `system.attributes.${statName}.val`)) || Number(foundry.utils.getProperty(act, `system.attributes.${statName}.value`)) || 1;
+  const hn = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.h_normal`)) || 0;
+  const hh = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.h_hard`)) || 0;
+  const hw = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.h_wiggle`)) || 0;
+  return base + hn + hh + hw;
+}
 function instance$p($$self, $$props, $$invalidate) {
   let activeEntityToEdit;
   let $activeTurnId;
@@ -110004,7 +110015,7 @@ function instance$p($$self, $$props, $$invalidate) {
   let hookIdSocket;
   let unsubTurn;
   onMount(async () => {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
+    var _a, _b, _c, _d, _e;
     OnlineCombat.init();
     const savedPos = game.user.getFlag(MODULE_ID$g, "hubPos");
     const savedSize = game.user.getFlag(MODULE_ID$g, "hubSize");
@@ -110048,10 +110059,10 @@ function instance$p($$self, $$props, $$invalidate) {
               ready: true,
               submitted: true,
               stats: data.stats || {
-                sense: 1,
-                command: 1,
-                mind: 1,
-                coordination: 1
+                sense: getStatValue(pActor, "sense"),
+                command: getStatValue(pActor, "command"),
+                mind: getStatValue(pActor, "mind"),
+                coordination: getStatValue(pActor, "coordination")
               },
               pool: data.pool,
               poolToRoll: data.pool,
@@ -110075,12 +110086,12 @@ function instance$p($$self, $$props, $$invalidate) {
         img: actor.img,
         isNpc: false,
         stats: {
-          sense: ((_e = s == null ? void 0 : s.sense) == null ? void 0 : _e.value) || 1,
-          command: ((_f = s == null ? void 0 : s.command) == null ? void 0 : _f.value) || 1,
-          mind: ((_g = s == null ? void 0 : s.mind) == null ? void 0 : _g.value) || 1,
-          coordination: ((_h = s == null ? void 0 : s.coordination) == null ? void 0 : _h.value) || 1
+          sense: getStatValue(actor, "sense"),
+          command: getStatValue(actor, "command"),
+          mind: getStatValue(actor, "mind"),
+          coordination: getStatValue(actor, "coordination")
         },
-        pool: savedDec ? savedDec.pool : { d: ((_i = s == null ? void 0 : s.body) == null ? void 0 : _i.value) || 4, hd: 0, wd: 0 },
+        pool: savedDec ? savedDec.pool : { d: ((_e = s == null ? void 0 : s.body) == null ? void 0 : _e.value) || 4, hd: 0, wd: 0 },
         actions: savedDec ? savedDec.actions : [],
         localSets: savedDec ? savedDec.localSets : [],
         submitted: !!savedDec
@@ -110137,7 +110148,7 @@ function instance$p($$self, $$props, $$invalidate) {
   function handlePullPlayers() {
     const onlineUsers = game.users.filter((u) => !u.isGM && u.active && u.character);
     onlineUsers.forEach((u) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i;
+      var _a, _b, _c;
       const char = u.character;
       const savedDec = u.getFlag(MODULE_ID$g, "combatDeclaration");
       if (!npcs.find((n) => n.actorId === char.id)) {
@@ -110152,13 +110163,13 @@ function instance$p($$self, $$props, $$invalidate) {
             userId: u.id,
             ready: !!savedDec,
             stats: (savedDec == null ? void 0 : savedDec.stats) || {
-              sense: ((_c = (_b = (_a = char.system) == null ? void 0 : _a.stats) == null ? void 0 : _b.sense) == null ? void 0 : _c.value) || 1,
-              command: ((_f = (_e = (_d = char.system) == null ? void 0 : _d.stats) == null ? void 0 : _e.command) == null ? void 0 : _f.value) || 1,
-              mind: 1,
-              coordination: 1
+              sense: getStatValue(char, "sense"),
+              command: getStatValue(char, "command"),
+              mind: getStatValue(char, "mind"),
+              coordination: getStatValue(char, "coordination")
             },
             pool: (savedDec == null ? void 0 : savedDec.pool) || {
-              d: ((_i = (_h = (_g = char.system) == null ? void 0 : _g.stats) == null ? void 0 : _h.body) == null ? void 0 : _i.value) || 4,
+              d: ((_c = (_b = (_a = char.system) == null ? void 0 : _a.stats) == null ? void 0 : _b.body) == null ? void 0 : _c.value) || 4,
               hd: 0,
               wd: 0,
               spray: 0,
@@ -110204,7 +110215,7 @@ function instance$p($$self, $$props, $$invalidate) {
   function handleAddTargetedNpcs() {
     const targets = Array.from(game.user.targets);
     targets.forEach((t) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i;
+      var _a, _b, _c;
       const char = t.actor;
       if (!char) return;
       $$invalidate(0, npcs = [
@@ -110217,13 +110228,13 @@ function instance$p($$self, $$props, $$invalidate) {
           isNpc: true,
           ready: false,
           stats: {
-            sense: ((_c = (_b = (_a = char.system) == null ? void 0 : _a.stats) == null ? void 0 : _b.sense) == null ? void 0 : _c.value) || 1,
-            command: ((_f = (_e = (_d = char.system) == null ? void 0 : _d.stats) == null ? void 0 : _e.command) == null ? void 0 : _f.value) || 1,
-            mind: 1,
-            coordination: 1
+            sense: getStatValue(char, "sense"),
+            command: getStatValue(char, "command"),
+            mind: getStatValue(char, "mind"),
+            coordination: getStatValue(char, "coordination")
           },
           pool: {
-            d: ((_i = (_h = (_g = char.system) == null ? void 0 : _g.stats) == null ? void 0 : _h.body) == null ? void 0 : _i.value) || 3,
+            d: ((_c = (_b = (_a = char.system) == null ? void 0 : _a.stats) == null ? void 0 : _b.body) == null ? void 0 : _c.value) || 3,
             hd: 0,
             wd: 0,
             spray: 0,
@@ -152762,7 +152773,11 @@ class NexusCombat extends Combat {
       const actor = combatant.actor;
       if (!actor) continue;
       const getStat = (stat) => {
-        return Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.value`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.val`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.value`)) || 0;
+        const base = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.value`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.val`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.value`)) || 0;
+        const hn = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_normal`)) || 0;
+        const hh = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_hard`)) || 0;
+        const hw = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_wiggle`)) || 0;
+        return base + hn + hh + hw;
       };
       const sense = getStat("sense");
       const mind = getStat("mind");
