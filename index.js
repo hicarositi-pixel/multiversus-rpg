@@ -152543,7 +152543,11 @@ Hooks.on("preCreateCombatant", (combatant, data, options, userId) => {
   if (!combatant.actor) return;
   const actor = combatant.actor;
   const getStat = (stat) => {
-    return Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.value`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.val`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.value`)) || 0;
+    const base = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.value`)) || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.normal`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.val`)) || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.value`)) || 0;
+    const hn = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_normal`)) || 0;
+    const hh = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_hard`)) || 0;
+    const hw = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_wiggle`)) || 0;
+    return base + hn + hh + hw;
   };
   const sense = getStat("sense");
   const mind = getStat("mind");
