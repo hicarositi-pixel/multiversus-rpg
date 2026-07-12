@@ -2,7 +2,7 @@
   "id": "multiversus-rpg",
   "title": "Multiversus RPG",
   "description": "Um Sistema Operacional futurista (Kernel) projetado para o cenário Multiversus RPG.",
-  "version": "1.6.5",
+  "version": "1.6.51",
   "compatibility": {
     "minimum": "11",
     "verified": "12"
