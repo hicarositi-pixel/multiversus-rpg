@@ -90,7 +90,7 @@ export const StoreDatabase = {
         return d.getTime();
     },
 
-    generateExclusiveStore: async (userId, force = false, forcedItemId = null) => {
+    generateExclusiveStore: async (userId, force = false) => {
         const user = game.users.get(userId);
         if (!user) return;
         
@@ -120,7 +120,7 @@ export const StoreDatabase = {
         let totalWeight = weights.reduce((acc, curr) => acc + curr.weight, 0);
         let storeItems = [];
         
-        const loops = forcedItemId ? 7 : 8;
+        const loops = 8;
         for (let i = 0; i < loops; i++) {
             let rnd = Math.random() * totalWeight;
             let acc = 0;
@@ -195,16 +195,6 @@ let fItems = archive.filter(item => {
             storeItems[discountIndex].discounted = true;
             storeItems[discountIndex].originalPrice = storeItems[discountIndex].price;
             storeItems[discountIndex].price = Math.floor(storeItems[discountIndex].price * 0.8);
-        }
-
-        if (forcedItemId) {
-            let forcedItemObj = archive.find(i => i.id === forcedItemId);
-            if (forcedItemObj) {
-                let fItem = JSON.parse(JSON.stringify(forcedItemObj));
-                fItem.exclusiveId = foundry.utils.randomID();
-                fItem.discounted = false;
-                storeItems.push(fItem);
-            }
         }
         
         userData.exclusiveStore = {
