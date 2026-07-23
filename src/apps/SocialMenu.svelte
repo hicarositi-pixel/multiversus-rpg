@@ -36,12 +36,52 @@
     )).map(chatId => {
         const otherId = chatId.replace('dm-', '').split('-').find(id => id !== mainActor?.id);
         const otherActor = game.actors.get(otherId);
+        const msgs = ($hubChatStore || []).filter(m => m.chatId === chatId);
+        const lastMsg = msgs[msgs.length - 1];
         return {
             id: chatId,
             name: otherActor?.name || 'Desconhecido',
-            actorId: otherId
+            actorId: otherId,
+            lastTimestamp: lastMsg ? lastMsg.timestamp : 0,
+            unread: (lastMsg && lastMsg.timestamp > (socialProfile.lastReadDMs?.[chatId] || 0) && lastMsg.senderId !== mainActor?.id)
         };
-    });
+    }).sort((a, b) => b.lastTimestamp - a.lastTimestamp);
+
+    $: hasUnreadDMs = activeDMs.some(dm => dm.unread);
+
+    $: allPosts = ($hubChatStore || []).filter(m => m.chatId === 'feed');
+    $: lastPostTime = allPosts.length > 0 ? allPosts[allPosts.length - 1].timestamp : 0;
+    $: hasUnreadFeed = lastPostTime > (socialProfile.lastReadFeed || 0) && (allPosts[allPosts.length - 1]?.senderId !== mainActor?.id);
+
+    let _readTimer = null;
+    function markAsRead(chatId, tab) {
+        if (!mainActor) return;
+        if (_readTimer) clearTimeout(_readTimer);
+        _readTimer = setTimeout(() => {
+            let sp = mainActor.getFlag(MODULE_ID, "social_profile") || {};
+            let changed = false;
+            if (tab === 'chats' && chatId && chatId.startsWith('dm-')) {
+                if (!sp.lastReadDMs) sp.lastReadDMs = {};
+                if ((sp.lastReadDMs[chatId] || 0) < Date.now() - 5000) {
+                    sp.lastReadDMs[chatId] = Date.now();
+                    changed = true;
+                }
+            } else if (tab === 'network') {
+                if ((sp.lastReadFeed || 0) < Date.now() - 5000) {
+                    sp.lastReadFeed = Date.now();
+                    changed = true;
+                }
+            }
+            if (changed) {
+                socialProfile = sp;
+                mainActor.setFlag(MODULE_ID, "social_profile", sp).catch(()=>{});
+            }
+        }, 500);
+    }
+
+    $: if ($hubActiveTab && $hubActiveChatId && mainActor) {
+        markAsRead($hubActiveChatId, $hubActiveTab);
+    }
 
     let socialVisibleActors = [];
     try { socialVisibleActors = game.settings.get("multiversus-rpg", "socialVisibleActors") || []; } catch(e){}
@@ -179,13 +219,12 @@
         };
 
         const content = isRoll ? customContent : formatMessage(newMessage.trim());
+        if (!isRoll) newMessage = "";
 
         await SocialHubDatabase.sendMessage({
             chatId: $hubActiveChatId, senderId: mainActor?.id || game.user.id, ...senderData,
             text: content, image: img, isRoll: isRoll
         });
-        
-        if (!isRoll) newMessage = "";
     }
 
     async function handleDiceLogicResult(htmlContent) {
@@ -274,9 +313,13 @@
 
     <aside class="nexus-sidebar">
         <div class="nav-icons">
-            <button class:active={$hubActiveTab === 'network'} on:click={() => setTab('network')} title="Feed"><i class="fas fa-home"></i></button>
+            <button class:active={$hubActiveTab === 'network'} on:click={() => setTab('network')} title="Feed">
+                <i class="fas fa-home" class:blinking={hasUnreadFeed && $hubActiveTab !== 'network'} style={hasUnreadFeed && $hubActiveTab !== 'network' ? 'color:#00ff41;' : ''}></i>
+            </button>
             <button class:active={$hubActiveTab === 'explore'} on:click={() => setTab('explore')} title="Explorar"><i class="fas fa-search"></i></button>
-            <button class:active={$hubActiveTab === 'chats'} on:click={() => setTab('chats')} title="Directs"><i class="fas fa-paper-plane"></i></button>
+            <button class:active={$hubActiveTab === 'chats'} on:click={() => setTab('chats')} title="Directs">
+                <i class="fas fa-paper-plane" class:blinking={hasUnreadDMs && $hubActiveTab !== 'chats'} style={hasUnreadDMs && $hubActiveTab !== 'chats' ? 'color:#00ff41;' : ''}></i>
+            </button>
             <button class:active={$hubActiveTab === 'profile'} on:click={() => setTab('profile')} title="Perfil"><i class="fas fa-user"></i></button>
             <button class:active={$hubActiveTab === 'personas'} on:click={() => setTab('personas')} title="Trocar Ficha (OOC)"><i class="fas fa-id-card"></i></button>
             {#if game.user.isGM}
@@ -317,9 +360,12 @@
                         {#each activeDMs as dm}
                             <div class="chat-row" class:active={$hubActiveChatId === dm.id} role="button" tabindex="0" on:click={() => switchChat(dm.id, dm.name)}>
                                 <div style="display:flex; align-items:center; gap:8px; flex:1;">
-                                    <i class="fas fa-user"></i>
-                                    <span>{dm.name}</span>
+                                    <i class="fas fa-user" style={dm.unread ? 'color:#00ff41;' : ''}></i>
+                                    <span style={dm.unread ? 'font-weight:bold; color:#00ff41;' : ''}>{dm.name}</span>
                                 </div>
+                                {#if dm.unread}
+                                    <div class="unread-dot"></div>
+                                {/if}
                             </div>
                         {/each}
                     </div>
@@ -329,7 +375,7 @@
                     <header class="chat-header-bar"><span class="channel-name"># {$hubActiveChatName}</span></header>
                     <div class="message-log custom-scroll" bind:this={chatContainer}>
                         {#each messages as m (m.id)}
-                            <div class="msg-row" class:me={m.senderId === game.user.id} in:fade>
+                            <div class="msg-row" class:me={m.senderId === game.user.id || m.senderId === mainActor?.id || m.realName === game.user.name} in:fade>
                                 <img src={m.senderImg} class="msg-avatar" alt="av" on:click={()=>window.open(m.senderImg)}/>
                                 <div class="msg-content-wrapper">
                                     <div class="msg-header">
@@ -446,6 +492,9 @@
     .nexus-sidebar button { background: none; border: none; color: var(--chat-text); font-size: 22px; cursor: pointer; opacity: 0.4; transition: 0.2s; }
     .nexus-sidebar button.active { opacity: 1; color: var(--chat-accent); text-shadow: 0 0 10px var(--chat-accent); }
     .user-mini-status img { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--chat-border); }
+    @keyframes fastPulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+    .blinking { animation: fastPulse 1s infinite; text-shadow: 0 0 10px #00ff41; }
+    .unread-dot { width: 8px; height: 8px; background: #00ff41; border-radius: 50%; box-shadow: 0 0 5px #00ff41; }
     
     .nexus-viewport { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; z-index: 1; min-width: 0; }
     .split-view { display: flex; height: 100%; width: 100%; }

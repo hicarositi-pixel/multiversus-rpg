@@ -72,7 +72,8 @@
                  class:active={isActive}
                  animate:flip={{duration: 400, easing: quintOut}}
                  on:click={() => dispatch('selectNpc', c.id)}
-                 title="Clique para inspecionar no Terminal">
+                 on:contextmenu|preventDefault={() => { if(isGM) dispatch('setTurn', c.id); }}
+                 title="Botão Esquerdo: Terminal | Botão Direito (GM): Forçar Turno">
                 
                 <div class="order-badge" title="Ordem na Fila">{i + 1}</div>
                 

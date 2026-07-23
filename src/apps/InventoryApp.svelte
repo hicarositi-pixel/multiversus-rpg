@@ -303,7 +303,7 @@
       <div class="stash-header"><span>ITENS FORA DO INVENTÁRIO</span> <span class="count-badge">{stashItems.length}</span></div>
       <div class="stash-grid custom-scroll">
         {#each stashItems as item (item.id)}
-          <div class="stash-slot" draggable="true" on:dragstart={(e) => handleDragStart(e, item, 'stash')}>
+          <div class="stash-slot" draggable="true" on:dragstart={(e) => handleDragStart(e, item, 'stash')} on:click|stopPropagation>
               <InventoryCard item={item} index={item.id} isGM={isGM} inGrid={false} onSelect={() => { selectedItem = item; isEditing = false; }} onUpdateQty={updateItemLocal} onDelete={() => deleteItem(item.id)}/>
           </div>
         {/each}

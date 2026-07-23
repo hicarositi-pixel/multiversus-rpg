@@ -18,7 +18,7 @@
         { id: 'stats', label: 'Atributos', icon: 'fa-user-bolt' },
         { id: 'skills', label: 'Perícias', icon: 'fa-list-check' },
         { id: 'powers', label: 'Milagres', icon: 'fa-hand-sparkles' },
-        { id: 'combat', label: 'Combate/Dano', icon: 'fa-shield-heart' },
+        { id: 'combat', label: 'ESTATÍSTICAS DE COMBATE', icon: 'fa-shield-heart' },
         { id: 'inv', label: 'Equipamento', icon: 'fa-briefcase' },
         { id: 'bio', label: 'Dossiê', icon: 'fa-address-card' }
     ];
@@ -108,7 +108,7 @@
                             <p>Aqui entram os Atributos de Wild Talents (Body, Mind, etc)</p>
                         </div>
                     {:else if activeApp === 'combat'}
-                        <CombatApp {actor} {system} />
+                        <CombatApp {actor} {system} themeColor={themeColor} />
                     {:else if activeApp === 'bio'}
                         <ProfileApp {actor} {system} />
                     {/if}

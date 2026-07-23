@@ -137,6 +137,13 @@
 
         ChatMessage.create(chatData);
     }
+
+    function sendToCombatOS() {
+        if (window.NexusCombatOS) {
+            window.NexusCombatOS.setPool({d: pool.d, hd: pool.hd, wd: pool.wd});
+            if (onClose) onClose();
+        }
+    }
 </script>
 
 <div class="roll-engine-overlay no-drag" style="--primary: {theme.primary}; --bg: {theme.bg};" transition:fade>
@@ -195,6 +202,12 @@
                     <option value="blindroll">Rolagem Cega (Apenas o Mestre vê)</option>
                 </select>
             </div>
+
+            {#if game.combat && game.combat.combatants.find(c => c.actor?.id === actor?.id) && window.NexusCombatOS}
+                <button class="execute-btn" style="background: #ffcc00; color: #000;" on:click={sendToCombatOS}>
+                    <i class="fas fa-swords"></i> EXTRAIR DADOS PARA COMBAT OS
+                </button>
+            {/if}
 
             <button class="execute-btn" on:click={handleRoll}>
                 <i class="fas fa-dice-d20"></i> INICIAR ROLAGEM

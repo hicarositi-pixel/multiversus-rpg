@@ -77,7 +77,7 @@
     }
 
     const desktopIcons = [
-        { id: 'combat', icon: 'fa-crosshairs', label: 'COMBATE' },
+        { id: 'combat', icon: 'fa-crosshairs', label: 'ESTATÍSTICAS DE COMBATE' },
         { id: 'profile', icon: 'fa-id-card', label: 'PERFIL' },
         { id: 'inv', icon: 'fa-box-open', label: 'INVENTÁRIO' },
         { id: 'powers', icon: 'fa-bolt', label: 'PODERES' },
@@ -177,6 +177,7 @@
                             </button>
                         </div>
                         <div class="window-content-area">
+
                             {#if activeApp === 'combat'} <CombatApp {actor} {system} themeColor={themeColor} />
                             {:else if activeApp === 'profile'} <ProfileApp {actor} {system} themeColor={themeColor} />
                             {:else if activeApp === 'settings'} <SettingsApp {actor} on:close={() => activeApp = null} />

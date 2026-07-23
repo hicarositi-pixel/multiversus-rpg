@@ -200,6 +200,7 @@ import { onMount, onDestroy, createEventDispatcher } from 'svelte';
         {activeUnitId}
         targetingActive={targeting.active}
         {isGM} 
+        {combatantsData}
         on:rowClicked={handleTimelineClick}
         on:reveal={(e) => CombatManager.revealSet(e.detail)} 
     />

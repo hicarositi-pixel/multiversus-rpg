@@ -6,6 +6,11 @@ export default class MultiversusItemSheet extends ItemSheet {
     this.component = null;
   }
 
+  /** @override */
+  get id() {
+    return `multiversus-item-${this.document.id}`;
+  }
+
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
       classes: ["multiversus", "sheet", "item"],

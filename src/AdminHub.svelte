@@ -11,6 +11,7 @@
     import OracleApp from './OracleApp.svelte';
     import NexusApp from './database/NexusApp.svelte';
     import CalendarApp from './apps/CalendarApp.svelte'; // Adicione isto
+    import ArchetypeManager from './apps/ArchetypeManager.svelte';
     
     const dispatch = createEventDispatcher();
 
@@ -226,6 +227,14 @@
                                 <span class="desc">Database & Lore Manager</span>
                             </div>
                         </button>
+
+                        <button class="modern-app arche-theme" on:click={() => openApp('archetype')}>
+                            <div class="icon-box"><i class="fas fa-book-open"></i></div>
+                            <div class="app-meta">
+                                <span class="name">ARQUÉTIPOS</span>
+                                <span class="desc">Gerenciador de Kits e Talentos</span>
+                            </div>
+                        </button>
                     </div>
 
                 {:else if currentApp === 'config'}
@@ -263,6 +272,8 @@
                     <div class="full-app-wrapper"><NexusApp /></div>
                 {:else if currentApp === 'pass'}
                     <div class="full-app-wrapper"><PassManager /></div>
+                {:else if currentApp === 'archetype'}
+                    <div class="full-app-wrapper"><ArchetypeManager /></div>
                 {/if}
             </main>
 
@@ -359,6 +370,7 @@
     .pass-theme { --app-color: #ff9900; }
     .config-theme { --app-color: var(--c-primary); }
     .ai-theme { --app-color: #ffffff; }
+    .arche-theme { --app-color: #00ff41; }
 
     .modern-app:hover { 
         border-color: var(--app-color);

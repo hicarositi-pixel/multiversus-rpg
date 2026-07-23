@@ -4,10 +4,11 @@
     import { cubicOut, elasticOut } from 'svelte/easing';
     
     // --- IMPORTS DE APLICATIVOS (Atualizado para o novo CombatHub) ---
-import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
-    import StoreApp from './StoreApp.svelte'; // Mantido (já estava certo)
-    import RollEngine from './apps/components/RollEngine.svelte'; // Caminho corrigido
-    import MiroHub from './MiroHub.svelte'; // Mantido (já estava certo)
+import CombatHub from './apps/combat/CombatHub.svelte'; 
+    import StoreApp from './StoreApp.svelte'; 
+    import RollEngine from './apps/components/RollEngine.svelte'; 
+    import MiroHub from './MiroHub.svelte'; 
+    import ArchetypeManager from './apps/ArchetypeManager.svelte';
 
     const MODULE_ID = "multiversus-rpg";
     const user = game.user;
@@ -15,7 +16,7 @@ import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
 
     // --- PROPS & ATOR ---
     export let actor = null; 
-    $: currentActor = actor || user.character || canvas.tokens.controlled[0]?.actor || null;
+    $: currentActor = actor || user.character || null;
 
     // --- ESTADO & CORES ---
     let pos = user.getFlag(MODULE_ID, "hubPos") || { x: 100, y: 100 };
@@ -138,7 +139,7 @@ import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
 
 <div class="apps-overlay">
     {#if activeApp === 'combate'}
-        <CombatHub actor={currentActor} on:close={() => activeApp = null} />
+        <CombatHub actor={currentActor} />
     {/if}
 
     {#if activeApp === 'loja'}
@@ -157,6 +158,18 @@ import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
 
     {#if showMiro}
         <MiroHub themeColor={themeColor} mode={miroMode} onClose={() => showMiro = false} />
+    {/if}
+
+    {#if activeApp === 'arquétipos'}
+        <div class="arch-manager-global-wrapper" transition:fade>
+            <header class="arch-header">
+                <h3><i class="fas fa-book-open"></i> DATABASE DE ARQUÉTIPOS</h3>
+                <button on:click={() => activeApp = null}><i class="fas fa-times"></i></button>
+            </header>
+            <div class="arch-content">
+                <ArchetypeManager />
+            </div>
+        </div>
     {/if}
 </div>
 
@@ -179,8 +192,8 @@ import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
                 <div class="tech-ring"></div>
                 <div class="hex-wireframe"></div>
 
-                <button class="m-btn star-pt n1" on:click={(e) => openApp('ficha', e)} title="FICHA ORIGINAL">
-                    <i class="fas fa-id-card"></i>
+                <button class="m-btn star-pt n1 {currentActor ? '' : 'locked'}" on:click={(e) => openApp('ficha', e)} title="FICHA ORIGINAL">
+                    <i class="fas {currentActor ? 'fa-id-card' : 'fa-lock'}"></i>
                 </button>
                 
                 <button class="m-btn star-pt n2" on:click={(e) => openApp('combate', e)} title="NEXUS COMBAT OS">
@@ -201,6 +214,10 @@ import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
 
                 <button class="m-btn star-pt n6" on:click={(e) => openApp('detetive', e)} title="DETETIVE HUB">
                     <i class="fas fa-search-plus"></i>
+                </button>
+
+                <button class="m-btn star-pt n7" on:click={(e) => openApp('arquétipos', e)} title="ARQUÉTIPOS DE PODER">
+                    <i class="fas fa-book"></i>
                 </button>
 
             </div>
@@ -262,19 +279,37 @@ import CombatHub from './apps/combat/CombatHub.svelte'; // Caminho corrigido
         box-shadow: 0 5px 15px rgba(0,0,0,0.8), inset 0 0 10px rgba(0, 0, 0, 0.9);
         z-index: 160;
     }
-    
+
     .m-btn:hover { 
         background: var(--c-primary); color: #000; 
         transform: translate(-50%, -50%) scale(1.2) !important; 
         box-shadow: 0 0 20px var(--c-primary), inset 0 0 5px #fff; 
     }
+    
+    .m-btn.locked { opacity: 0.4; border-color: #ff3333 !important; color: #ff3333 !important; cursor: not-allowed; }
+    .m-btn.locked:hover { background: rgba(255,51,51,0.2) !important; color: #ff3333 !important; box-shadow: none !important; }
 
     .n1 { top: 0%; left: 50%; transform: translate(-50%, -50%); animation: float1 4s ease-in-out infinite; } 
-    .n2 { top: 25%; left: 93.3%; transform: translate(-50%, -50%); animation: float2 4.5s ease-in-out infinite; } 
-    .n3 { top: 75%; left: 93.3%; transform: translate(-50%, -50%); animation: float3 4.2s ease-in-out infinite; } 
-    .n4 { top: 100%; left: 50%; transform: translate(-50%, -50%); animation: float1 4.7s ease-in-out infinite; } 
-    .n5 { top: 75%; left: 6.7%; transform: translate(-50%, -50%); animation: float2 4.1s ease-in-out infinite; } 
-    .n6 { top: 25%; left: 6.7%; transform: translate(-50%, -50%); animation: float3 4.6s ease-in-out infinite; } 
+    .n2 { top: 18.8%; left: 89.1%; transform: translate(-50%, -50%); animation: float2 4.5s ease-in-out infinite; } 
+    .n3 { top: 61.1%; left: 98.7%; transform: translate(-50%, -50%); animation: float3 4.2s ease-in-out infinite; } 
+    .n4 { top: 95.0%; left: 71.7%; transform: translate(-50%, -50%); animation: float1 4.7s ease-in-out infinite; } 
+    .n5 { top: 95.0%; left: 28.3%; transform: translate(-50%, -50%); animation: float2 4.1s ease-in-out infinite; } 
+    .n6 { top: 61.1%; left: 1.3%; transform: translate(-50%, -50%); animation: float3 4.6s ease-in-out infinite; } 
+    .n7 { top: 18.8%; left: 10.9%; transform: translate(-50%, -50%); animation: float1 4.3s ease-in-out infinite; } 
+
+    .arch-manager-global-wrapper {
+        position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 1000px; height: 750px;
+        background: #000; border: 1px solid var(--c-primary); display: flex; flex-direction: column;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 15px rgba(var(--c-primary), 0.3); border-radius: 8px; overflow: hidden; pointer-events: auto; z-index: 25000;
+    }
+    .arch-header {
+        background: rgba(var(--c-primary), 0.1); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 2px solid var(--c-primary);
+    }
+    .arch-header h3 { margin: 0; color: var(--c-primary); font-size: 16px; text-shadow: 0 0 5px var(--c-primary); }
+    .arch-header button { background: transparent; border: none; color: var(--c-primary); cursor: pointer; font-size: 18px; transition: 0.2s; }
+    .arch-header button:hover { color: #ff3333; transform: scale(1.2); }
+    .arch-content { flex: 1; overflow: hidden; position: relative; }
 
     .board-selector-hud { position: absolute; left: 160px; top: 50%; transform: translateY(-50%); background: rgba(5,5,10,0.95); border: 1px solid var(--c-primary); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; width: 180px; pointer-events: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
     .selector-title { font-size: 10px; font-weight: bold; color: var(--c-primary); border-bottom: 1px dashed var(--c-primary); padding-bottom: 6px; margin-bottom: 4px; letter-spacing: 1px; }

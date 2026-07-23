@@ -8,14 +8,31 @@
     export let targetingActive = false;
     export let isGM = false;
 
+    export let combatantsData = []; // Passado para encontrar o alvo
+
     const dispatch = createEventDispatcher();
 
     function getActionInfo(action) {
-        if (!action || action.text === 'Ação Improvisada') return { title: 'AÇÃO IMPROVISADA', css: 'improvisada' };
-        if (action.type === 'ataque') return { title: `ATAQUE`, css: 'ataque' };
-        if (action.type === 'defesa') return { title: `DEFESA`, css: 'defesa' };
-        if (action.type === 'utilidade') return { title: `UTILIDADE`, css: 'utilidade' };
-        return { title: 'OCULTO', css: 'improvisada' };
+        if (!action || !action.types || action.types.length === 0) return { title: 'AÇÃO IMPROVISADA', css: 'improvisada' };
+        
+        let uniqueTypes = [...new Set(action.types)];
+        let titleParts = [];
+        uniqueTypes.forEach(t => {
+            let count = action.types.filter(type => type === t).length;
+            titleParts.push(count > 1 ? `${count}x ${t.toUpperCase()}` : t.toUpperCase());
+        });
+        let title = titleParts.join(' + ');
+
+        if (uniqueTypes.length > 1) {
+            return { title: title, css: 'multi' };
+        } else if (uniqueTypes.includes('ataque')) {
+            return { title: title, css: 'ataque' };
+        } else if (uniqueTypes.includes('defesa')) {
+            return { title: title, css: 'defesa' };
+        } else if (uniqueTypes.includes('utilidade')) {
+            return { title: title, css: 'utilidade' };
+        }
+        return { title: 'OCULTO', css: 'encrypted' };
     }
 
     function handleRowClick(item, isClear) {
@@ -55,6 +72,7 @@
             <div class="t-row {isClear ? info.css : 'encrypted'}" 
                  class:active={activeUnitId === item.actorId && !targetingActive}
                  class:locked={!isClear && !targetingActive}
+                 class:multi-action={isClear && item.action?.types && new Set(item.action.types).size > 1}
                  animate:flip={{duration: 400, easing: quintOut}}
                  on:click={() => handleRowClick(item, isClear)}>
                 
@@ -94,6 +112,17 @@
                     {/if}
                 </div>
 
+                <!-- TARGET DISPLAY -->
+                {#if isClear && item.targetId}
+                    {@const targetNpc = combatantsData?.find(c => c.id === item.targetId || c.actorId === item.targetId)}
+                    {#if targetNpc}
+                        <div class="t-target" title="Alvo: {targetNpc.name}">
+                            <i class="fas fa-crosshairs target-icon"></i>
+                            <img src={targetNpc.img} alt="Target" class="target-img"/>
+                        </div>
+                    {/if}
+                {/if}
+
                 {#if isGM && !item.isRevealed}
                     <button class="gm-reveal-btn" on:click|stopPropagation={() => dispatch('reveal', item.uniqueId)}>
                         <i class="fas fa-unlock"></i> REVELAR
@@ -106,7 +135,7 @@
 
 <style>
     .timeline-panel { 
-        width: 360px; background: #050508; border-right: 2px solid #00ff41; 
+        width: 420px; background: #050508; border-right: 2px solid #00ff41; 
         display: flex; flex-direction: column; height: 100%; position: relative; 
         font-family: 'Share Tech Mono', monospace;
     }
@@ -133,10 +162,14 @@
     .t-row.locked { cursor: not-allowed; opacity: 0.7; }
     .t-row.locked:hover { transform: none; background: #0a0a0e; }
 
+    /* CORE COLORS */
     .t-row.ataque { border-left-color: #f33; }
     .t-row.defesa { border-left-color: #08f; }
-    .t-row.utilidade { border-left-color: #00ff41; }
+    .t-row.utilidade { border-left-color: #ffea00; }
+    .t-row.multi { border-left-color: #fff; background: #000; box-shadow: inset 0 0 10px rgba(255,255,255,0.05); }
     .t-row.encrypted { border-left-color: #333; background: #050505; border-style: dashed; }
+    
+    .t-row.multi-action { background: #000 !important; }
 
     .t-speed { font-size: 11px; color: #ffaa00; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; border: 1px dashed #444; width: 28px; height: 36px; }
     .t-set { font-size: 18px; font-weight: bold; color: #fff; width: 45px; text-align: center; }
@@ -149,11 +182,17 @@
 
     .t-info { flex: 1; overflow: hidden; padding-top: 2px; }
     .name { font-size: 12px; font-weight: bold; color: #fff; display: block; }
+    
     .action-tag { font-size: 8px; font-weight: bold; padding: 1px 4px; border-radius: 2px; text-transform: uppercase; }
-    .action-tag.ataque { background: #300; color: #f33; }
-    .action-tag.defesa { background: #002; color: #08f; }
-    .action-tag.utilidade { background: #020; color: #00ff41; }
+    .action-tag.ataque { background: #300; color: #f33; border: 1px solid #f33; }
+    .action-tag.defesa { background: #002; color: #08f; border: 1px solid #08f; }
+    .action-tag.utilidade { background: #220; color: #ffea00; border: 1px solid #ffea00; }
+    .action-tag.multi { background: #111; color: #fff; border: 1px solid #fff; }
     .action-tag.encrypted { color: #555; border: 1px solid #222; }
+
+    .t-target { position: relative; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 1px solid #444; border-radius: 50%; padding: 2px; background: #000; margin-left: 5px; }
+    .t-target .target-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .t-target .target-icon { position: absolute; top: -5px; right: -5px; color: #f33; font-size: 10px; text-shadow: 0 0 2px #000; }
 
     .details-reveal { max-height: 0; opacity: 0; overflow: hidden; transition: 0.3s; }
     .t-row:hover .details-reveal { max-height: 80px; opacity: 1; margin-top: 5px; }

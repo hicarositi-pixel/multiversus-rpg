@@ -58,6 +58,13 @@ export class SocialNetworkDB {
         await db.setFlag(MODULE_ID, "users", users);
         
         this.notifyUpdate();
+
+        if (!isPrivate) {
+            import('./SocialHubDatabase.js').then(({ SocialHubDatabase }) => {
+                SocialHubDatabase.sendToDiscordWebhook(newPost).catch(() => {});
+            }).catch(() => {});
+        }
+
         return newPost;
     }
 

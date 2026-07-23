@@ -28,9 +28,11 @@ import OpeningScreen from "./OpeningScreen.svelte";
 import { CardDatabase } from '../Logic/CardDatabase.js';
 import { OriginDatabase } from './OriginDatabase.js';
 import { PowerDatabase } from './auxiliar/PowerDatabase.js';
+import { SystemBookDB } from './SystemBookDB.js';
 
 Hooks.once('init', () => {
     CardDatabase.init();
+    SystemBookDB.init();
 });
 
  
@@ -45,6 +47,11 @@ Hooks.once('init', async function() {
     SocialHubDatabase.init();
     await OriginDatabase.init();
     await PowerDatabase.init();
+
+    // Fix para TYPES.Item.power aparecer corretamente nos dropdowns
+    CONFIG.Item.typeLabels = CONFIG.Item.typeLabels || {};
+    CONFIG.Item.typeLabels.power = "Poder";
+
     // --- A. SETTINGS ---
     game.settings.register(MODULE_ID, "chatThemeBg", {
         name: "Cor de Fundo do Chat", hint: "Cor de fundo das mensagens no chat. Padrão: rgba(45, 45, 50, 0.4)",
@@ -165,11 +172,43 @@ game.settings.register("multiversus-rpg", "menuTheme", {
     type: Object,
     default: {
         currentDate: { day: 1, month: 0, year: 1 },
-        events: {}, // { "1-0-1": [{type: 'note', text: 'Inicio'}, {type: 'group', id: 'xyz'}] }
-        notes: {}
-    },
-    
-});
+        weather: "clear",
+        customEvents: []
+    }
+    });
+
+    game.settings.register("multiversus-rpg", "archetypeData", {
+        name: "Banco de Dados de Arquétipos",
+        scope: "world",
+        config: false,
+        type: Array,
+        default: []
+    });
+
+    game.settings.register("multiversus-rpg", "creatorBgUrl", {
+        name: "Fundo do Criador de Personagem (URL)",
+        scope: "world",
+        config: true,
+        type: String,
+        default: ""
+    });
+
+    game.settings.register("multiversus-rpg", "creatorAvatarUrl", {
+        name: "Avatar Padrão do Criador (URL)",
+        scope: "world",
+        config: true,
+        type: String,
+        default: "icons/svg/mystery-man.svg"
+    });
+
+    game.settings.register("multiversus-rpg", "nexusNotificationLevel", {
+        name: "Nível de Notificação do Nexus Hub",
+        hint: "Define como você recebe avisos de novas mensagens.",
+        scope: "client",
+        config: false,
+        type: String,
+        default: "completa"
+    });
 
     // --- B. BANCOS DE DADOS ---
     StoreDatabase.init();
@@ -204,9 +243,144 @@ game.settings.register("multiversus-rpg", "menuTheme", {
     console.log("MULTIVERSUS RPG | Init Concluído.");
 });
 
+// --- NEXUS HUB CHAT MESSAGE HOOKS ---
+Hooks.once("ready", () => {
+    const originalNotify = ChatLog.prototype.notify;
+    ChatLog.prototype.notify = function(message) {
+        if (message.getFlag(MODULE_ID, "isNexusHub")) {
+            const muteState = game.settings.get(MODULE_ID, "nexusNotificationLevel") || "completa";
+            
+            if (muteState === "nenhuma") return; // Completely silent, no visual, no sound
+
+            if (muteState === "visual") {
+                // Visual only: We bypass the native sound but still notify the UI.
+                // We can just show a silent toast and skip original notify to avoid the ping sound.
+                ui.notifications.info("Nexus Hub: Nova mensagem recebida!");
+                return;
+            }
+            
+            // "completa" -> let Foundry do its native ping/sound
+        }
+        return originalNotify.apply(this, arguments);
+    };
+});
+
+Hooks.on("renderChatMessage", (message, html) => {
+    if (message.getFlag(MODULE_ID, "isNexusHub")) {
+        if (html && typeof html.hide === 'function') html.hide();
+        else if (html && html[0] && typeof html[0].style === 'object') html[0].style.display = 'none';
+    }
+});
+
+Hooks.on("createChatMessage", (message) => {
+    if (message.getFlag(MODULE_ID, "isNexusHub")) {
+        import('./database/SocialHubStore.js').then(({ updateHubStore }) => {
+            updateHubStore();
+            Hooks.callAll("socialHubUpdate");
+        }).catch(() => {});
+    }
+});
+
+Hooks.on("deleteChatMessage", (message) => {
+    if (message.getFlag(MODULE_ID, "isNexusHub")) {
+        import('./database/SocialHubStore.js').then(({ updateHubStore }) => {
+            updateHubStore();
+            Hooks.callAll("socialHubUpdate");
+        }).catch(() => {});
+    }
+});
+
+import CombatHUD from './apps/combat/CombatHUD.svelte';
+
+Hooks.on("renderCombatTracker", (app, html, data) => {
+    // V12 passa um array de HTMLElement ou HTMLElement direto.
+    const tracker = html[0] || html;
+    if (!tracker || typeof tracker.querySelectorAll !== 'function') return;
+
+    if (game.user.isGM && game.combat) {
+        // Auto-roll para combatentes sem iniciativa (para não precisar clicar no dado)
+        const unrolled = game.combat.combatants.filter(c => c.initiative === null).map(c => c.id);
+        if (unrolled.length > 0) {
+            game.combat.rollInitiative(unrolled, { messageOptions: { rollMode: "gmroll" } });
+        }
+    }
+
+    tracker.querySelectorAll(".combatant").forEach(el => {
+        const id = el.dataset.combatantId;
+        const combatant = game.combat.combatants.get(id);
+        if (combatant && combatant.actor) {
+            const getStat = (stat) => {
+                const base = Number(foundry.utils.getProperty(combatant.actor, `flags.multiversus-rpg.stats.${stat}.normal`))
+                    || Number(foundry.utils.getProperty(combatant.actor, `system.stats.${stat}.value`))
+                    || Number(foundry.utils.getProperty(combatant.actor, `system.stats.${stat}.normal`))
+                    || Number(foundry.utils.getProperty(combatant.actor, `system.attributes.${stat}.val`))
+                    || Number(foundry.utils.getProperty(combatant.actor, `system.attributes.${stat}.value`))
+                    || 0;
+                
+                const hn = Number(foundry.utils.getProperty(combatant.actor, `flags.multiversus-rpg.stats.${stat}.h_normal`)) || 0;
+                const hh = Number(foundry.utils.getProperty(combatant.actor, `flags.multiversus-rpg.stats.${stat}.h_hard`)) || 0;
+                const hw = Number(foundry.utils.getProperty(combatant.actor, `flags.multiversus-rpg.stats.${stat}.h_wiggle`)) || 0;
+                
+                return base + hn + hh + hw;
+            };
+            const sense = getStat("sense");
+            const mind = getStat("mind");
+            
+            const initEl = el.querySelector(".token-initiative");
+            if (initEl && combatant.initiative !== null) {
+                // Remove the original dice roll button if present
+                initEl.innerHTML = `<span class="initiative" style="font-size: 11px; font-weight: bold;" title="Sense: ${sense} | Mind: ${mind}">${sense} / ${mind}</span>`;
+            }
+        }
+    });
+});
+
+Hooks.on("preCreateCombatant", (combatant, data, options, userId) => {
+    if (!combatant.actor) return;
+    const actor = combatant.actor;
+    const getStat = (stat) => {
+        const base = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.normal`))
+            || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.value`))
+            || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.normal`))
+            || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.val`))
+            || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.value`))
+            || 0;
+        
+        const hn = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_normal`)) || 0;
+        const hh = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_hard`)) || 0;
+        const hw = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_wiggle`)) || 0;
+        
+        return base + hn + hh + hw;
+    };
+    const sense = getStat("sense");
+    const mind = getStat("mind");
+    const score = - (sense + (mind / 100));
+    combatant.updateSource({ initiative: score });
+});
+
 // =========================================================
 // 3. READY HOOK
 // =========================================================
+Hooks.on("ready", () => {
+    // Monta o CombatHUD globalmente se não existir
+    if (!document.getElementById("nexus-combat-hud-container")) {
+        const hudContainer = document.createElement("div");
+        hudContainer.id = "nexus-combat-hud-container";
+        document.body.appendChild(hudContainer);
+        
+        new CombatHUD({
+            target: hudContainer,
+            props: {
+                themeColor: game.settings.get(MODULE_ID, "chatThemeBg") || "rgba(0, 0, 0, 0.7)",
+                neonColor: game.settings.get(MODULE_ID, "chatThemeNeon") || "#00ff41"
+            }
+        });
+    }
+
+    // Aplica o tema do Diário global
+    const themeBg = game.settings.get(MODULE_ID, "chatThemeBg");
+});
+
 Hooks.once('ready', async function() {
     console.log(`!!! ${MODULE_ID.toUpperCase()} OS: SISTEMAS PRONTOS !!!`);
 
@@ -218,8 +392,39 @@ Hooks.once('ready', async function() {
     }
 
     game.socket.on(`module.multiversus-rpg`, (payload) => {
-        if (payload.type === "SOCIAL_HUB_REFRESH") {
-            Hooks.callAll("socialHubUpdate");
+        if (payload.type === "SOCIAL_HUB_NEW_MESSAGE" && payload.msg) {
+            import('./database/SocialHubStore.js').then(({ hubChatStore }) => {
+                hubChatStore.update(messages => {
+                    if (messages.find(m => m.id === payload.msg.id)) return messages;
+                    const arr = [...messages, payload.msg];
+                    if (arr.length > 200) arr.shift();
+                    return arr;
+                });
+                Hooks.callAll("socialHubUpdate");
+            }).catch(() => Hooks.callAll("socialHubUpdate"));
+        } else if (payload.type === "SOCIAL_HUB_NEW_GROUP" && payload.group) {
+            import('./database/SocialHubStore.js').then(({ hubGroupsStore }) => {
+                hubGroupsStore.update(groups => {
+                    if (groups.find(g => g.id === payload.group.id)) return groups;
+                    return [...groups, payload.group];
+                });
+                Hooks.callAll("socialHubUpdate");
+            }).catch(() => Hooks.callAll("socialHubUpdate"));
+        } else if (payload.type === "SOCIAL_HUB_DELETE_GROUP" && payload.groupId) {
+            import('./database/SocialHubStore.js').then(({ hubGroupsStore }) => {
+                hubGroupsStore.update(groups => groups.filter(g => g.id !== payload.groupId));
+                Hooks.callAll("socialHubUpdate");
+            }).catch(() => Hooks.callAll("socialHubUpdate"));
+        } else if (payload.type === "SOCIAL_HUB_CLEAR_CHAT") {
+            import('./database/SocialHubStore.js').then(({ hubChatStore }) => {
+                hubChatStore.set([]);
+                Hooks.callAll("socialHubUpdate");
+            }).catch(() => Hooks.callAll("socialHubUpdate"));
+        } else if (payload.type === "SOCIAL_HUB_REFRESH") {
+            import('./database/SocialHubStore.js').then(({ updateHubStore }) => {
+                updateHubStore();
+                Hooks.callAll("socialHubUpdate");
+            }).catch(() => Hooks.callAll("socialHubUpdate"));
         }
     });
 
@@ -273,12 +478,45 @@ Hooks.once('ready', async function() {
     }
     new AuxiliarButton({ target: auxRoot });
 
+    // --- MACRO HUD (GLOBAL) ---
+    let macroRoot = document.getElementById('multiversus-macro-root');
+    if (!macroRoot) {
+        macroRoot = document.createElement('div');
+        macroRoot.id = 'multiversus-macro-root';
+        Object.assign(macroRoot.style, { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '10000' });
+        document.body.appendChild(macroRoot);
+    }
+    if (!window.multiversusMacroHUD) {
+        window.multiversusMacroHUD = new MacroScanner({ target: macroRoot, props: { actor: null } });
+    }
 
     // --- SOCKETS ---
     game.socket.on(`module.${MODULE_ID}`, async (payload) => {
         
         // >>> LÓGICA GM <<<
         if (game.user.isGM) {
+            if (payload.type === "COMBAT_ADD_PASSIVE" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
+                const activeCombat = game.combat;
+                if (activeCombat) {
+                    let pFlag = activeCombat.getFlag('multiversus-rpg', 'combatPassives');
+                    let arr = Array.isArray(pFlag) ? [...pFlag] : [];
+                    arr.push(payload.passive);
+                    await activeCombat.setFlag('multiversus-rpg', 'combatPassives', arr);
+                }
+            }
+
+            if (payload.type === "SOCIAL_HUB_SEND_MESSAGE" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
+                await SocialHubDatabase.sendMessage(payload.data);
+            }
+            if (payload.type === "SOCIAL_HUB_CREATE_GROUP" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
+                await SocialHubDatabase.createGroup(payload.name, payload.password);
+            }
+            if (payload.type === "SOCIAL_HUB_DELETE_GROUP" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
+                await SocialHubDatabase.deleteGroup(payload.groupId);
+            }
+            if (payload.type === "SOCIAL_HUB_CLEAR_CHAT" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
+                await SocialHubDatabase.clearChat();
+            }
             
             // 1. CRIAR FICHA COM PERMISSÕES (NOVO)
             if (payload.type === "AUX_ACTION_CREATE_SHEET") {
@@ -351,6 +589,7 @@ Hooks.once('ready', async function() {
                 await PlayerDatabase.deleteGroup(payload.id);
                 game.socket.emit(`module.${MODULE_ID}`, { type: "PLAYER_DB_UPDATE_NOTIFY" });
             }
+
         }
 
         // >>> LÓGICA CLIENTE <<<
@@ -398,13 +637,7 @@ class FichaSvelte extends ActorSheet {
         }
 
         // --- MACRO HUD ---
-        if (!window.multiversusMacroHUD) {
-            const macroRoot = document.createElement('div');
-            macroRoot.id = 'multiversus-macro-root';
-            Object.assign(macroRoot.style, { position: 'fixed', inset: '0', pointerEvents: 'none', zIndex: '10000' });
-            document.body.appendChild(macroRoot);
-            window.multiversusMacroHUD = new MacroScanner({ target: macroRoot, props: { actor: this.actor } });
-        } else {
+        if (window.multiversusMacroHUD) {
             window.multiversusMacroHUD.$set({ actor: this.actor });
         }
 
@@ -467,50 +700,31 @@ class NexusCombat extends Combat {
             const combatant = this.combatants.get(id);
             const actor = combatant.actor;
 
-            if ( !actor ) {
-                updates.push({_id: id, initiative: 0});
-                continue;
-            }
+            if ( !actor ) continue;
 
-            // --- LÓGICA DO SEU SISTEMA ---
-            // Pega os valores (padrão 0 se não existir na ficha)
-            const sense = Number(foundry.utils.getProperty(actor, "system.stats.sense.normal")) || 0;
-            const mind = Number(foundry.utils.getProperty(actor, "system.stats.mind.normal")) || 0;
-            const coord = Number(foundry.utils.getProperty(actor, "system.stats.coordination.normal")) || 0;
+            const getStat = (stat) => {
+                const base = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.normal`))
+                    || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.value`))
+                    || Number(foundry.utils.getProperty(actor, `system.stats.${stat}.normal`))
+                    || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.val`))
+                    || Number(foundry.utils.getProperty(actor, `system.attributes.${stat}.value`))
+                    || 0;
+                
+                const hn = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_normal`)) || 0;
+                const hh = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_hard`)) || 0;
+                const hw = Number(foundry.utils.getProperty(actor, `flags.multiversus-rpg.stats.${stat}.h_wiggle`)) || 0;
+                
+                return base + hn + hh + hw;
+            };
+            const sense = getStat("sense");
+            const mind = getStat("mind");
 
-            // FÓRMULA MATEMÁTICA "QUANTO MENOS, MELHOR"
-            // Base 100. Subtraímos os atributos. 
-            // Quem tem atributos altos, fica com nota menor e vai para o final da fila.
-            
-            // Passo 1: Sentidos (Peso Maior)
-            // Passo 2: Mente (Peso Decimal 0.01)
-            // Passo 3: Coordenação (Peso Decimal 0.0001)
-            
-            const score = 100 - sense - (mind / 100) - (coord / 10000);
+            // O Tracker vai ordenar pelo valor de initiative (decimais para Mind).
+            // Para o foundry (decrescente = maior valor age primeiro), como queremos que MENOR aja primeiro,
+            // usaremos um valor negativo para forçar a ordenação certa no Tracker se ele estiver em modo decrescente.
+            const score = - (sense + (mind / 100));
 
             updates.push({_id: id, initiative: score});
-
-            // --- MENSAGEM NO CHAT (PARA CLAREZA) ---
-            // Criamos uma mensagem bonita para o jogador entender o critério
-            const chatData = {
-                speaker: ChatMessage.getSpeaker({actor: actor, token: combatant.token, alias: combatant.name}),
-                flavor: `<h4 style="border-bottom:2px solid #00ff41; margin-bottom:5px;">Iniciativa Rolada</h4>
-                         <div style="display:flex; justify-content:space-between; font-size:12px; color:#ccc;">
-                            <span>👁️ Sense: <strong>${sense}</strong></span>
-                            <span>🧠 Mind: <strong>${mind}</strong></span>
-                            <span>🏃 Coord: <strong>${coord}</strong></span>
-                         </div>
-                         <div style="text-align:center; margin-top:5px; font-size:10px; color:#666;">
-                            (Menores atributos agem primeiro)
-                         </div>`,
-                content: `<div style="text-align:center; font-size:18px; font-weight:bold; color:#00ff41;">
-                            Score: ${score.toFixed(4)}
-                          </div>`
-            };
-            
-            // Se for GM rolando para NPC, oculta o detalhe se quiser (mode: CONST.CHAT_MESSAGE_TYPES.WHISPER)
-            // Aqui deixei público para todos verem a ordem
-            messages.push(chatData);
         }
 
         // Atualiza o Combat Tracker
@@ -518,12 +732,9 @@ class NexusCombat extends Combat {
         await this.updateEmbeddedDocuments("Combatant", updates);
 
         // Atualiza o Turno atual
-        if ( updateTurn && this._combatant ) {
-            await this.update({turn: this.turns.findIndex(t => t.id === this._combatant.id)});
+        if ( updateTurn && this.combatant ) {
+            await this.update({turn: this.turns.findIndex(t => t.id === this.combatant.id)});
         }
-
-        // Envia as mensagens explicativas para o chat
-        if (messages.length > 0) ChatMessage.createDocuments(messages);
 
         return this;
     }

@@ -17,17 +17,48 @@
     function toggleFocus() {
         isFocused = !isFocused;
     }
+
+    function count(t) {
+        return action.types.filter(type => type === t).length;
+    }
+    
+    function addType(t) {
+        action.types = [...action.types, t];
+        dispatch('updatePool');
+    }
+    
+    function removeType(t) {
+        const idx = action.types.lastIndexOf(t);
+        if (idx !== -1) {
+            let newArr = [...action.types];
+            newArr.splice(idx, 1);
+            action.types = newArr;
+            dispatch('updatePool');
+        }
+    }
 </script>
 
 <div class="action-card" class:disabled class:focused={isFocused}>
     <div class="ac-header">
         <div class="ac-title">
             <span class="num">0{index + 1}</span>
-            <select bind:value={action.type} {disabled} class="type-select {action.type}">
-                <option value="ataque">ATAQUE</option>
-                <option value="defesa">DEFESA</option>
-                <option value="utilidade">UTILIDADE</option>
-            </select>
+            <div class="tags-container">
+                <div class="tag-counter ataque" class:active={action.types.includes('ataque')}>
+                    <button class="t-btn" on:click={() => removeType('ataque')} disabled={disabled || count('ataque') === 0}>-</button>
+                    <span class="t-lbl">{count('ataque')}x ATAQUE</span>
+                    <button class="t-btn" on:click={() => addType('ataque')} {disabled}>+</button>
+                </div>
+                <div class="tag-counter defesa" class:active={action.types.includes('defesa')}>
+                    <button class="t-btn" on:click={() => removeType('defesa')} disabled={disabled || count('defesa') === 0}>-</button>
+                    <span class="t-lbl">{count('defesa')}x DEFESA</span>
+                    <button class="t-btn" on:click={() => addType('defesa')} {disabled}>+</button>
+                </div>
+                <div class="tag-counter utilidade" class:active={action.types.includes('utilidade')}>
+                    <button class="t-btn" on:click={() => removeType('utilidade')} disabled={disabled || count('utilidade') === 0}>-</button>
+                    <span class="t-lbl">{count('utilidade')}x UTILIDADE</span>
+                    <button class="t-btn" on:click={() => addType('utilidade')} {disabled}>+</button>
+                </div>
+            </div>
         </div>
 
         {#if isCollapsed && !isFocused}
@@ -57,7 +88,7 @@
             
             <div class="tactic-modules">
 
-                {#if action.type === 'ataque'}
+                {#if action.types.includes('ataque')}
                     <div class="module full-width">
                         <div class="segmented-control">
                             <label class="seg-btn {action.style === 'melee' ? 'active' : ''}">
@@ -122,7 +153,7 @@
                     </div>
                 {/if}
 
-                {#if action.type === 'defesa'}
+                {#if action.types.includes('defesa')}
                     <div class="module full-width">
                         <div class="segmented-control">
                             <label class="seg-btn {action.defense.style === 'block' ? 'active' : ''}">
@@ -167,7 +198,7 @@
                     </div>
                 {/if}
 
-                {#if action.type === 'utilidade'}
+                {#if action.types.includes('utilidade')}
                     <div class="module full-width">
                         <div class="segmented-control small">
                             <label class="seg-btn {action.utility.style === 'power' ? 'active' : ''}"><input type="radio" bind:group={action.utility.style} value="power" {disabled} class="hidden-radio"> PODER</label>
@@ -249,7 +280,7 @@
                 {/if}
             </div>
 
-            {#if action.type === 'ataque' || (action.type === 'utilidade' && action.utility.style === 'debuff')}
+            {#if action.types.includes('ataque') || (action.types.includes('utilidade') && action.utility.style === 'debuff')}
                 <button class="toggle-effects-btn {action.maneuvers.length > 0 ? 'has-effects' : ''}" 
                         on:click={() => showSpecialEffects = !showSpecialEffects} {disabled}>
                     <i class="fas fa-dna"></i> 
@@ -283,10 +314,14 @@
     .ac-title { display: flex; align-items: center; gap: 10px; }
     .num { font-weight: bold; color: var(--c-primary); font-size: 16px; text-shadow: 0 0 5px var(--c-primary); }
     
-    .type-select { background: #000; border: 1px solid #444; color: #fff; font-family: inherit; font-size: 12px; font-weight: bold; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; }
-    .type-select.ataque { color: #f33; border-color: #f33; box-shadow: inset 0 0 5px rgba(255,0,0,0.5); }
-    .type-select.defesa { color: #08f; border-color: #08f; box-shadow: inset 0 0 5px rgba(0,136,255,0.5); }
-    .type-select.utilidade { color: #a855f7; border-color: #a855f7; box-shadow: inset 0 0 5px rgba(168,85,247,0.5); }
+    .tags-container { display: flex; gap: 5px; align-items: center; }
+    .tag-counter { display: flex; align-items: center; background: #000; border: 1px solid #444; border-radius: 4px; overflow: hidden; font-size: 11px; font-weight: bold; color: #555; transition: 0.2s; }
+    .tag-counter.ataque.active { color: #f33; border-color: #f33; box-shadow: inset 0 0 5px rgba(255,0,0,0.5); }
+    .tag-counter.defesa.active { color: #08f; border-color: #08f; box-shadow: inset 0 0 5px rgba(0,136,255,0.5); }
+    .tag-counter.utilidade.active { color: #ffaa00; border-color: #ffaa00; box-shadow: inset 0 0 5px rgba(255,170,0,0.5); }
+    .t-btn { background: rgba(255,255,255,0.05); color: inherit; border: none; cursor: pointer; width: 20px; text-align: center; font-weight: bold; }
+    .t-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .t-lbl { padding: 0 6px; }
 
     .collapsed-preview { flex: 1; font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 0 15px; font-style: italic; }
     

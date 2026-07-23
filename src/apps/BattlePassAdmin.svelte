@@ -11,9 +11,20 @@
     
     // --- ESTADOS DE UI ---
     let selectedCell = null; // { weekIdx, tier }
-    let activeTab = 'list'; // 'list' | 'form'
+    let activeTab = 'list'; // 'list' | 'form' | 'seasons'
     let formMode = 'create'; // 'create' | 'edit'
     let searchQuery = "";
+
+    // --- ESTADOS DE TEMPORADAS ---
+    let seasonsList = [];
+    let currentSeason = {};
+    let editSeasonId = "";
+    let editSeasonName = "";
+    let editSeasonStatus = "closed";
+    let editStartDateStr = "";
+    let editEndDateStr = "";
+    let newSeasonName = "";
+    let newSeasonIdInput = "";
     
     // --- DRAFT (FORMULÁRIO) ---
     const emptyItem = {
@@ -52,7 +63,58 @@
     function loadData() {
         rewardsMap = PassSystem.getRewardsMap();
         archive = StoreDatabase.getArchive() || [];
+        seasonsList = PassSystem.getSeasonsList();
+        currentSeason = PassSystem.getSeasonData();
+        selectSeasonForEdit(currentSeason.id || "Season01_PASS");
         filterList();
+    }
+
+    function toInputDate(timestamp) {
+        if (!timestamp) return "";
+        const d = new Date(timestamp);
+        const pad = (n) => String(n).padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function fromInputDate(str) {
+        if (!str) return null;
+        return new Date(str).getTime();
+    }
+
+    function selectSeasonForEdit(sid) {
+        const found = seasonsList.find(s => s.id === sid) || currentSeason;
+        editSeasonId = found.id || "Season01_PASS";
+        editSeasonName = found.name || "Temporada 1";
+        editSeasonStatus = found.status || "closed";
+        editStartDateStr = toInputDate(found.startDate);
+        editEndDateStr = toInputDate(found.endDate);
+    }
+
+    async function handleSwitchSeason() {
+        await PassSystem.switchSeason(editSeasonId);
+        loadData();
+        ui.notifications.info(`Temporada [${editSeasonName}] ativada como atual!`);
+    }
+
+    async function handleSaveSeasonConfig() {
+        await PassSystem.updateSeason({
+            id: editSeasonId,
+            name: editSeasonName,
+            status: editSeasonStatus,
+            startDate: fromInputDate(editStartDateStr),
+            endDate: fromInputDate(editEndDateStr)
+        });
+        loadData();
+        ui.notifications.info("Configurações da Temporada Atualizadas!");
+    }
+
+    async function handleCreateNewSeason() {
+        if (!newSeasonName) return ui.notifications.warn("Digite o nome da nova temporada.");
+        const created = await PassSystem.createSeason(newSeasonName, newSeasonIdInput ? newSeasonIdInput.trim() : null);
+        newSeasonName = "";
+        newSeasonIdInput = "";
+        loadData();
+        ui.notifications.info(`Temporada [${created.name}] criada e selecionada como atual!`);
     }
 
     function filterList() {
@@ -238,10 +300,11 @@
         </div>
     </div>
 
-    <aside class="sidebar-tools">
+    <aside class="sidebar-tools" style="width: 360px;">
         <div class="tabs">
             <button class:active={activeTab === 'list'} on:click={() => activeTab = 'list'}>DATABASE</button>
             <button class:active={activeTab === 'form'} on:click={startCreate}>CRIAR NOVO</button>
+            <button class:active={activeTab === 'seasons'} on:click={() => activeTab = 'seasons'} style="color: #ffcc00;">PASSES / TEMPORADAS</button>
         </div>
 
         {#if activeTab === 'list'}
@@ -274,8 +337,7 @@
                     {/each}
                 </div>
             </div>
-
-        {:else}
+        {:else if activeTab === 'form'}
             <div class="tool-content create-mode">
                 <div class="form-title">{formMode === 'create' ? 'CRIAR NOVO ITEM' : 'EDITAR ITEM'}</div>
                 
@@ -328,6 +390,80 @@
                         {formMode === 'create' ? 'CRIAR ITEM' : 'SALVAR ALTERAÇÕES'}
                     </button>
                     <button class="do-cancel" on:click={() => activeTab = 'list'}>CANCELAR</button>
+                </div>
+            </div>
+
+        {:else if activeTab === 'seasons'}
+            <div class="tool-content create-mode" style="overflow-y: auto; gap: 14px; padding: 12px;">
+                <div style="border-bottom: 1px dashed #00ff41; padding-bottom: 10px;">
+                    <h4 style="color: #00ff41; margin: 0 0 6px 0; font-size: 13px;"><i class="fas fa-calendar-alt"></i> SELECIONAR TEMPORADA ATUAL</h4>
+                    <small style="color: #888; font-size: 10px;">Alterna entre os passes criados para carregar a matriz na tela e ativar para os jogadores.</small>
+                    <div style="display: flex; gap: 6px; margin-top: 8px;">
+                        <select bind:value={editSeasonId} on:change={() => selectSeasonForEdit(editSeasonId)} style="flex: 1; background: #000; border: 1px solid #444; color: #fff; padding: 6px; font-size: 11px;">
+                            {#each seasonsList as s}
+                                <option value={s.id}>{s.name} [{s.id}] {s.status === 'active' ? '(ATIVO)' : ''}</option>
+                            {/each}
+                        </select>
+                        <button class="save-main-btn" on:click={handleSwitchSeason} style="padding: 6px 12px; font-size: 10px; white-space: nowrap;">
+                            <i class="fas fa-bolt"></i> ATIVAR PASSE
+                        </button>
+                    </div>
+                </div>
+
+                <div style="border-bottom: 1px dashed #333; padding-bottom: 12px;">
+                    <h4 style="color: #fff; margin: 0 0 10px 0; font-size: 12px;"><i class="fas fa-sliders-h"></i> CONFIGURAR PASSE SELECIONADO</h4>
+                    
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label>ID DO PASSE (Imutável)</label>
+                        <input type="text" bind:value={editSeasonId} disabled style="background: #111; color: #666;" />
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label>NOME EXIBIDO DA TEMPORADA</label>
+                        <input type="text" bind:value={editSeasonName} placeholder="Ex: Temporada 1 - Cyberpunk" />
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label>STATUS DA TEMPORADA</label>
+                        <select bind:value={editSeasonStatus}>
+                            <option value="active">ATIVO (Jogadores progridem e resgatam)</option>
+                            <option value="closed">FECHADO / INATIVO</option>
+                        </select>
+                    </div>
+
+                    <div class="row" style="margin-bottom: 10px;">
+                        <div class="field">
+                            <label>DATA DE INÍCIO</label>
+                            <input type="datetime-local" bind:value={editStartDateStr} style="font-size: 10px;" />
+                        </div>
+                        <div class="field">
+                            <label>DATA DE TÉRMINO</label>
+                            <input type="datetime-local" bind:value={editEndDateStr} style="font-size: 10px;" />
+                        </div>
+                    </div>
+
+                    <button class="do-save" on:click={handleSaveSeasonConfig} style="width: 100%; font-size: 11px; padding: 8px;">
+                        <i class="fas fa-save"></i> SALVAR CONFIGURAÇÕES DO PASSE
+                    </button>
+                </div>
+
+                <div>
+                    <h4 style="color: #ffcc00; margin: 0 0 6px 0; font-size: 12px;"><i class="fas fa-plus-circle"></i> CRIAR NOVO PASSE DE BATALHA</h4>
+                    <small style="color: #999; font-size: 10px; display: block; margin-bottom: 10px;">Cria uma nova temporada mantendo os dados das anteriores e matriz 100% limpa.</small>
+                    
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label>NOME DO NOVO PASSE</label>
+                        <input type="text" bind:value={newSeasonName} placeholder="Ex: Temporada 2 - O Retorno" />
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label>ID DO PASSE (Opcional, ex: Season02_PASS)</label>
+                        <input type="text" bind:value={newSeasonIdInput} placeholder="Season02_PASS" />
+                    </div>
+
+                    <button class="do-save" on:click={handleCreateNewSeason} style="width: 100%; background: #ffcc00; color: #000; font-size: 11px; padding: 8px;">
+                        <i class="fas fa-magic"></i> CRIAR E SELECIONAR NOVO PASSE
+                    </button>
                 </div>
             </div>
         {/if}

@@ -14,6 +14,23 @@
 
     export let actor = null; 
 
+    function getStatValue(a, statName) {
+        if (!a) return 1;
+        const act = a instanceof Actor ? a : game.actors.get(a.id || a.actorId || a._id);
+        if (!act) return a.system?.stats?.[statName]?.value || 1;
+
+        const base = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.normal`))
+            || Number(foundry.utils.getProperty(act, `system.stats.${statName}.value`))
+            || Number(foundry.utils.getProperty(act, `system.stats.${statName}.normal`))
+            || Number(foundry.utils.getProperty(act, `system.attributes.${statName}.val`))
+            || Number(foundry.utils.getProperty(act, `system.attributes.${statName}.value`))
+            || 1;
+        const hn = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.h_normal`)) || 0;
+        const hh = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.h_hard`)) || 0;
+        const hw = Number(foundry.utils.getProperty(act, `flags.multiversus-rpg.stats.${statName}.h_wiggle`)) || 0;
+        return base + hn + hh + hw;
+    }
+
     function handleClose(e) {
         e.stopPropagation();
         if (isGM && selectedNpcId) { selectedNpcId = null; return; }
@@ -70,7 +87,7 @@
                 npcs = npcs.map(n => {
                     if (n.actorId === data.actorId) {
                         playerEncontrado = true;
-                        return { ...n, actions: data.actions, pool: data.pool, poolToRoll: data.pool, stats: data.stats || n.stats, ready: true, submitted: true };
+                        return { ...n, actions: data.actions, pool: data.pool, poolToRoll: data.pool, stats: data.stats || n.stats, localSets: data.localSets, ready: true, submitted: true };
                     }
                     return n;
                 });
@@ -81,8 +98,13 @@
                         npcs.push({
                             id: foundry.utils.randomID(), actorId: data.actorId, userId: data.userId,
                             name: pActor.name, img: pActor.img, isNpc: false, ready: true, submitted: true,
-                            stats: data.stats || { sense: 1, command: 1, mind: 1, coordination: 1 },
-                            pool: data.pool, poolToRoll: data.pool, actions: data.actions
+                            stats: data.stats || { 
+                                sense: getStatValue(pActor, "sense"), 
+                                command: getStatValue(pActor, "command"), 
+                                mind: getStatValue(pActor, "mind"), 
+                                coordination: getStatValue(pActor, "coordination") 
+                            },
+                            pool: data.pool, poolToRoll: data.pool, actions: data.actions, localSets: data.localSets
                         });
                     }
                 }
@@ -97,9 +119,14 @@
             const savedDec = game.user.getFlag(MODULE_ID, "combatDeclaration");
             playerEntity = {
                 id: actor.id, actorId: actor.id, name: actor.name, img: actor.img, isNpc: false, 
-                stats: { sense: s?.sense?.value || 1, command: s?.command?.value || 1, mind: s?.mind?.value || 1, coordination: s?.coordination?.value || 1 }, 
+                stats: { 
+                    sense: getStatValue(actor, "sense"), 
+                    command: getStatValue(actor, "command"), 
+                    mind: getStatValue(actor, "mind"), 
+                    coordination: getStatValue(actor, "coordination") 
+                }, 
                 pool: savedDec ? savedDec.pool : { d: s?.body?.value || 4, hd: 0, wd: 0 }, 
-                actions: savedDec ? savedDec.actions : [], submitted: !!savedDec
+                actions: savedDec ? savedDec.actions : [], localSets: savedDec ? savedDec.localSets : [], submitted: !!savedDec
             };
         }
         
@@ -172,10 +199,16 @@ hookIdScene = Hooks.on("updateScene", (scene, data) => {
                 npcs = [...npcs, {
                     id: foundry.utils.randomID(), actorId: char.id, name: char.name, img: char.img,
                     isNpc: false, userId: u.id, ready: !!savedDec,
-                    stats: savedDec?.stats || { sense: char.system?.stats?.sense?.value || 1, command: char.system?.stats?.command?.value || 1, mind: 1, coordination: 1 },
+                    stats: savedDec?.stats || { 
+                        sense: getStatValue(char, "sense"), 
+                        command: getStatValue(char, "command"), 
+                        mind: getStatValue(char, "mind"), 
+                        coordination: getStatValue(char, "coordination") 
+                    },
                     pool: savedDec?.pool || { d: char.system?.stats?.body?.value || 4, hd: 0, wd: 0, spray: 0, buff: 0 }, 
                     poolToRoll: savedDec?.pool || null,
                     actions: savedDec?.actions || [], 
+                    localSets: savedDec?.localSets || [],
                     submitted: !!savedDec
                 }];
             }
@@ -200,7 +233,8 @@ hookIdScene = Hooks.on("updateScene", (scene, data) => {
                             stats: savedDec.stats || n.stats,
                             pool: savedDec.pool || n.pool,
                             poolToRoll: savedDec.pool || n.pool,
-                            actions: savedDec.actions || []
+                            actions: savedDec.actions || [],
+                            localSets: savedDec.localSets || []
                         };
                     }
                     return n;
@@ -223,7 +257,13 @@ hookIdScene = Hooks.on("updateScene", (scene, data) => {
             if (!char) return;
             npcs = [...npcs, {
                 id: foundry.utils.randomID(), actorId: char.id, name: char.name, img: char.img,
-                isNpc: true, ready: false, stats: { sense: char.system?.stats?.sense?.value || 1, command: char.system?.stats?.command?.value || 1, mind: 1, coordination: 1 },
+                isNpc: true, ready: false, 
+                stats: { 
+                    sense: getStatValue(char, "sense"), 
+                    command: getStatValue(char, "command"), 
+                    mind: getStatValue(char, "mind"), 
+                    coordination: getStatValue(char, "coordination") 
+                },
                 pool: { d: char.system?.stats?.body?.value || 3, hd: 0, wd: 0, spray: 0, buff: 0 }, actions: [], submitted: false
             }];
         });

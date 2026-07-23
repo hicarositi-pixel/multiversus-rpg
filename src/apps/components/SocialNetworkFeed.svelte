@@ -24,15 +24,16 @@
     let viewingListFor = null;
     let commentText = "";
     let emojiMenuOpenFor = null;
+    let expandedMedia = null;
 
     let editProfileMode = false;
-    let socialProfile = { socialName: "", bio: "", attachments: [], coverImage: "" };
+    let socialProfile = { socialName: "", bio: "", attachments: [], coverImage: "", avatarImage: "", syncDiscord: false };
     let followerEditAmount = 10;
-
+    
     function startEditProfile() {
-        if (actor) {
-            const sp = actor.getFlag("multiversus-rpg", "social_profile") || {};
-            socialProfile = { socialName: sp.socialName || "", bio: sp.bio || "", attachments: sp.attachments || [], coverImage: sp.coverImage || "" };
+        const sp = actor?.getFlag("multiversus-rpg", "social_profile") || {};
+        if (sp) {
+            socialProfile = { socialName: sp.socialName || "", bio: sp.bio || "", attachments: sp.attachments || [], coverImage: sp.coverImage || "", avatarImage: sp.avatarImage || "", syncDiscord: !!sp.syncDiscord };
         }
         editProfileMode = true;
     }
@@ -61,16 +62,25 @@
         return (users[uid1].following || []).includes(uid2) && (users[uid2].following || []).includes(uid1);
     }
     
+    function getPostPriority(post) {
+        if (!post.timestamp) return 0;
+        const daysElapsed = Math.floor((Date.now() - post.timestamp) / (24 * 60 * 60 * 1000));
+        return Math.max(0, 10 - daysElapsed);
+    }
+
     $: visiblePosts = posts.filter(p => {
         if (!p.isPrivate) return true;
         if (p.authorId === currentActorId) return true;
         if (game.user.isGM) return true;
         return isMutualFollow(currentActorId, p.authorId);
     }).sort((a, b) => {
+        const pa = getPostPriority(a);
+        const pb = getPostPriority(b);
+        if (pb !== pa) return pb - pa; // Escada de prioridade de 10 a 0 por tempo passado
         const fa = calculateTotalFollowers(a.authorId, users);
         const fb = calculateTotalFollowers(b.authorId, users);
-        if (fb !== fa) return fb - fa; // Decrescente em seguidores
-        return b.timestamp - a.timestamp; // Decrescente em data (mais recente primeiro)
+        if (fb !== fa) return fb - fa; // Dentre a mesma prioridade, quem tem mais seguidores fica acima
+        return b.timestamp - a.timestamp; // Desempate por data exata (mais recente primeiro)
     });
 
     const COOLDOWN_MS = 3 * 60 * 60 * 1000;
@@ -104,12 +114,13 @@
         if (!_u[uid]) return 0;
         const base = _u[uid].baseFollowers || 0;
         let bonus = 0;
-        for (const tid of (_u[uid].following || [])) {
-            if (_u[tid]) {
-                bonus += Math.floor((users[tid].baseFollowers || 0) * 0.25);
+        const myFollowers = getFollowersList(uid);
+        for (const followerId of myFollowers) {
+            if (_u[followerId]) {
+                bonus += Math.floor((_u[followerId].baseFollowers || 0) * 0.25);
             }
         }
-        return base + bonus + getFollowersList(uid).length;
+        return base + bonus + myFollowers.length;
     }
 
     function getFollowersList(uid) {
@@ -171,12 +182,12 @@
         else if (currentFollowers < 2000) { baseDiceQty = 2; baseDiceType = 12; }
         else if (currentFollowers < 4000) { baseDiceQty = 4; baseDiceType = 12; }
         else if (currentFollowers < 8000) { baseDiceQty = 8; baseDiceType = 12; }
-        else if (currentFollowers < 16000) { baseDiceQty = 8; baseDiceType = 12; extraPercent = 10; }
-        else if (currentFollowers < 32000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 10; }
-        else if (currentFollowers < 1000000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 10; }
+        else if (currentFollowers < 16000) { baseDiceQty = 8; baseDiceType = 12; extraPercent = 2; }
+        else if (currentFollowers < 32000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 2; }
+        else if (currentFollowers < 1000000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 2; }
         else {
             baseDiceQty = 10; baseDiceType = 12;
-            if (hyperSum > 0) extraPercent = 10 + (hyperSum * 1);
+            if (hyperSum > 0) extraPercent = 2 + (hyperSum * 1);
             else extraPercent = 0;
         }
 
@@ -230,9 +241,23 @@
 
     function getYoutubeId(url) {
         if (!url) return null;
-        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|shorts\/|\&v=)([^#\&\?]*).*/;
         const match = url.match(regExp);
         return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function getInstagramId(url) {
+        if (!url) return null;
+        const regExp = /(?:https?:\/\/)?(?:www\.)?instagram\.com\/(?:p|reel|tv)\/([^\/?#&]+)/;
+        const match = url.match(regExp);
+        return match ? match[1] : null;
+    }
+
+    function getSpotifyId(url) {
+        if (!url) return null;
+        const regExp = /(?:https?:\/\/)?(?:open\.)?spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/;
+        const match = url.match(regExp);
+        return match ? { type: match[1], id: match[2] } : null;
     }
 
     function getUserName(uid) {
@@ -247,7 +272,12 @@
     }
     
     function getUserAvatar(uid) {
-        return game.actors.get(uid)?.img || "icons/svg/mystery-man.svg";
+        const a = game.actors.get(uid);
+        return a?.getFlag("multiversus-rpg", "social_profile")?.avatarImage || a?.img || "icons/svg/mystery-man.svg";
+    }
+
+    function getUserCover(uid) {
+        return game.actors.get(uid)?.getFlag("multiversus-rpg", "social_profile")?.coverImage || "";
     }
 
     function getBio(uid) {
@@ -337,11 +367,20 @@
                                 {#each p.attachments as att}
                                     {#if getYoutubeId(att)}
                                         <iframe class="post-media yt-frame" src="https://www.youtube.com/embed/{getYoutubeId(att)}" frameborder="0" allowfullscreen></iframe>
+                                    {:else if getInstagramId(att)}
+                                        <iframe class="post-media ig-frame" src="https://www.instagram.com/p/{getInstagramId(att)}/embed" frameborder="0" scrolling="no" allowtransparency="true" style="background:white; border-radius:4px;"></iframe>
+                                {:else if getSpotifyId(att)}
+                                    <iframe class="post-media spotify-frame" src="https://open.spotify.com/embed/{getSpotifyId(att).type}/{getSpotifyId(att).id}" width="100%" height="152" frameborder="0" allowtransparency="true" allow="encrypted-media" style="border-radius:12px;"></iframe>
                                     {:else if isVideo(att)}
-                                        <!-- svelte-ignore a11y-media-has-caption -->
-                                        <video src={att} controls class="post-media" loop autoplay muted></video>
+                                        <div style="position:relative; display:inline-block; width:100%;">
+                                            <!-- svelte-ignore a11y-media-has-caption -->
+                                            <video src={att} controls class="post-media" loop autoplay muted></video>
+                                            <button class="btn-ghost" style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); color:#fff; border:none; padding:5px 10px; border-radius:4px; z-index:10; cursor:pointer;" on:click={() => expandedMedia = {type: 'video', url: att}} title="Expandir"><i class="fas fa-expand"></i></button>
+                                        </div>
                                     {:else}
-                                        <img src={att} class="post-media" alt="post" />
+                                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                        <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                                        <img src={att} class="post-media" alt="post" style="cursor:zoom-in;" on:click={() => expandedMedia = {type: 'image', url: att}} title="Expandir" />
                                     {/if}
                                 {/each}
                             </div>
@@ -433,7 +472,8 @@
                 <div class="edit-profile-box" in:fade>
                     <h3>EDITAR PERFIL</h3>
                     <div class="form-group"><label>Nome de Exibição</label><input type="text" bind:value={socialProfile.socialName} class="hacker-input" placeholder={actor?.name}/></div>
-                    <div class="form-group"><label>Imagem de Capa (URL)</label><input type="text" bind:value={socialProfile.coverImage} class="hacker-input" placeholder="http://..."/></div>
+                    <div class="form-group"><label>Avatar (URL)</label><input type="text" bind:value={socialProfile.avatarImage} class="hacker-input" placeholder="http://..."/></div>
+                    <div class="form-group"><label>Imagem de Capa / Banner (URL)</label><input type="text" bind:value={socialProfile.coverImage} class="hacker-input" placeholder="http://..."/></div>
                     <div class="form-group"><label>Biografia</label><textarea bind:value={socialProfile.bio} class="hacker-input" style="height: 80px; resize: none;"></textarea></div>
                     <div class="form-group">
                         <label>Status Fixos (Links de Mídia)</label>
@@ -445,20 +485,29 @@
                         {/each}
                         <button class="btn-ghost" style="width:100%; margin-top:5px;" on:click={() => socialProfile.attachments = [...socialProfile.attachments, ""]}>+ Adicionar Anexo</button>
                     </div>
+                    <div class="form-group" style="margin-top: 15px; background: rgba(0,255,65,0.05); padding: 12px; border-radius: 6px; border: 1px dashed rgba(0,255,65,0.4);">
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; color:#00ff41; font-size:13px; margin:0; font-weight: bold;">
+                            <input type="checkbox" bind:checked={socialProfile.syncDiscord} style="width:16px; height:16px; accent-color:#00ff41; cursor:pointer;" />
+                            <span><i class="fab fa-discord"></i> Enviar minhas publicações para o Discord da mesa</span>
+                        </label>
+                        <span style="display:block; font-size:11px; color:#aaa; margin-top:4px; margin-left:24px;">Quando ativo, novas publicações no Feed serão espelhadas no canal configurado pelo Mestre.</span>
+                    </div>
                     <div style="display:flex; gap:10px; margin-top:15px;">
                         <button class="btn-publish" style="flex:1" on:click={saveProfile}>SALVAR</button>
                         <button class="btn-ghost" style="flex:1" on:click={() => editProfileMode = false}>CANCELAR</button>
                     </div>
                 </div>
             {:else}
-                <div class="p-modal-header" style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px;">
-                    <img src={getUserAvatar(currentActorId)} alt="avatar" style="width: 100px; height: 100px;" />
-                    <div class="p-modal-info" style="flex:1;">
-                        <h2 style="font-size: 24px;">{getUserName(currentActorId)}</h2>
-                        <span class="real-name">({getRealName(currentActorId)})</span>
+                <div class="p-modal-header" style="background: {getUserCover(currentActorId) ? `url('${getUserCover(currentActorId)}') center/cover` : 'rgba(0,0,0,0.3)'}; padding: 20px; border-radius: 8px; position: relative; min-height: 140px; margin-bottom: 20px;">
+                    <div style="position: absolute; bottom: -30px; left: 20px; border-radius: 50%; border: 4px solid #111; overflow: hidden; width: 100px; height: 100px; background: #000;">
+                        <img src={getUserAvatar(currentActorId)} alt="avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                    </div>
+                    <div class="p-modal-info" style="flex:1; margin-left: 130px; text-shadow: 0px 2px 4px rgba(0,0,0,1);">
+                        <h2 style="font-size: 24px; color: #fff;">{getUserName(currentActorId)}</h2>
+                        <span class="real-name" style="color: #ddd;">({getRealName(currentActorId)})</span>
                         <div class="p-stats">
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = currentActorId; }}><i class="fas fa-users"></i> {calculateTotalFollowers(currentActorId, users)} Seguidores</span>
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = currentActorId; }}> | <b>{getFollowingList(currentActorId, users).length}</b> Seguindo</span>
+                            <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'followers'; viewingListFor = currentActorId; }}><i class="fas fa-users"></i> {calculateTotalFollowers(currentActorId, users)} Seguidores</span>
+                            <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'following'; viewingListFor = currentActorId; }}> | <b>{getFollowingList(currentActorId, users).length}</b> Seguindo</span>
                         </div>
                         {#if game.user.isGM}
                             <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">
@@ -485,10 +534,20 @@
                             {#each getFixedStatus(currentActorId) as att}
                                 {#if getYoutubeId(att)}
                                     <iframe class="post-media yt-frame" src="https://www.youtube.com/embed/{getYoutubeId(att)}" frameborder="0" allowfullscreen></iframe>
+                                {:else if getInstagramId(att)}
+                                    <iframe class="post-media ig-frame" src="https://www.instagram.com/p/{getInstagramId(att)}/embed" frameborder="0" scrolling="no" allowtransparency="true" style="background:white; border-radius:4px;"></iframe>
+                                {:else if getSpotifyId(att)}
+                                    <iframe class="post-media spotify-frame" src="https://open.spotify.com/embed/{getSpotifyId(att).type}/{getSpotifyId(att).id}" width="100%" height="152" frameborder="0" allowtransparency="true" allow="encrypted-media" style="border-radius:12px;"></iframe>
                                 {:else if isVideo(att)}
-                                    <video src={att} controls class="post-media" loop autoplay muted></video>
+                                    <div style="position:relative; display:inline-block; width:100%;">
+                                        <!-- svelte-ignore a11y-media-has-caption -->
+                                        <video src={att} controls class="post-media" loop autoplay muted></video>
+                                        <button class="btn-ghost" style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); color:#fff; border:none; padding:5px 10px; border-radius:4px; z-index:10; cursor:pointer;" on:click={() => expandedMedia = {type: 'video', url: att}} title="Expandir"><i class="fas fa-expand"></i></button>
+                                    </div>
                                 {:else}
-                                    <img src={att} class="post-media" alt="post" />
+                                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                                    <img src={att} class="post-media" alt="post" style="cursor:zoom-in;" on:click={() => expandedMedia = {type: 'image', url: att}} title="Expandir" />
                                 {/if}
                             {/each}
                         </div>
@@ -515,27 +574,29 @@
             <div class="profile-modal custom-scroll" on:click|stopPropagation>
                 <button class="btn-close-modal" on:click={() => viewingProfileOf = null}><i class="fas fa-times"></i></button>
                 
-                <div class="p-modal-header">
-                    <img src={getUserAvatar(viewingProfileOf)} alt="avatar" />
-                    <div class="p-modal-info">
-                        <h2>{getUserName(viewingProfileOf)}</h2>
-                        <span class="real-name">({getRealName(viewingProfileOf)})</span>
+                <div class="p-modal-header" style="background: {getUserCover(viewingProfileOf) ? `url('${getUserCover(viewingProfileOf)}') center/cover` : 'rgba(0,0,0,0.3)'}; padding: 20px; border-radius: 8px; position: relative; min-height: 140px; margin-bottom: 20px;">
+                    <div style="position: absolute; bottom: -30px; left: 20px; border-radius: 50%; border: 4px solid #111; overflow: hidden; width: 100px; height: 100px; background: #000;">
+                        <img src={getUserAvatar(viewingProfileOf)} alt="avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                    </div>
+                    <div class="p-modal-info" style="flex:1; margin-left: 130px; text-shadow: 0px 2px 4px rgba(0,0,0,1);">
+                        <h2 style="font-size: 24px; color: #fff;">{getUserName(viewingProfileOf)}</h2>
+                        <span class="real-name" style="color: #ddd;">({getRealName(viewingProfileOf)})</span>
                         <div class="p-stats">
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'followers'; viewingListFor = viewingProfileOf; }}><i class="fas fa-users"></i> {calculateTotalFollowers(viewingProfileOf, users)} Seguidores</span>
-                            <span class="clickable-stat" on:click={() => { viewingListType = 'following'; viewingListFor = viewingProfileOf; }}> | <b>{getFollowingList(viewingProfileOf, users).length}</b> Seguindo</span>
+                            <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'followers'; viewingListFor = viewingProfileOf; }}><i class="fas fa-users"></i> {calculateTotalFollowers(viewingProfileOf, users)} Seguidores</span>
+                            <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'following'; viewingListFor = viewingProfileOf; }}> | <b>{getFollowingList(viewingProfileOf, users).length}</b> Seguindo</span>
                         </div>
                         {#if game.user.isGM}
                             <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">
                                 <input type="number" bind:value={followerEditAmount} class="hacker-input" style="width:60px; height:26px; padding:0; text-align:center;">
-                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#00ff41; border-color:#00ff41;" on:click={() => SocialNetworkDB.updateBaseFollowers(viewingProfileOf, followerEditAmount)}><i class="fas fa-plus"></i></button>
-                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#ff4444; border-color:#ff4444;" on:click={() => SocialNetworkDB.updateBaseFollowers(viewingProfileOf, -followerEditAmount)}><i class="fas fa-minus"></i></button>
+                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#00ff41; border-color:#00ff41; background:rgba(0,0,0,0.7);" on:click={() => SocialNetworkDB.updateBaseFollowers(viewingProfileOf, followerEditAmount)}><i class="fas fa-plus"></i></button>
+                                <button class="btn-ghost" style="width:26px; height:26px; padding:0; display:flex; align-items:center; justify-content:center; color:#ff4444; border-color:#ff4444; background:rgba(0,0,0,0.7);" on:click={() => SocialNetworkDB.updateBaseFollowers(viewingProfileOf, -followerEditAmount)}><i class="fas fa-minus"></i></button>
                             </div>
                         {/if}
                         {#if viewingProfileOf !== currentActorId}
                             <button class="btn-follow {isFollowing(viewingProfileOf) ? 'on' : ''}" style="margin-top:10px; width:100%; font-size:12px;" on:click={() => toggleFollow(viewingProfileOf)}>
                                 {isFollowing(viewingProfileOf) ? 'Seguindo' : 'Seguir'}
                             </button>
-                            <button class="btn-ghost" style="margin-top:5px; width:100%; font-size:12px; color:var(--chat-accent); border-color:var(--chat-accent);" on:click={() => dispatch('openDM', viewingProfileOf)}>
+                            <button class="btn-ghost" style="margin-top:5px; width:100%; font-size:12px; color:var(--chat-accent); border-color:var(--chat-accent); background:rgba(0,0,0,0.7);" on:click={() => dispatch('openDM', viewingProfileOf)}>
                                 <i class="fas fa-paper-plane"></i> Mensagem (DM)
                             </button>
                         {/if}
@@ -556,10 +617,20 @@
                             {#each getFixedStatus(viewingProfileOf) as att}
                                 {#if getYoutubeId(att)}
                                     <iframe class="post-media yt-frame" src="https://www.youtube.com/embed/{getYoutubeId(att)}" frameborder="0" allowfullscreen></iframe>
+                                {:else if getInstagramId(att)}
+                                    <iframe class="post-media ig-frame" src="https://www.instagram.com/p/{getInstagramId(att)}/embed" frameborder="0" scrolling="no" allowtransparency="true" style="background:white; border-radius:4px;"></iframe>
+                                {:else if getSpotifyId(att)}
+                                    <iframe class="post-media spotify-frame" src="https://open.spotify.com/embed/{getSpotifyId(att).type}/{getSpotifyId(att).id}" width="100%" height="152" frameborder="0" allowtransparency="true" allow="encrypted-media" style="border-radius:12px;"></iframe>
                                 {:else if isVideo(att)}
-                                    <video src={att} controls class="post-media" loop autoplay muted></video>
+                                    <div style="position:relative; display:inline-block; width:100%;">
+                                        <!-- svelte-ignore a11y-media-has-caption -->
+                                        <video src={att} controls class="post-media" loop autoplay muted></video>
+                                        <button class="btn-ghost" style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.6); color:#fff; border:none; padding:5px 10px; border-radius:4px; z-index:10; cursor:pointer;" on:click={() => expandedMedia = {type: 'video', url: att}} title="Expandir"><i class="fas fa-expand"></i></button>
+                                    </div>
                                 {:else}
-                                    <img src={att} class="post-media" alt="post" />
+                                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+                                    <img src={att} class="post-media" alt="post" style="cursor:zoom-in;" on:click={() => expandedMedia = {type: 'image', url: att}} title="Expandir" />
                                 {/if}
                             {/each}
                         </div>
@@ -609,6 +680,23 @@
                         <p style="font-size:12px; color:#888; text-align:center;">Nenhuma ficha encontrada.</p>
                     {/if}
                 </div>
+            </div>
+        </div>
+    {/if}
+
+    <!-- MEDIA EXPANDER MODAL -->
+    {#if expandedMedia}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <!-- svelte-ignore a11y-no-static-element-interactions -->
+        <div class="media-expander-overlay" transition:fade={{duration: 150}} on:click={() => expandedMedia = null}>
+            <button class="btn-close-modal" on:click={() => expandedMedia = null}><i class="fas fa-times"></i></button>
+            <div class="expander-content" on:click|stopPropagation>
+                {#if expandedMedia.type === 'image'}
+                    <img src={expandedMedia.url} alt="expanded" />
+                {:else}
+                    <!-- svelte-ignore a11y-media-has-caption -->
+                    <video src={expandedMedia.url} controls autoplay loop></video>
+                {/if}
             </div>
         </div>
     {/if}
@@ -702,7 +790,11 @@
 
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-    .custom-scroll::-webkit-scrollbar-thumb { background: var(--chat-accent); border-radius: 3px; }
+    .profile-modal::-webkit-scrollbar-thumb { background: var(--chat-accent); border-radius: 3px; }
+    
+    .media-expander-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 999999; display: flex; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+    .expander-content { max-width: 95vw; max-height: 95vh; display: flex; justify-content: center; align-items: center; }
+    .expander-content img, .expander-content video { max-width: 100%; max-height: 95vh; object-fit: contain; border-radius: 8px; box-shadow: 0 0 30px rgba(0,0,0,1); }
 
     /* Modal de Perfil */
     .profile-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; justify-content: center; align-items: center; padding: 20px;}

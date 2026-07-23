@@ -54,7 +54,21 @@
     $: statCommand = Number(system.stats?.command?.value || system.attributes?.command?.value || flags.stats?.command?.normal || 1);
     $: boughtBaseWill = flags.boughtBaseWill || 0;
     
-    $: maxWillpower = statCharm + statCommand + activeLevel + boughtBaseWill;
+    $: maxWillpower = (function() {
+        let hCharm = 0;
+        let hCommand = 0;
+        if (flags && flags.stats) {
+            if (flags.stats.charm) {
+                hCharm = (Number(flags.stats.charm.h_normal) || 0) + (Number(flags.stats.charm.h_hard) || 0) + (Number(flags.stats.charm.h_wiggle) || 0);
+            }
+            if (flags.stats.command) {
+                hCommand = (Number(flags.stats.command.h_normal) || 0) + (Number(flags.stats.command.h_hard) || 0) + (Number(flags.stats.command.h_wiggle) || 0);
+            }
+        }
+        let wMod = Number(flags.willpowerMod) || 0;
+        let nMod = Number(flags.nexusEnergyMod) || 0;
+        return statCharm + hCharm + statCommand + hCommand + boughtBaseWill + activeLevel + wMod + nMod;
+    })();
     
     // BYPASS LOCAL COM GETFLAG: Garante que a UI inicie sem erros de undefined
     let localMana = actor.getFlag(MODULE_ID, 'currWillpower') ?? 0;
@@ -137,6 +151,7 @@
     let inputHeal = null;
     let inputPenetration = null;
     let inputNonPhysical = false;
+    let inputEngolfar = false;
     let inputRegen = null;
 
     let newTrauma = { key: "", label: "", color: "#ffffff", desc: "", icon: "Biohazard" };
@@ -200,63 +215,67 @@
 
     // --- CÁLCULO DE DANO REVISADO (REGRAS ORE + NÃO FÍSICO E PERFURAÇÃO) ---
     async function applyDamage() {
-        if (!selectedLimb) return ui.notifications.warn("Selecione um membro!");
+        if (!selectedLimb && !inputEngolfar) return ui.notifications.warn("Selecione um membro ou ative Engolfar!");
         let S_in = Number(inputShock || 0);
         let K_in = Number(inputKilling || 0);
         let Pen_in = Number(inputPenetration || 0);
         let isNonPhysical = inputNonPhysical;
 
-        // 1. Lógica de Armadura (Perfuração afeta LAR e HAR)
-        const baseLAR = Number(selectedLimb.lar || 0);
-        
-        // 2. Lógica do Dano Não Físico (Ignora LAR se o membro não possuir Defesa Não Física)
-        let ignoreArmor = isNonPhysical && !selectedLimb.nonPhysicalDef;
-        
-        // LAR efetiva pós-perfuração (Mínimo 0)
-        let effectiveLAR = ignoreArmor ? 0 : Math.max(0, baseLAR - Pen_in);
-        // HAR APENAS VISUAL: Apenas a LAR reduz o dano mecanicamente, HAR é apenas narrativa no Foundry.
+        let targets = inputEngolfar ? currentLimbs : [selectedLimb];
 
-        // 3. ORE RULES: LAR reduz Shock para 1.
-        let S_final = S_in;
-        if (effectiveLAR > 0 && S_in > 0) {
-            S_final = 1; 
-        }
+        for (let target of targets) {
+            if (!target) continue;
 
-        // 4. ORE RULES: LAR converte Killing em Shock.
-        let converted_K = Math.min(K_in, effectiveLAR);
-        let K_final = K_in - converted_K;
-        S_final += converted_K; // Shock convertido do Killing não é reduzido para 1
+            // 1. Lógica de Armadura (Perfuração afeta LAR e HAR)
+            const baseLAR = Number(target.lar || 0);
+            
+            // 2. Lógica do Dano Não Físico (Ignora LAR se o membro não possuir Defesa Não Física)
+            let ignoreArmor = isNonPhysical && !target.nonPhysicalDef;
+            
+            // LAR efetiva pós-perfuração (Mínimo 0)
+            let effectiveLAR = ignoreArmor ? 0 : Math.max(0, baseLAR - Pen_in);
 
-        let curK = selectedLimb.killing;
-        let curS = selectedLimb.shock;
-        const hp = selectedLimb.hp;
-        const occupied = selectedLimb.trauma.length; 
-
-        let tempK = curK + K_final;
-        
-        if (tempK >= hp) {
-            selectedLimb.killing = hp; selectedLimb.shock = 0;
-        } else {
-            let tempS = curS + S_final;
-            let totalSpace = hp - occupied;
-            let totalDamage = tempK + tempS;
-
-            if (totalDamage > totalSpace) {
-                let overflow = totalDamage - totalSpace;
-                tempK += overflow;
-                selectedLimb.killing = Math.min(totalSpace, tempK);
-                selectedLimb.shock = Math.max(0, totalSpace - selectedLimb.killing);
-            } else {
-                selectedLimb.killing = tempK; selectedLimb.shock = tempS;
+            // 3. ORE RULES: LAR reduz Shock para 1.
+            let S_final = S_in;
+            if (effectiveLAR > 0 && S_in > 0) {
+                S_final = 1; 
             }
+
+            // 4. ORE RULES: LAR converte Killing em Shock.
+            let converted_K = Math.min(K_in, effectiveLAR);
+            let K_final = K_in - converted_K;
+            S_final += converted_K; // Shock convertido do Killing não é reduzido para 1
+
+            let curK = target.killing;
+            let curS = target.shock;
+            const hp = target.hp;
+            const occupied = target.trauma.length; 
+
+            let tempK = curK + K_final;
+            
+            if (tempK >= hp) {
+                target.killing = hp; target.shock = 0;
+            } else {
+                let tempS = curS + S_final;
+                let totalSpace = hp - occupied;
+                let totalDamage = tempK + tempS;
+
+                if (totalDamage > totalSpace) {
+                    let overflow = totalDamage - totalSpace;
+                    tempK += overflow;
+                    target.killing = Math.min(totalSpace, tempK);
+                    target.shock = Math.max(0, totalSpace - target.killing);
+                } else {
+                    target.killing = tempK; target.shock = tempS;
+                }
+            }
+            if (target.killing >= target.hp && !inputEngolfar) ui.notifications.error(`${target.name} DESTRUÍDO!`);
         }
         
         triggerReactivity(); // Renderiza instantâneo na UI
         
         // Limpa as caixas de dano após a aplicação
-        inputShock = null; inputKilling = null; inputPenetration = null; inputNonPhysical = false;
-        
-        if (selectedLimb.killing >= selectedLimb.hp) ui.notifications.error(`${selectedLimb.name} DESTRUÍDO!`);
+        inputShock = null; inputKilling = null; inputPenetration = null; inputNonPhysical = false; inputEngolfar = false;
     }
 
     async function applyHeal() {
@@ -293,12 +312,7 @@
         triggerReactivity();
         inputRegen = null;
 
-        if (totalCured > 0) {
-            ChatMessage.create({
-                content: `<div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 10px; color: #fff;"><strong>${actor.name}</strong> ativou <strong style="color: #3b82f6;">Regeneração</strong> e curou um total de <strong>${totalCured}</strong> caixas de dano em todo o corpo!</div>`,
-                speaker: ChatMessage.getSpeaker({actor: actor})
-            });
-        } else {
+        if (totalCured === 0) {
             ui.notifications.info("A regeneração concluiu, mas não havia dano a curar.");
         }
     }
@@ -586,6 +600,7 @@
                             <div class="grp"><label style="color:var(--c-kill)">Letal</label><input type="number" bind:value={inputKilling}></div>
                             <div class="grp"><label style="color:#00fbff">Perf.</label><input type="number" bind:value={inputPenetration}></div>
                             <div class="grp" style="flex: 0.5;"><label style="color: #a855f7;">Não-Físico?</label><input type="checkbox" bind:checked={inputNonPhysical} style="margin-top: 5px; cursor: pointer;"></div>
+                            <div class="grp" style="flex: 0.5;"><label style="color: #f75555;">Engolfar</label><input type="checkbox" bind:checked={inputEngolfar} style="margin-top: 5px; cursor: pointer;"></div>
                         </div>
                         <button class="btn-hit" on:click={applyDamage}>DANO</button>
                         <div class="heal-row">

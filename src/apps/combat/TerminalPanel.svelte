@@ -10,14 +10,16 @@ import { CombatManager } from '../../../Logic/CombatManager.js';
 
     export let entity; 
     export let isGM = false;
+    export let combatantsData = [];
 
     const dispatch = createEventDispatcher();
     const MODULE_ID = "multiversus-rpg";
 
     let focusedActionIndex = null; 
+    let rolledLocal = false;
 
     const createManeuver = () => ({
-        id: foundry.utils.randomID(), type: 'ataque', style: 'melee', desc: "", sourceId: "custom",
+        id: foundry.utils.randomID(), types: ['ataque'], style: 'melee', desc: "", sourceId: "custom",
         basePool: { d: entity.pool?.d || 0, hd: 0, wd: 0 }, maneuvers: [], 
         tactics: { aimingTurns: 0, calledShot: false, targetLocation: 10, sneakAttack: false, disarm: false },
         env: { range: 'curta', movement: 'parado' }, weapon: { dmg: 1, pen: 0, penType: 'fisica', spray: 0, isSlow: false, isThrownObject: false },
@@ -67,9 +69,30 @@ import { CombatManager } from '../../../Logic/CombatManager.js';
         return totalManeuversCost + tacticsPenalty + multipleActionsCost;
     }
 
-async function submitActions() {
+    // NOVO FLUXO: Rolar e exibir Sets localmente
+    function rollLocal() {
+        const finalSubmitPool = entity.poolToRoll || entity.pool;
+        import('../../../Logic/ORE.js').then(({ ORE }) => {
+            const rolledDice = ORE.generateRoll(finalSubmitPool);
+            const parsed = ORE.parseResults(rolledDice);
+            entity.localSets = parsed.validSets.map((s, idx) => ({ ...s, id: idx, linkedActionIndex: null, targetId: null }));
+            rolledLocal = true;
+            triggerUpdate();
+        });
+    }
+
+    async function submitActions() {
+        // Validação: Garante que todos os sets têm ação vinculada
+        if (entity.localSets && entity.localSets.length > 0) {
+            const allLinked = entity.localSets.every(s => s.linkedActionIndex !== null);
+            if (!allLinked) {
+                ui.notifications.warn("Por favor, vincule uma Ação a cada Conjunto rolado antes de transmitir.");
+                return;
+            }
+        }
+
         entity.submitted = true;
-        entity.ready = true; // NOVO: Garante que a luz azul acenda no carrossel!
+        entity.ready = true;
         const finalSubmitPool = entity.poolToRoll || entity.pool;
 
         const payload = JSON.parse(JSON.stringify({ 
@@ -77,21 +100,23 @@ async function submitActions() {
             userId: game.user?.id,
             pool: finalSubmitPool, 
             actions: entity.actions,
-            stats: entity.stats 
+            stats: entity.stats,
+            localSets: entity.localSets || [] // Passa os sets já associados pro Mestre
         }));
 
         if (!isGM) {
             await game.user.setFlag(MODULE_ID, "combatDeclaration", payload);
             OnlineCombat.sendVectorsToGM(payload);
-            ui.notifications.info("VETORES TRANSMITIDOS.");
+            ui.notifications.info("VETORES E CONJUNTOS TRANSMITIDOS.");
         } else {
-            // MESTRE EDITANDO: Manda pro Hub atualizar a lista
             entity.poolToRoll = finalSubmitPool;
             dispatch('npcUpdated', entity);
         }
     }
     async function cancelSubmit() {
         entity.submitted = false;
+        rolledLocal = false;
+        entity.localSets = [];
         if (!isGM) await game.user.unsetFlag(MODULE_ID, "combatDeclaration");
         else dispatch('npcUpdated', entity);
     }
@@ -134,11 +159,11 @@ async function submitActions() {
 
     <div class="actions-area custom-scroll" class:disabled-area={entity.submitted}>
         {#each entity.actions as action, i (action.id)}
-            <div class="action-wrapper" style="display: {focusedActionIndex !== null && focusedActionIndex !== i ? 'none' : 'block'}">
+            <div class="action-wrapper" style="display: {focusedActionIndex !== null && focusedActionIndex !== i ? 'none' : 'block'}" on:contextmenu|preventDefault={() => { if(!entity.submitted && !rolledLocal) removeAction(i); }}>
                 <ActionCard 
                     bind:action={action} 
                     index={i} 
-                    disabled={entity.submitted} 
+                    disabled={entity.submitted || rolledLocal} 
                     isFocused={focusedActionIndex === i}
                     on:toggleFocus={() => focusedActionIndex = focusedActionIndex === i ? null : i}
                     on:remove={() => removeAction(i)} 
@@ -147,22 +172,59 @@ async function submitActions() {
             </div>
         {/each}
 
-        {#if focusedActionIndex === null}
+        {#if focusedActionIndex === null && !rolledLocal}
             <button class="add-act-btn" on:click={addAction} disabled={entity.submitted}>
                 <i class="fas fa-plus-circle"></i> ABRIR NOVO VETOR 
                 {#if entity.actions.length > 0}<span class="penalty-tag">(-1D)</span>{/if}
             </button>
         {/if}
+
+        {#if rolledLocal && !entity.submitted}
+            <div class="local-sets-area" transition:slide>
+                <div class="ls-title"><i class="fas fa-dice"></i> CONJUNTOS ROLADOS (VINCULE AÇÕES E ALVOS)</div>
+                {#if !entity.localSets || entity.localSets.length === 0}
+                    <div class="ls-empty">Nenhum conjunto formado.</div>
+                {/if}
+                {#each entity.localSets || [] as set, sIdx}
+                    <div class="ls-row">
+                        <div class="ls-dice">
+                            <span class="ls-w">{set.w}</span>x<span class="ls-h">{set.h}</span>
+                        </div>
+                        <div class="ls-selects">
+                            <select bind:value={set.linkedActionIndex}>
+                                <option value={null}>[ Selecione a Ação ]</option>
+                                {#each entity.actions as act, i}
+                                    <option value={i}>Ação 0{i+1}: {act.types.join('+').toUpperCase()}</option>
+                                {/each}
+                            </select>
+                            <select bind:value={set.targetId}>
+                                <option value={null}>[ Selecione o Alvo (Opcional) ]</option>
+                                {#each combatantsData as c}
+                                    <option value={c.id}>{c.name}</option>
+                                {/each}
+                            </select>
+                        </div>
+                    </div>
+                {/each}
+            </div>
+        {/if}
     </div>
 
     {#if focusedActionIndex === null}
         <footer class="t-footer" transition:slide>
-            <PoolBuilder bind:basePool={derivedBasePool} manualOverride={isManualOverride} bind:buffPool={entity.pool} cost={poolCost} disabled={entity.submitted} bind:finalCalculatedPool={entity.poolToRoll} />
+            {#if !rolledLocal && !entity.submitted}
+                <PoolBuilder bind:basePool={derivedBasePool} manualOverride={isManualOverride} bind:buffPool={entity.pool} cost={poolCost} disabled={entity.submitted} bind:finalCalculatedPool={entity.poolToRoll} />
+            {/if}
             <div class="action-buttons">
                 {#if entity.submitted}
                     <button class="submit-btn cancel" on:click={cancelSubmit}><i class="fas fa-unlock"></i> CÓDIGOS ENVIADOS! DESTRAVAR</button>
+                {:else if !rolledLocal}
+                    <button class="submit-btn active" on:click={rollLocal}><i class="fas fa-dice"></i> ROLAR DADOS</button>
                 {:else}
-                    <button class="submit-btn active" on:click={submitActions}><i class="fas fa-paper-plane"></i> TRANSMITIR PROTOCOLOS</button>
+                    <div style="display:flex; gap:10px; width:100%;">
+                        <button class="submit-btn cancel" style="flex:1;" on:click={() => {rolledLocal = false; entity.localSets = [];}}><i class="fas fa-undo"></i> REFAZER</button>
+                        <button class="submit-btn active" style="flex:2;" on:click={submitActions}><i class="fas fa-paper-plane"></i> TRANSMITIR PROTOCOLOS</button>
+                    </div>
                 {/if}
             </div>
         </footer>
@@ -229,6 +291,18 @@ async function submitActions() {
     .custom-scroll::-webkit-scrollbar { width: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: var(--c-primary, #00ff41); }
+    
+    .local-sets-area { background: #000; border: 1px solid #333; border-radius: 6px; padding: 15px; margin-top: 10px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); }
+    .ls-title { color: #00ffaa; font-weight: bold; font-size: 12px; border-bottom: 1px dashed #333; padding-bottom: 8px; margin-bottom: 10px; }
+    .ls-empty { color: #888; font-size: 11px; font-style: italic; text-align: center; padding: 10px; }
+    .ls-row { display: flex; align-items: center; gap: 15px; background: #08080a; padding: 10px; border: 1px solid #222; border-left: 3px solid #00ffaa; border-radius: 4px; margin-bottom: 8px; }
+    .ls-dice { display: flex; align-items: center; gap: 2px; font-weight: bold; font-size: 18px; color: #fff; background: #111; padding: 5px 10px; border-radius: 4px; box-shadow: inset 0 0 10px #000; }
+    .ls-w { color: #aaa; }
+    .ls-h { color: #ffaa00; text-shadow: 0 0 5px rgba(255,170,0,0.5); }
+    .ls-selects { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .ls-selects select { background: #000; border: 1px solid #444; color: #ddd; padding: 5px; font-family: inherit; font-size: 11px; border-radius: 4px; outline: none; }
+    .ls-selects select:focus { border-color: var(--c-primary); }
+    
     @keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
     @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; } 50% { opacity: 0.5; box-shadow: 0 0 15px currentColor; } }
     @keyframes pulseFast { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }

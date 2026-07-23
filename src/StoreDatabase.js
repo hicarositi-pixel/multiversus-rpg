@@ -90,7 +90,7 @@ export const StoreDatabase = {
         return d.getTime();
     },
 
-    generateExclusiveStore: async (userId, force = false) => {
+    generateExclusiveStore: async (userId, force = false, forcedItemId = null) => {
         const user = game.users.get(userId);
         if (!user) return;
         
@@ -120,7 +120,8 @@ export const StoreDatabase = {
         let totalWeight = weights.reduce((acc, curr) => acc + curr.weight, 0);
         let storeItems = [];
         
-        for (let i = 0; i < 8; i++) {
+        const loops = forcedItemId ? 7 : 8;
+        for (let i = 0; i < loops; i++) {
             let rnd = Math.random() * totalWeight;
             let acc = 0;
             let chosenRarity = "Comum";
@@ -194,6 +195,16 @@ let fItems = archive.filter(item => {
             storeItems[discountIndex].discounted = true;
             storeItems[discountIndex].originalPrice = storeItems[discountIndex].price;
             storeItems[discountIndex].price = Math.floor(storeItems[discountIndex].price * 0.8);
+        }
+
+        if (forcedItemId) {
+            let forcedItemObj = archive.find(i => i.id === forcedItemId);
+            if (forcedItemObj) {
+                let fItem = JSON.parse(JSON.stringify(forcedItemObj));
+                fItem.exclusiveId = foundry.utils.randomID();
+                fItem.discounted = false;
+                storeItems.push(fItem);
+            }
         }
         
         userData.exclusiveStore = {
@@ -469,6 +480,27 @@ buyItemLocal: async (itemToBuy) => {
                 if (item.name === "Vale Re-roll" && item.systemTag === "Passe") {
                     await StoreDatabase.generateExclusiveStore(user.id, true);
                     ui.notifications.info("Vale Re-roll utilizado! Loja Exclusiva renovada gratuitamente.");
+                }
+
+                // Lógica de XP
+                if (item.name === "XP" && item.systemTag === "Passe") {
+                    let xpData = user.getFlag(MODULE_ID, "xpData") || { initialPoints: 150, earnedXP: 0, spentXP: 0, group: "Sem Grupo", log: [] };
+                    xpData.earnedXP = (xpData.earnedXP || 0) + 1;
+                    xpData.log = xpData.log || [];
+                    xpData.log.unshift({ date: Date.now(), amount: 1, reason: "Uso de Item XP" });
+                    if (xpData.log.length > 20) xpData.log.pop();
+                    
+                    await user.setFlag(MODULE_ID, "xpData", xpData);
+                    
+                    if (user.character) {
+                        await user.character.update({ [`flags.${MODULE_ID}.xp`]: xpData.earnedXP }, { render: false });
+                    }
+                }
+
+                // Lógica de Moedas (100 NX)
+                if (item.name === "100 NX" || item.name === "100 MV Coins" || item.name === "100 MV Coin") {
+                    userData.coins = (userData.coins || 0) + 100;
+                    ui.notifications.info("100 NX adicionados à sua carteira virtual!");
                 }
 
                 // Remove do estoque automaticamente ao renderizar

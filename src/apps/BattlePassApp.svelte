@@ -55,32 +55,41 @@ async function refresh() {
         playerTier = PassSystem.getPlayerTier(game.user.id);
         rewardsMap = PassSystem.getRewardsMap();
         
-        // --- SISTEMA DE MIGRAÇÃO RETROATIVA BLINDADA ---
-        // 1. Pega o que já está salvo na conta do jogador (pode estar vazio)
-        let userClaimed = game.user.getFlag(MODULE_ID, "claimedRewards") || [];
-        let maxClaimed = [...userClaimed]; // Começa assumindo que a conta é o maior
+        const sId = season.id || "Season01_PASS";
+        const claimFlag = "claimedRewards_" + sId;
+        
+        // 1. Pega o que já está salvo na conta do jogador para este passe específico
+        let userClaimed = game.user.getFlag(MODULE_ID, claimFlag);
+        if (!userClaimed && sId === "Season01_PASS") {
+            userClaimed = game.user.getFlag(MODULE_ID, "claimedRewards") || [];
+        }
+        userClaimed = userClaimed || [];
+        
+        let maxClaimed = [...userClaimed];
 
         // 2. Varre TODAS as fichas (actors) do mundo
         game.actors.forEach(a => {
-            // Se o jogador atual é DONO desta ficha...
             if (a.isOwner) {
-                let actorClaimed = a.getFlag(MODULE_ID, "claimedRewards") || [];
-                // Se essa ficha tem mais itens resgatados que o nosso recorde atual...
+                let actorClaimed = a.getFlag(MODULE_ID, claimFlag);
+                if (!actorClaimed && sId === "Season01_PASS") {
+                    actorClaimed = a.getFlag(MODULE_ID, "claimedRewards") || [];
+                }
+                actorClaimed = actorClaimed || [];
                 if (actorClaimed.length > maxClaimed.length) {
-                    maxClaimed = actorClaimed; // Atualiza o recorde!
+                    maxClaimed = actorClaimed;
                 }
             }
         });
 
-        // 3. Define os resgates para a tela
         claimed = maxClaimed;
 
-        // 4. Se a ficha tinha mais progresso que a conta, salva o progresso maior na conta do jogador
         if (maxClaimed.length > userClaimed.length) {
-            await game.user.setFlag(MODULE_ID, "claimedRewards", maxClaimed);
-            console.log(`[NEXUS PASS] Progresso sincronizado e restaurado para ${game.user.name}.`);
+            await game.user.setFlag(MODULE_ID, claimFlag, maxClaimed);
+            if (sId === "Season01_PASS") {
+                await game.user.setFlag(MODULE_ID, "claimedRewards", maxClaimed);
+            }
+            console.log(`[NEXUS PASS] Progresso sincronizado para ${game.user.name} (${sId}).`);
         }
-        // -----------------------------------------------
 
         calculateTimeLogic();
     }
@@ -179,7 +188,12 @@ async function refresh() {
             }
         }
 
-      await game.user.setFlag(MODULE_ID, "claimedRewards", newClaimed);
+        const sId = season.id || "Season01_PASS";
+        const claimFlag = "claimedRewards_" + sId;
+        await game.user.setFlag(MODULE_ID, claimFlag, newClaimed);
+        if (sId === "Season01_PASS") {
+            await game.user.setFlag(MODULE_ID, "claimedRewards", newClaimed);
+        }
         claimed = newClaimed;
     }
 </script>

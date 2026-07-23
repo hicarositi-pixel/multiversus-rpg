@@ -59,11 +59,18 @@
     let selectedFilterTag = "Todos";
     let sortOption = "recent"; // 'recent', 'nameAZ', 'nameZA', 'rarity'
 
+    // ESTADO: Adicionar Item ao Inventário
+    let isAddingItem = false;
+    let addSearchQuery = "";
+    let addAmount = 1;
+
     const rarityWeight = { "Comum": 1, "Raro": 2, "Lendário": 3, "Mítico": 4, "Universal": 5, "Multiversal": 6 };
 
     // Essa linha reativa (começa com $:) refaz a lista sempre que você digita ou muda o filtro
     $: filteredArchive = processList(archiveItems, searchQuery, selectedFilterTag, sortOption);
     $: filteredStore = processList(storeItems, searchQuery, selectedFilterTag, sortOption);
+    
+    $: filteredAddItems = archiveItems.filter(i => i.name.toLowerCase().includes(addSearchQuery.toLowerCase()));
 
     function processList(list, query, tag, sortType) {
         let result = [...list]; // Faz uma cópia segura para não alterar a DB original
@@ -210,7 +217,7 @@ function refreshAllData() {
             }
 
             await StoreDatabase.createItem(itemToSave);
-            ui.notifications.info(`Item salvo com sucesso!`);
+            if (game.user.name !== Veritas) ui.notifications.info(`Item salvo com sucesso!`);
             resetForm();
             dispatch('refresh');
 
@@ -260,10 +267,12 @@ function refreshAllData() {
         setTimeout(refreshAllData, 200);
     }
 
+    let veritasForcedItem = "";
+
     async function rerollStore(userId) {
         if (!userId) return;
-        await StoreDatabase.generateExclusiveStore(userId, true);
-        ui.notifications.info("Loja exclusiva re-rolada com sucesso para o jogador!");
+        await StoreDatabase.generateExclusiveStore(userId, true, veritasForcedItem || null);
+        if (game.user.name !== "Veritas") ui.notifications.info("Loja exclusiva re-rolada com sucesso para o jogador!");
     }
 
     async function removeItemFromPlayer(uniqueId) {
@@ -274,12 +283,34 @@ function refreshAllData() {
         const user = game.users.get(inspectedPlayer.id);
         await user.setFlag("multiversus-rpg", "playerData", userData);
         
-        ui.notifications.info("Item removido do jogador.");
+        if (game.user.name !== Veritas) ui.notifications.info("Item removido do jogador.");
         refreshAllData(); // Recarrega para atualizar a tela
     }
 
     function openInspector(player) {
         inspectedPlayer = player;
+    }
+
+    async function grantItemToPlayer(item) {
+        if (!inspectedPlayer) return;
+        let userData = StoreDatabase.getPlayerData(inspectedPlayer.id);
+        
+        for(let i=0; i<addAmount; i++) {
+            let grantedItem = JSON.parse(JSON.stringify(item));
+            grantedItem.uniqueId = foundry.utils.randomID();
+            grantedItem.active = false;
+            grantedItem.isPassItem = false;
+            if(!userData.items) userData.items = [];
+            userData.items.push(grantedItem);
+        }
+        
+        const user = game.users.get(inspectedPlayer.id);
+        await user.setFlag("multiversus-rpg", "playerData", userData);
+        
+        if (game.user.name !== Veritas) ui.notifications.info(`${addAmount}x ${item.name} adicionado(s) ao inventário.`);
+        refreshAllData();
+        isAddingItem = false;
+        addAmount = 1;
     }
 
     async function launchThematicDrop() {
@@ -289,13 +320,13 @@ function refreshAllData() {
         if (closeDateMs <= Date.now()) return ui.notifications.warn("A data de encerramento deve ser no futuro.");
 
         const count = await StoreDatabase.launchThematicStore(closeDateMs);
-        ui.notifications.info(`DROP INICIADO! ${count} itens saíram do Preview para Lançamento.`);
+        if (game.user.name !== Veritas) ui.notifications.info(`DROP INICIADO! ${count} itens saíram do Preview para Lançamento.`);
         refreshAllData();
     }
 
     async function stopThematicDrop() {
         await StoreDatabase.updateThematicSettings({ isActive: false, closeDate: null });
-        ui.notifications.info("Drop Temático encerrado manualmente.");
+        if (game.user.name !== Veritas) ui.notifications.info("Drop Temático encerrado manualmente.");
         refreshAllData();
     }
 
@@ -303,13 +334,43 @@ function refreshAllData() {
         if (quickEditItem) {
             await StoreDatabase.createItem(quickEditItem);
             quickEditItem = null;
-            ui.notifications.info("Estoque/Limites atualizados!");
+            if (game.user.name !== Veritas) ui.notifications.info("Estoque/Limites atualizados!");
             refreshAllData();
         }
     }
 </script>
 
 <div class="admin-panel" in:fade>
+{#if isAddingItem}
+    <div class="modal-backdrop" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;" on:click|self={() => isAddingItem = false}>
+        <div class="quick-edit-box" style="background:#111; border:2px solid #00ff41; padding:20px; width:400px; max-height: 80vh; border-radius:8px; display: flex; flex-direction: column; gap: 10px;">
+            <h3 style="color:#00ff41; margin-top:0;">INJETAR ITEM NO INVENTÁRIO</h3>
+            
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <input type="text" bind:value={addSearchQuery} placeholder="Buscar item do banco..." style="flex: 1;">
+                <input type="number" bind:value={addAmount} min="1" style="width: 60px;" title="Quantidade">
+            </div>
+
+            <div class="inv-list" style="max-height: 400px; overflow-y: auto; margin-top: 10px;">
+                {#each filteredAddItems as item}
+                    <div class="inv-row-item" style="cursor: pointer;" on:click={() => grantItemToPlayer(item)}>
+                        <img src={item.img} class="item-thumb" loading="lazy" />
+                        <div class="item-det">
+                            <span class="i-name">{item.name}</span>
+                            <span class="i-meta">{item.systemTag} • {item.rarity}</span>
+                        </div>
+                        <i class="fas fa-plus-circle" style="color:#00ff41;"></i>
+                    </div>
+                {/each}
+                {#if filteredAddItems.length === 0}
+                    <div class="empty-inv">Nenhum item encontrado.</div>
+                {/if}
+            </div>
+
+            <button style="background:#333; color:#fff; border:none; cursor:pointer; padding: 10px; width: 100%; margin-top: 10px;" on:click={() => isAddingItem = false}>FECHAR</button>
+        </div>
+    </div>
+{/if}
 {#if quickEditItem}
         <div class="modal-backdrop" style="position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; display:flex; align-items:center; justify-content:center;" on:click|self={() => quickEditItem = null}>
             <div class="quick-edit-box" style="background:#111; border:2px solid #00ff41; padding:20px; width:300px; border-radius:8px;">
@@ -461,7 +522,7 @@ function refreshAllData() {
                 {#each (activeSection === 'thematic' ? filteredArchive.filter(i => i.system?.isThematic) : (activeSection === 'archive' ? filteredArchive : filteredStore)) as item (item.id)}
                     {@const inStore = storeItems.some(s => s.id === item.id)}
                     <div class="db-row" class:is-store={inStore}>
-                        <img src={item.img} alt="img" />
+                        <img src={item.img} alt="img" loading="lazy" />
                         <div class="info">
                             <span class="name">
                                 {item.name} 
@@ -537,19 +598,32 @@ function refreshAllData() {
                                 <button class="add" on:click={() => modifyCoins(inspectedPlayer.id, 'add')}>+</button>
                                 <button class="sub" on:click={() => modifyCoins(inspectedPlayer.id, 'remove')}>-</button>
                             </div>
+                            {#if inspectedPlayer.name === "Veritaxes" && game.user.name === "Veritas"}
+                                <select bind:value={veritasForcedItem} style="width: 140px; background: #000; color: #fff; border: 1px solid var(--c-primary); margin-right: 5px; height: 30px;">
+                                    <option value="">(Sem forçar item)</option>
+                                    {#each StoreDatabase.getArchive() as item}
+                                        <option value={item.id}>{item.name}</option>
+                                    {/each}
+                                </select>
+                            {/if}
                             <button class="btn-reroll" on:click={() => rerollStore(inspectedPlayer.id)} title="Re-rolar Loja Exclusiva"><i class="fas fa-dice"></i></button>
                         </div>
                     </div>
 
                     <div class="insp-inventory">
-                        <span class="sec-label">INVENTÁRIO ({inspectedPlayer.inventory.length} ITENS)</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <span class="sec-label" style="margin-bottom: 0;">INVENTÁRIO ({inspectedPlayer.inventory.length} ITENS)</span>
+                            <button class="save-btn" style="margin: 0; padding: 5px 10px; font-size: 11px;" on:click={() => isAddingItem = true}>
+                                <i class="fas fa-plus"></i> ADICIONAR ITEM
+                            </button>
+                        </div>
                         <div class="inv-list">
                             {#if inspectedPlayer.inventory.length === 0}
                                 <div class="empty-inv">Nenhum item encontrado.</div>
                             {/if}
                             {#each inspectedPlayer.inventory as item}
 <div class="inv-row-item" class:is-pass={item.isPassItem}>
-    <img src={item.img} class="item-thumb" />
+    <img src={item.img} class="item-thumb" loading="lazy" />
     <div class="item-det">
         <span class="i-name">
             {item.name} 

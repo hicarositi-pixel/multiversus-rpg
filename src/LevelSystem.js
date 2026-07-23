@@ -82,10 +82,29 @@ export const LevelCalculator = {
             nextXP = data.max + 1; // XP exato necessário para "upar"
         }
 
+        const lvl = data.lvl;
+        let buffsArray = [];
+        const exclSlots = 3 + Math.floor(lvl / 3);
+        
+        if (lvl === 1) {
+            buffsArray.push("150 Pontos iniciais", "Origem", "Kit Inicial baseado na Origem");
+        }
+        
+        buffsArray.push(`+${lvl} de HP em todas as partes`);
+        buffsArray.push(`+${exclSlots} Slots de Exclusividade`);
+        
+        if (lvl > 1 && lvl % 3 === 0) {
+            buffsArray.push("Habilidade de Origem");
+        }
+        
+        if (lvl >= 10) {
+            buffsArray.push("NÍVEL MÁXIMO");
+        }
+
         return {
             level: data.lvl,
             limits: data.limits,
-            buffs: data.buffs,
+            buffs: buffsArray.join(", "),
             progress: Math.min(100, Math.max(0, progress)), // Mantém a barra entre 0% e 100%
             currentXP: earnedXP,
             nextXP: nextXP

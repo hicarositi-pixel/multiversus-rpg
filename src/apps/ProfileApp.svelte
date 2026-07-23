@@ -113,9 +113,10 @@
     $: hyperCharm = (Number(flags.stats?.charm?.h_normal) || 0) + (Number(flags.stats?.charm?.h_hard) || 0) + (Number(flags.stats?.charm?.h_wiggle) || 0);
     $: hyperCommand = (Number(flags.stats?.command?.h_normal) || 0) + (Number(flags.stats?.command?.h_hard) || 0) + (Number(flags.stats?.command?.h_wiggle) || 0);
     $: nexusEnergyMod = Number(flags.nexusEnergyMod) || 0;
+    $: willpowerMod = Number(flags.willpowerMod) || 0;
 
-    $: maxBaseWill = statCharm + statCommand + activeLevel + boughtBaseWill;
-    $: maxWillpower = maxBaseWill + hyperCharm + hyperCommand + nexusEnergyMod;
+    $: maxBaseWill = statCharm + hyperCharm + statCommand + hyperCommand + boughtBaseWill + activeLevel + willpowerMod;
+    $: maxWillpower = maxBaseWill + nexusEnergyMod;
 
     // Se estiver zero e max for maior, inicializa o atual
     $: {
@@ -274,9 +275,14 @@ async function importPlayerXP() {
         currWillpower = parseInt(e.target.value) || 0;
         actor.update({ [`flags.${MODULE_ID}.currWillpower`]: currWillpower }, {render:false});
     }
-    function updateNexusMod(e) {
-        let val = parseInt(e.target.value) || 0;
-        actor.update({ [`flags.${MODULE_ID}.nexusEnergyMod`]: val }, {render:false});
+    async function updateNexusMod(e) {
+        let val = Number(e.target.value) || 0;
+        await actor.update({ [`flags.${MODULE_ID}.nexusEnergyMod`]: val }, {render:false});
+    }
+    
+    async function updateWillpowerMod(e) {
+        let val = Number(e.target.value) || 0;
+        await actor.update({ [`flags.${MODULE_ID}.willpowerMod`]: val }, {render:false});
     }
 
     // --- Listas Dinâmicas ---
@@ -505,20 +511,29 @@ async function importPlayerXP() {
             <div class="will-row">
                 <div class="will-info">
                     <span class="w-label">Força de Vontade</span>
-                    <div class="w-calc" title="Charme + Comando + Nível + Comprados">
-                        <span>[{statCharm}]</span> + <span>[{statCommand}]</span> + <span>[{activeLevel}]</span> + 
-                        <span class="bought" title="Comprado (Custa 3XP)">[{boughtBaseWill}]</span> = <strong>{maxBaseWill}</strong>
+                    <div class="w-calc" title="Charme + Comando + Hypers + Nível + Modificador + Comprados">
+                        <span>[{statCharm}]</span> + <span>[{hyperCharm}]</span> + <span>[{statCommand}]</span> + <span>[{hyperCommand}]</span> + <span>[{activeLevel}]</span> + 
+                        <span class="bought" title="Comprado (Custa 3XP)">[{boughtBaseWill}]</span> + <span>[{willpowerMod}]</span> = <strong>{maxBaseWill}</strong>
                     </div>
                 </div>
                 <div class="will-controls">
                     <div class="buyer">
+                        {#if game.user.isGM}
                         <button on:click={() => buyStat(-1)}>-</button>
+                        {/if}
                         <span>+3 XP</span>
                         <button on:click={() => buyStat(1)}>+</button>
                     </div>
                     <div class="current-input-wrapper">
-                        <label>ATUAL</label>
-                        <input type="number" value={currBaseWill} on:change={updateCurrentBW}>
+                        <label>MAX MOD</label>
+                        <input type="number" value={willpowerMod} on:change={updateWillpowerMod} style="width: 40px;">
+                    </div>
+                    <div class="current-input-wrapper">
+                        <label>ATUAL / MÁX</label>
+                        <div style="display: flex; align-items: center; gap: 5px;">
+                            <input type="number" value={currBaseWill} on:change={updateCurrentBW}>
+                            <span style="color: var(--c-primary); font-weight: bold; font-size: 14px;">/ {maxBaseWill}</span>
+                        </div>
                     </div>
                 </div>
             </div>

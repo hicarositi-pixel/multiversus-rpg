@@ -129,7 +129,7 @@ function openNexusMenu() {
     }
 
     const desktopIcons = [
-        { id: 'combat', icon: 'fa-crosshairs', label: 'COMBATE' },
+        { id: 'combat', icon: 'fa-crosshairs', label: 'ESTATÍSTICAS DE COMBATE' },
         { id: 'profile', icon: 'fa-id-card', label: 'PERFIL' },
         { id: 'stats', icon: 'fa-dna', label: 'ATRIBUTOS' },
         { id: 'inv', icon: 'fa-box-open', label: 'INVENTÁRIO' },
@@ -242,7 +242,7 @@ function openNexusMenu() {
                             
                             <div class="window-content-area">
                                 {#if activeApp === 'combat'} 
-                                    <CombatApp {actor} {system} {flags} themeColor={themeColor} />
+                                    <CombatApp {actor} {system} themeColor={themeColor} />
                                 {:else if activeApp === 'profile'} 
                                     <ProfileApp {actor} {system} {flags} themeColor={themeColor} />
                                 {:else if activeApp === 'settings'} 
