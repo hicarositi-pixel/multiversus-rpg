@@ -132301,10 +132301,15 @@ function instance$b($$self, $$props, $$invalidate) {
       baseDiceQty = 10;
       baseDiceType = 12;
       extraPercent = 2;
+    } else if (currentFollowers < 5e7) {
+      baseDiceQty = 10;
+      baseDiceType = 12;
+      if (hyperSum > 0) extraPercent = 2 + hyperSum * 0.1;
+      else extraPercent = 0;
     } else {
       baseDiceQty = 10;
       baseDiceType = 12;
-      if (hyperSum > 0) extraPercent = 2 + hyperSum * 1;
+      if (hyperSum > 0) extraPercent = hyperSum * 0.1;
       else extraPercent = 0;
     }
     let finalDiceQty = baseDiceQty * modMult;

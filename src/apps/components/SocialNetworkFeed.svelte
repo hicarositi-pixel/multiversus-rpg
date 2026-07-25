@@ -185,9 +185,14 @@
         else if (currentFollowers < 16000) { baseDiceQty = 8; baseDiceType = 12; extraPercent = 2; }
         else if (currentFollowers < 32000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 2; }
         else if (currentFollowers < 1000000) { baseDiceQty = 10; baseDiceType = 12; extraPercent = 2; }
+        else if (currentFollowers < 50000000) {
+            baseDiceQty = 10; baseDiceType = 12;
+            if (hyperSum > 0) extraPercent = 2 + (hyperSum * 0.1);
+            else extraPercent = 0;
+        }
         else {
             baseDiceQty = 10; baseDiceType = 12;
-            if (hyperSum > 0) extraPercent = 2 + (hyperSum * 1);
+            if (hyperSum > 0) extraPercent = (hyperSum * 0.1);
             else extraPercent = 0;
         }
 
