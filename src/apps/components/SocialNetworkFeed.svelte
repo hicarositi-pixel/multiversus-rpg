@@ -123,6 +123,16 @@
         return base + bonus + myFollowers.length;
     }
 
+    function calculateMonthlyPosts(uid) {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+        return posts.filter(p => p.authorId === uid && p.timestamp >= startOfMonth).length;
+    }
+
+    function calculateTotalPosts(uid) {
+        return posts.filter(p => p.authorId === uid).length;
+    }
+
     function getFollowersList(uid) {
         let followers = [];
         for (const [id, data] of Object.entries(users)) {
@@ -513,6 +523,8 @@
                         <div class="p-stats">
                             <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'followers'; viewingListFor = currentActorId; }}><i class="fas fa-users"></i> {calculateTotalFollowers(currentActorId, users)} Seguidores</span>
                             <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'following'; viewingListFor = currentActorId; }}> | <b>{getFollowingList(currentActorId, users).length}</b> Seguindo</span>
+                            <br>
+                            <span class="clickable-stat" style="color: #00d4ff; margin-top: 5px; display: inline-block;" title="Total de posts: {calculateTotalPosts(currentActorId)}"><i class="fas fa-edit"></i> {calculateMonthlyPosts(currentActorId)} Posts (Este Mês)</span>
                         </div>
                         {#if game.user.isGM}
                             <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">
@@ -589,6 +601,8 @@
                         <div class="p-stats">
                             <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'followers'; viewingListFor = viewingProfileOf; }}><i class="fas fa-users"></i> {calculateTotalFollowers(viewingProfileOf, users)} Seguidores</span>
                             <span class="clickable-stat" style="color: #00ff41;" on:click={() => { viewingListType = 'following'; viewingListFor = viewingProfileOf; }}> | <b>{getFollowingList(viewingProfileOf, users).length}</b> Seguindo</span>
+                            <br>
+                            <span class="clickable-stat" style="color: #00d4ff; margin-top: 5px; display: inline-block;" title="Total de posts: {calculateTotalPosts(viewingProfileOf)}"><i class="fas fa-edit"></i> {calculateMonthlyPosts(viewingProfileOf)} Posts (Este Mês)</span>
                         </div>
                         {#if game.user.isGM}
                             <div style="margin-top:10px; display:flex; gap:5px; align-items:center;">

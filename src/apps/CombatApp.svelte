@@ -593,23 +593,23 @@
                             <label>Arm. Leve<input type="number" bind:value={selectedLimb.lar} on:change={triggerReactivity}></label>
                             <label>Arm. Pesada<input type="number" bind:value={selectedLimb.har} on:change={triggerReactivity}></label>
                             <label>HP Total<input type="number" bind:value={selectedLimb.hp} on:change={triggerReactivity}></label>
-                            <label style="flex: 0.8; color: #a855f7;">Não-Físico<input type="checkbox" bind:checked={selectedLimb.nonPhysicalDef} on:change={triggerReactivity} style="cursor: pointer;"></label>
+                            <label style="color: #a855f7;">Não-Físico<input type="checkbox" bind:checked={selectedLimb.nonPhysicalDef} on:change={triggerReactivity} class="custom-chk non-phys"></label>
                         </div>
                         <div class="dmg-inputs">
                             <div class="grp"><label style="color:var(--c-shock)">Não Letal</label><input type="number" bind:value={inputShock}></div>
                             <div class="grp"><label style="color:var(--c-kill)">Letal</label><input type="number" bind:value={inputKilling}></div>
                             <div class="grp"><label style="color:#00fbff">Perf.</label><input type="number" bind:value={inputPenetration}></div>
-                            <div class="grp" style="flex: 0.5;"><label style="color: #a855f7;">Não-Físico?</label><input type="checkbox" bind:checked={inputNonPhysical} style="margin-top: 5px; cursor: pointer;"></div>
-                            <div class="grp" style="flex: 0.5;"><label style="color: #f75555;">Engolfar</label><input type="checkbox" bind:checked={inputEngolfar} style="margin-top: 5px; cursor: pointer;"></div>
+                            <div class="grp"><label style="color: #a855f7;">Não-Físico?</label><input type="checkbox" bind:checked={inputNonPhysical} class="custom-chk non-phys"></div>
+                            <div class="grp"><label style="color: #f75555;">Engolfar</label><input type="checkbox" bind:checked={inputEngolfar} class="custom-chk engulf"></div>
                         </div>
                         <button class="btn-hit" on:click={applyDamage}>DANO</button>
-                        <div class="heal-row">
-                            <input type="number" bind:value={inputHeal} placeholder="Cura">
-                            <button on:click={applyHeal}>+</button>
+                        <div class="heal-row" style="display: flex; gap: 5px;">
+                            <input type="number" bind:value={inputHeal} placeholder="Cura" style="flex: 1;">
+                            <button on:click={applyHeal} class="btn-square-heal">+</button>
                         </div>
-                        <div class="heal-row" style="margin-top: 5px;">
-                            <input type="number" bind:value={inputRegen} placeholder="Regen" style="border-color: #3b82f6;">
-                            <button style="background: #3b82f6; color: #fff;" on:click={applyRegen}><i class="fas fa-dna"></i> REGEN CORPO TODO</button>
+                        <div class="heal-row" style="display: flex; gap: 5px; margin-top: 5px;">
+                            <input type="number" bind:value={inputRegen} placeholder="Regen" style="border-color: #3b82f6; flex: 1;">
+                            <button style="background: #3b82f6; color: #fff;" class="btn-square-heal" on:click={applyRegen} title="Regen Corpo Todo"><i class="fas fa-dna"></i></button>
                         </div>
                     {/if}
                 </div>
@@ -770,8 +770,37 @@
     
     .btn-hit { width: 100%; background: var(--c-kill); color: #fff; padding: 10px; margin-bottom: 10px; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s;}
     .btn-hit:hover { background: #fff; color: #000; box-shadow: 0 0 15px var(--c-kill);}
-    .heal-row button { flex: 1; background: #22c55e; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+    .heal-row button { background: #22c55e; color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s;}
     .heal-row button:hover { background: #16a34a; }
+    
+    .btn-square-heal { width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+
+    input.custom-chk {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 28px;
+        height: 28px;
+        background: #000;
+        border: 1px solid #444;
+        border-radius: 4px;
+        cursor: pointer;
+        position: relative;
+        margin: 2px auto 0 auto;
+        display: block;
+    }
+    input.custom-chk:checked::after {
+        content: '✔';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 16px;
+        color: #fff;
+    }
+    input.custom-chk.non-phys:checked { background: rgba(168, 85, 247, 0.2); border-color: #a855f7; }
+    input.custom-chk.non-phys:checked::after { color: #a855f7; }
+    input.custom-chk.engulf:checked { background: rgba(247, 85, 85, 0.2); border-color: #f75555; }
+    input.custom-chk.engulf:checked::after { color: #f75555; }
 
     .trauma-box { flex: 1; padding: 15px; background: rgba(0,0,0,0.3); display: flex; flex-direction: column; }
     .box-title { display: flex; justify-content: space-between; border-bottom: 1px solid #333; margin-bottom: 10px; color: #ccc; font-size: 10px; font-weight: bold; padding-bottom: 5px;}

@@ -8,6 +8,7 @@
     import { SystemBookDB } from '../SystemBookDB.js';
     import { BookAutomation } from '../BookAutomation.js';
     import { SHEET_THEMES } from '../data/SheetThemeDB.js'; 
+    import { ExclusivityDatabase } from '../database/ExclusivityDatabase.js';
 
     export let actor;
     export let flags = {}; 
@@ -57,6 +58,144 @@
     let activeImagePrompt = null; // 'token', 'banner', 'body'
     let imageUrlInput = "";
 
+    // === TROCA DE VISUAL ===
+    let visualProfiles = flags.visualProfiles || [];
+    $: { if (flags.visualProfiles !== undefined) visualProfiles = flags.visualProfiles; }
+    let showVisualProfiles = false;
+    let newProfile = { name: "Nova Forma", actorImg: "", tokenImg: "" };
+
+    function toggleVisualProfiles() {
+        showVisualProfiles = !showVisualProfiles;
+    }
+
+    function addVisualProfile() {
+        if (!newProfile.actorImg && !newProfile.tokenImg) return ui.notifications.warn("Insira pelo menos a URL do Avatar ou do Token.");
+        const p = { id: foundry.utils.randomID(), name: newProfile.name, actorImg: newProfile.actorImg, tokenImg: newProfile.tokenImg };
+        const updatedProfiles = [...visualProfiles, p];
+        actor.update({ [`flags.${MODULE_ID}.visualProfiles`]: updatedProfiles }, { render: false });
+        newProfile = { name: "Nova Forma", actorImg: "", tokenImg: "" };
+    }
+
+    function removeVisualProfile(id) {
+        const updatedProfiles = visualProfiles.filter(p => p.id !== id);
+        actor.update({ [`flags.${MODULE_ID}.visualProfiles`]: updatedProfiles }, { render: false });
+    }
+
+    function updateVisualProfile(id, field, value) {
+        const idx = visualProfiles.findIndex(p => p.id === id);
+        if(idx !== -1) {
+            visualProfiles[idx][field] = value;
+            actor.update({ [`flags.${MODULE_ID}.visualProfiles`]: [...visualProfiles] }, { render: false });
+        }
+    }
+
+    async function applyVisualProfile(p) {
+        const updates = {};
+        if (p.actorImg) updates.img = p.actorImg;
+        if (p.tokenImg) {
+            updates["prototypeToken.texture.src"] = p.tokenImg;
+            updates[`flags.${MODULE_ID}.tokenImg`] = p.tokenImg;
+        }
+        if (p.name) updates["prototypeToken.name"] = p.name;
+        
+        await actor.update(updates, { render: false });
+
+        const activeTokens = actor.getActiveTokens();
+        for (let t of activeTokens) {
+            const tUpdates = {};
+            if (p.tokenImg) tUpdates["texture.src"] = p.tokenImg;
+            if (p.name) tUpdates["name"] = p.name;
+            await t.document.update(tUpdates);
+        }
+        
+        ui.notifications.info(`Visual alterado para: ${p.name}`);
+        showVisualProfiles = false;
+    }
+
+    // === EXCLUSIVIDADES ===
+    let showExclusividades = false;
+    let exclusividades = flags.exclusivities || [];
+    $: { if (flags.exclusivities !== undefined) exclusividades = flags.exclusivities; }
+
+    function toggleExclusividades() {
+        showExclusividades = !showExclusividades;
+    }
+    
+    let showExcPicker = false;
+    let excPickerGroups = [];
+
+    function openExcPicker() {
+        excPickerGroups = ExclusivityDatabase.getGroups();
+        showExcPicker = true;
+    }
+    
+    async function pickExclusivity(exc) {
+        const novaExclusividade = {
+            id: foundry.utils.randomID(),
+            name: exc.name,
+            img: exc.img,
+            description: exc.description || exc.system?.description || "",
+            category: exc.category || exc.system?.category || "Geral"
+        };
+        const updated = [...exclusividades, novaExclusividade];
+        await actor.update({ [`flags.${MODULE_ID}.exclusivities`]: updated }, { render: false });
+        ui.notifications.info(`Exclusividade adicionada à ficha.`);
+        showExcPicker = false;
+    }
+
+    async function handleDropExclusividade(e) {
+        if (!isGM) return;
+        const dataStr = e.dataTransfer.getData('text/plain');
+        if (!dataStr) return;
+        try {
+            const data = JSON.parse(dataStr);
+            if (data.type === 'Item') {
+                const item = await Item.implementation.fromDropData(data);
+                if (item && item.type === 'exclusividade') {
+                    const novaExclusividade = {
+                        id: foundry.utils.randomID(),
+                        name: item.name,
+                        img: item.img,
+                        description: item.system?.description || "",
+                        category: item.system?.category || "Geral"
+                    };
+                    const updated = [...exclusividades, novaExclusividade];
+                    await actor.update({ [`flags.${MODULE_ID}.exclusivities`]: updated }, { render: false });
+                    ui.notifications.info(`Exclusividade adicionada à ficha.`);
+                }
+            } else if (data.type === 'Exclusivity') {
+                const exc = data.data;
+                const novaExclusividade = {
+                    id: foundry.utils.randomID(),
+                    name: exc.name,
+                    img: exc.img,
+                    description: exc.description || exc.system?.description || "",
+                    category: exc.category || exc.system?.category || "Geral"
+                };
+                const updated = [...exclusividades, novaExclusividade];
+                await actor.update({ [`flags.${MODULE_ID}.exclusivities`]: updated }, { render: false });
+                ui.notifications.info(`Exclusividade adicionada à ficha.`);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    async function removeExclusividade(id) {
+        if (!isGM) return;
+        const updated = exclusividades.filter(e => e.id !== id);
+        await actor.update({ [`flags.${MODULE_ID}.exclusivities`]: updated }, { render: false });
+    }
+
+    async function updateExclusividade(id, newDesc) {
+        if (!isGM) return;
+        const idx = exclusividades.findIndex(e => e.id === id);
+        if (idx !== -1) {
+            exclusividades[idx].description = newDesc;
+            await actor.update({ [`flags.${MODULE_ID}.exclusivities`]: [...exclusividades] }, { render: false });
+        }
+    }
+
     function openImagePrompt(type, currentUrl) {
         activeImagePrompt = type;
         // Limpa se for o placeholder padrão, senão mantém a URL do jogador
@@ -92,19 +231,19 @@
     $: previewAppearance = BookAutomation.renderMarkdown(localAppearance || "Nenhum dado arquivado. Clique em editar.", glossary);
 
 // === 6. CÁLCULO DE NÍVEL ===
-    $: currentXP = flags.xp || 0; 
-    $: playerLvlInfo = LevelCalculator.getLevelInfo(currentXP);
-    
-    // Nível do Mestre: Calcula pelo XP "fictício" baseado nos Pontos Totais digitados
-    $: customXP = Math.max(0, customPoints - BASE_POINTS_CAP);
-    $: customLvlInfo = LevelCalculator.getLevelInfo(customXP);
-    
-    // A MÁGICA: Define qual "pacote de nível" a ficha toda vai usar
-    $: activeLvlInfo = gmMode ? customLvlInfo : playerLvlInfo;
-    
-    $: activeLevel = activeLvlInfo.level;
-    $: missingXP = playerLvlInfo.nextXP - currentXP; // Sempre baseado no player
-    $: totalPointsCap = gmMode ? customPoints : (BASE_POINTS_CAP + currentXP);
+    $: currentXP = flags.xp || 0; 
+    $: playerLvlInfo = LevelCalculator.getLevelInfo(currentXP);
+    
+    // Nível do Mestre: Calcula pelo XP "fictício" baseado nos Pontos Totais digitados
+    $: customXP = Math.max(0, customPoints - BASE_POINTS_CAP);
+    $: customLvlInfo = LevelCalculator.getLevelInfo(customXP);
+    
+    // A MÁGICA: Define qual "pacote de nível" a ficha toda vai usar
+    $: activeLvlInfo = gmMode ? customLvlInfo : playerLvlInfo;
+    
+    $: activeLevel = activeLvlInfo.level;
+    $: missingXP = playerLvlInfo.nextXP - currentXP; // Sempre baseado no player
+    $: totalPointsCap = gmMode ? customPoints : (BASE_POINTS_CAP + currentXP);
 
     // === 7. SISTEMA DE VONTADE ===
     $: statCharm = Number(system.stats?.charm?.value || system.attributes?.charm?.value || flags.stats?.charm?.normal || 1);
@@ -326,6 +465,113 @@ async function importPlayerXP() {
         </div>
     {/if}
 
+    {#if showVisualProfiles}
+        <div class="modal-backdrop" on:click={() => showVisualProfiles = false} transition:fade style="z-index: 10000;">
+            <div class="modal-window" style="width: 600px;" transition:scale on:click|stopPropagation role="dialog">
+                <div class="modal-header">
+                    <span><i class="fas fa-mask"></i> TROCA DE VISUAL</span>
+                    <button class="close-btn" type="button" on:click={() => showVisualProfiles = false}><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body custom-scroll" style="display:flex; flex-direction:column; gap:15px; max-height: 70vh;">
+                    {#each visualProfiles as p (p.id)}
+                        <div class="profile-row" style="background: rgba(0,0,0,0.5); border: 1px solid #333; padding: 10px; border-radius: 4px; display: flex; gap: 10px; align-items: center;">
+                            <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
+                                <input type="text" value={p.name} on:change={(e) => updateVisualProfile(p.id, 'name', e.target.value)} placeholder="Nome do Perfil" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #fff; padding: 5px; border-radius: 4px; font-weight: bold; font-family: inherit;">
+                                <input type="text" value={p.actorImg} on:change={(e) => updateVisualProfile(p.id, 'actorImg', e.target.value)} placeholder="URL do Avatar" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
+                                <input type="text" value={p.tokenImg} on:change={(e) => updateVisualProfile(p.id, 'tokenImg', e.target.value)} placeholder="URL do Token" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 5px; width: 100px;">
+                                <button class="btn-info" style="border-color: #00ff41; color: #00ff41; height: auto; padding: 8px; width: 100%; box-sizing: border-box;" on:click={() => applyVisualProfile(p)}>APLICAR</button>
+                                <button class="btn-info" style="border-color: #ff3333; color: #ff3333; height: auto; padding: 8px; width: 100%; box-sizing: border-box;" on:click={() => removeVisualProfile(p.id)}>EXCLUIR</button>
+                            </div>
+                        </div>
+                    {/each}
+                    
+                    <div class="profile-row" style="background: rgba(255,255,255,0.05); border: 1px dashed #555; padding: 10px; border-radius: 4px; display: flex; gap: 10px; align-items: stretch; margin-top: 10px;">
+                        <div style="display: flex; flex-direction: column; gap: 5px; flex: 1;">
+                            <input type="text" bind:value={newProfile.name} placeholder="Nome do Perfil" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid var(--c-primary); color: #fff; padding: 5px; border-radius: 4px; font-weight: bold; font-family: inherit;">
+                            <input type="text" bind:value={newProfile.actorImg} placeholder="URL do Avatar" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
+                            <input type="text" bind:value={newProfile.tokenImg} placeholder="URL do Token" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
+                        </div>
+                        <button class="btn-info" style="border-color: var(--c-primary); color: var(--c-primary); flex-shrink: 0; padding: 10px; width: 100px; box-sizing: border-box; height: 100%; display: flex; align-items: center; justify-content: center;" on:click={addVisualProfile}>+ ADICIONAR</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    {#if showExclusividades}
+        <div class="modal-backdrop" on:click={() => showExclusividades = false} transition:fade style="z-index: 10000;">
+            <div class="modal-window" style="width: 700px;" transition:scale on:click|stopPropagation role="dialog" 
+                 on:drop={handleDropExclusividade} on:dragover={(e) => {if(isGM) e.preventDefault();}}>
+                <div class="modal-header" style="background: #9900ff; border-bottom: 2px solid #5555aa; color: #fff;">
+                    <span><i class="fas fa-crown"></i> EXCLUSIVIDADES</span>
+                    <button class="close-btn" style="color: #fff; border-color: #fff;" type="button" on:click={() => showExclusividades = false}><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body custom-scroll" style="display:flex; flex-direction:column; gap:15px; max-height: 70vh;">
+                    {#if isGM}
+                        <div style="display: flex; justify-content: center; margin-bottom: 5px;">
+                            <button style="background: rgba(153,0,255,0.1); border: 1px solid #9900ff; color: #e0e0e0; padding: 8px 15px; border-radius: 4px; font-family: inherit; font-weight: bold; font-size: 13px; cursor: pointer; width: fit-content;" on:click={openExcPicker}>
+                                <i class="fas fa-plus"></i> ADICIONAR EXCLUSIVIDADE
+                            </button>
+                        </div>
+                    {/if}
+                    
+                    {#each exclusividades as exc (exc.id)}
+                        <div class="exc-card" style="background: #0a0a0c; border: 1px solid #333; border-radius: 4px; overflow: hidden;">
+                            <div class="exc-header" style="background: #111; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #222;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    {#if exc.img}<img src={exc.img} alt="exc" style="width: 30px; height: 30px; border-radius: 4px; border: 1px solid #444;">{/if}
+                                    <span style="color: #9900ff; font-weight: bold; font-family: var(--font-head); font-size: 16px;">{exc.name}</span>
+                                </div>
+                                {#if isGM}
+                                    <button style="background: transparent; border: 1px solid #ff4444; color: #ff4444; border-radius: 4px; width: 22px; height: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto;" title="Remover" on:click={() => removeExclusividade(exc.id)}><i class="fas fa-trash" style="font-size: 10px;"></i></button>
+                                {/if}
+                            </div>
+                            <div class="exc-body" style="padding: 15px;">
+                                {#if isGM}
+                                    <textarea style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #ccc; padding: 10px; border-radius: 4px; min-height: 80px; font-family: inherit; font-size: 13px;" 
+                                              value={exc.description} on:change={(e) => updateExclusividade(exc.id, e.target.value)}></textarea>
+                                {:else}
+                                    <div class="html-injection" style="color: #ccc; font-size: 13px; line-height: 1.5;">
+                                        {@html exc.description}
+                                    </div>
+                                {/if}
+                            </div>
+                        </div>
+                    {/each}
+                    
+                    {#if exclusividades.length === 0}
+                        <div style="text-align: center; color: #555; padding: 20px; font-style: italic;">
+                            Este personagem não possui exclusividades.
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    {#if showExcPicker}
+        <div class="modal-backdrop" on:click={() => showExcPicker = false} transition:fade style="z-index: 10001;">
+            <div class="modal-window" style="width: 500px;" transition:scale on:click|stopPropagation role="dialog">
+                <div class="modal-header">
+                    <span>SELECIONAR EXCLUSIVIDADE</span>
+                    <button class="close-btn" type="button" on:click={() => showExcPicker = false}><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body custom-scroll" style="display:flex; flex-direction:column; gap:5px; max-height: 60vh;">
+                    {#each excPickerGroups as group}
+                        <div style="margin-top: 10px; font-weight: bold; color: var(--c-primary); font-size: 12px; border-bottom: 1px solid #333;">{group.name}</div>
+                        {#each group.exclusivities as item}
+                            <button class="exc-pick-btn" on:click={() => pickExclusivity(item)}>
+                                {item.name}
+                            </button>
+                        {/each}
+                    {/each}
+                </div>
+            </div>
+        </div>
+    {/if}
+
     {#if activePopup}
         <div class="modal-backdrop" on:click={() => activePopup = null} transition:fade>
             <div class="modal-window" transition:scale on:click|stopPropagation role="dialog">
@@ -438,6 +684,12 @@ async function importPlayerXP() {
                         </button>
                         <button class="sync-btn" style="border-color: var(--c-primary); color: var(--c-primary);" on:click={toggleImages}>
                             <i class="fas fa-image"></i> {showImages ? 'OCULTAR ARTES' : 'GALERIA'}
+                        </button>
+                        <button class="sync-btn" style="border-color: #bb8800; color: #ffaa00;" on:click={toggleVisualProfiles}>
+                            <i class="fas fa-mask"></i> VISUAL
+                        </button>
+                        <button class="sync-btn" style="border-color: #9900ff; color: #9900ff;" on:click={toggleExclusividades}>
+                            <i class="fas fa-crown"></i> EXCLUSIVIDADES
                         </button>
                         {#if !gmMode && missingXP <= 0}
                             <button class="lvl-up-btn" style="margin-top:0;" on:click={() => dispatch('openLvlUp')} transition:fade>

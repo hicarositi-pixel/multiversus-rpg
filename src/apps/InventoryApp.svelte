@@ -3,8 +3,8 @@
   import { fade, fly, scale } from 'svelte/transition';
   import { quintOut } from 'svelte/easing';
   
-  // --- IMPORTS ---
   import InventoryCard from '../components/InventoryCard.svelte';
+  import EquipmentPanel from './components/EquipmentPanel.svelte';
   import CraftingApp from '../../crafting/CraftingApp.svelte';
   import { CraftDB } from '../../crafting/CraftDB.js';
 
@@ -26,6 +26,10 @@
   let localItems = getVal(actor, "flags.multiversus-rpg.inventory", []);
   let localBody = getVal(actor, "system.stats.body") || getVal(actor, "flags.multiversus-rpg.tempBody", 0);
   let localBoosters = getVal(actor, "flags.multiversus-rpg.invBoosters", 0);
+  let localCurrency = getVal(actor, "flags.multiversus-rpg.currency_u", 0);
+  let currencyInput = 0;
+  
+  let activeMainTab = 'inventory'; // 'inventory' or 'equipments'
   
   let showCrafting = false;
   let showCreator = false;
@@ -75,6 +79,9 @@
       
       const boostChange = foundry.utils.getProperty(changes, "flags.multiversus-rpg.invBoosters");
       if (boostChange !== undefined) localBoosters = boostChange;
+
+      const currencyChange = foundry.utils.getProperty(changes, "flags.multiversus-rpg.currency_u");
+      if (currencyChange !== undefined) localCurrency = currencyChange;
     });
     
     return () => Hooks.off("updateActor", hookId);
@@ -208,6 +215,16 @@
     await actor.update(updates, { render: false });
   }
 
+  async function modifyCurrency(amount) {
+      if (!amount) return;
+      if (!isGM && amount > 0) return ui.notifications.error("Jogadores só podem gastar Unidades (U).");
+      let current = localCurrency || 0;
+      let newValue = Math.max(0, current + amount);
+      localCurrency = newValue;
+      await actor.update({ "flags.multiversus-rpg.currency_u": newValue }, { render: false });
+      currencyInput = 0; 
+  }
+
   const RARITY_COLORS = { "Comum": "#a0a0a0", "Incomum": "#10b981", "Raro": "#00bfff", "Épico": "#8b5cf6", "Lendário": "#ffa500", "Mítico": "#ff4500", "Universal": "#ffffff", "Multiversal": "#d000ff" };
 </script>
 
@@ -220,7 +237,13 @@
   <header class="os-header">
     <div class="os-brand">
       <i class="fas fa-box-open pulse"></i>
-      <div class="os-titles"><h1>INVENTÁRIO</h1><small>{actor.name}</small></div>
+      <div class="os-titles">
+          <div style="display: flex; gap: 15px;">
+              <button class="main-tab-btn {activeMainTab === 'inventory' ? 'active' : ''}" on:click={() => activeMainTab = 'inventory'}>INVENTÁRIO</button>
+              <button class="main-tab-btn {activeMainTab === 'equipments' ? 'active' : ''}" on:click={() => activeMainTab = 'equipments'}>EQUIPAMENTOS</button>
+          </div>
+          <small>{actor.name}</small>
+      </div>
     </div>
     
     <div class="os-stats">
@@ -233,6 +256,18 @@
       </div>
       
       <div class="stat-inputs">
+        <div class="currency-grp" style="display: flex; flex-direction: column; align-items: center; background: rgba(255,215,0,0.1); border: 1px solid #ffd700; border-radius: 4px; padding: 2px 5px; margin-right: 10px;">
+            <label style="color: #ffd700; font-size: 8px; font-weight: bold;">UNIDADES (U)</label>
+            <div style="font-weight: bold; color: #ffd700; font-size: 14px;">{localCurrency} U</div>
+            <div style="display: flex; gap: 2px; margin-top: 2px;">
+                <input type="number" min="0" bind:value={currencyInput} style="width: 40px; height: 18px; font-size: 10px; text-align: center; background: #000; border: 1px solid #333; color: #fff; outline: none; box-sizing: border-box;">
+                {#if isGM}
+                    <button style="width: 18px; height: 18px; background: #000; border: 1px solid #0f0; color: #0f0; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; box-sizing: border-box;" on:click={() => modifyCurrency(currencyInput)} title="Adicionar">+</button>
+                {/if}
+                <button style="width: 18px; height: 18px; background: #000; border: 1px solid #f00; color: #f00; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-sizing: border-box;" on:click={() => modifyCurrency(-currencyInput)} title="Remover">-</button>
+            </div>
+        </div>
+
         <div class="input-grp">
             <label>CORPO</label>
             <input type="number" value={localBody} on:change={(e)=>updateStat('body', e.target.value)} disabled={!isGM}>
@@ -256,59 +291,63 @@
   </header>
 
   <div class="main-stage">
-    <div class="grid-panel">
-      <div class="grid-frame">
-        <div class="inventory-stage" 
-             style="width: {COLS * (CELL_SIZE + GAP)}px; height: {ROWS * (CELL_SIZE + GAP)}px;"
-             on:dragover={handleDragOver} on:drop={handleDropOnGrid} on:click={() => { selectedItem = null; isEditing = false; }}>
-          
-          <div class="slots-layer">
-            {#each Array(TOTAL_SLOTS) as _, i}
-              <div class="grid-slot {i >= unlockedSlots ? 'locked' : ''}">
-                {#if i >= unlockedSlots}<i class="fas fa-lock"></i>{/if}
+    {#if activeMainTab === 'inventory'}
+        <div class="grid-panel">
+          <div class="grid-frame">
+            <div class="inventory-stage" 
+                 style="width: {COLS * (CELL_SIZE + GAP)}px; height: {ROWS * (CELL_SIZE + GAP)}px;"
+                 on:dragover={handleDragOver} on:drop={handleDropOnGrid} on:click={() => { selectedItem = null; isEditing = false; }}>
+              
+              <div class="slots-layer">
+                {#each Array(TOTAL_SLOTS) as _, i}
+                  <div class="grid-slot {i >= unlockedSlots ? 'locked' : ''}">
+                    {#if i >= unlockedSlots}<i class="fas fa-lock"></i>{/if}
+                  </div>
+                {/each}
               </div>
-            {/each}
-          </div>
 
-          <div class="items-layer">
-            {#each gridItems as item (item.id)}
-              <div class="item-container" 
-                class:selected={selectedItem?.id === item.id}
-                style="
-                    position: absolute; 
-                    left: {item.x * (CELL_SIZE + GAP)}px; 
-                    top: {item.y * (CELL_SIZE + GAP)}px; 
-                    width: {item.w * (CELL_SIZE + GAP) - GAP}px; 
-                    height: {item.h * (CELL_SIZE + GAP) - GAP}px; 
-                    z-index: {selectedItem?.id === item.id ? 999 : 10};
-                "
-                draggable="true" 
-                on:dragstart={(e) => handleDragStart(e, item, 'grid')} 
-                on:click|stopPropagation={() => { selectedItem = item; isEditing = false; }}
-              >
-                <InventoryCard 
-                    item={item} index={item.id} isGM={isGM} inGrid={true} 
-                    onSelect={() => { selectedItem = item; isEditing = false; }} 
-                    onUpdateQty={updateItemLocal} 
-                    onDelete={() => deleteItem(item.id)}
-                />
+              <div class="items-layer">
+                {#each gridItems as item (item.id)}
+                  <div class="item-container" 
+                    class:selected={selectedItem?.id === item.id}
+                    style="
+                        position: absolute; 
+                        left: {item.x * (CELL_SIZE + GAP)}px; 
+                        top: {item.y * (CELL_SIZE + GAP)}px; 
+                        width: {item.w * (CELL_SIZE + GAP) - GAP}px; 
+                        height: {item.h * (CELL_SIZE + GAP) - GAP}px; 
+                        z-index: {selectedItem?.id === item.id ? 999 : 10};
+                    "
+                    draggable="true" 
+                    on:dragstart={(e) => handleDragStart(e, item, 'grid')} 
+                    on:click|stopPropagation={() => { selectedItem = item; isEditing = false; }}
+                  >
+                    <InventoryCard 
+                        item={item} index={item.id} isGM={isGM} inGrid={true} 
+                        onSelect={() => { selectedItem = item; isEditing = false; }} 
+                        onUpdateQty={updateItemLocal} 
+                        onDelete={() => deleteItem(item.id)}
+                    />
+                  </div>
+                {/each}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stash-panel" on:dragover={handleDragOver} on:drop={handleDropOnStash} on:click={() => { selectedItem = null; isEditing = false; }}>
+          <div class="stash-header"><span>ITENS FORA DO INVENTÁRIO</span> <span class="count-badge">{stashItems.length}</span></div>
+          <div class="stash-grid custom-scroll">
+            {#each stashItems as item (item.id)}
+              <div class="stash-slot" draggable="true" on:dragstart={(e) => handleDragStart(e, item, 'stash')} on:click|stopPropagation>
+                  <InventoryCard item={item} index={item.id} isGM={isGM} inGrid={false} onSelect={() => { selectedItem = item; isEditing = false; }} onUpdateQty={updateItemLocal} onDelete={() => deleteItem(item.id)}/>
               </div>
             {/each}
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="stash-panel" on:dragover={handleDragOver} on:drop={handleDropOnStash} on:click={() => { selectedItem = null; isEditing = false; }}>
-      <div class="stash-header"><span>ITENS FORA DO INVENTÁRIO</span> <span class="count-badge">{stashItems.length}</span></div>
-      <div class="stash-grid custom-scroll">
-        {#each stashItems as item (item.id)}
-          <div class="stash-slot" draggable="true" on:dragstart={(e) => handleDragStart(e, item, 'stash')} on:click|stopPropagation>
-              <InventoryCard item={item} index={item.id} isGM={isGM} inGrid={false} onSelect={() => { selectedItem = item; isEditing = false; }} onUpdateQty={updateItemLocal} onDelete={() => deleteItem(item.id)}/>
-          </div>
-        {/each}
-      </div>
-    </div>
+    {:else}
+        <EquipmentPanel {actor} {isGM} items={gridItems} />
+    {/if}
   </div>
 
   {#if selectedItem}
@@ -425,7 +464,10 @@
   .os-brand { display: flex; align-items: center; gap: 10px; color: #00ff41; }
   .pulse { animation: pulse 2s infinite; }
   .os-titles h1 { margin: 0; font-size: 16px; font-family: 'Share Tech Mono'; letter-spacing: 1px; line-height: 1; }
-  .os-titles small { font-size: 10px; color: #666; letter-spacing: 2px; }
+  .os-titles small { font-size: 10px; color: #666; letter-spacing: 2px; margin-top: 4px; display: block; }
+  .main-tab-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: #555; font-size: 16px; font-family: 'Share Tech Mono'; letter-spacing: 1px; line-height: 1; cursor: pointer; padding: 0 0 2px 0; transition: 0.2s; }
+  .main-tab-btn:hover { color: #aaa; }
+  .main-tab-btn.active { color: #fff; border-bottom-color: #00ff41; }
   
   .os-stats { display: flex; align-items: center; gap: 20px; }
   .stat-module { display: flex; flex-direction: column; width: 150px; }

@@ -185,6 +185,14 @@ game.settings.register("multiversus-rpg", "menuTheme", {
         default: []
     });
 
+    game.settings.register("multiversus-rpg", "exclusivityData", {
+        name: "Banco de Dados de Exclusividades",
+        scope: "world",
+        config: false,
+        type: Array,
+        default: []
+    });
+
     game.settings.register("multiversus-rpg", "creatorBgUrl", {
         name: "Fundo do Criador de Personagem (URL)",
         scope: "world",
@@ -513,6 +521,12 @@ Hooks.once('ready', async function() {
             }
             if (payload.type === "SOCIAL_HUB_DELETE_GROUP" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
                 await SocialHubDatabase.deleteGroup(payload.groupId);
+            }
+
+            if (payload.type === "NEXUS_CREATE_UPDATE" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
+                import('./database/NexusDatabase.js').then(({ NexusDatabase }) => {
+                    NexusDatabase._handleCreateOrUpdate(payload.data, payload.isFolder, payload.userId);
+                });
             }
             if (payload.type === "SOCIAL_HUB_CLEAR_CHAT" && (!game.users.activeGM || game.users.activeGM.id === game.user.id)) {
                 await SocialHubDatabase.clearChat();
