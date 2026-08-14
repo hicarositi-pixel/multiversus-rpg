@@ -26,6 +26,16 @@
     let editModeExcGroup = false;
     let excGroupName = "";
     let excSearchTerm = "";
+    
+    let expandedExcIds = new Set();
+    function toggleExcExpand(id) {
+        if (expandedExcIds.has(id)) {
+            expandedExcIds.delete(id);
+        } else {
+            expandedExcIds.add(id);
+        }
+        expandedExcIds = expandedExcIds;
+    }
 
     // Virtual Exclusivity Form State
     let showExcForm = false;
@@ -340,16 +350,31 @@
                                     const t = excSearchTerm.toLowerCase();
                                     return e.name.toLowerCase().includes(t) || (e.system && e.system.description && e.system.description.toLowerCase().includes(t));
                                 }) as exc}
-                                    <div class="t-card" draggable="true" on:dragstart={(e) => onDragStartExclusivity(e, exc)} on:click={() => { if(isGM) openExcForm(exc); }} title="Arraste para a Ficha do Jogador" style="cursor: grab;">
-                                        <img src={exc.img} alt="exc"/>
-                                        <div class="t-info">
-                                            <span class="t-name">{exc.name} <span style="color:#00ff41; font-size:10px;">({exc.system?.category || 'Geral'})</span></span>
-                                            <span class="t-cost" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">
-                                                {exc.system?.description?.replace(/<[^>]+>/g, '') || 'Sem descrição.'}
-                                            </span>
+                                    {@const isExpanded = expandedExcIds.has(exc.id)}
+                                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                    <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                    <div class="t-card" on:click={() => toggleExcExpand(exc.id)} title="Clique para expandir/recolher" style="cursor: pointer; align-items: {isExpanded ? 'flex-start' : 'center'}; flex-direction: {isExpanded ? 'column' : 'row'};">
+                                        <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
+                                            <img src={exc.img} alt="exc"/>
+                                            <div class="t-info">
+                                                <span class="t-name">{exc.name} <span style="color:#00ff41; font-size:10px;">({exc.system?.category || 'Geral'})</span></span>
+                                                {#if !isExpanded}
+                                                <span class="t-cost" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;">
+                                                    {exc.system?.description?.replace(/<[^>]+>/g, '') || 'Sem descrição.'}
+                                                </span>
+                                                {/if}
+                                            </div>
+                                            {#if isGM}
+                                            <div class="gm-controls-exc" style="margin-left: auto; display: flex; gap: 5px;">
+                                                <button class="btn-trash-t" style="color: #00ff41; opacity: 1;" on:click|stopPropagation={() => openExcForm(exc)} title="Editar"><i class="fas fa-edit"></i></button>
+                                                <button class="btn-trash-t" style="opacity: 1;" on:click|stopPropagation={() => removeExclusivity(exc.id)} title="Remover"><i class="fas fa-times"></i></button>
+                                            </div>
+                                            {/if}
                                         </div>
-                                        {#if isGM}
-                                        <button class="btn-trash-t" on:click|stopPropagation={() => removeExclusivity(exc.id)}><i class="fas fa-times"></i></button>
+                                        {#if isExpanded}
+                                        <div class="t-cost expanded" style="margin-top: 5px; color: #ccc; font-size: 11px; width: 100%; border-top: 1px dashed #333; padding-top: 5px;">
+                                            {@html exc.system?.description || 'Sem descrição.'}
+                                        </div>
                                         {/if}
                                     </div>
                                 {/each}

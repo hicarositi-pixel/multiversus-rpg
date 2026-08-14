@@ -117,6 +117,11 @@
     let exclusividades = flags.exclusivities || [];
     $: { if (flags.exclusivities !== undefined) exclusividades = flags.exclusivities; }
 
+    let expandedExc = {};
+    function toggleExpandedExc(id) {
+        expandedExc[id] = !expandedExc[id];
+    }
+
     function toggleExclusividades() {
         showExclusividades = !showExclusividades;
     }
@@ -519,25 +524,29 @@ async function importPlayerXP() {
                     
                     {#each exclusividades as exc (exc.id)}
                         <div class="exc-card" style="background: #0a0a0c; border: 1px solid #333; border-radius: 4px; overflow: hidden;">
-                            <div class="exc-header" style="background: #111; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #222;">
+                            <div class="exc-header" style="background: #111; padding: 10px 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #222; cursor: {isGM ? 'default' : 'pointer'};" on:click={() => { if (!isGM) toggleExpandedExc(exc.id); }}>
                                 <div style="display: flex; align-items: center; gap: 10px;">
                                     {#if exc.img}<img src={exc.img} alt="exc" style="width: 30px; height: 30px; border-radius: 4px; border: 1px solid #444;">{/if}
                                     <span style="color: #9900ff; font-weight: bold; font-family: var(--font-head); font-size: 16px;">{exc.name}</span>
                                 </div>
                                 {#if isGM}
-                                    <button style="background: transparent; border: 1px solid #ff4444; color: #ff4444; border-radius: 4px; width: 22px; height: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto;" title="Remover" on:click={() => removeExclusividade(exc.id)}><i class="fas fa-trash" style="font-size: 10px;"></i></button>
-                                {/if}
-                            </div>
-                            <div class="exc-body" style="padding: 15px;">
-                                {#if isGM}
-                                    <textarea style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #ccc; padding: 10px; border-radius: 4px; min-height: 80px; font-family: inherit; font-size: 13px;" 
-                                              value={exc.description} on:change={(e) => updateExclusividade(exc.id, e.target.value)}></textarea>
+                                    <button style="background: transparent; border: 1px solid #ff4444; color: #ff4444; border-radius: 4px; width: 22px; height: 22px; padding: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; flex: 0 0 auto;" title="Remover" on:click|stopPropagation={() => removeExclusividade(exc.id)}><i class="fas fa-trash" style="font-size: 10px;"></i></button>
                                 {:else}
-                                    <div class="html-injection" style="color: #ccc; font-size: 13px; line-height: 1.5;">
-                                        {@html exc.description}
-                                    </div>
+                                    <i class="fas fa-chevron-{expandedExc[exc.id] ? 'up' : 'down'}" style="color: #666;"></i>
                                 {/if}
                             </div>
+                            {#if isGM || expandedExc[exc.id]}
+                                <div class="exc-body" style="padding: 15px;" transition:slide>
+                                    {#if isGM}
+                                        <textarea style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #ccc; padding: 10px; border-radius: 4px; min-height: 80px; font-family: inherit; font-size: 13px;" 
+                                                  value={exc.description} on:change={(e) => updateExclusividade(exc.id, e.target.value)}></textarea>
+                                    {:else}
+                                        <div class="html-injection" style="color: #ccc; font-size: 13px; line-height: 1.5;">
+                                            {@html exc.description}
+                                        </div>
+                                    {/if}
+                                </div>
+                            {/if}
                         </div>
                     {/each}
                     

@@ -324,9 +324,13 @@
             </header>
 
             <div class="widget-content">
+                {@const isCrit = unit.pool.filter(d => d.val === 10 && d.type === 'd').length >= 3}
+                {#if isCrit}
+                    <div style="background: rgba(255,255,255,0.2); color: #fff; text-align: center; font-weight: bold; padding: 2px; margin-bottom: 5px; border: 1px dashed #fff; border-radius: 4px; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff; font-size: 10px;">CRÍTICO!</div>
+                {/if}
                 <div class="pool-grid">
                     {#each unit.pool as die, i}
-                        <div class="die {die.type}" class:wiggle={die.val === 0}>
+                        <div class="die {die.type}" class:wiggle={die.val === 0} class:crit-white={isCrit && die.val === 10 && die.type === 'd'}>
                             {#if die.val === 0}
                                 <select on:change={(e) => setWiggle(unit.id, i, parseInt(e.target.value))}>
                                     <option value="0">?</option>
@@ -431,6 +435,7 @@
     .die { width: 22px; height: 22px; background: #111; border: 1px solid #444; color: #fff; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
     .die.hd { color: #f33; border-color: #f33; }
     .die.wd { color: #fc0; border-color: #fc0; }
+    .die.crit-white { background: #000 !important; border: 2px solid #fff !important; color: #fff !important; box-shadow: 0 0 8px #fff !important; }
     .die select { width: 100%; height: 100%; background: transparent; border: none; color: inherit; font-weight: bold; text-align: center; -webkit-appearance: none; }
 
     .set-row { display: flex; align-items: center; background: #151515; padding: 3px; margin-bottom: 3px; border-radius: 2px; }

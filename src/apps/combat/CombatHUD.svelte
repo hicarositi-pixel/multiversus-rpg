@@ -782,17 +782,23 @@
                         {#if item.res.result}
                             <div class="ore-result" style="margin-top: 5px; border-top: 1px solid #333; padding-top: 5px; border-left: 2px solid {getBorderColor(item.res.type)}; padding-left: 5px;">
                                 {#if item.type === 'set'}
+                                    {@const normalTens = item.set.h === 10 ? (item.set.dice || []).filter(d => d.type === 'd').length : 0}
+                                    {@const isCrit = normalTens >= 3}
                                     <div style="display:flex; align-items:center; gap:5px;">
                                         <img src={item.res.img} alt="Origin" style="width:16px;height:16px;border-radius:50%;" title="Originador" />
                                         <div class="set-line" style="font-size: 13px; font-weight: bold; color: #fff;">
                                             {item.set.w}x{item.set.h} 
+                                            {#if isCrit}
+                                                <span style="font-size: 8px; background: #fff; color: #000; padding: 2px 4px; border-radius: 2px; margin-left: 5px; font-weight: bold; box-shadow: 0 0 5px #fff;">CRÍTICO</span>
+                                            {/if}
                                             <span class="boxes" style="display:inline-flex; gap: 2px; margin-left: 5px;">
                                                 {#each (item.set.dice || Array(item.set.w).fill({})) as die}
+                                                    {@const isCritDie = isCrit && die.type === 'd'}
                                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                                                     <!-- svelte-ignore a11y-no-static-element-interactions -->
                                                     <div 
                                                         on:click={() => changeWD(item.res, die)}
-                                                        style="width:14px; height:14px; background: {getDieBoxBg(item.res.type)}; border-radius: 2px; box-shadow: 0 0 5px {getBorderColor(item.res.type)}; display:flex; align-items:center; justify-content:center; font-size: 9px; font-weight: bold; color: {getDieTextColor(item.res.type)}; cursor: {die.type === 'wd' ? 'pointer' : 'default'};"
+                                                        style="width:14px; height:14px; background: {isCritDie ? '#000' : getDieBoxBg(item.res.type)}; border: {isCritDie ? '1px solid #fff' : 'none'}; border-radius: 2px; box-shadow: 0 0 5px {isCritDie ? '#fff' : getBorderColor(item.res.type)}; display:flex; align-items:center; justify-content:center; font-size: 9px; font-weight: bold; color: {isCritDie ? '#fff' : getDieTextColor(item.res.type)}; cursor: {die.type === 'wd' ? 'pointer' : 'default'}; box-sizing: border-box;"
                                                         title={die.type === 'wd' ? 'Clique para ajustar WD' : ''}>
                                                         {die.type ? die.type.toUpperCase().charAt(0) : ''}
                                                     </div>

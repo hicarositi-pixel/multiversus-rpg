@@ -99,14 +99,34 @@
             <div style="padding: 10px;">
         `;
 
+        let normalTens = rolledDice.filter(d => d.val === 10 && d.type === 'd').length;
+        let isCrit = normalTens >= 3;
+
+        if (isCrit) {
+            html += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO!</div>`;
+        }
+
         if (finalResults.validSets.length > 0) {
             html += `<div style="font-weight: bold; font-size: 12px; color: #aaa; margin-bottom: 5px;">CONJUNTOS VÁLIDOS (L x A)</div>`;
             finalResults.validSets.forEach(set => {
+                let blocksHtml = '';
+                if (set.h === 10 && isCrit) {
+                    for (let i = 0; i < set.w; i++) {
+                        if (i < normalTens) {
+                            blocksHtml += `<div style="width: 15px; height: 15px; background: ${tColor}; border: 2px solid #fff; border-radius: 2px; box-sizing: border-box; box-shadow: 0 0 8px #fff;"></div>`;
+                        } else {
+                            blocksHtml += `<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`;
+                        }
+                    }
+                } else {
+                    blocksHtml = Array(set.w).fill(`<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`).join('');
+                }
+
                 html += `
                 <div style="display: flex; align-items: center; margin-bottom: 5px; background: #111; padding: 5px; border-left: 3px solid ${tColor}; border-radius: 4px;">
                     <span style="font-size: 18px; font-weight: bold; color: ${tColor}; margin-right: 10px;">${set.w}x${set.h}</span>
                     <div style="display: flex; gap: 2px;">
-                        ${Array(set.w).fill(`<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`).join('')}
+                        ${blocksHtml}
                     </div>
                 </div>`;
             });

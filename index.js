@@ -5178,63 +5178,63 @@ class ExclusivityDatabase {
 }
 function get_each_context$$(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[177] = list[i];
-  child_ctx[179] = i;
+  child_ctx[180] = list[i];
+  child_ctx[182] = i;
   return child_ctx;
 }
 function get_each_context_1$N(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[180] = list[i];
-  child_ctx[179] = i;
+  child_ctx[183] = list[i];
+  child_ctx[182] = i;
   return child_ctx;
 }
 function get_each_context_4$k(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[182] = list[i];
+  child_ctx[185] = list[i];
   return child_ctx;
 }
 function get_each_context_5$f(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[185] = list[i];
+  child_ctx[188] = list[i];
   return child_ctx;
 }
 function get_each_context_2$t(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[182] = list[i];
+  child_ctx[185] = list[i];
   return child_ctx;
 }
 function get_each_context_3$o(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[185] = list[i];
+  child_ctx[188] = list[i];
   return child_ctx;
 }
 function get_each_context_6$9(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[192] = list[i][0];
-  child_ctx[193] = list[i][1];
+  child_ctx[195] = list[i][0];
+  child_ctx[196] = list[i][1];
   return child_ctx;
 }
 function get_each_context_7$5(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[196] = list[i];
+  child_ctx[199] = list[i];
   return child_ctx;
 }
 function get_each_context_8$4(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[180] = list[i];
+  child_ctx[183] = list[i];
   return child_ctx;
 }
 function get_each_context_9$3(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[201] = list[i];
+  child_ctx[204] = list[i];
   return child_ctx;
 }
 function get_each_context_10$2(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[204] = list[i];
+  child_ctx[207] = list[i];
   return child_ctx;
 }
-function create_if_block_27$2(ctx) {
+function create_if_block_28$2(ctx) {
   let div3;
   let div2;
   let div0;
@@ -5330,29 +5330,29 @@ function create_if_block_27$2(ctx) {
             button0,
             "click",
             /*click_handler_5*/
-            ctx[117]
+            ctx[119]
           ),
           listen(
             input,
             "input",
             /*input_input_handler*/
-            ctx[118]
+            ctx[120]
           ),
           listen(
             button1,
             "click",
             /*saveImageUrl*/
-            ctx[69]
+            ctx[71]
           ),
           listen(div2, "click", stop_propagation(
             /*click_handler*/
-            ctx[116]
+            ctx[118]
           )),
           listen(
             div3,
             "click",
             /*click_handler_6*/
-            ctx[119]
+            ctx[121]
           )
         ];
         mounted = true;
@@ -5409,7 +5409,7 @@ function create_if_block_27$2(ctx) {
     }
   };
 }
-function create_if_block_26$2(ctx) {
+function create_if_block_27$2(ctx) {
   let div5;
   let div4;
   let div0;
@@ -5441,7 +5441,7 @@ function create_if_block_26$2(ctx) {
   );
   const get_key = (ctx2) => (
     /*p*/
-    ctx2[204].id
+    ctx2[207].id
   );
   for (let i = 0; i < each_value_10.length; i += 1) {
     let child_ctx = get_each_context_10$2(ctx, each_value_10, i);
@@ -5591,41 +5591,41 @@ function create_if_block_26$2(ctx) {
             button0,
             "click",
             /*click_handler_7*/
-            ctx[120]
+            ctx[122]
           ),
           listen(
             input0,
             "input",
             /*input0_input_handler*/
-            ctx[126]
+            ctx[128]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler*/
-            ctx[127]
+            ctx[129]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler*/
-            ctx[128]
+            ctx[130]
           ),
           listen(
             button1,
             "click",
             /*addVisualProfile*/
-            ctx[58]
+            ctx[59]
           ),
           listen(div4, "click", stop_propagation(
             /*click_handler_1*/
-            ctx[115]
+            ctx[117]
           )),
           listen(
             div5,
             "click",
             /*click_handler_10*/
-            ctx[129]
+            ctx[131]
           )
         ];
         mounted = true;
@@ -5633,8 +5633,9 @@ function create_if_block_26$2(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*visualProfiles*/
-      16777216 | dirty[1] & /*removeVisualProfile, applyVisualProfile, updateVisualProfile*/
-      1879048192) {
+      16777216 | dirty[1] & /*removeVisualProfile, updateVisualProfile*/
+      1610612736 | dirty[2] & /*applyVisualProfile*/
+      1) {
         each_value_10 = ensure_array_like(
           /*visualProfiles*/
           ctx2[24]
@@ -5733,9 +5734,9 @@ function create_each_block_10$2(key_2, ctx) {
   function change_handler(...args) {
     return (
       /*change_handler*/
-      ctx[121](
+      ctx[123](
         /*p*/
-        ctx[204],
+        ctx[207],
         ...args
       )
     );
@@ -5743,9 +5744,9 @@ function create_each_block_10$2(key_2, ctx) {
   function change_handler_1(...args) {
     return (
       /*change_handler_1*/
-      ctx[122](
+      ctx[124](
         /*p*/
-        ctx[204],
+        ctx[207],
         ...args
       )
     );
@@ -5753,9 +5754,9 @@ function create_each_block_10$2(key_2, ctx) {
   function change_handler_2(...args) {
     return (
       /*change_handler_2*/
-      ctx[123](
+      ctx[125](
         /*p*/
-        ctx[204],
+        ctx[207],
         ...args
       )
     );
@@ -5763,18 +5764,18 @@ function create_each_block_10$2(key_2, ctx) {
   function click_handler_8() {
     return (
       /*click_handler_8*/
-      ctx[124](
+      ctx[126](
         /*p*/
-        ctx[204]
+        ctx[207]
       )
     );
   }
   function click_handler_9() {
     return (
       /*click_handler_9*/
-      ctx[125](
+      ctx[127](
         /*p*/
-        ctx[204]
+        ctx[207]
       )
     );
   }
@@ -5798,7 +5799,7 @@ function create_each_block_10$2(key_2, ctx) {
       button1.textContent = "EXCLUIR";
       attr(input0, "type", "text");
       input0.value = input0_value_value = /*p*/
-      ctx[204].name;
+      ctx[207].name;
       attr(input0, "placeholder", "Nome do Perfil");
       set_style(input0, "width", "100%");
       set_style(input0, "box-sizing", "border-box");
@@ -5811,7 +5812,7 @@ function create_each_block_10$2(key_2, ctx) {
       set_style(input0, "font-family", "inherit");
       attr(input1, "type", "text");
       input1.value = input1_value_value = /*p*/
-      ctx[204].actorImg;
+      ctx[207].actorImg;
       attr(input1, "placeholder", "URL do Avatar");
       set_style(input1, "width", "100%");
       set_style(input1, "box-sizing", "border-box");
@@ -5824,7 +5825,7 @@ function create_each_block_10$2(key_2, ctx) {
       set_style(input1, "font-family", "inherit");
       attr(input2, "type", "text");
       input2.value = input2_value_value = /*p*/
-      ctx[204].tokenImg;
+      ctx[207].tokenImg;
       attr(input2, "placeholder", "URL do Token");
       set_style(input2, "width", "100%");
       set_style(input2, "box-sizing", "border-box");
@@ -5895,17 +5896,17 @@ function create_each_block_10$2(key_2, ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*visualProfiles*/
       16777216 && input0_value_value !== (input0_value_value = /*p*/
-      ctx[204].name) && input0.value !== input0_value_value) {
+      ctx[207].name) && input0.value !== input0_value_value) {
         input0.value = input0_value_value;
       }
       if (dirty[0] & /*visualProfiles*/
       16777216 && input1_value_value !== (input1_value_value = /*p*/
-      ctx[204].actorImg) && input1.value !== input1_value_value) {
+      ctx[207].actorImg) && input1.value !== input1_value_value) {
         input1.value = input1_value_value;
       }
       if (dirty[0] & /*visualProfiles*/
       16777216 && input2_value_value !== (input2_value_value = /*p*/
-      ctx[204].tokenImg) && input2.value !== input2_value_value) {
+      ctx[207].tokenImg) && input2.value !== input2_value_value) {
         input2.value = input2_value_value;
       }
     },
@@ -5938,7 +5939,7 @@ function create_if_block_20$4(ctx) {
   let dispose;
   let if_block0 = (
     /*isGM*/
-    ctx[56] && create_if_block_25$3(ctx)
+    ctx[57] && create_if_block_26$2(ctx)
   );
   let each_value_9 = ensure_array_like(
     /*exclusividades*/
@@ -5946,7 +5947,7 @@ function create_if_block_20$4(ctx) {
   );
   const get_key = (ctx2) => (
     /*exc*/
-    ctx2[201].id
+    ctx2[204].id
   );
   for (let i = 0; i < each_value_9.length; i += 1) {
     let child_ctx = get_each_context_9$3(ctx, each_value_9, i);
@@ -6020,29 +6021,29 @@ function create_if_block_20$4(ctx) {
             button,
             "click",
             /*click_handler_11*/
-            ctx[130]
+            ctx[132]
           ),
           listen(div2, "click", stop_propagation(
             /*click_handler_2*/
-            ctx[114]
+            ctx[116]
           )),
           listen(
             div2,
             "drop",
             /*handleDropExclusividade*/
-            ctx[65]
+            ctx[67]
           ),
           listen(
             div2,
             "dragover",
             /*dragover_handler*/
-            ctx[133]
+            ctx[136]
           ),
           listen(
             div3,
             "click",
-            /*click_handler_13*/
-            ctx[134]
+            /*click_handler_14*/
+            ctx[137]
           )
         ];
         mounted = true;
@@ -6051,12 +6052,12 @@ function create_if_block_20$4(ctx) {
     p(ctx2, dirty) {
       if (
         /*isGM*/
-        ctx2[56]
+        ctx2[57]
       ) if_block0.p(ctx2, dirty);
-      if (dirty[0] & /*exclusividades*/
-      268435456 | dirty[1] & /*isGM*/
-      33554432 | dirty[2] & /*updateExclusividade, removeExclusividade*/
-      48) {
+      if (dirty[0] & /*exclusividades, expandedExc*/
+      805306368 | dirty[1] & /*isGM*/
+      67108864 | dirty[2] & /*updateExclusividade, toggleExpandedExc, removeExclusividade*/
+      194) {
         each_value_9 = ensure_array_like(
           /*exclusividades*/
           ctx2[28]
@@ -6123,7 +6124,7 @@ function create_if_block_20$4(ctx) {
     }
   };
 }
-function create_if_block_25$3(ctx) {
+function create_if_block_26$2(ctx) {
   let div;
   let button;
   let mounted;
@@ -6155,7 +6156,7 @@ function create_if_block_25$3(ctx) {
           button,
           "click",
           /*openExcPicker*/
-          ctx[63]
+          ctx[65]
         );
         mounted = true;
       }
@@ -6170,14 +6171,14 @@ function create_if_block_25$3(ctx) {
     }
   };
 }
-function create_if_block_24$3(ctx) {
+function create_if_block_25$3(ctx) {
   let img;
   let img_src_value;
   return {
     c() {
       img = element("img");
       if (!src_url_equal(img.src, img_src_value = /*exc*/
-      ctx[201].img)) attr(img, "src", img_src_value);
+      ctx[204].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "exc");
       set_style(img, "width", "30px");
       set_style(img, "height", "30px");
@@ -6190,7 +6191,7 @@ function create_if_block_24$3(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*exclusividades*/
       268435456 && !src_url_equal(img.src, img_src_value = /*exc*/
-      ctx2[201].img)) {
+      ctx2[204].img)) {
         attr(img, "src", img_src_value);
       }
     },
@@ -6201,16 +6202,49 @@ function create_if_block_24$3(ctx) {
     }
   };
 }
-function create_if_block_23$4(ctx) {
+function create_else_block_2$h(ctx) {
+  let i;
+  let i_class_value;
+  return {
+    c() {
+      i = element("i");
+      attr(i, "class", i_class_value = "fas fa-chevron-" + /*expandedExc*/
+      (ctx[29][
+        /*exc*/
+        ctx[204].id
+      ] ? "up" : "down"));
+      set_style(i, "color", "#666");
+    },
+    m(target, anchor) {
+      insert(target, i, anchor);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*expandedExc, exclusividades*/
+      805306368 && i_class_value !== (i_class_value = "fas fa-chevron-" + /*expandedExc*/
+      (ctx2[29][
+        /*exc*/
+        ctx2[204].id
+      ] ? "up" : "down"))) {
+        attr(i, "class", i_class_value);
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(i);
+      }
+    }
+  };
+}
+function create_if_block_24$4(ctx) {
   let button;
   let mounted;
   let dispose;
   function click_handler_12() {
     return (
       /*click_handler_12*/
-      ctx[131](
+      ctx[133](
         /*exc*/
-        ctx[201]
+        ctx[204]
       )
     );
   }
@@ -6235,7 +6269,7 @@ function create_if_block_23$4(ctx) {
     m(target, anchor) {
       insert(target, button, anchor);
       if (!mounted) {
-        dispose = listen(button, "click", click_handler_12);
+        dispose = listen(button, "click", stop_propagation(click_handler_12));
         mounted = true;
       }
     },
@@ -6251,11 +6285,66 @@ function create_if_block_23$4(ctx) {
     }
   };
 }
+function create_if_block_22$4(ctx) {
+  let div;
+  let div_transition;
+  let current;
+  function select_block_type_1(ctx2, dirty) {
+    if (
+      /*isGM*/
+      ctx2[57]
+    ) return create_if_block_23$4;
+    return create_else_block_1$w;
+  }
+  let current_block_type = select_block_type_1(ctx);
+  let if_block = current_block_type(ctx);
+  return {
+    c() {
+      div = element("div");
+      if_block.c();
+      attr(div, "class", "exc-body");
+      set_style(div, "padding", "15px");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      if_block.m(div, null);
+      current = true;
+    },
+    p(ctx2, dirty) {
+      if_block.p(ctx2, dirty);
+    },
+    i(local) {
+      if (current) return;
+      if (local) {
+        add_render_callback(() => {
+          if (!current) return;
+          if (!div_transition) div_transition = create_bidirectional_transition(div, slide, {}, true);
+          div_transition.run(1);
+        });
+      }
+      current = true;
+    },
+    o(local) {
+      if (local) {
+        if (!div_transition) div_transition = create_bidirectional_transition(div, slide, {}, false);
+        div_transition.run(0);
+      }
+      current = false;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div);
+      }
+      if_block.d();
+      if (detaching && div_transition) div_transition.end();
+    }
+  };
+}
 function create_else_block_1$w(ctx) {
   let div;
   let raw_value = (
     /*exc*/
-    ctx[201].description + ""
+    ctx[204].description + ""
   );
   return {
     c() {
@@ -6272,7 +6361,7 @@ function create_else_block_1$w(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*exclusividades*/
       268435456 && raw_value !== (raw_value = /*exc*/
-      ctx2[201].description + "")) div.innerHTML = raw_value;
+      ctx2[204].description + "")) div.innerHTML = raw_value;
     },
     d(detaching) {
       if (detaching) {
@@ -6281,7 +6370,7 @@ function create_else_block_1$w(ctx) {
     }
   };
 }
-function create_if_block_22$4(ctx) {
+function create_if_block_23$4(ctx) {
   let textarea;
   let textarea_value_value;
   let mounted;
@@ -6289,9 +6378,9 @@ function create_if_block_22$4(ctx) {
   function change_handler_3(...args) {
     return (
       /*change_handler_3*/
-      ctx[132](
+      ctx[135](
         /*exc*/
-        ctx[201],
+        ctx[204],
         ...args
       )
     );
@@ -6310,7 +6399,7 @@ function create_if_block_22$4(ctx) {
       set_style(textarea, "font-family", "inherit");
       set_style(textarea, "font-size", "13px");
       textarea.value = textarea_value_value = /*exc*/
-      ctx[201].description;
+      ctx[204].description;
       attr(textarea, "class", "svelte-1kfzpoa");
     },
     m(target, anchor) {
@@ -6324,7 +6413,7 @@ function create_if_block_22$4(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*exclusividades*/
       268435456 && textarea_value_value !== (textarea_value_value = /*exc*/
-      ctx[201].description)) {
+      ctx[204].description)) {
         textarea.value = textarea_value_value;
       }
     },
@@ -6338,41 +6427,55 @@ function create_if_block_22$4(ctx) {
   };
 }
 function create_each_block_9$3(key_2, ctx) {
-  let div3;
+  let div2;
   let div1;
   let div0;
   let t0;
   let span;
   let t1_value = (
     /*exc*/
-    ctx[201].name + ""
+    ctx[204].name + ""
   );
   let t1;
   let t2;
   let t3;
-  let div2;
+  let mounted;
+  let dispose;
   let if_block0 = (
     /*exc*/
-    ctx[201].img && create_if_block_24$3(ctx)
-  );
-  let if_block1 = (
-    /*isGM*/
-    ctx[56] && create_if_block_23$4(ctx)
+    ctx[204].img && create_if_block_25$3(ctx)
   );
   function select_block_type(ctx2, dirty) {
     if (
       /*isGM*/
-      ctx2[56]
-    ) return create_if_block_22$4;
-    return create_else_block_1$w;
+      ctx2[57]
+    ) return create_if_block_24$4;
+    return create_else_block_2$h;
   }
   let current_block_type = select_block_type(ctx);
-  let if_block2 = current_block_type(ctx);
+  let if_block1 = current_block_type(ctx);
+  function click_handler_13() {
+    return (
+      /*click_handler_13*/
+      ctx[134](
+        /*exc*/
+        ctx[204]
+      )
+    );
+  }
+  let if_block2 = (
+    /*isGM*/
+    (ctx[57] || /*expandedExc*/
+    ctx[29][
+      /*exc*/
+      ctx[204].id
+    ]) && create_if_block_22$4(ctx)
+  );
   return {
     key: key_2,
     first: null,
     c() {
-      div3 = element("div");
+      div2 = element("div");
       div1 = element("div");
       div0 = element("div");
       if (if_block0) if_block0.c();
@@ -6380,10 +6483,9 @@ function create_each_block_9$3(key_2, ctx) {
       span = element("span");
       t1 = text(t1_value);
       t2 = space();
-      if (if_block1) if_block1.c();
+      if_block1.c();
       t3 = space();
-      div2 = element("div");
-      if_block2.c();
+      if (if_block2) if_block2.c();
       set_style(span, "color", "#9900ff");
       set_style(span, "font-weight", "bold");
       set_style(span, "font-family", "var(--font-head)");
@@ -6398,39 +6500,46 @@ function create_each_block_9$3(key_2, ctx) {
       set_style(div1, "align-items", "center");
       set_style(div1, "justify-content", "space-between");
       set_style(div1, "border-bottom", "1px solid #222");
-      attr(div2, "class", "exc-body");
-      set_style(div2, "padding", "15px");
-      attr(div3, "class", "exc-card");
-      set_style(div3, "background", "#0a0a0c");
-      set_style(div3, "border", "1px solid #333");
-      set_style(div3, "border-radius", "4px");
-      set_style(div3, "overflow", "hidden");
-      this.first = div3;
+      set_style(
+        div1,
+        "cursor",
+        /*isGM*/
+        ctx[57] ? "default" : "pointer"
+      );
+      attr(div2, "class", "exc-card");
+      set_style(div2, "background", "#0a0a0c");
+      set_style(div2, "border", "1px solid #333");
+      set_style(div2, "border-radius", "4px");
+      set_style(div2, "overflow", "hidden");
+      this.first = div2;
     },
     m(target, anchor) {
-      insert(target, div3, anchor);
-      append(div3, div1);
+      insert(target, div2, anchor);
+      append(div2, div1);
       append(div1, div0);
       if (if_block0) if_block0.m(div0, null);
       append(div0, t0);
       append(div0, span);
       append(span, t1);
       append(div1, t2);
-      if (if_block1) if_block1.m(div1, null);
-      append(div3, t3);
-      append(div3, div2);
-      if_block2.m(div2, null);
+      if_block1.m(div1, null);
+      append(div2, t3);
+      if (if_block2) if_block2.m(div2, null);
+      if (!mounted) {
+        dispose = listen(div1, "click", click_handler_13);
+        mounted = true;
+      }
     },
     p(new_ctx, dirty) {
       ctx = new_ctx;
       if (
         /*exc*/
-        ctx[201].img
+        ctx[204].img
       ) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
         } else {
-          if_block0 = create_if_block_24$3(ctx);
+          if_block0 = create_if_block_25$3(ctx);
           if_block0.c();
           if_block0.m(div0, t0);
         }
@@ -6440,20 +6549,45 @@ function create_each_block_9$3(key_2, ctx) {
       }
       if (dirty[0] & /*exclusividades*/
       268435456 && t1_value !== (t1_value = /*exc*/
-      ctx[201].name + "")) set_data(t1, t1_value);
+      ctx[204].name + "")) set_data(t1, t1_value);
+      if_block1.p(ctx, dirty);
       if (
         /*isGM*/
-        ctx[56]
-      ) if_block1.p(ctx, dirty);
-      if_block2.p(ctx, dirty);
+        ctx[57] || /*expandedExc*/
+        ctx[29][
+          /*exc*/
+          ctx[204].id
+        ]
+      ) {
+        if (if_block2) {
+          if_block2.p(ctx, dirty);
+          if (dirty[0] & /*expandedExc, exclusividades*/
+          805306368) {
+            transition_in(if_block2, 1);
+          }
+        } else {
+          if_block2 = create_if_block_22$4(ctx);
+          if_block2.c();
+          transition_in(if_block2, 1);
+          if_block2.m(div2, null);
+        }
+      } else if (if_block2) {
+        group_outros();
+        transition_out(if_block2, 1, 1, () => {
+          if_block2 = null;
+        });
+        check_outros();
+      }
     },
     d(detaching) {
       if (detaching) {
-        detach(div3);
+        detach(div2);
       }
       if (if_block0) if_block0.d();
-      if (if_block1) if_block1.d();
-      if_block2.d();
+      if_block1.d();
+      if (if_block2) if_block2.d();
+      mounted = false;
+      dispose();
     }
   };
 }
@@ -6478,7 +6612,7 @@ function create_if_block_21$4(ctx) {
     }
   };
 }
-function create_if_block_19$4(ctx) {
+function create_if_block_19$5(ctx) {
   let div3;
   let div2;
   let div0;
@@ -6494,7 +6628,7 @@ function create_if_block_19$4(ctx) {
   let dispose;
   let each_value_7 = ensure_array_like(
     /*excPickerGroups*/
-    ctx[30]
+    ctx[31]
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_7.length; i += 1) {
@@ -6549,30 +6683,30 @@ function create_if_block_19$4(ctx) {
           listen(
             button,
             "click",
-            /*click_handler_14*/
-            ctx[135]
+            /*click_handler_15*/
+            ctx[138]
           ),
           listen(div2, "click", stop_propagation(
             /*click_handler_3*/
-            ctx[113]
+            ctx[115]
           )),
           listen(
             div3,
             "click",
-            /*click_handler_16*/
-            ctx[137]
+            /*click_handler_17*/
+            ctx[140]
           )
         ];
         mounted = true;
       }
     },
     p(ctx2, dirty) {
-      if (dirty[0] & /*excPickerGroups*/
-      1073741824 | dirty[2] & /*pickExclusivity*/
-      4) {
+      if (dirty[1] & /*excPickerGroups*/
+      1 | dirty[2] & /*pickExclusivity*/
+      16) {
         each_value_7 = ensure_array_like(
           /*excPickerGroups*/
-          ctx2[30]
+          ctx2[31]
         );
         let i;
         for (i = 0; i < each_value_7.length; i += 1) {
@@ -6636,18 +6770,18 @@ function create_each_block_8$4(ctx) {
   let button;
   let t0_value = (
     /*item*/
-    ctx[180].name + ""
+    ctx[183].name + ""
   );
   let t0;
   let t1;
   let mounted;
   let dispose;
-  function click_handler_15() {
+  function click_handler_16() {
     return (
-      /*click_handler_15*/
-      ctx[136](
+      /*click_handler_16*/
+      ctx[139](
         /*item*/
-        ctx[180]
+        ctx[183]
       )
     );
   }
@@ -6663,15 +6797,15 @@ function create_each_block_8$4(ctx) {
       append(button, t0);
       append(button, t1);
       if (!mounted) {
-        dispose = listen(button, "click", click_handler_15);
+        dispose = listen(button, "click", click_handler_16);
         mounted = true;
       }
     },
     p(new_ctx, dirty) {
       ctx = new_ctx;
-      if (dirty[0] & /*excPickerGroups*/
-      1073741824 && t0_value !== (t0_value = /*item*/
-      ctx[180].name + "")) set_data(t0, t0_value);
+      if (dirty[1] & /*excPickerGroups*/
+      1 && t0_value !== (t0_value = /*item*/
+      ctx[183].name + "")) set_data(t0, t0_value);
     },
     d(detaching) {
       if (detaching) {
@@ -6686,14 +6820,14 @@ function create_each_block_7$5(ctx) {
   let div;
   let t0_value = (
     /*group*/
-    ctx[196].name + ""
+    ctx[199].name + ""
   );
   let t0;
   let t1;
   let each_1_anchor;
   let each_value_8 = ensure_array_like(
     /*group*/
-    ctx[196].exclusivities
+    ctx[199].exclusivities
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_8.length; i += 1) {
@@ -6726,15 +6860,15 @@ function create_each_block_7$5(ctx) {
       insert(target, each_1_anchor, anchor);
     },
     p(ctx2, dirty) {
-      if (dirty[0] & /*excPickerGroups*/
-      1073741824 && t0_value !== (t0_value = /*group*/
-      ctx2[196].name + "")) set_data(t0, t0_value);
-      if (dirty[0] & /*excPickerGroups*/
-      1073741824 | dirty[2] & /*pickExclusivity*/
-      4) {
+      if (dirty[1] & /*excPickerGroups*/
+      1 && t0_value !== (t0_value = /*group*/
+      ctx2[199].name + "")) set_data(t0, t0_value);
+      if (dirty[1] & /*excPickerGroups*/
+      1 | dirty[2] & /*pickExclusivity*/
+      16) {
         each_value_8 = ensure_array_like(
           /*group*/
-          ctx2[196].exclusivities
+          ctx2[199].exclusivities
         );
         let i;
         for (i = 0; i < each_value_8.length; i += 1) {
@@ -6763,7 +6897,7 @@ function create_each_block_7$5(ctx) {
     }
   };
 }
-function create_if_block_18$8(ctx) {
+function create_if_block_18$9(ctx) {
   let div3;
   let div2;
   let div0;
@@ -6771,7 +6905,7 @@ function create_if_block_18$8(ctx) {
   let t0;
   let t1_value = (
     /*activePopup*/
-    ctx[32].title + ""
+    ctx[33].title + ""
   );
   let t1;
   let t2;
@@ -6780,7 +6914,7 @@ function create_if_block_18$8(ctx) {
   let div1;
   let raw_value = (
     /*activePopup*/
-    ctx[32].desc + ""
+    ctx[33].desc + ""
   );
   let div2_transition;
   let div3_transition;
@@ -6824,18 +6958,18 @@ function create_if_block_18$8(ctx) {
       if (!mounted) {
         dispose = [
           listen(button, "click", stop_propagation(
-            /*click_handler_17*/
-            ctx[138]
+            /*click_handler_18*/
+            ctx[141]
           )),
           listen(div2, "click", stop_propagation(
             /*click_handler_4*/
-            ctx[112]
+            ctx[114]
           )),
           listen(
             div3,
             "click",
-            /*click_handler_18*/
-            ctx[139]
+            /*click_handler_19*/
+            ctx[142]
           )
         ];
         mounted = true;
@@ -6843,11 +6977,11 @@ function create_if_block_18$8(ctx) {
     },
     p(ctx2, dirty) {
       if ((!current || dirty[1] & /*activePopup*/
-      2) && t1_value !== (t1_value = /*activePopup*/
-      ctx2[32].title + "")) set_data(t1, t1_value);
+      4) && t1_value !== (t1_value = /*activePopup*/
+      ctx2[33].title + "")) set_data(t1, t1_value);
       if ((!current || dirty[1] & /*activePopup*/
-      2) && raw_value !== (raw_value = /*activePopup*/
-      ctx2[32].desc + "")) div1.innerHTML = raw_value;
+      4) && raw_value !== (raw_value = /*activePopup*/
+      ctx2[33].desc + "")) div1.innerHTML = raw_value;
     },
     i(local) {
       if (current) return;
@@ -6899,7 +7033,7 @@ function create_if_block_17$b(ctx) {
   let t1;
   let t2_value = (
     /*activeViewer*/
-    ctx[36] === "psyche" ? "HISTÓRIA" : "APARÊNCIA"
+    ctx[37] === "psyche" ? "HISTÓRIA" : "APARÊNCIA"
   );
   let t2;
   let t3;
@@ -6910,12 +7044,12 @@ function create_if_block_17$b(ctx) {
   let div2;
   let raw_value = (
     /*activeViewer*/
-    (ctx[36] === "psyche" ? (
+    (ctx[37] === "psyche" ? (
       /*previewPsyche*/
-      ctx[46]
+      ctx[47]
     ) : (
       /*previewAppearance*/
-      ctx[45]
+      ctx[46]
     )) + ""
   );
   let div4_transition;
@@ -6978,13 +7112,13 @@ function create_if_block_17$b(ctx) {
             button,
             "click",
             /*closeViewer*/
-            ctx[73]
+            ctx[75]
           ),
           listen(
             div3,
             "click",
             /*handleArticleClick*/
-            ctx[77]
+            ctx[79]
           )
         ];
         mounted = true;
@@ -6992,16 +7126,16 @@ function create_if_block_17$b(ctx) {
     },
     p(ctx2, dirty) {
       if ((!current || dirty[1] & /*activeViewer*/
-      32) && t2_value !== (t2_value = /*activeViewer*/
-      ctx2[36] === "psyche" ? "HISTÓRIA" : "APARÊNCIA")) set_data(t2, t2_value);
+      64) && t2_value !== (t2_value = /*activeViewer*/
+      ctx2[37] === "psyche" ? "HISTÓRIA" : "APARÊNCIA")) set_data(t2, t2_value);
       if ((!current || dirty[1] & /*activeViewer, previewPsyche, previewAppearance*/
-      49184) && raw_value !== (raw_value = /*activeViewer*/
-      (ctx2[36] === "psyche" ? (
+      98368) && raw_value !== (raw_value = /*activeViewer*/
+      (ctx2[37] === "psyche" ? (
         /*previewPsyche*/
-        ctx2[46]
+        ctx2[47]
       ) : (
         /*previewAppearance*/
-        ctx2[45]
+        ctx2[46]
       )) + "")) div2.innerHTML = raw_value;
     },
     i(local) {
@@ -7042,7 +7176,7 @@ function create_if_block_16$e(ctx) {
   let t1;
   let t2_value = (
     /*activeEditor*/
-    ctx[37] === "psyche" ? "HISTÓRIA" : "APARÊNCIA"
+    ctx[38] === "psyche" ? "HISTÓRIA" : "APARÊNCIA"
   );
   let t2;
   let t3;
@@ -7126,14 +7260,14 @@ function create_if_block_16$e(ctx) {
         button1,
         "active",
         /*editorTab*/
-        ctx[38] === "markdown"
+        ctx[39] === "markdown"
       );
       attr(button2, "class", "svelte-1kfzpoa");
       toggle_class(
         button2,
         "active",
         /*editorTab*/
-        ctx[38] === "preview"
+        ctx[39] === "preview"
       );
       attr(div2, "class", "mobile-tabs svelte-1kfzpoa");
       attr(button3, "class", "svelte-1kfzpoa");
@@ -7148,7 +7282,7 @@ function create_if_block_16$e(ctx) {
         div4,
         "m-hide",
         /*editorTab*/
-        ctx[38] !== "markdown"
+        ctx[39] !== "markdown"
       );
       attr(div5, "class", "preview-tag svelte-1kfzpoa");
       attr(div6, "class", "article-container svelte-1kfzpoa");
@@ -7157,7 +7291,7 @@ function create_if_block_16$e(ctx) {
         div7,
         "m-hide",
         /*editorTab*/
-        ctx[38] !== "preview"
+        ctx[39] !== "preview"
       );
       attr(div8, "class", "split-screen custom-scroll svelte-1kfzpoa");
       attr(div9, "class", "fullscreen-editor-layer svelte-1kfzpoa");
@@ -7201,7 +7335,7 @@ function create_if_block_16$e(ctx) {
       append(div7, t18);
       append(div7, div6);
       div6.innerHTML = /*livePreviewHtml*/
-      ctx[42];
+      ctx[43];
       current = true;
       if (!mounted) {
         dispose = [
@@ -7209,49 +7343,49 @@ function create_if_block_16$e(ctx) {
             button0,
             "click",
             /*saveAndCloseEditor*/
-            ctx[75]
+            ctx[77]
           ),
           listen(
             button1,
             "click",
-            /*click_handler_19*/
-            ctx[140]
+            /*click_handler_20*/
+            ctx[143]
           ),
           listen(
             button2,
             "click",
-            /*click_handler_20*/
-            ctx[141]
+            /*click_handler_21*/
+            ctx[144]
           ),
           listen(
             button3,
             "click",
-            /*click_handler_21*/
-            ctx[142]
+            /*click_handler_22*/
+            ctx[145]
           ),
           listen(
             button4,
             "click",
-            /*click_handler_22*/
-            ctx[143]
+            /*click_handler_23*/
+            ctx[146]
           ),
           listen(
             button5,
             "click",
-            /*click_handler_23*/
-            ctx[144]
+            /*click_handler_24*/
+            ctx[147]
           ),
           listen(
             textarea,
             "input",
             /*textarea_input_handler*/
-            ctx[145]
+            ctx[148]
           ),
           listen(
             div7,
             "click",
             /*handleArticleClick*/
-            ctx[77]
+            ctx[79]
           )
         ];
         mounted = true;
@@ -7259,24 +7393,24 @@ function create_if_block_16$e(ctx) {
     },
     p(ctx2, dirty) {
       if ((!current || dirty[1] & /*activeEditor*/
-      64) && t2_value !== (t2_value = /*activeEditor*/
-      ctx2[37] === "psyche" ? "HISTÓRIA" : "APARÊNCIA")) set_data(t2, t2_value);
+      128) && t2_value !== (t2_value = /*activeEditor*/
+      ctx2[38] === "psyche" ? "HISTÓRIA" : "APARÊNCIA")) set_data(t2, t2_value);
       if (!current || dirty[1] & /*editorTab*/
-      128) {
+      256) {
         toggle_class(
           button1,
           "active",
           /*editorTab*/
-          ctx2[38] === "markdown"
+          ctx2[39] === "markdown"
         );
       }
       if (!current || dirty[1] & /*editorTab*/
-      128) {
+      256) {
         toggle_class(
           button2,
           "active",
           /*editorTab*/
-          ctx2[38] === "preview"
+          ctx2[39] === "preview"
         );
       }
       if (dirty[0] & /*editorContent*/
@@ -7288,24 +7422,24 @@ function create_if_block_16$e(ctx) {
         );
       }
       if (!current || dirty[1] & /*editorTab*/
-      128) {
+      256) {
         toggle_class(
           div4,
           "m-hide",
           /*editorTab*/
-          ctx2[38] !== "markdown"
+          ctx2[39] !== "markdown"
         );
       }
       if (!current || dirty[1] & /*livePreviewHtml*/
-      2048) div6.innerHTML = /*livePreviewHtml*/
-      ctx2[42];
+      4096) div6.innerHTML = /*livePreviewHtml*/
+      ctx2[43];
       if (!current || dirty[1] & /*editorTab*/
-      128) {
+      256) {
         toggle_class(
           div7,
           "m-hide",
           /*editorTab*/
-          ctx2[38] !== "preview"
+          ctx2[39] !== "preview"
         );
       }
     },
@@ -7342,28 +7476,28 @@ function create_if_block_14$g(ctx) {
   let div0;
   let t0_value = (
     /*activeTerm*/
-    ctx[40].type + ""
+    ctx[41].type + ""
   );
   let t0;
   let t1;
   let h3;
   let t2_value = (
     /*activeTerm*/
-    ctx[40].title + ""
+    ctx[41].title + ""
   );
   let t2;
   let t3;
   let p_1;
   let t4_value = (
     /*activeTerm*/
-    ctx[40].desc + ""
+    ctx[41].desc + ""
   );
   let t4;
   let t5;
   let div1_intro;
   let if_block = (
     /*activeTerm*/
-    ctx[40].img && create_if_block_15$f(ctx)
+    ctx[41].img && create_if_block_15$f(ctx)
   );
   return {
     c() {
@@ -7398,17 +7532,17 @@ function create_if_block_14$g(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[1] & /*activeTerm*/
-      512 && t0_value !== (t0_value = /*activeTerm*/
-      ctx2[40].type + "")) set_data(t0, t0_value);
+      1024 && t0_value !== (t0_value = /*activeTerm*/
+      ctx2[41].type + "")) set_data(t0, t0_value);
       if (dirty[1] & /*activeTerm*/
-      512 && t2_value !== (t2_value = /*activeTerm*/
-      ctx2[40].title + "")) set_data(t2, t2_value);
+      1024 && t2_value !== (t2_value = /*activeTerm*/
+      ctx2[41].title + "")) set_data(t2, t2_value);
       if (dirty[1] & /*activeTerm*/
-      512 && t4_value !== (t4_value = /*activeTerm*/
-      ctx2[40].desc + "")) set_data(t4, t4_value);
+      1024 && t4_value !== (t4_value = /*activeTerm*/
+      ctx2[41].desc + "")) set_data(t4, t4_value);
       if (
         /*activeTerm*/
-        ctx2[40].img
+        ctx2[41].img
       ) {
         if (if_block) {
           if_block.p(ctx2, dirty);
@@ -7448,7 +7582,7 @@ function create_if_block_15$f(ctx) {
     c() {
       img = element("img");
       if (!src_url_equal(img.src, img_src_value = /*activeTerm*/
-      ctx[40].img)) attr(img, "src", img_src_value);
+      ctx[41].img)) attr(img, "src", img_src_value);
       attr(img, "class", "term-img svelte-1kfzpoa");
       attr(img, "alt", "Ref Visual");
     },
@@ -7457,8 +7591,8 @@ function create_if_block_15$f(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[1] & /*activeTerm*/
-      512 && !src_url_equal(img.src, img_src_value = /*activeTerm*/
-      ctx2[40].img)) {
+      1024 && !src_url_equal(img.src, img_src_value = /*activeTerm*/
+      ctx2[41].img)) {
         attr(img, "src", img_src_value);
       }
     },
@@ -7487,7 +7621,7 @@ function create_if_block_13$h(ctx) {
       div0 = element("div");
       div0.innerHTML = `<i class="fas fa-link"></i>`;
       if (!src_url_equal(img.src, img_src_value = /*tokenImg*/
-      ctx[52])) attr(img, "src", img_src_value);
+      ctx[53])) attr(img, "src", img_src_value);
       attr(img, "alt", "Token");
       attr(img, "class", "svelte-1kfzpoa");
       attr(div0, "class", "overlay svelte-1kfzpoa");
@@ -7515,16 +7649,16 @@ function create_if_block_13$h(ctx) {
         dispose = listen(
           div1,
           "click",
-          /*click_handler_25*/
-          ctx[147]
+          /*click_handler_26*/
+          ctx[150]
         );
         mounted = true;
       }
     },
     p(ctx2, dirty) {
       if (!current || dirty[1] & /*tokenImg*/
-      2097152 && !src_url_equal(img.src, img_src_value = /*tokenImg*/
-      ctx2[52])) {
+      4194304 && !src_url_equal(img.src, img_src_value = /*tokenImg*/
+      ctx2[53])) {
         attr(img, "src", img_src_value);
       }
     },
@@ -7576,8 +7710,8 @@ function create_if_block_12$i(ctx) {
         dispose = listen(
           button,
           "click",
-          /*click_handler_26*/
-          ctx[149]
+          /*click_handler_27*/
+          ctx[152]
         );
         mounted = true;
       }
@@ -7648,7 +7782,7 @@ function create_if_block_10$l(ctx) {
           button,
           "click",
           /*toggleGMMode*/
-          ctx[78]
+          ctx[80]
         );
         mounted = true;
       }
@@ -7713,7 +7847,7 @@ function create_if_block_11$j(ctx) {
   let dispose;
   let each_value_6 = ensure_array_like(Object.entries(
     /*allOriginsList*/
-    ctx[33]
+    ctx[34]
   ));
   let each_blocks = [];
   for (let i = 0; i < each_value_6.length; i += 1) {
@@ -7768,13 +7902,13 @@ function create_if_block_11$j(ctx) {
             input,
             "change",
             /*saveGMConfig*/
-            ctx[79]
+            ctx[81]
           ),
           listen(
             select,
             "change",
             /*changeOriginGM*/
-            ctx[80]
+            ctx[82]
           )
         ];
         mounted = true;
@@ -7788,10 +7922,10 @@ function create_if_block_11$j(ctx) {
         ctx2[3];
       }
       if (dirty[1] & /*allOriginsList*/
-      4) {
+      8) {
         each_value_6 = ensure_array_like(Object.entries(
           /*allOriginsList*/
-          ctx2[33]
+          ctx2[34]
         ));
         let i;
         for (i = 0; i < each_value_6.length; i += 1) {
@@ -7811,7 +7945,7 @@ function create_if_block_11$j(ctx) {
       }
       if (!current || dirty[0] & /*flags*/
       2 | dirty[1] & /*allOriginsList*/
-      4 && select_value_value !== (select_value_value = /*flags*/
+      8 && select_value_value !== (select_value_value = /*flags*/
       ctx2[1].origin || "humano")) {
         select_option(
           select,
@@ -7853,7 +7987,7 @@ function create_each_block_6$9(ctx) {
   let option;
   let t_1_value = (
     /*data*/
-    ctx[193].name + ""
+    ctx[196].name + ""
   );
   let t_1;
   let option_value_value;
@@ -7862,7 +7996,7 @@ function create_each_block_6$9(ctx) {
       option = element("option");
       t_1 = text(t_1_value);
       option.__value = option_value_value = /*key*/
-      ctx[192];
+      ctx[195];
       set_input_value(option, option.__value);
     },
     m(target, anchor) {
@@ -7871,11 +8005,11 @@ function create_each_block_6$9(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[1] & /*allOriginsList*/
-      4 && t_1_value !== (t_1_value = /*data*/
-      ctx2[193].name + "")) set_data(t_1, t_1_value);
+      8 && t_1_value !== (t_1_value = /*data*/
+      ctx2[196].name + "")) set_data(t_1, t_1_value);
       if (dirty[1] & /*allOriginsList*/
-      4 && option_value_value !== (option_value_value = /*key*/
-      ctx2[192])) {
+      8 && option_value_value !== (option_value_value = /*key*/
+      ctx2[195])) {
         option.__value = option_value_value;
         set_input_value(option, option.__value);
       }
@@ -7892,9 +8026,9 @@ function create_if_block_9$r(ctx) {
   let t0;
   let t1_value = (
     /*missingXP*/
-    (ctx[44] > 0 ? (
+    (ctx[45] > 0 ? (
       /*missingXP*/
-      ctx[44]
+      ctx[45]
     ) : 0) + ""
   );
   let t1;
@@ -7926,10 +8060,10 @@ function create_if_block_9$r(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[1] & /*missingXP*/
-      8192 && t1_value !== (t1_value = /*missingXP*/
-      (ctx2[44] > 0 ? (
+      16384 && t1_value !== (t1_value = /*missingXP*/
+      (ctx2[45] > 0 ? (
         /*missingXP*/
-        ctx2[44]
+        ctx2[45]
       ) : 0) + "")) set_data(t1, t1_value);
       if (dirty[0] & /*activeLevel*/
       65536 && t3_value !== (t3_value = /*activeLevel*/
@@ -7958,8 +8092,8 @@ function create_if_block_8$v(ctx) {
         dispose = listen(
           button,
           "click",
-          /*click_handler_27*/
-          ctx[150]
+          /*click_handler_28*/
+          ctx[153]
         );
         mounted = true;
       }
@@ -7989,7 +8123,7 @@ function create_if_block_7$z(ctx) {
       attr(div0, "class", "banner-overlay svelte-1kfzpoa");
       attr(div1, "class", "origin-banner svelte-1kfzpoa");
       set_style(div1, "background-image", "url('" + /*originBanner*/
-      ctx[51] + "')");
+      ctx[52] + "')");
     },
     m(target, anchor) {
       insert(target, div1, anchor);
@@ -7999,17 +8133,17 @@ function create_if_block_7$z(ctx) {
         dispose = listen(
           div1,
           "click",
-          /*click_handler_29*/
-          ctx[152]
+          /*click_handler_30*/
+          ctx[155]
         );
         mounted = true;
       }
     },
     p(ctx2, dirty) {
       if (!current || dirty[1] & /*originBanner*/
-      1048576) {
+      2097152) {
         set_style(div1, "background-image", "url('" + /*originBanner*/
-        ctx2[51] + "')");
+        ctx2[52] + "')");
       }
     },
     i(local) {
@@ -8056,8 +8190,8 @@ function create_if_block_6$D(ctx) {
         dispose = listen(
           button,
           "click",
-          /*click_handler_30*/
-          ctx[153]
+          /*click_handler_31*/
+          ctx[156]
         );
         mounted = true;
       }
@@ -8077,7 +8211,7 @@ function create_else_block$V(ctx) {
   let t_1;
   let each_value_5 = ensure_array_like(
     /*originData*/
-    ctx[34].traits
+    ctx[35].traits
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_5.length; i += 1) {
@@ -8085,8 +8219,8 @@ function create_else_block$V(ctx) {
   }
   let if_block = (
     /*originData*/
-    ctx[34].enhancements && /*originData*/
-    ctx[34].enhancements.length > 0 && create_if_block_5$G(ctx)
+    ctx[35].enhancements && /*originData*/
+    ctx[35].enhancements.length > 0 && create_if_block_5$G(ctx)
   );
   return {
     c() {
@@ -8110,10 +8244,10 @@ function create_else_block$V(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[1] & /*activePopup, originData*/
-      10) {
+      20) {
         each_value_5 = ensure_array_like(
           /*originData*/
-          ctx2[34].traits
+          ctx2[35].traits
         );
         let i;
         for (i = 0; i < each_value_5.length; i += 1) {
@@ -8133,8 +8267,8 @@ function create_else_block$V(ctx) {
       }
       if (
         /*originData*/
-        ctx2[34].enhancements && /*originData*/
-        ctx2[34].enhancements.length > 0
+        ctx2[35].enhancements && /*originData*/
+        ctx2[35].enhancements.length > 0
       ) {
         if (if_block) {
           if_block.p(ctx2, dirty);
@@ -8166,7 +8300,7 @@ function create_if_block_2$10(ctx) {
   let current;
   let each_value_3 = ensure_array_like(
     /*originData*/
-    ctx[34].traits
+    ctx[35].traits
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_3.length; i += 1) {
@@ -8174,8 +8308,8 @@ function create_if_block_2$10(ctx) {
   }
   let if_block = (
     /*originData*/
-    ctx[34].enhancements && /*originData*/
-    ctx[34].enhancements.length > 0 && create_if_block_3$V(ctx)
+    ctx[35].enhancements && /*originData*/
+    ctx[35].enhancements.length > 0 && create_if_block_3$V(ctx)
   );
   return {
     c() {
@@ -8200,10 +8334,10 @@ function create_if_block_2$10(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[1] & /*activePopup, originData*/
-      10) {
+      20) {
         each_value_3 = ensure_array_like(
           /*originData*/
-          ctx2[34].traits
+          ctx2[35].traits
         );
         let i;
         for (i = 0; i < each_value_3.length; i += 1) {
@@ -8223,8 +8357,8 @@ function create_if_block_2$10(ctx) {
       }
       if (
         /*originData*/
-        ctx2[34].enhancements && /*originData*/
-        ctx2[34].enhancements.length > 0
+        ctx2[35].enhancements && /*originData*/
+        ctx2[35].enhancements.length > 0
       ) {
         if (if_block) {
           if_block.p(ctx2, dirty);
@@ -8270,17 +8404,17 @@ function create_each_block_5$f(ctx) {
   let span;
   let t_1_value = (
     /*t*/
-    ctx[185].name + ""
+    ctx[188].name + ""
   );
   let t_1;
   let mounted;
   let dispose;
-  function click_handler_36() {
+  function click_handler_37() {
     return (
-      /*click_handler_36*/
-      ctx[160](
+      /*click_handler_37*/
+      ctx[163](
         /*t*/
-        ctx[185]
+        ctx[188]
       )
     );
   }
@@ -8294,15 +8428,15 @@ function create_each_block_5$f(ctx) {
       insert(target, span, anchor);
       append(span, t_1);
       if (!mounted) {
-        dispose = listen(span, "click", click_handler_36);
+        dispose = listen(span, "click", click_handler_37);
         mounted = true;
       }
     },
     p(new_ctx, dirty) {
       ctx = new_ctx;
       if (dirty[1] & /*originData*/
-      8 && t_1_value !== (t_1_value = /*t*/
-      ctx[185].name + "")) set_data(t_1, t_1_value);
+      16 && t_1_value !== (t_1_value = /*t*/
+      ctx[188].name + "")) set_data(t_1, t_1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -8317,9 +8451,9 @@ function create_if_block_5$G(ctx) {
   let each_1_anchor;
   let each_value_4 = ensure_array_like(
     /*originData*/
-    ctx[34].enhancements.filter(
+    ctx[35].enhancements.filter(
       /*func_2*/
-      ctx[161]
+      ctx[164]
     )
   );
   let each_blocks = [];
@@ -8344,12 +8478,12 @@ function create_if_block_5$G(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*activeLevel*/
       65536 | dirty[1] & /*activePopup, originData*/
-      10) {
+      20) {
         each_value_4 = ensure_array_like(
           /*originData*/
-          ctx2[34].enhancements.filter(
+          ctx2[35].enhancements.filter(
             /*func_2*/
-            ctx2[161]
+            ctx2[164]
           )
         );
         let i;
@@ -8383,17 +8517,17 @@ function create_each_block_4$k(ctx) {
   let t0;
   let t1_value = (
     /*e*/
-    ctx[182].name + ""
+    ctx[185].name + ""
   );
   let t1;
   let mounted;
   let dispose;
-  function click_handler_37() {
+  function click_handler_38() {
     return (
-      /*click_handler_37*/
-      ctx[162](
+      /*click_handler_38*/
+      ctx[165](
         /*e*/
-        ctx[182]
+        ctx[185]
       )
     );
   }
@@ -8413,7 +8547,7 @@ function create_each_block_4$k(ctx) {
       append(span, t0);
       append(span, t1);
       if (!mounted) {
-        dispose = listen(span, "click", click_handler_37);
+        dispose = listen(span, "click", click_handler_38);
         mounted = true;
       }
     },
@@ -8421,8 +8555,8 @@ function create_each_block_4$k(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*activeLevel*/
       65536 | dirty[1] & /*originData*/
-      8 && t1_value !== (t1_value = /*e*/
-      ctx[182].name + "")) set_data(t1, t1_value);
+      16 && t1_value !== (t1_value = /*e*/
+      ctx[185].name + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -8438,24 +8572,24 @@ function create_each_block_3$o(ctx) {
   let strong;
   let t0_value = (
     /*t*/
-    ctx[185].name + ""
+    ctx[188].name + ""
   );
   let t0;
   let t1;
   let p_1;
   let t2_value = (
     /*t*/
-    ctx[185].effect + ""
+    ctx[188].effect + ""
   );
   let t2;
   let mounted;
   let dispose;
-  function click_handler_34() {
+  function click_handler_35() {
     return (
-      /*click_handler_34*/
-      ctx[157](
+      /*click_handler_35*/
+      ctx[160](
         /*t*/
-        ctx[185]
+        ctx[188]
       )
     );
   }
@@ -8479,18 +8613,18 @@ function create_each_block_3$o(ctx) {
       append(div, p_1);
       append(p_1, t2);
       if (!mounted) {
-        dispose = listen(div, "click", click_handler_34);
+        dispose = listen(div, "click", click_handler_35);
         mounted = true;
       }
     },
     p(new_ctx, dirty) {
       ctx = new_ctx;
       if (dirty[1] & /*originData*/
-      8 && t0_value !== (t0_value = /*t*/
-      ctx[185].name + "")) set_data(t0, t0_value);
+      16 && t0_value !== (t0_value = /*t*/
+      ctx[188].name + "")) set_data(t0, t0_value);
       if (dirty[1] & /*originData*/
-      8 && t2_value !== (t2_value = /*t*/
-      ctx[185].effect + "")) set_data(t2, t2_value);
+      16 && t2_value !== (t2_value = /*t*/
+      ctx[188].effect + "")) set_data(t2, t2_value);
     },
     d(detaching) {
       if (detaching) {
@@ -8507,17 +8641,17 @@ function create_if_block_3$V(ctx) {
   let t2;
   let show_if = (
     /*originData*/
-    ctx[34].enhancements.filter(
+    ctx[35].enhancements.filter(
       /*func*/
-      ctx[111]
+      ctx[113]
     ).length === 0
   );
   let if_block_anchor;
   let each_value_2 = ensure_array_like(
     /*originData*/
-    ctx[34].enhancements.filter(
+    ctx[35].enhancements.filter(
       /*func_1*/
-      ctx[158]
+      ctx[161]
     )
   );
   let each_blocks = [];
@@ -8553,12 +8687,12 @@ function create_if_block_3$V(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*activeLevel*/
       65536 | dirty[1] & /*activePopup, originData*/
-      10) {
+      20) {
         each_value_2 = ensure_array_like(
           /*originData*/
-          ctx2[34].enhancements.filter(
+          ctx2[35].enhancements.filter(
             /*func_1*/
-            ctx2[158]
+            ctx2[161]
           )
         );
         let i;
@@ -8579,10 +8713,10 @@ function create_if_block_3$V(ctx) {
       }
       if (dirty[0] & /*activeLevel*/
       65536 | dirty[1] & /*originData*/
-      8) show_if = /*originData*/
-      ctx2[34].enhancements.filter(
+      16) show_if = /*originData*/
+      ctx2[35].enhancements.filter(
         /*func*/
-        ctx2[111]
+        ctx2[113]
       ).length === 0;
       if (show_if) {
         if (if_block) ;
@@ -8614,30 +8748,30 @@ function create_each_block_2$t(ctx) {
   let t0;
   let t1_value = (
     /*e*/
-    ctx[182].level + ""
+    ctx[185].level + ""
   );
   let t1;
   let t2;
   let t3_value = (
     /*e*/
-    ctx[182].name + ""
+    ctx[185].name + ""
   );
   let t3;
   let t4;
   let p_1;
   let t5_value = (
     /*e*/
-    ctx[182].desc + ""
+    ctx[185].desc + ""
   );
   let t5;
   let mounted;
   let dispose;
-  function click_handler_35() {
+  function click_handler_36() {
     return (
-      /*click_handler_35*/
-      ctx[159](
+      /*click_handler_36*/
+      ctx[162](
         /*e*/
-        ctx[182]
+        ctx[185]
       )
     );
   }
@@ -8667,7 +8801,7 @@ function create_each_block_2$t(ctx) {
       append(div, p_1);
       append(p_1, t5);
       if (!mounted) {
-        dispose = listen(div, "click", click_handler_35);
+        dispose = listen(div, "click", click_handler_36);
         mounted = true;
       }
     },
@@ -8675,16 +8809,16 @@ function create_each_block_2$t(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*activeLevel*/
       65536 | dirty[1] & /*originData*/
-      8 && t1_value !== (t1_value = /*e*/
-      ctx[182].level + "")) set_data(t1, t1_value);
+      16 && t1_value !== (t1_value = /*e*/
+      ctx[185].level + "")) set_data(t1, t1_value);
       if (dirty[0] & /*activeLevel*/
       65536 | dirty[1] & /*originData*/
-      8 && t3_value !== (t3_value = /*e*/
-      ctx[182].name + "")) set_data(t3, t3_value);
+      16 && t3_value !== (t3_value = /*e*/
+      ctx[185].name + "")) set_data(t3, t3_value);
       if (dirty[0] & /*activeLevel*/
       65536 | dirty[1] & /*originData*/
-      8 && t5_value !== (t5_value = /*e*/
-      ctx[182].desc + "")) set_data(t5, t5_value);
+      16 && t5_value !== (t5_value = /*e*/
+      ctx[185].desc + "")) set_data(t5, t5_value);
     },
     d(detaching) {
       if (detaching) {
@@ -8757,9 +8891,9 @@ function create_each_block_1$N(ctx) {
   function change_handler_5(...args) {
     return (
       /*change_handler_5*/
-      ctx[163](
+      ctx[166](
         /*i*/
-        ctx[179],
+        ctx[182],
         ...args
       )
     );
@@ -8767,23 +8901,23 @@ function create_each_block_1$N(ctx) {
   function change_handler_6(...args) {
     return (
       /*change_handler_6*/
-      ctx[164](
+      ctx[167](
         /*i*/
-        ctx[179],
+        ctx[182],
         ...args
       )
     );
   }
   let if_block = (
     /*i*/
-    ctx[179] > 0 && create_if_block_1$16()
+    ctx[182] > 0 && create_if_block_1$16()
   );
-  function click_handler_38() {
+  function click_handler_39() {
     return (
-      /*click_handler_38*/
-      ctx[165](
+      /*click_handler_39*/
+      ctx[168](
         /*i*/
-        ctx[179]
+        ctx[182]
       )
     );
   }
@@ -8806,12 +8940,12 @@ function create_each_block_1$N(ctx) {
       t5 = space();
       attr(input0, "class", "univ-input svelte-1kfzpoa");
       input0.value = input0_value_value = /*item*/
-      ctx[180].universe;
+      ctx[183].universe;
       attr(input0, "placeholder", "Universo...");
       attr(span, "class", "divider");
       attr(input1, "class", "theme-input svelte-1kfzpoa");
       input1.value = input1_value_value = /*item*/
-      ctx[180].theme;
+      ctx[183].theme;
       attr(input1, "placeholder", "Tema...");
       attr(div0, "class", "input-group svelte-1kfzpoa");
       attr(button, "class", "del-btn svelte-1kfzpoa");
@@ -8837,7 +8971,7 @@ function create_each_block_1$N(ctx) {
         dispose = [
           listen(input0, "change", change_handler_5),
           listen(input1, "change", change_handler_6),
-          listen(button, "click", click_handler_38)
+          listen(button, "click", click_handler_39)
         ];
         mounted = true;
       }
@@ -8846,12 +8980,12 @@ function create_each_block_1$N(ctx) {
       ctx = new_ctx;
       if (!current || dirty[0] & /*originUniverses*/
       128 && input0_value_value !== (input0_value_value = /*item*/
-      ctx[180].universe) && input0.value !== input0_value_value) {
+      ctx[183].universe) && input0.value !== input0_value_value) {
         input0.value = input0_value_value;
       }
       if (!current || dirty[0] & /*originUniverses*/
       128 && input1_value_value !== (input1_value_value = /*item*/
-      ctx[180].theme) && input1.value !== input1_value_value) {
+      ctx[183].theme) && input1.value !== input1_value_value) {
         input1.value = input1_value_value;
       }
     },
@@ -8896,7 +9030,7 @@ function create_each_block$$(ctx) {
   let span;
   let t2_value = getStars(
     /*mot*/
-    ctx[177].stars
+    ctx[180].stars
   ) + "";
   let t2;
   let t3;
@@ -8909,9 +9043,9 @@ function create_each_block$$(ctx) {
   function change_handler_7(...args) {
     return (
       /*change_handler_7*/
-      ctx[166](
+      ctx[169](
         /*i*/
-        ctx[179],
+        ctx[182],
         ...args
       )
     );
@@ -8919,19 +9053,19 @@ function create_each_block$$(ctx) {
   function change_handler_8(...args) {
     return (
       /*change_handler_8*/
-      ctx[167](
+      ctx[170](
         /*i*/
-        ctx[179],
+        ctx[182],
         ...args
       )
     );
   }
-  function click_handler_39() {
+  function click_handler_40() {
     return (
-      /*click_handler_39*/
-      ctx[168](
+      /*click_handler_40*/
+      ctx[171](
         /*i*/
-        ctx[179]
+        ctx[182]
       )
     );
   }
@@ -8951,14 +9085,14 @@ function create_each_block$$(ctx) {
       t4 = space();
       attr(input0, "class", "full-input svelte-1kfzpoa");
       input0.value = input0_value_value = /*mot*/
-      ctx[177].text;
+      ctx[180].text;
       attr(input0, "placeholder", "Escreva um objetivo...");
       attr(input1, "type", "number");
       attr(input1, "class", "num-input svelte-1kfzpoa");
       attr(input1, "min", "1");
       attr(input1, "max", "5");
       input1.value = input1_value_value = /*mot*/
-      ctx[177].stars;
+      ctx[180].stars;
       attr(span, "class", "stars-render");
       set_style(span, "color", "var(--c-primary)");
       attr(button, "class", "del-btn svelte-1kfzpoa");
@@ -8982,7 +9116,7 @@ function create_each_block$$(ctx) {
         dispose = [
           listen(input0, "change", change_handler_7),
           listen(input1, "change", change_handler_8),
-          listen(button, "click", click_handler_39)
+          listen(button, "click", click_handler_40)
         ];
         mounted = true;
       }
@@ -8991,18 +9125,18 @@ function create_each_block$$(ctx) {
       ctx = new_ctx;
       if (!current || dirty[0] & /*motivations*/
       2097152 && input0_value_value !== (input0_value_value = /*mot*/
-      ctx[177].text) && input0.value !== input0_value_value) {
+      ctx[180].text) && input0.value !== input0_value_value) {
         input0.value = input0_value_value;
       }
       if (!current || dirty[0] & /*motivations*/
       2097152 && input1_value_value !== (input1_value_value = /*mot*/
-      ctx[177].stars) && input1.value !== input1_value_value) {
+      ctx[180].stars) && input1.value !== input1_value_value) {
         input1.value = input1_value_value;
       }
       if ((!current || dirty[0] & /*motivations*/
       2097152) && t2_value !== (t2_value = getStars(
         /*mot*/
-        ctx[177].stars
+        ctx[180].stars
       ) + "")) set_data(t2, t2_value);
     },
     i(local) {
@@ -9044,7 +9178,7 @@ function create_if_block$1d(ctx) {
   let t2;
   let t3_value = (
     /*isFullBody*/
-    ctx[47] ? "FULL" : "HALF"
+    ctx[48] ? "FULL" : "HALF"
   );
   let t3;
   let t4;
@@ -9057,7 +9191,7 @@ function create_if_block$1d(ctx) {
   let t6;
   let t7_value = (
     /*isFullBody*/
-    ctx[47] ? "(FULL)" : "(HALF)"
+    ctx[48] ? "(FULL)" : "(HALF)"
   );
   let t7;
   let div2_class_value;
@@ -9085,24 +9219,24 @@ function create_if_block$1d(ctx) {
       t6 = text(" COLAR LINK ");
       t7 = text(t7_value);
       attr(i0, "class", i0_class_value = "fas " + /*isFullBody*/
-      (ctx[47] ? "fa-arrows-alt-v" : "fa-compress-arrows-alt"));
+      (ctx[48] ? "fa-arrows-alt-v" : "fa-compress-arrows-alt"));
       attr(button, "class", "edit-lore-btn svelte-1kfzpoa");
       attr(button, "title", "Alternar entre Corpo Inteiro e Meio Corpo");
       attr(div0, "class", "body-art-header svelte-1kfzpoa");
       if (!src_url_equal(img.src, img_src_value = /*isFullBody*/
-      ctx[47] ? (
+      ctx[48] ? (
         /*fullBodyImg*/
-        ctx[49]
+        ctx[50]
       ) : (
         /*halfBodyImg*/
-        ctx[50]
+        ctx[51]
       ))) attr(img, "src", img_src_value);
       attr(img, "alt", "Character Art");
       attr(img, "class", "svelte-1kfzpoa");
       attr(i1, "class", "fas fa-link");
       attr(div1, "class", "banner-overlay svelte-1kfzpoa");
       attr(div2, "class", div2_class_value = "body-art-frame " + /*isFullBody*/
-      (ctx[47] ? "full-body" : "half-body") + " svelte-1kfzpoa");
+      (ctx[48] ? "full-body" : "half-body") + " svelte-1kfzpoa");
       attr(div3, "class", "body-art-container svelte-1kfzpoa");
     },
     m(target, anchor) {
@@ -9129,13 +9263,13 @@ function create_if_block$1d(ctx) {
             button,
             "click",
             /*toggleBodyType*/
-            ctx[71]
+            ctx[73]
           ),
           listen(
             div2,
             "click",
-            /*click_handler_44*/
-            ctx[173]
+            /*click_handler_45*/
+            ctx[176]
           )
         ];
         mounted = true;
@@ -9143,30 +9277,30 @@ function create_if_block$1d(ctx) {
     },
     p(ctx2, dirty) {
       if (!current || dirty[1] & /*isFullBody*/
-      65536 && i0_class_value !== (i0_class_value = "fas " + /*isFullBody*/
-      (ctx2[47] ? "fa-arrows-alt-v" : "fa-compress-arrows-alt"))) {
+      131072 && i0_class_value !== (i0_class_value = "fas " + /*isFullBody*/
+      (ctx2[48] ? "fa-arrows-alt-v" : "fa-compress-arrows-alt"))) {
         attr(i0, "class", i0_class_value);
       }
       if ((!current || dirty[1] & /*isFullBody*/
-      65536) && t3_value !== (t3_value = /*isFullBody*/
-      ctx2[47] ? "FULL" : "HALF")) set_data(t3, t3_value);
+      131072) && t3_value !== (t3_value = /*isFullBody*/
+      ctx2[48] ? "FULL" : "HALF")) set_data(t3, t3_value);
       if (!current || dirty[1] & /*isFullBody, fullBodyImg, halfBodyImg*/
-      851968 && !src_url_equal(img.src, img_src_value = /*isFullBody*/
-      ctx2[47] ? (
+      1703936 && !src_url_equal(img.src, img_src_value = /*isFullBody*/
+      ctx2[48] ? (
         /*fullBodyImg*/
-        ctx2[49]
+        ctx2[50]
       ) : (
         /*halfBodyImg*/
-        ctx2[50]
+        ctx2[51]
       ))) {
         attr(img, "src", img_src_value);
       }
       if ((!current || dirty[1] & /*isFullBody*/
-      65536) && t7_value !== (t7_value = /*isFullBody*/
-      ctx2[47] ? "(FULL)" : "(HALF)")) set_data(t7, t7_value);
+      131072) && t7_value !== (t7_value = /*isFullBody*/
+      ctx2[48] ? "(FULL)" : "(HALF)")) set_data(t7, t7_value);
       if (!current || dirty[1] & /*isFullBody*/
-      65536 && div2_class_value !== (div2_class_value = "body-art-frame " + /*isFullBody*/
-      (ctx2[47] ? "full-body" : "half-body") + " svelte-1kfzpoa")) {
+      131072 && div2_class_value !== (div2_class_value = "body-art-frame " + /*isFullBody*/
+      (ctx2[48] ? "full-body" : "half-body") + " svelte-1kfzpoa")) {
         attr(div2, "class", div2_class_value);
       }
     },
@@ -9242,7 +9376,7 @@ function create_fragment$1i(ctx) {
   let t20;
   let t21_value = (
     /*showImages*/
-    ctx[48] ? "OCULTAR ARTES" : "GALERIA"
+    ctx[49] ? "OCULTAR ARTES" : "GALERIA"
   );
   let t21;
   let t22;
@@ -9400,7 +9534,7 @@ function create_fragment$1i(ctx) {
   let div31;
   let t117_value = (
     /*originData*/
-    ctx[34].icon + ""
+    ctx[35].icon + ""
   );
   let t117;
   let t118;
@@ -9410,7 +9544,7 @@ function create_fragment$1i(ctx) {
   let span20;
   let t121_value = (
     /*originData*/
-    ctx[34].name.toUpperCase() + ""
+    ctx[35].name.toUpperCase() + ""
   );
   let t121;
   let t122;
@@ -9425,7 +9559,7 @@ function create_fragment$1i(ctx) {
   let span22;
   let t128_value = (
     /*originData*/
-    ctx[34].mechanic.name + ""
+    ctx[35].mechanic.name + ""
   );
   let t128;
   let t129;
@@ -9439,7 +9573,7 @@ function create_fragment$1i(ctx) {
   let t132;
   let t133_value = (
     /*expandTraits*/
-    ctx[35] ? "OCULTAR" : "EXPANDIR"
+    ctx[36] ? "OCULTAR" : "EXPANDIR"
   );
   let t133;
   let t134;
@@ -9497,11 +9631,11 @@ function create_fragment$1i(ctx) {
   let dispose;
   let if_block0 = (
     /*activeImagePrompt*/
-    ctx[22] && create_if_block_27$2(ctx)
+    ctx[22] && create_if_block_28$2(ctx)
   );
   let if_block1 = (
     /*showVisualProfiles*/
-    ctx[25] && create_if_block_26$2(ctx)
+    ctx[25] && create_if_block_27$2(ctx)
   );
   let if_block2 = (
     /*showExclusividades*/
@@ -9509,56 +9643,56 @@ function create_fragment$1i(ctx) {
   );
   let if_block3 = (
     /*showExcPicker*/
-    ctx[29] && create_if_block_19$4(ctx)
+    ctx[30] && create_if_block_19$5(ctx)
   );
   let if_block4 = (
     /*activePopup*/
-    ctx[32] && create_if_block_18$8(ctx)
+    ctx[33] && create_if_block_18$9(ctx)
   );
   let if_block5 = (
     /*activeViewer*/
-    ctx[36] && create_if_block_17$b(ctx)
+    ctx[37] && create_if_block_17$b(ctx)
   );
   let if_block6 = (
     /*activeEditor*/
-    ctx[37] && create_if_block_16$e(ctx)
+    ctx[38] && create_if_block_16$e(ctx)
   );
   let if_block7 = (
     /*activeTerm*/
-    ctx[40] && create_if_block_14$g(ctx)
+    ctx[41] && create_if_block_14$g(ctx)
   );
   let if_block8 = (
     /*showImages*/
-    ctx[48] && create_if_block_13$h(ctx)
+    ctx[49] && create_if_block_13$h(ctx)
   );
   let if_block9 = !/*gmMode*/
   ctx[2] && /*missingXP*/
-  ctx[44] <= 0 && create_if_block_12$i(ctx);
+  ctx[45] <= 0 && create_if_block_12$i(ctx);
   let if_block10 = (
     /*isGM*/
-    ctx[56] && create_if_block_10$l(ctx)
+    ctx[57] && create_if_block_10$l(ctx)
   );
   let if_block11 = !/*gmMode*/
   ctx[2] && create_if_block_9$r(ctx);
   let if_block12 = game.user.isGM && create_if_block_8$v(ctx);
   let if_block13 = (
     /*showImages*/
-    ctx[48] && create_if_block_7$z(ctx)
+    ctx[49] && create_if_block_7$z(ctx)
   );
   let if_block14 = (
     /*originData*/
-    ctx[34].initialKit && create_if_block_6$D(ctx)
+    ctx[35].initialKit && create_if_block_6$D(ctx)
   );
   const if_block_creators = [create_if_block_2$10, create_else_block$V];
   const if_blocks = [];
-  function select_block_type_1(ctx2, dirty) {
+  function select_block_type_2(ctx2, dirty) {
     if (
       /*expandTraits*/
-      ctx2[35]
+      ctx2[36]
     ) return 0;
     return 1;
   }
-  current_block_type_index = select_block_type_1(ctx);
+  current_block_type_index = select_block_type_2(ctx);
   if_block15 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
   let each_value_1 = ensure_array_like(
     /*originUniverses*/
@@ -9584,7 +9718,7 @@ function create_fragment$1i(ctx) {
   });
   let if_block16 = (
     /*showImages*/
-    ctx[48] && create_if_block$1d(ctx)
+    ctx[49] && create_if_block$1d(ctx)
   );
   return {
     c() {
@@ -9678,7 +9812,7 @@ function create_fragment$1i(ctx) {
       span6 = element("span");
       t39 = text(
         /*availablePoints*/
-        ctx[41]
+        ctx[42]
       );
       t40 = space();
       if (if_block11) if_block11.c();
@@ -9956,7 +10090,7 @@ function create_fragment$1i(ctx) {
         aside,
         "open",
         /*isHelperOpen*/
-        ctx[39]
+        ctx[40]
       );
       if (!src_url_equal(img.src, img_src_value = /*actor*/
       ctx[0].img)) attr(img, "src", img_src_value);
@@ -9972,7 +10106,7 @@ function create_fragment$1i(ctx) {
       ctx[0].name;
       attr(i1, "class", "fas fa-satellite-dish");
       attr(button1, "class", button1_class_value = "sync-btn " + /*isSyncing*/
-      (ctx[31] ? "pulsing" : "") + " svelte-1kfzpoa");
+      (ctx[32] ? "pulsing" : "") + " svelte-1kfzpoa");
       attr(i2, "class", "fas fa-image");
       attr(button2, "class", "sync-btn svelte-1kfzpoa");
       set_style(button2, "border-color", "var(--c-primary)");
@@ -10000,7 +10134,7 @@ function create_fragment$1i(ctx) {
         span6,
         "color",
         /*availablePoints*/
-        ctx[41] < 0 ? "#ff3333" : "var(--c-primary)"
+        ctx[42] < 0 ? "#ff3333" : "var(--c-primary)"
       );
       attr(div9, "class", "res-line main svelte-1kfzpoa");
       attr(div10, "class", "resource-display svelte-1kfzpoa");
@@ -10016,7 +10150,7 @@ function create_fragment$1i(ctx) {
         circle1,
         "stroke-dashoffset",
         /*strokeDashoffset*/
-        ctx[43]
+        ctx[44]
       );
       attr(svg, "viewBox", "0 0 100 100");
       attr(svg, "class", "svelte-1kfzpoa");
@@ -10110,7 +10244,7 @@ function create_fragment$1i(ctx) {
       attr(span23, "class", "lbl svelte-1kfzpoa");
       set_style(span23, "margin-bottom", "0");
       attr(i6, "class", i6_class_value = "fas " + /*expandTraits*/
-      (ctx[35] ? "fa-chevron-up" : "fa-chevron-down"));
+      (ctx[36] ? "fa-chevron-up" : "fa-chevron-down"));
       attr(button7, "class", "expand-traits-btn svelte-1kfzpoa");
       set_style(div36, "display", "flex");
       set_style(div36, "justify-content", "space-between");
@@ -10121,7 +10255,7 @@ function create_fragment$1i(ctx) {
       attr(div38, "class", "origin-details svelte-1kfzpoa");
       attr(section1, "class", "origin-display svelte-1kfzpoa");
       attr(section1, "style", section1_style_value = /*showImages*/
-      ctx[48] ? "border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;" : "");
+      ctx[49] ? "border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;" : "");
       attr(button8, "class", "add-btn svelte-1kfzpoa");
       attr(button8, "title", "Adicionar Universo (Custa 8 Pontos)");
       attr(div39, "class", "list-head svelte-1kfzpoa");
@@ -10155,8 +10289,8 @@ function create_fragment$1i(ctx) {
       attr(div55, "class", "content-scroll custom-scroll svelte-1kfzpoa");
       attr(div56, "class", "bio-terminal svelte-1kfzpoa");
       attr(div56, "style", div56_style_value = /*cssVariables*/
-      ctx[54] + "; --c-primary: " + /*themeColor*/
-      ctx[53] + ";");
+      ctx[55] + "; --c-primary: " + /*themeColor*/
+      ctx[54] + ";");
     },
     m(target, anchor) {
       insert(target, div56, anchor);
@@ -10427,7 +10561,7 @@ function create_fragment$1i(ctx) {
       append(div48, t151);
       append(div48, div47);
       div47.innerHTML = /*previewPsyche*/
-      ctx[46];
+      ctx[47];
       append(div55, t152);
       append(div55, div53);
       append(div53, div52);
@@ -10441,7 +10575,7 @@ function create_fragment$1i(ctx) {
       append(div52, t158);
       append(div52, div51);
       div51.innerHTML = /*previewAppearance*/
-      ctx[45];
+      ctx[46];
       append(div53, t159);
       if (if_block16) if_block16.m(div53, null);
       append(div55, t160);
@@ -10453,146 +10587,146 @@ function create_fragment$1i(ctx) {
           listen(
             button0,
             "click",
-            /*click_handler_24*/
-            ctx[146]
+            /*click_handler_25*/
+            ctx[149]
           ),
           listen(
             div3,
             "click",
             /*editImg*/
-            ctx[94]
+            ctx[96]
           ),
           listen(
             input0,
             "change",
             /*change_handler_4*/
-            ctx[148]
+            ctx[151]
           ),
           listen(
             button1,
             "click",
             /*importPlayerXP*/
-            ctx[81]
+            ctx[83]
           ),
           listen(
             button2,
             "click",
             /*toggleImages*/
-            ctx[70]
+            ctx[72]
           ),
           listen(
             button3,
             "click",
             /*toggleVisualProfiles*/
-            ctx[57]
+            ctx[58]
           ),
           listen(
             button4,
             "click",
             /*toggleExclusividades*/
-            ctx[62]
+            ctx[64]
           ),
           listen(
             button5,
             "click",
-            /*click_handler_28*/
-            ctx[151]
+            /*click_handler_29*/
+            ctx[154]
           ),
           listen(
             input1,
             "change",
             /*updateWillpowerMod*/
-            ctx[86]
+            ctx[88]
           ),
           listen(
             input2,
             "change",
             /*updateCurrentBW*/
-            ctx[83]
+            ctx[85]
           ),
           listen(
             input3,
             "change",
             /*updateNexusMod*/
-            ctx[85]
+            ctx[87]
           ),
           listen(
             input4,
             "change",
             /*updateCurrentWP*/
-            ctx[84]
+            ctx[86]
           ),
           listen(
             button6,
             "click",
-            /*click_handler_31*/
-            ctx[154]
+            /*click_handler_32*/
+            ctx[157]
           ),
           listen(
             div35,
             "click",
-            /*click_handler_32*/
-            ctx[155]
+            /*click_handler_33*/
+            ctx[158]
           ),
           listen(
             button7,
             "click",
-            /*click_handler_33*/
-            ctx[156]
+            /*click_handler_34*/
+            ctx[159]
           ),
           listen(
             button8,
             "click",
             /*addUniverse*/
-            ctx[87]
+            ctx[89]
           ),
           listen(
             button9,
             "click",
             /*addMotivation*/
-            ctx[90]
+            ctx[92]
           ),
           listen(
             button10,
             "click",
-            /*click_handler_40*/
-            ctx[169]
+            /*click_handler_41*/
+            ctx[172]
           ),
           listen(
             button11,
             "click",
-            /*click_handler_41*/
-            ctx[170]
+            /*click_handler_42*/
+            ctx[173]
           ),
           listen(
             div47,
             "click",
             /*handleArticleClick*/
-            ctx[77]
+            ctx[79]
           ),
           listen(
             button12,
             "click",
-            /*click_handler_42*/
-            ctx[171]
+            /*click_handler_43*/
+            ctx[174]
           ),
           listen(
             button13,
             "click",
-            /*click_handler_43*/
-            ctx[172]
+            /*click_handler_44*/
+            ctx[175]
           ),
           listen(
             div51,
             "click",
             /*handleArticleClick*/
-            ctx[77]
+            ctx[79]
           ),
           listen(
             button14,
             "click",
             /*saveBioText*/
-            ctx[93]
+            ctx[95]
           )
         ];
         mounted = true;
@@ -10610,7 +10744,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block0, 1);
           }
         } else {
-          if_block0 = create_if_block_27$2(ctx2);
+          if_block0 = create_if_block_28$2(ctx2);
           if_block0.c();
           transition_in(if_block0, 1);
           if_block0.m(div56, t0);
@@ -10633,7 +10767,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block1, 1);
           }
         } else {
-          if_block1 = create_if_block_26$2(ctx2);
+          if_block1 = create_if_block_27$2(ctx2);
           if_block1.c();
           transition_in(if_block1, 1);
           if_block1.m(div56, t1);
@@ -10670,16 +10804,16 @@ function create_fragment$1i(ctx) {
       }
       if (
         /*showExcPicker*/
-        ctx2[29]
+        ctx2[30]
       ) {
         if (if_block3) {
           if_block3.p(ctx2, dirty);
           if (dirty[0] & /*showExcPicker*/
-          536870912) {
+          1073741824) {
             transition_in(if_block3, 1);
           }
         } else {
-          if_block3 = create_if_block_19$4(ctx2);
+          if_block3 = create_if_block_19$5(ctx2);
           if_block3.c();
           transition_in(if_block3, 1);
           if_block3.m(div56, t3);
@@ -10693,16 +10827,16 @@ function create_fragment$1i(ctx) {
       }
       if (
         /*activePopup*/
-        ctx2[32]
+        ctx2[33]
       ) {
         if (if_block4) {
           if_block4.p(ctx2, dirty);
           if (dirty[1] & /*activePopup*/
-          2) {
+          4) {
             transition_in(if_block4, 1);
           }
         } else {
-          if_block4 = create_if_block_18$8(ctx2);
+          if_block4 = create_if_block_18$9(ctx2);
           if_block4.c();
           transition_in(if_block4, 1);
           if_block4.m(div56, t4);
@@ -10716,12 +10850,12 @@ function create_fragment$1i(ctx) {
       }
       if (
         /*activeViewer*/
-        ctx2[36]
+        ctx2[37]
       ) {
         if (if_block5) {
           if_block5.p(ctx2, dirty);
           if (dirty[1] & /*activeViewer*/
-          32) {
+          64) {
             transition_in(if_block5, 1);
           }
         } else {
@@ -10739,12 +10873,12 @@ function create_fragment$1i(ctx) {
       }
       if (
         /*activeEditor*/
-        ctx2[37]
+        ctx2[38]
       ) {
         if (if_block6) {
           if_block6.p(ctx2, dirty);
           if (dirty[1] & /*activeEditor*/
-          64) {
+          128) {
             transition_in(if_block6, 1);
           }
         } else {
@@ -10762,12 +10896,12 @@ function create_fragment$1i(ctx) {
       }
       if (
         /*activeTerm*/
-        ctx2[40]
+        ctx2[41]
       ) {
         if (if_block7) {
           if_block7.p(ctx2, dirty);
           if (dirty[1] & /*activeTerm*/
-          512) {
+          1024) {
             transition_in(if_block7, 1);
           }
         } else {
@@ -10781,12 +10915,12 @@ function create_fragment$1i(ctx) {
         if_block7 = null;
       }
       if (!current || dirty[1] & /*isHelperOpen*/
-      256) {
+      512) {
         toggle_class(
           aside,
           "open",
           /*isHelperOpen*/
-          ctx2[39]
+          ctx2[40]
         );
       }
       if (!current || dirty[0] & /*actor*/
@@ -10796,12 +10930,12 @@ function create_fragment$1i(ctx) {
       }
       if (
         /*showImages*/
-        ctx2[48]
+        ctx2[49]
       ) {
         if (if_block8) {
           if_block8.p(ctx2, dirty);
           if (dirty[1] & /*showImages*/
-          131072) {
+          262144) {
             transition_in(if_block8, 1);
           }
         } else {
@@ -10823,21 +10957,21 @@ function create_fragment$1i(ctx) {
         input0.value = input0_value_value;
       }
       if (!current || dirty[1] & /*isSyncing*/
-      1 && button1_class_value !== (button1_class_value = "sync-btn " + /*isSyncing*/
-      (ctx2[31] ? "pulsing" : "") + " svelte-1kfzpoa")) {
+      2 && button1_class_value !== (button1_class_value = "sync-btn " + /*isSyncing*/
+      (ctx2[32] ? "pulsing" : "") + " svelte-1kfzpoa")) {
         attr(button1, "class", button1_class_value);
       }
       if ((!current || dirty[1] & /*showImages*/
-      131072) && t21_value !== (t21_value = /*showImages*/
-      ctx2[48] ? "OCULTAR ARTES" : "GALERIA")) set_data(t21, t21_value);
+      262144) && t21_value !== (t21_value = /*showImages*/
+      ctx2[49] ? "OCULTAR ARTES" : "GALERIA")) set_data(t21, t21_value);
       if (!/*gmMode*/
       ctx2[2] && /*missingXP*/
-      ctx2[44] <= 0) {
+      ctx2[45] <= 0) {
         if (if_block9) {
           if_block9.p(ctx2, dirty);
           if (dirty[0] & /*gmMode*/
           4 | dirty[1] & /*missingXP*/
-          8192) {
+          16384) {
             transition_in(if_block9, 1);
           }
         } else {
@@ -10855,7 +10989,7 @@ function create_fragment$1i(ctx) {
       }
       if (
         /*isGM*/
-        ctx2[56]
+        ctx2[57]
       ) if_block10.p(ctx2, dirty);
       if (!current || dirty[0] & /*totalPointsCap*/
       2048) set_data(
@@ -10870,18 +11004,18 @@ function create_fragment$1i(ctx) {
         ctx2[10]
       );
       if (!current || dirty[1] & /*availablePoints*/
-      1024) set_data(
+      2048) set_data(
         t39,
         /*availablePoints*/
-        ctx2[41]
+        ctx2[42]
       );
       if (!current || dirty[1] & /*availablePoints*/
-      1024) {
+      2048) {
         set_style(
           span6,
           "color",
           /*availablePoints*/
-          ctx2[41] < 0 ? "#ff3333" : "var(--c-primary)"
+          ctx2[42] < 0 ? "#ff3333" : "var(--c-primary)"
         );
       }
       if (!/*gmMode*/
@@ -10898,12 +11032,12 @@ function create_fragment$1i(ctx) {
         if_block11 = null;
       }
       if (!current || dirty[1] & /*strokeDashoffset*/
-      4096) {
+      8192) {
         attr(
           circle1,
           "stroke-dashoffset",
           /*strokeDashoffset*/
-          ctx2[43]
+          ctx2[44]
         );
       }
       if (!current || dirty[0] & /*activeLevel*/
@@ -11011,12 +11145,12 @@ function create_fragment$1i(ctx) {
       );
       if (
         /*showImages*/
-        ctx2[48]
+        ctx2[49]
       ) {
         if (if_block13) {
           if_block13.p(ctx2, dirty);
           if (dirty[1] & /*showImages*/
-          131072) {
+          262144) {
             transition_in(if_block13, 1);
           }
         } else {
@@ -11033,14 +11167,14 @@ function create_fragment$1i(ctx) {
         check_outros();
       }
       if ((!current || dirty[1] & /*originData*/
-      8) && t117_value !== (t117_value = /*originData*/
-      ctx2[34].icon + "")) set_data(t117, t117_value);
+      16) && t117_value !== (t117_value = /*originData*/
+      ctx2[35].icon + "")) set_data(t117, t117_value);
       if ((!current || dirty[1] & /*originData*/
-      8) && t121_value !== (t121_value = /*originData*/
-      ctx2[34].name.toUpperCase() + "")) set_data(t121, t121_value);
+      16) && t121_value !== (t121_value = /*originData*/
+      ctx2[35].name.toUpperCase() + "")) set_data(t121, t121_value);
       if (
         /*originData*/
-        ctx2[34].initialKit
+        ctx2[35].initialKit
       ) {
         if (if_block14) {
           if_block14.p(ctx2, dirty);
@@ -11054,18 +11188,18 @@ function create_fragment$1i(ctx) {
         if_block14 = null;
       }
       if ((!current || dirty[1] & /*originData*/
-      8) && t128_value !== (t128_value = /*originData*/
-      ctx2[34].mechanic.name + "")) set_data(t128, t128_value);
+      16) && t128_value !== (t128_value = /*originData*/
+      ctx2[35].mechanic.name + "")) set_data(t128, t128_value);
       if (!current || dirty[1] & /*expandTraits*/
-      16 && i6_class_value !== (i6_class_value = "fas " + /*expandTraits*/
-      (ctx2[35] ? "fa-chevron-up" : "fa-chevron-down"))) {
+      32 && i6_class_value !== (i6_class_value = "fas " + /*expandTraits*/
+      (ctx2[36] ? "fa-chevron-up" : "fa-chevron-down"))) {
         attr(i6, "class", i6_class_value);
       }
       if ((!current || dirty[1] & /*expandTraits*/
-      16) && t133_value !== (t133_value = /*expandTraits*/
-      ctx2[35] ? "OCULTAR" : "EXPANDIR")) set_data(t133, t133_value);
+      32) && t133_value !== (t133_value = /*expandTraits*/
+      ctx2[36] ? "OCULTAR" : "EXPANDIR")) set_data(t133, t133_value);
       let previous_block_index = current_block_type_index;
-      current_block_type_index = select_block_type_1(ctx2);
+      current_block_type_index = select_block_type_2(ctx2);
       if (current_block_type_index === previous_block_index) {
         if_blocks[current_block_type_index].p(ctx2, dirty);
       } else {
@@ -11085,13 +11219,13 @@ function create_fragment$1i(ctx) {
         if_block15.m(div37, null);
       }
       if (!current || dirty[1] & /*showImages*/
-      131072 && section1_style_value !== (section1_style_value = /*showImages*/
-      ctx2[48] ? "border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;" : "")) {
+      262144 && section1_style_value !== (section1_style_value = /*showImages*/
+      ctx2[49] ? "border-top-left-radius: 0; border-top-right-radius: 0; border-top: none;" : "")) {
         attr(section1, "style", section1_style_value);
       }
       if (dirty[0] & /*originUniverses*/
       128 | dirty[2] & /*removeUniverse, commitUniverse*/
-      201326592) {
+      805306368) {
         each_value_1 = ensure_array_like(
           /*originUniverses*/
           ctx2[7]
@@ -11116,8 +11250,8 @@ function create_fragment$1i(ctx) {
         check_outros();
       }
       if (dirty[0] & /*motivations*/
-      2097152 | dirty[2] & /*removeMotivation, commitMotivation*/
-      1610612736) {
+      2097152 | dirty[3] & /*removeMotivation, commitMotivation*/
+      3) {
         each_value = ensure_array_like(
           /*motivations*/
           ctx2[21]
@@ -11142,19 +11276,19 @@ function create_fragment$1i(ctx) {
         check_outros();
       }
       if (!current || dirty[1] & /*previewPsyche*/
-      32768) div47.innerHTML = /*previewPsyche*/
-      ctx2[46];
+      65536) div47.innerHTML = /*previewPsyche*/
+      ctx2[47];
       if (!current || dirty[1] & /*previewAppearance*/
-      16384) div51.innerHTML = /*previewAppearance*/
-      ctx2[45];
+      32768) div51.innerHTML = /*previewAppearance*/
+      ctx2[46];
       if (
         /*showImages*/
-        ctx2[48]
+        ctx2[49]
       ) {
         if (if_block16) {
           if_block16.p(ctx2, dirty);
           if (dirty[1] & /*showImages*/
-          131072) {
+          262144) {
             transition_in(if_block16, 1);
           }
         } else {
@@ -11171,9 +11305,9 @@ function create_fragment$1i(ctx) {
         check_outros();
       }
       if (!current || dirty[1] & /*cssVariables, themeColor*/
-      12582912 && div56_style_value !== (div56_style_value = /*cssVariables*/
-      ctx2[54] + "; --c-primary: " + /*themeColor*/
-      ctx2[53] + ";")) {
+      25165824 && div56_style_value !== (div56_style_value = /*cssVariables*/
+      ctx2[55] + "; --c-primary: " + /*themeColor*/
+      ctx2[54] + ";")) {
         attr(div56, "style", div56_style_value);
       }
     },
@@ -11384,14 +11518,18 @@ function instance$1i($$self, $$props, $$invalidate) {
   }
   let showExclusividades = false;
   let exclusividades = flags.exclusivities || [];
+  let expandedExc = {};
+  function toggleExpandedExc(id) {
+    $$invalidate(29, expandedExc[id] = !expandedExc[id], expandedExc);
+  }
   function toggleExclusividades() {
     $$invalidate(27, showExclusividades = !showExclusividades);
   }
   let showExcPicker = false;
   let excPickerGroups = [];
   function openExcPicker() {
-    $$invalidate(30, excPickerGroups = ExclusivityDatabase.getGroups());
-    $$invalidate(29, showExcPicker = true);
+    $$invalidate(31, excPickerGroups = ExclusivityDatabase.getGroups());
+    $$invalidate(30, showExcPicker = true);
   }
   async function pickExclusivity(exc) {
     var _a, _b;
@@ -11410,7 +11548,7 @@ function instance$1i($$self, $$props, $$invalidate) {
       { render: false }
     );
     ui.notifications.info(`Exclusividade adicionada à ficha.`);
-    $$invalidate(29, showExcPicker = false);
+    $$invalidate(30, showExcPicker = false);
   }
   async function handleDropExclusividade(e) {
     var _a, _b, _c, _d;
@@ -11516,7 +11654,7 @@ function instance$1i($$self, $$props, $$invalidate) {
     $$invalidate(22, activeImagePrompt = null);
   }
   function toggleImages() {
-    $$invalidate(48, showImages = !showImages);
+    $$invalidate(49, showImages = !showImages);
     actor.update(
       {
         [`flags.${MODULE_ID$J}.showImages`]: showImages
@@ -11525,7 +11663,7 @@ function instance$1i($$self, $$props, $$invalidate) {
     );
   }
   function toggleBodyType() {
-    $$invalidate(47, isFullBody = !isFullBody);
+    $$invalidate(48, isFullBody = !isFullBody);
     actor.update(
       {
         [`flags.${MODULE_ID$J}.isFullBody`]: isFullBody
@@ -11556,18 +11694,18 @@ function instance$1i($$self, $$props, $$invalidate) {
   let isHelperOpen = false;
   let activeTerm = null;
   function openViewer(type) {
-    $$invalidate(36, activeViewer = type);
+    $$invalidate(37, activeViewer = type);
   }
   function closeViewer() {
-    $$invalidate(36, activeViewer = null);
+    $$invalidate(37, activeViewer = null);
   }
   function openEditor(type) {
-    $$invalidate(37, activeEditor = type);
+    $$invalidate(38, activeEditor = type);
     $$invalidate(8, editorContent = type === "psyche" ? localPsyche : localAppearance);
   }
   function saveAndCloseEditor() {
-    if (activeEditor === "psyche") $$invalidate(96, localPsyche = editorContent);
-    else $$invalidate(97, localAppearance = editorContent);
+    if (activeEditor === "psyche") $$invalidate(98, localPsyche = editorContent);
+    else $$invalidate(99, localAppearance = editorContent);
     actor.update(
       {
         [`flags.${MODULE_ID$J}.bio_psyche`]: localPsyche,
@@ -11575,7 +11713,7 @@ function instance$1i($$self, $$props, $$invalidate) {
       },
       { render: false }
     );
-    $$invalidate(37, activeEditor = null);
+    $$invalidate(38, activeEditor = null);
   }
   function injectCode(prefix, suffix = "") {
     $$invalidate(8, editorContent += `
@@ -11586,19 +11724,19 @@ ${prefix}TextoAqui${suffix}`);
     if (keyword) {
       const key = keyword.getAttribute("data-key");
       if (glossary[key]) {
-        $$invalidate(40, activeTerm = glossary[key]);
-        $$invalidate(39, isHelperOpen = true);
+        $$invalidate(41, activeTerm = glossary[key]);
+        $$invalidate(40, isHelperOpen = true);
       }
     }
   }
   onMount(async () => {
-    $$invalidate(33, allOriginsList = await OriginDatabase.load());
+    $$invalidate(34, allOriginsList = await OriginDatabase.load());
     const originID = flags.origin || "humano";
     loadOriginData(originID);
-    $$invalidate(98, glossary = SystemBookDB.getGlossary());
+    $$invalidate(100, glossary = SystemBookDB.getGlossary());
   });
   async function loadOriginData(originID) {
-    $$invalidate(34, originData = allOriginsList[originID] || allOriginsList["humano"] || originData);
+    $$invalidate(35, originData = allOriginsList[originID] || allOriginsList["humano"] || originData);
   }
   async function updateFlag(key, value) {
     if (key === "bio_universes") $$invalidate(7, originUniverses = value);
@@ -11630,7 +11768,7 @@ ${prefix}TextoAqui${suffix}`);
     ui.notifications.info(`Origem alterada.`);
   }
   async function importPlayerXP() {
-    $$invalidate(31, isSyncing = true);
+    $$invalidate(32, isSyncing = true);
     try {
       const userId = game.user.id;
       const xpData = await XPDatabase.getPlayerData(userId);
@@ -11639,14 +11777,14 @@ ${prefix}TextoAqui${suffix}`);
         [`flags.${MODULE_ID$J}.xp`]: xpData.earnedXP || 0
       };
       await actor.update(updates, { render: false });
-      $$invalidate(100, currentXP = xpData.earnedXP || 0);
+      $$invalidate(102, currentXP = xpData.earnedXP || 0);
       await loadOriginData(sheetOrigin);
       ui.notifications.info(`Sincronizado: ${currentXP} XP.`);
     } catch (e) {
       console.error("NEXUS | Erro na sincronia de XP/Origem:", e);
       ui.notifications.warn("Falha de Sincronia.");
     }
-    $$invalidate(31, isSyncing = false);
+    $$invalidate(32, isSyncing = false);
   }
   function buyStat(amount) {
     const cost = 3;
@@ -11771,84 +11909,87 @@ ${prefix}TextoAqui${suffix}`);
   const click_handler_10 = () => $$invalidate(25, showVisualProfiles = false);
   const click_handler_11 = () => $$invalidate(27, showExclusividades = false);
   const click_handler_12 = (exc) => removeExclusividade(exc.id);
+  const click_handler_13 = (exc) => {
+    if (!isGM) toggleExpandedExc(exc.id);
+  };
   const change_handler_3 = (exc, e) => updateExclusividade(exc.id, e.target.value);
   const dragover_handler2 = (e) => {
     if (isGM) e.preventDefault();
   };
-  const click_handler_13 = () => $$invalidate(27, showExclusividades = false);
-  const click_handler_14 = () => $$invalidate(29, showExcPicker = false);
-  const click_handler_15 = (item) => pickExclusivity(item);
-  const click_handler_16 = () => $$invalidate(29, showExcPicker = false);
-  const click_handler_17 = () => $$invalidate(32, activePopup = null);
-  const click_handler_18 = () => $$invalidate(32, activePopup = null);
-  const click_handler_19 = () => $$invalidate(38, editorTab = "markdown");
-  const click_handler_20 = () => $$invalidate(38, editorTab = "preview");
-  const click_handler_21 = () => injectCode("# ");
-  const click_handler_22 = () => injectCode("> ## ");
-  const click_handler_23 = () => injectCode("[img:URL_DA_IMAGEM:100%]");
+  const click_handler_14 = () => $$invalidate(27, showExclusividades = false);
+  const click_handler_15 = () => $$invalidate(30, showExcPicker = false);
+  const click_handler_16 = (item) => pickExclusivity(item);
+  const click_handler_17 = () => $$invalidate(30, showExcPicker = false);
+  const click_handler_18 = () => $$invalidate(33, activePopup = null);
+  const click_handler_19 = () => $$invalidate(33, activePopup = null);
+  const click_handler_20 = () => $$invalidate(39, editorTab = "markdown");
+  const click_handler_21 = () => $$invalidate(39, editorTab = "preview");
+  const click_handler_22 = () => injectCode("# ");
+  const click_handler_23 = () => injectCode("> ## ");
+  const click_handler_24 = () => injectCode("[img:URL_DA_IMAGEM:100%]");
   function textarea_input_handler() {
     editorContent = this.value;
     $$invalidate(8, editorContent);
   }
-  const click_handler_24 = () => $$invalidate(39, isHelperOpen = false);
-  const click_handler_25 = () => openImagePrompt("token", tokenImg);
+  const click_handler_25 = () => $$invalidate(40, isHelperOpen = false);
+  const click_handler_26 = () => openImagePrompt("token", tokenImg);
   const change_handler_4 = (e) => actor.update({ name: e.target.value }, { render: false });
-  const click_handler_26 = () => dispatch2("openLvlUp");
-  const click_handler_27 = () => buyStat(-1);
-  const click_handler_28 = () => buyStat(1);
-  const click_handler_29 = () => openImagePrompt("banner", originBanner);
-  const click_handler_30 = () => $$invalidate(32, activePopup = {
+  const click_handler_27 = () => dispatch2("openLvlUp");
+  const click_handler_28 = () => buyStat(-1);
+  const click_handler_29 = () => buyStat(1);
+  const click_handler_30 = () => openImagePrompt("banner", originBanner);
+  const click_handler_31 = () => $$invalidate(33, activePopup = {
     title: "Kit Inicial",
     desc: originData.initialKit
   });
-  const click_handler_31 = () => $$invalidate(32, activePopup = {
+  const click_handler_32 = () => $$invalidate(33, activePopup = {
     title: originData.name,
     desc: originData.desc + "<hr>" + originData.powers
   });
-  const click_handler_32 = () => $$invalidate(32, activePopup = {
+  const click_handler_33 = () => $$invalidate(33, activePopup = {
     title: originData.mechanic.name,
     desc: originData.mechanic.desc
   });
-  const click_handler_33 = () => $$invalidate(35, expandTraits = !expandTraits);
-  const click_handler_34 = (t) => $$invalidate(32, activePopup = { title: t.name, desc: t.effect });
+  const click_handler_34 = () => $$invalidate(36, expandTraits = !expandTraits);
+  const click_handler_35 = (t) => $$invalidate(33, activePopup = { title: t.name, desc: t.effect });
   const func_12 = (e) => activeLevel >= e.level;
-  const click_handler_35 = (e) => $$invalidate(32, activePopup = { title: e.name, desc: e.desc });
-  const click_handler_36 = (t) => $$invalidate(32, activePopup = { title: t.name, desc: t.effect });
+  const click_handler_36 = (e) => $$invalidate(33, activePopup = { title: e.name, desc: e.desc });
+  const click_handler_37 = (t) => $$invalidate(33, activePopup = { title: t.name, desc: t.effect });
   const func_22 = (e) => activeLevel >= e.level;
-  const click_handler_37 = (e) => $$invalidate(32, activePopup = { title: e.name, desc: e.desc });
+  const click_handler_38 = (e) => $$invalidate(33, activePopup = { title: e.name, desc: e.desc });
   const change_handler_5 = (i, e) => commitUniverse(i, "universe", e.target.value);
   const change_handler_6 = (i, e) => commitUniverse(i, "theme", e.target.value);
-  const click_handler_38 = (i) => removeUniverse(i);
+  const click_handler_39 = (i) => removeUniverse(i);
   const change_handler_7 = (i, e) => commitMotivation(i, "text", e.target.value);
   const change_handler_8 = (i, e) => commitMotivation(i, "stars", parseInt(e.target.value));
-  const click_handler_39 = (i) => removeMotivation(i);
-  const click_handler_40 = () => openViewer("psyche");
-  const click_handler_41 = () => openEditor("psyche");
-  const click_handler_42 = () => openViewer("appearance");
-  const click_handler_43 = () => openEditor("appearance");
-  const click_handler_44 = () => openImagePrompt("body", isFullBody ? fullBodyImg : halfBodyImg);
+  const click_handler_40 = (i) => removeMotivation(i);
+  const click_handler_41 = () => openViewer("psyche");
+  const click_handler_42 = () => openEditor("psyche");
+  const click_handler_43 = () => openViewer("appearance");
+  const click_handler_44 = () => openEditor("appearance");
+  const click_handler_45 = () => openImagePrompt("body", isFullBody ? fullBodyImg : halfBodyImg);
   $$self.$$set = ($$props2) => {
     if ("actor" in $$props2) $$invalidate(0, actor = $$props2.actor);
     if ("flags" in $$props2) $$invalidate(1, flags = $$props2.flags);
-    if ("system" in $$props2) $$invalidate(95, system = $$props2.system);
+    if ("system" in $$props2) $$invalidate(97, system = $$props2.system);
   };
   $$self.$$.update = () => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y;
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(110, activeThemeKey = ((_a = flags.sheetConfig) == null ? void 0 : _a.theme) || "terminal");
+      $$invalidate(112, activeThemeKey = ((_a = flags.sheetConfig) == null ? void 0 : _a.theme) || "terminal");
     }
     if ($$self.$$.dirty[3] & /*activeThemeKey*/
-    131072) {
-      $$invalidate(109, currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES["terminal"]);
+    524288) {
+      $$invalidate(111, currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES["terminal"]);
     }
     if ($$self.$$.dirty[3] & /*currentThemeData*/
-    65536) {
-      $$invalidate(54, cssVariables = Object.entries(currentThemeData.vars).map(([key, val]) => `${key}: ${val};`).join(" "));
+    262144) {
+      $$invalidate(55, cssVariables = Object.entries(currentThemeData.vars).map(([key, val]) => `${key}: ${val};`).join(" "));
     }
     if ($$self.$$.dirty[3] & /*currentThemeData*/
-    65536) {
-      $$invalidate(53, themeColor = currentThemeData.vars["--c-primary"]);
+    262144) {
+      $$invalidate(54, themeColor = currentThemeData.vars["--c-primary"]);
     }
     if ($$self.$$.dirty[0] & /*flags, gmMode*/
     6) {
@@ -11864,27 +12005,27 @@ ${prefix}TextoAqui${suffix}`);
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(48, showImages = flags.showImages !== false);
+      $$invalidate(49, showImages = flags.showImages !== false);
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(52, tokenImg = flags.tokenImg || "https://placehold.co/256x256/111/333?text=TOKEN");
+      $$invalidate(53, tokenImg = flags.tokenImg || "https://placehold.co/256x256/111/333?text=TOKEN");
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(51, originBanner = flags.originBanner || "https://placehold.co/800x200/111/333?text=BANNER");
+      $$invalidate(52, originBanner = flags.originBanner || "https://placehold.co/800x200/111/333?text=BANNER");
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(50, halfBodyImg = flags.halfBodyImg || "https://i.imgur.com/1DyBPgD.png");
+      $$invalidate(51, halfBodyImg = flags.halfBodyImg || "https://i.imgur.com/1DyBPgD.png");
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(49, fullBodyImg = flags.fullBodyImg || "https://i.imgur.com/1DyBPgD.png");
+      $$invalidate(50, fullBodyImg = flags.fullBodyImg || "https://i.imgur.com/1DyBPgD.png");
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(47, isFullBody = flags.isFullBody !== false);
+      $$invalidate(48, isFullBody = flags.isFullBody !== false);
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
@@ -11899,32 +12040,32 @@ ${prefix}TextoAqui${suffix}`);
       }
     }
     if ($$self.$$.dirty[3] & /*localPsyche, glossary*/
-    40) {
-      $$invalidate(46, previewPsyche = BookAutomation.renderMarkdown(localPsyche || "Nenhum dado arquivado. Clique em editar.", glossary));
+    160) {
+      $$invalidate(47, previewPsyche = BookAutomation.renderMarkdown(localPsyche || "Nenhum dado arquivado. Clique em editar.", glossary));
     }
     if ($$self.$$.dirty[3] & /*localAppearance, glossary*/
-    48) {
-      $$invalidate(45, previewAppearance = BookAutomation.renderMarkdown(localAppearance || "Nenhum dado arquivado. Clique em editar.", glossary));
+    192) {
+      $$invalidate(46, previewAppearance = BookAutomation.renderMarkdown(localAppearance || "Nenhum dado arquivado. Clique em editar.", glossary));
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(100, currentXP = flags.xp || 0);
+      $$invalidate(102, currentXP = flags.xp || 0);
     }
     if ($$self.$$.dirty[3] & /*currentXP*/
-    128) {
-      $$invalidate(106, playerLvlInfo = LevelCalculator.getLevelInfo(currentXP));
+    512) {
+      $$invalidate(108, playerLvlInfo = LevelCalculator.getLevelInfo(currentXP));
     }
     if ($$self.$$.dirty[0] & /*customPoints*/
     8) {
-      $$invalidate(108, customXP = Math.max(0, customPoints - BASE_POINTS_CAP$1));
+      $$invalidate(110, customXP = Math.max(0, customPoints - BASE_POINTS_CAP$1));
     }
     if ($$self.$$.dirty[3] & /*customXP*/
-    32768) {
-      $$invalidate(107, customLvlInfo = LevelCalculator.getLevelInfo(customXP));
+    131072) {
+      $$invalidate(109, customLvlInfo = LevelCalculator.getLevelInfo(customXP));
     }
     if ($$self.$$.dirty[0] & /*gmMode*/
     4 | $$self.$$.dirty[3] & /*customLvlInfo, playerLvlInfo*/
-    24576) {
+    98304) {
       $$invalidate(9, activeLvlInfo = gmMode ? customLvlInfo : playerLvlInfo);
     }
     if ($$self.$$.dirty[0] & /*activeLvlInfo*/
@@ -11932,22 +12073,22 @@ ${prefix}TextoAqui${suffix}`);
       $$invalidate(16, activeLevel = activeLvlInfo.level);
     }
     if ($$self.$$.dirty[3] & /*playerLvlInfo, currentXP*/
-    8320) {
-      $$invalidate(44, missingXP = playerLvlInfo.nextXP - currentXP);
+    33280) {
+      $$invalidate(45, missingXP = playerLvlInfo.nextXP - currentXP);
     }
     if ($$self.$$.dirty[0] & /*gmMode, customPoints*/
     12 | $$self.$$.dirty[3] & /*currentXP*/
-    128) {
+    512) {
       $$invalidate(11, totalPointsCap = gmMode ? customPoints : BASE_POINTS_CAP$1 + currentXP);
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2 | $$self.$$.dirty[3] & /*system*/
-    4) {
+    16) {
       $$invalidate(20, statCharm = Number(((_c = (_b = system.stats) == null ? void 0 : _b.charm) == null ? void 0 : _c.value) || ((_e = (_d = system.attributes) == null ? void 0 : _d.charm) == null ? void 0 : _e.value) || ((_g = (_f = flags.stats) == null ? void 0 : _f.charm) == null ? void 0 : _g.normal) || 1));
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2 | $$self.$$.dirty[3] & /*system*/
-    4) {
+    16) {
       $$invalidate(18, statCommand = Number(((_i = (_h = system.stats) == null ? void 0 : _h.command) == null ? void 0 : _i.value) || ((_k = (_j = system.attributes) == null ? void 0 : _j.command) == null ? void 0 : _k.value) || ((_m = (_l = flags.stats) == null ? void 0 : _l.command) == null ? void 0 : _m.normal) || 1));
     }
     if ($$self.$$.dirty[0] & /*flags*/
@@ -11983,38 +12124,38 @@ ${prefix}TextoAqui${suffix}`);
     }
     if ($$self.$$.dirty[0] & /*boughtBaseWill*/
     16) {
-      $$invalidate(105, costBaseWill = boughtBaseWill * 3);
+      $$invalidate(107, costBaseWill = boughtBaseWill * 3);
     }
     if ($$self.$$.dirty[3] & /*costBaseWill*/
-    4096) {
-      $$invalidate(101, totalWillCost = costBaseWill);
+    16384) {
+      $$invalidate(103, totalWillCost = costBaseWill);
     }
     if ($$self.$$.dirty[0] & /*originUniverses*/
     128) {
-      $$invalidate(102, universeCost = Math.max(0, originUniverses.length - 1) * 8);
+      $$invalidate(104, universeCost = Math.max(0, originUniverses.length - 1) * 8);
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(104, statsCost = flags.statsCost || 0);
+      $$invalidate(106, statsCost = flags.statsCost || 0);
     }
     if ($$self.$$.dirty[0] & /*flags*/
     2) {
-      $$invalidate(103, powersCost = flags.powersSpent || 0);
+      $$invalidate(105, powersCost = flags.powersSpent || 0);
     }
     if ($$self.$$.dirty[3] & /*statsCost, powersCost, universeCost, totalWillCost*/
-    3840) {
+    15360) {
       $$invalidate(10, spentPoints = statsCost + powersCost + universeCost + totalWillCost);
     }
     if ($$self.$$.dirty[0] & /*totalPointsCap, spentPoints*/
     3072) {
-      $$invalidate(41, availablePoints = totalPointsCap - spentPoints);
+      $$invalidate(42, availablePoints = totalPointsCap - spentPoints);
     }
     if ($$self.$$.dirty[0] & /*actor, spentPoints*/
     1025 | $$self.$$.dirty[3] & /*saveTimeout, universeCost, totalWillCost*/
-    832) {
+    3328) {
       {
         if (saveTimeout) clearTimeout(saveTimeout);
-        $$invalidate(99, saveTimeout = setTimeout(
+        $$invalidate(101, saveTimeout = setTimeout(
           () => {
             actor.update(
               {
@@ -12031,12 +12172,12 @@ ${prefix}TextoAqui${suffix}`);
     }
     if ($$self.$$.dirty[0] & /*activeLvlInfo*/
     512) {
-      $$invalidate(43, strokeDashoffset = 283 - 283 * activeLvlInfo.progress / 100);
+      $$invalidate(44, strokeDashoffset = 283 - 283 * activeLvlInfo.progress / 100);
     }
     if ($$self.$$.dirty[0] & /*editorContent*/
     256 | $$self.$$.dirty[3] & /*glossary*/
-    32) {
-      $$invalidate(42, livePreviewHtml = BookAutomation.renderMarkdown(editorContent, glossary));
+    128) {
+      $$invalidate(43, livePreviewHtml = BookAutomation.renderMarkdown(editorContent, glossary));
     }
   };
   return [
@@ -12069,6 +12210,7 @@ ${prefix}TextoAqui${suffix}`);
     newProfile,
     showExclusividades,
     exclusividades,
+    expandedExc,
     showExcPicker,
     excPickerGroups,
     isSyncing,
@@ -12102,6 +12244,7 @@ ${prefix}TextoAqui${suffix}`);
     removeVisualProfile,
     updateVisualProfile,
     applyVisualProfile,
+    toggleExpandedExc,
     toggleExclusividades,
     openExcPicker,
     pickExclusivity,
@@ -12172,9 +12315,9 @@ ${prefix}TextoAqui${suffix}`);
     click_handler_10,
     click_handler_11,
     click_handler_12,
+    click_handler_13,
     change_handler_3,
     dragover_handler2,
-    click_handler_13,
     click_handler_14,
     click_handler_15,
     click_handler_16,
@@ -12185,11 +12328,11 @@ ${prefix}TextoAqui${suffix}`);
     click_handler_21,
     click_handler_22,
     click_handler_23,
-    textarea_input_handler,
     click_handler_24,
+    textarea_input_handler,
     click_handler_25,
-    change_handler_4,
     click_handler_26,
+    change_handler_4,
     click_handler_27,
     click_handler_28,
     click_handler_29,
@@ -12198,28 +12341,29 @@ ${prefix}TextoAqui${suffix}`);
     click_handler_32,
     click_handler_33,
     click_handler_34,
-    func_12,
     click_handler_35,
+    func_12,
     click_handler_36,
-    func_22,
     click_handler_37,
+    func_22,
+    click_handler_38,
     change_handler_5,
     change_handler_6,
-    click_handler_38,
+    click_handler_39,
     change_handler_7,
     change_handler_8,
-    click_handler_39,
     click_handler_40,
     click_handler_41,
     click_handler_42,
     click_handler_43,
-    click_handler_44
+    click_handler_44,
+    click_handler_45
   ];
 }
 class ProfileApp extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$1i, create_fragment$1i, safe_not_equal, { actor: 0, flags: 1, system: 95 }, null, [-1, -1, -1, -1, -1, -1, -1]);
+    init(this, options, instance$1i, create_fragment$1i, safe_not_equal, { actor: 0, flags: 1, system: 97 }, null, [-1, -1, -1, -1, -1, -1, -1]);
   }
 }
 const MODULE_ID$I = "multiversus-rpg";
@@ -37981,14 +38125,31 @@ function instance$17($$self, $$props, $$invalidate) {
             </header>
             <div style="padding: 10px;">
         `;
+    let normalTens = rolledDice.filter((d) => d.val === 10 && d.type === "d").length;
+    let isCrit = normalTens >= 3;
+    if (isCrit) {
+      html += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO!</div>`;
+    }
     if (finalResults.validSets.length > 0) {
       html += `<div style="font-weight: bold; font-size: 12px; color: #aaa; margin-bottom: 5px;">CONJUNTOS VÁLIDOS (L x A)</div>`;
       finalResults.validSets.forEach((set) => {
+        let blocksHtml = "";
+        if (set.h === 10 && isCrit) {
+          for (let i = 0; i < set.w; i++) {
+            if (i < normalTens) {
+              blocksHtml += `<div style="width: 15px; height: 15px; background: ${tColor}; border: 2px solid #fff; border-radius: 2px; box-sizing: border-box; box-shadow: 0 0 8px #fff;"></div>`;
+            } else {
+              blocksHtml += `<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`;
+            }
+          }
+        } else {
+          blocksHtml = Array(set.w).fill(`<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`).join("");
+        }
         html += `
                 <div style="display: flex; align-items: center; margin-bottom: 5px; background: #111; padding: 5px; border-left: 3px solid ${tColor}; border-radius: 4px;">
                     <span style="font-size: 18px; font-weight: bold; color: ${tColor}; margin-right: 10px;">${set.w}x${set.h}</span>
                     <div style="display: flex; gap: 2px;">
-                        ${Array(set.w).fill(`<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`).join("")}
+                        ${blocksHtml}
                     </div>
                 </div>`;
       });
@@ -48101,7 +48262,7 @@ function create_if_block_22$3(ctx) {
   );
   let if_block4 = (
     /*canEdit*/
-    ctx[17] && create_if_block_24$2(ctx)
+    ctx[17] && create_if_block_24$3(ctx)
   );
   let if_block5 = (
     /*canEdit*/
@@ -48307,7 +48468,7 @@ function create_if_block_22$3(ctx) {
         if (if_block4) {
           if_block4.p(ctx, dirty);
         } else {
-          if_block4 = create_if_block_24$2(ctx);
+          if_block4 = create_if_block_24$3(ctx);
           if_block4.c();
           if_block4.m(div4, t16);
         }
@@ -48523,7 +48684,7 @@ function create_if_block_25$2(ctx) {
     }
   };
 }
-function create_if_block_24$2(ctx) {
+function create_if_block_24$3(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -48872,11 +49033,11 @@ function create_if_block_16$c(ctx) {
   let t1;
   let if_block0 = (
     /*skill*/
-    ctx[86].h_normal > 0 && create_if_block_19$3(ctx)
+    ctx[86].h_normal > 0 && create_if_block_19$4(ctx)
   );
   let if_block1 = (
     /*skill*/
-    ctx[86].h_hard > 0 && create_if_block_18$7(ctx)
+    ctx[86].h_hard > 0 && create_if_block_18$8(ctx)
   );
   let if_block2 = (
     /*skill*/
@@ -48908,7 +49069,7 @@ function create_if_block_16$c(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_19$3(ctx2);
+          if_block0 = create_if_block_19$4(ctx2);
           if_block0.c();
           if_block0.m(div, t0);
         }
@@ -48923,7 +49084,7 @@ function create_if_block_16$c(ctx) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
         } else {
-          if_block1 = create_if_block_18$7(ctx2);
+          if_block1 = create_if_block_18$8(ctx2);
           if_block1.c();
           if_block1.m(div, t1);
         }
@@ -48957,7 +49118,7 @@ function create_if_block_16$c(ctx) {
     }
   };
 }
-function create_if_block_19$3(ctx) {
+function create_if_block_19$4(ctx) {
   let span;
   let t0;
   let t1_value = (
@@ -48989,7 +49150,7 @@ function create_if_block_19$3(ctx) {
     }
   };
 }
-function create_if_block_18$7(ctx) {
+function create_if_block_18$8(ctx) {
   let span;
   let t0;
   let t1_value = (
@@ -52028,7 +52189,7 @@ function create_each_block_5$b(ctx) {
     }
   };
 }
-function create_if_block_18$6(ctx) {
+function create_if_block_18$7(ctx) {
   let span0;
   let t1;
   let span1;
@@ -53990,7 +54151,7 @@ function create_fragment$$(ctx) {
   }
   let if_block0 = (
     /*activeItem*/
-    ctx[3] && create_if_block_18$6(ctx)
+    ctx[3] && create_if_block_18$7(ctx)
   );
   function select_block_type(ctx2, dirty) {
     if (
@@ -54111,7 +54272,7 @@ function create_fragment$$(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_18$6(ctx2);
+          if_block0 = create_if_block_18$7(ctx2);
           if_block0.c();
           if_block0.m(div0, null);
         }
@@ -56121,7 +56282,7 @@ function create_else_block_12(ctx) {
     }
   };
 }
-function create_if_block_24$1(ctx) {
+function create_if_block_24$2(ctx) {
   let img;
   let img_src_value;
   return {
@@ -56357,7 +56518,7 @@ function create_if_block_14$c(ctx) {
     if (
       /*isEditing*/
       ctx2[1]
-    ) return create_if_block_19$2;
+    ) return create_if_block_19$3;
     return create_else_block_7;
   }
   let current_block_type_2 = select_block_type_5(ctx);
@@ -56366,7 +56527,7 @@ function create_if_block_14$c(ctx) {
     if (
       /*isEditing*/
       ctx2[1]
-    ) return create_if_block_18$5;
+    ) return create_if_block_18$6;
     return create_else_block_6;
   }
   let current_block_type_3 = select_block_type_6(ctx);
@@ -56773,7 +56934,7 @@ function create_else_block_7(ctx) {
     }
   };
 }
-function create_if_block_19$2(ctx) {
+function create_if_block_19$3(ctx) {
   let input;
   let mounted;
   let dispose;
@@ -56849,7 +57010,7 @@ function create_else_block_6(ctx) {
     }
   };
 }
-function create_if_block_18$5(ctx) {
+function create_if_block_18$6(ctx) {
   let input;
   let mounted;
   let dispose;
@@ -58317,7 +58478,7 @@ function create_fragment$Y(ctx) {
       /*draft*/
       ctx2[0].bodyArt || /*draft*/
       ctx2[0].img
-    ) return create_if_block_24$1;
+    ) return create_if_block_24$2;
     return create_else_block_12;
   }
   let current_block_type = select_block_type(ctx);
@@ -75242,7 +75403,7 @@ function create_if_block_17$7(ctx) {
   let dispose;
   let if_block = (
     /*showCreateOptions*/
-    ctx[12] && create_if_block_18$4(ctx)
+    ctx[12] && create_if_block_18$5(ctx)
   );
   return {
     c() {
@@ -75281,7 +75442,7 @@ function create_if_block_17$7(ctx) {
             transition_in(if_block, 1);
           }
         } else {
-          if_block = create_if_block_18$4(ctx2);
+          if_block = create_if_block_18$5(ctx2);
           if_block.c();
           transition_in(if_block, 1);
           if_block.m(div, null);
@@ -75304,7 +75465,7 @@ function create_if_block_17$7(ctx) {
     }
   };
 }
-function create_if_block_18$4(ctx) {
+function create_if_block_18$5(ctx) {
   let div;
   let button0;
   let t1;
@@ -84138,7 +84299,7 @@ function create_if_block_17$6(ctx) {
   }
   let if_block = (
     /*filteredAddItems*/
-    ctx[23].length === 0 && create_if_block_18$3()
+    ctx[23].length === 0 && create_if_block_18$4()
   );
   return {
     c() {
@@ -84312,7 +84473,7 @@ function create_if_block_17$6(ctx) {
       ) {
         if (if_block) ;
         else {
-          if_block = create_if_block_18$3();
+          if_block = create_if_block_18$4();
           if_block.c();
           if_block.m(div1, null);
         }
@@ -84442,7 +84603,7 @@ function create_each_block_6$7(ctx) {
     }
   };
 }
-function create_if_block_18$3(ctx) {
+function create_if_block_18$4(ctx) {
   let div;
   return {
     c() {
@@ -96291,22 +96452,30 @@ class ArchetypeDatabase {
 }
 function get_each_context_2$d(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[71] = list[i];
+  child_ctx[73] = list[i];
+  const constants_0 = (
+    /*expandedExcIds*/
+    child_ctx[11].has(
+      /*exc*/
+      child_ctx[73].id
+    )
+  );
+  child_ctx[74] = constants_0;
   return child_ctx;
 }
 function get_each_context_3$a(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[74] = list[i];
+  child_ctx[77] = list[i];
   return child_ctx;
 }
 function get_each_context$q(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[65] = list[i];
+  child_ctx[67] = list[i];
   return child_ctx;
 }
 function get_each_context_1$j(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[68] = list[i];
+  child_ctx[70] = list[i];
   return child_ctx;
 }
 function create_else_block_1$9(ctx) {
@@ -96326,11 +96495,11 @@ function create_else_block_1$9(ctx) {
   let dispose;
   let if_block0 = (
     /*isGM*/
-    ctx[19] && create_if_block_17$4(ctx)
+    ctx[20] && create_if_block_19$2(ctx)
   );
   let each_value_3 = ensure_array_like(
     /*filteredExcGroups*/
-    ctx[18]
+    ctx[19]
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_3.length; i += 1) {
@@ -96340,10 +96509,10 @@ function create_else_block_1$9(ctx) {
     if ((!/*selectedExcGroupId*/
     ctx2[2] || /*editModeExcGroup*/
     ctx2[9]) && /*isGM*/
-    ctx2[19]) return create_if_block_10$7;
+    ctx2[20]) return create_if_block_10$7;
     if (
       /*selectedExcGroup*/
-      ctx2[16]
+      ctx2[17]
     ) return create_if_block_12$6;
   }
   let current_block_type = select_block_type_3(ctx);
@@ -96417,13 +96586,13 @@ function create_else_block_1$9(ctx) {
             input,
             "input",
             /*input_input_handler*/
-            ctx[48]
+            ctx[50]
           ),
           listen(
             div4,
             "drop",
             /*onDrop*/
-            ctx[34]
+            ctx[36]
           ),
           listen(div4, "dragover", dragover_handler_1)
         ];
@@ -96433,7 +96602,7 @@ function create_else_block_1$9(ctx) {
     p(ctx2, dirty) {
       if (
         /*isGM*/
-        ctx2[19]
+        ctx2[20]
       ) if_block0.p(ctx2, dirty);
       if (dirty[0] & /*excSearchTerm*/
       8 && input.value !== /*excSearchTerm*/
@@ -96445,10 +96614,10 @@ function create_else_block_1$9(ctx) {
         );
       }
       if (dirty[0] & /*selectedExcGroupId, filteredExcGroups, editModeExcGroup, handleDeleteExcGroup, isGM*/
-      269222404) {
+      1075315204) {
         each_value_3 = ensure_array_like(
           /*filteredExcGroups*/
-          ctx2[18]
+          ctx2[19]
         );
         let i;
         for (i = 0; i < each_value_3.length; i += 1) {
@@ -96505,7 +96674,7 @@ function create_if_block_1$v(ctx) {
   let dispose;
   let if_block0 = (
     /*isGM*/
-    ctx[19] && create_if_block_9$9(ctx)
+    ctx[20] && create_if_block_9$9(ctx)
   );
   let each_value_1 = ensure_array_like(
     /*archetypes*/
@@ -96519,10 +96688,10 @@ function create_if_block_1$v(ctx) {
     if ((!/*selectedArchId*/
     ctx2[1] || /*editModeArch*/
     ctx2[5]) && /*isGM*/
-    ctx2[19]) return create_if_block_2$s;
+    ctx2[20]) return create_if_block_2$s;
     if (
       /*selectedArch*/
-      ctx2[17]
+      ctx2[18]
     ) return create_if_block_4$h;
   }
   let current_block_type = select_block_type_1(ctx);
@@ -96574,7 +96743,7 @@ function create_if_block_1$v(ctx) {
             div3,
             "drop",
             /*onDrop*/
-            ctx[34]
+            ctx[36]
           ),
           listen(div3, "dragover", dragover_handler$2)
         ];
@@ -96584,10 +96753,10 @@ function create_if_block_1$v(ctx) {
     p(ctx2, dirty) {
       if (
         /*isGM*/
-        ctx2[19]
+        ctx2[20]
       ) if_block0.p(ctx2, dirty);
       if (dirty[0] & /*selectedArchId, archetypes, editModeArch, handleDeleteArch, isGM*/
-      4718627) {
+      17825827) {
         each_value_1 = ensure_array_like(
           /*archetypes*/
           ctx2[0]
@@ -96633,7 +96802,7 @@ function create_if_block_1$v(ctx) {
     }
   };
 }
-function create_if_block_17$4(ctx) {
+function create_if_block_19$2(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -96651,7 +96820,7 @@ function create_if_block_17$4(ctx) {
           button,
           "click",
           /*click_handler_7*/
-          ctx[47]
+          ctx[49]
         );
         mounted = true;
       }
@@ -96666,16 +96835,16 @@ function create_if_block_17$4(ctx) {
     }
   };
 }
-function create_if_block_16$4(ctx) {
+function create_if_block_18$3(ctx) {
   let button;
   let mounted;
   let dispose;
   function click_handler_8() {
     return (
       /*click_handler_8*/
-      ctx[49](
+      ctx[51](
         /*g*/
-        ctx[74]
+        ctx[77]
       )
     );
   }
@@ -96711,7 +96880,7 @@ function create_each_block_3$a(ctx) {
   let t0;
   let t1_value = (
     /*g*/
-    ctx[74].name + ""
+    ctx[77].name + ""
   );
   let t1;
   let t2;
@@ -96721,14 +96890,14 @@ function create_each_block_3$a(ctx) {
   let dispose;
   let if_block = (
     /*isGM*/
-    ctx[19] && create_if_block_16$4(ctx)
+    ctx[20] && create_if_block_18$3(ctx)
   );
   function click_handler_9() {
     return (
       /*click_handler_9*/
-      ctx[50](
+      ctx[52](
         /*g*/
-        ctx[74]
+        ctx[77]
       )
     );
   }
@@ -96747,7 +96916,7 @@ function create_each_block_3$a(ctx) {
       attr(span, "class", "svelte-u4oq5");
       attr(div, "class", div_class_value = "s-item " + /*selectedExcGroupId*/
       (ctx[2] === /*g*/
-      ctx[74].id ? "active" : "") + " svelte-u4oq5");
+      ctx[77].id ? "active" : "") + " svelte-u4oq5");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -96766,16 +96935,16 @@ function create_each_block_3$a(ctx) {
     p(new_ctx, dirty) {
       ctx = new_ctx;
       if (dirty[0] & /*filteredExcGroups*/
-      262144 && t1_value !== (t1_value = /*g*/
-      ctx[74].name + "")) set_data(t1, t1_value);
+      524288 && t1_value !== (t1_value = /*g*/
+      ctx[77].name + "")) set_data(t1, t1_value);
       if (
         /*isGM*/
-        ctx[19]
+        ctx[20]
       ) if_block.p(ctx, dirty);
       if (dirty[0] & /*selectedExcGroupId, filteredExcGroups*/
-      262148 && div_class_value !== (div_class_value = "s-item " + /*selectedExcGroupId*/
+      524292 && div_class_value !== (div_class_value = "s-item " + /*selectedExcGroupId*/
       (ctx[2] === /*g*/
-      ctx[74].id ? "active" : "") + " svelte-u4oq5")) {
+      ctx[77].id ? "active" : "") + " svelte-u4oq5")) {
         attr(div, "class", div_class_value);
       }
     },
@@ -96798,7 +96967,7 @@ function create_if_block_12$6(ctx) {
   let t0;
   let t1_value = (
     /*selectedExcGroup*/
-    ctx[16].name + ""
+    ctx[17].name + ""
   );
   let t1;
   let t2;
@@ -96812,13 +96981,13 @@ function create_if_block_12$6(ctx) {
   let t8;
   let if_block0 = (
     /*isGM*/
-    ctx[19] && create_if_block_15$5(ctx)
+    ctx[20] && create_if_block_17$4(ctx)
   );
   let each_value_2 = ensure_array_like(
     /*selectedExcGroup*/
-    ctx[16].exclusivities.filter(
+    ctx[17].exclusivities.filter(
       /*func*/
-      ctx[54]
+      ctx[56]
     )
   );
   let each_blocks = [];
@@ -96827,7 +96996,7 @@ function create_if_block_12$6(ctx) {
   }
   let if_block1 = (
     /*selectedExcGroup*/
-    ctx[16].exclusivities.length === 0 && create_if_block_13$6()
+    ctx[17].exclusivities.length === 0 && create_if_block_13$6()
   );
   return {
     c() {
@@ -96847,7 +97016,7 @@ function create_if_block_12$6(ctx) {
       div4 = element("div");
       div2 = element("div");
       div2.textContent = `${/*isGM*/
-      ctx[19] ? "EXCLUSIVIDADES (Arraste itens do Foundry para cá)" : "EXCLUSIVIDADES"}`;
+      ctx[20] ? "EXCLUSIVIDADES (Arraste itens do Foundry para cá)" : "EXCLUSIVIDADES"}`;
       t7 = space();
       div3 = element("div");
       for (let i2 = 0; i2 < each_blocks.length; i2 += 1) {
@@ -96895,20 +97064,20 @@ function create_if_block_12$6(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*selectedExcGroup*/
-      65536 && t1_value !== (t1_value = /*selectedExcGroup*/
-      ctx2[16].name + "")) set_data(t1, t1_value);
+      131072 && t1_value !== (t1_value = /*selectedExcGroup*/
+      ctx2[17].name + "")) set_data(t1, t1_value);
       if (
         /*isGM*/
-        ctx2[19]
+        ctx2[20]
       ) if_block0.p(ctx2, dirty);
-      if (dirty[0] & /*selectedExcGroup, excSearchTerm, isGM*/
-      589832 | dirty[1] & /*openExcForm, removeExclusivity*/
-      3) {
+      if (dirty[0] & /*expandedExcIds, selectedExcGroup, excSearchTerm, toggleExcExpand, isGM*/
+      3278856 | dirty[1] & /*removeExclusivity, openExcForm*/
+      12) {
         each_value_2 = ensure_array_like(
           /*selectedExcGroup*/
-          ctx2[16].exclusivities.filter(
+          ctx2[17].exclusivities.filter(
             /*func*/
-            ctx2[54]
+            ctx2[56]
           )
         );
         let i2;
@@ -96929,7 +97098,7 @@ function create_if_block_12$6(ctx) {
       }
       if (
         /*selectedExcGroup*/
-        ctx2[16].exclusivities.length === 0
+        ctx2[17].exclusivities.length === 0
       ) {
         if (if_block1) ;
         else {
@@ -97023,7 +97192,7 @@ function create_if_block_10$7(ctx) {
           input,
           "input",
           /*input_input_handler_1*/
-          ctx[51]
+          ctx[53]
         );
         mounted = true;
       }
@@ -97062,7 +97231,7 @@ function create_if_block_10$7(ctx) {
     }
   };
 }
-function create_if_block_15$5(ctx) {
+function create_if_block_17$4(ctx) {
   let div;
   let button0;
   let t1;
@@ -97098,13 +97267,13 @@ function create_if_block_15$5(ctx) {
             button0,
             "click",
             /*click_handler_11*/
-            ctx[53]
+            ctx[55]
           ),
           listen(
             button1,
             "click",
             /*startEditExcGroup*/
-            ctx[30]
+            ctx[32]
           )
         ];
         mounted = true;
@@ -97120,29 +97289,96 @@ function create_if_block_15$5(ctx) {
     }
   };
 }
-function create_if_block_14$6(ctx) {
-  let button;
+function create_if_block_16$4(ctx) {
+  var _a, _b;
+  let span;
+  let t_1_value = (
+    /*exc*/
+    (((_b = (_a = ctx[73].system) == null ? void 0 : _a.description) == null ? void 0 : _b.replace(/<[^>]+>/g, "")) || "Sem descrição.") + ""
+  );
+  let t_1;
+  return {
+    c() {
+      span = element("span");
+      t_1 = text(t_1_value);
+      attr(span, "class", "t-cost svelte-u4oq5");
+      set_style(span, "white-space", "nowrap");
+      set_style(span, "overflow", "hidden");
+      set_style(span, "text-overflow", "ellipsis");
+      set_style(span, "display", "block");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t_1);
+    },
+    p(ctx2, dirty) {
+      var _a2, _b2;
+      if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
+      131080 && t_1_value !== (t_1_value = /*exc*/
+      (((_b2 = (_a2 = ctx2[73].system) == null ? void 0 : _a2.description) == null ? void 0 : _b2.replace(/<[^>]+>/g, "")) || "Sem descrição.") + "")) set_data(t_1, t_1_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_15$5(ctx) {
+  let div;
+  let button0;
+  let t_1;
+  let button1;
   let mounted;
   let dispose;
   function click_handler_12() {
     return (
       /*click_handler_12*/
-      ctx[55](
+      ctx[57](
         /*exc*/
-        ctx[71]
+        ctx[73]
+      )
+    );
+  }
+  function click_handler_13() {
+    return (
+      /*click_handler_13*/
+      ctx[58](
+        /*exc*/
+        ctx[73]
       )
     );
   }
   return {
     c() {
-      button = element("button");
-      button.innerHTML = `<i class="fas fa-times"></i>`;
-      attr(button, "class", "btn-trash-t svelte-u4oq5");
+      div = element("div");
+      button0 = element("button");
+      button0.innerHTML = `<i class="fas fa-edit"></i>`;
+      t_1 = space();
+      button1 = element("button");
+      button1.innerHTML = `<i class="fas fa-times"></i>`;
+      attr(button0, "class", "btn-trash-t svelte-u4oq5");
+      set_style(button0, "color", "#00ff41");
+      set_style(button0, "opacity", "1");
+      attr(button0, "title", "Editar");
+      attr(button1, "class", "btn-trash-t svelte-u4oq5");
+      set_style(button1, "opacity", "1");
+      attr(button1, "title", "Remover");
+      attr(div, "class", "gm-controls-exc");
+      set_style(div, "margin-left", "auto");
+      set_style(div, "display", "flex");
+      set_style(div, "gap", "5px");
     },
     m(target, anchor) {
-      insert(target, button, anchor);
+      insert(target, div, anchor);
+      append(div, button0);
+      append(div, t_1);
+      append(div, button1);
       if (!mounted) {
-        dispose = listen(button, "click", stop_propagation(click_handler_12));
+        dispose = [
+          listen(button0, "click", stop_propagation(click_handler_12)),
+          listen(button1, "click", stop_propagation(click_handler_13))
+        ];
         mounted = true;
       }
     },
@@ -97151,15 +97387,51 @@ function create_if_block_14$6(ctx) {
     },
     d(detaching) {
       if (detaching) {
-        detach(button);
+        detach(div);
       }
       mounted = false;
-      dispose();
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_14$6(ctx) {
+  var _a;
+  let div;
+  let raw_value = (
+    /*exc*/
+    (((_a = ctx[73].system) == null ? void 0 : _a.description) || "Sem descrição.") + ""
+  );
+  return {
+    c() {
+      div = element("div");
+      attr(div, "class", "t-cost expanded svelte-u4oq5");
+      set_style(div, "margin-top", "5px");
+      set_style(div, "color", "#ccc");
+      set_style(div, "font-size", "11px");
+      set_style(div, "width", "100%");
+      set_style(div, "border-top", "1px dashed #333");
+      set_style(div, "padding-top", "5px");
+    },
+    m(target, anchor) {
+      insert(target, div, anchor);
+      div.innerHTML = raw_value;
+    },
+    p(ctx2, dirty) {
+      var _a2;
+      if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
+      131080 && raw_value !== (raw_value = /*exc*/
+      (((_a2 = ctx2[73].system) == null ? void 0 : _a2.description) || "Sem descrição.") + "")) div.innerHTML = raw_value;
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div);
+      }
     }
   };
 }
 function create_each_block_2$d(ctx) {
-  var _a, _b, _c;
+  var _a;
+  let div2;
   let div1;
   let img;
   let img_src_value;
@@ -97168,7 +97440,7 @@ function create_each_block_2$d(ctx) {
   let span1;
   let t1_value = (
     /*exc*/
-    ctx[71].name + ""
+    ctx[73].name + ""
   );
   let t1;
   let t2;
@@ -97176,45 +97448,37 @@ function create_each_block_2$d(ctx) {
   let t3;
   let t4_value = (
     /*exc*/
-    (((_a = ctx[71].system) == null ? void 0 : _a.category) || "Geral") + ""
+    (((_a = ctx[73].system) == null ? void 0 : _a.category) || "Geral") + ""
   );
   let t4;
   let t5;
   let t6;
-  let span2;
-  let t7_value = (
-    /*exc*/
-    (((_c = (_b = ctx[71].system) == null ? void 0 : _b.description) == null ? void 0 : _c.replace(/<[^>]+>/g, "")) || "Sem descrição.") + ""
-  );
   let t7;
   let t8;
   let mounted;
   let dispose;
-  let if_block = (
+  let if_block0 = !/*isExpanded*/
+  ctx[74] && create_if_block_16$4(ctx);
+  let if_block1 = (
     /*isGM*/
-    ctx[19] && create_if_block_14$6(ctx)
+    ctx[20] && create_if_block_15$5(ctx)
   );
-  function dragstart_handler(...args) {
+  let if_block2 = (
+    /*isExpanded*/
+    ctx[74] && create_if_block_14$6(ctx)
+  );
+  function click_handler_14() {
     return (
-      /*dragstart_handler*/
-      ctx[56](
+      /*click_handler_14*/
+      ctx[59](
         /*exc*/
-        ctx[71],
-        ...args
-      )
-    );
-  }
-  function click_handler_13() {
-    return (
-      /*click_handler_13*/
-      ctx[57](
-        /*exc*/
-        ctx[71]
+        ctx[73]
       )
     );
   }
   return {
     c() {
+      div2 = element("div");
       div1 = element("div");
       img = element("img");
       t0 = space();
@@ -97227,30 +97491,42 @@ function create_each_block_2$d(ctx) {
       t4 = text(t4_value);
       t5 = text(")");
       t6 = space();
-      span2 = element("span");
-      t7 = text(t7_value);
+      if (if_block0) if_block0.c();
+      t7 = space();
+      if (if_block1) if_block1.c();
       t8 = space();
-      if (if_block) if_block.c();
+      if (if_block2) if_block2.c();
       if (!src_url_equal(img.src, img_src_value = /*exc*/
-      ctx[71].img)) attr(img, "src", img_src_value);
+      ctx[73].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "exc");
       attr(img, "class", "svelte-u4oq5");
       set_style(span0, "color", "#00ff41");
       set_style(span0, "font-size", "10px");
       attr(span1, "class", "t-name svelte-u4oq5");
-      attr(span2, "class", "t-cost svelte-u4oq5");
-      set_style(span2, "white-space", "nowrap");
-      set_style(span2, "overflow", "hidden");
-      set_style(span2, "text-overflow", "ellipsis");
-      set_style(span2, "display", "block");
       attr(div0, "class", "t-info svelte-u4oq5");
-      attr(div1, "class", "t-card svelte-u4oq5");
-      attr(div1, "draggable", "true");
-      attr(div1, "title", "Arraste para a Ficha do Jogador");
-      set_style(div1, "cursor", "grab");
+      set_style(div1, "display", "flex");
+      set_style(div1, "gap", "10px");
+      set_style(div1, "width", "100%");
+      set_style(div1, "align-items", "center");
+      attr(div2, "class", "t-card svelte-u4oq5");
+      attr(div2, "title", "Clique para expandir/recolher");
+      set_style(div2, "cursor", "pointer");
+      set_style(
+        div2,
+        "align-items",
+        /*isExpanded*/
+        ctx[74] ? "flex-start" : "center"
+      );
+      set_style(
+        div2,
+        "flex-direction",
+        /*isExpanded*/
+        ctx[74] ? "column" : "row"
+      );
     },
     m(target, anchor) {
-      insert(target, div1, anchor);
+      insert(target, div2, anchor);
+      append(div2, div1);
       append(div1, img);
       append(div1, t0);
       append(div1, div0);
@@ -97262,47 +97538,90 @@ function create_each_block_2$d(ctx) {
       append(span0, t4);
       append(span0, t5);
       append(div0, t6);
-      append(div0, span2);
-      append(span2, t7);
-      append(div1, t8);
-      if (if_block) if_block.m(div1, null);
+      if (if_block0) if_block0.m(div0, null);
+      append(div1, t7);
+      if (if_block1) if_block1.m(div1, null);
+      append(div2, t8);
+      if (if_block2) if_block2.m(div2, null);
       if (!mounted) {
-        dispose = [
-          listen(div1, "dragstart", dragstart_handler),
-          listen(div1, "click", click_handler_13)
-        ];
+        dispose = listen(div2, "click", click_handler_14);
         mounted = true;
       }
     },
     p(new_ctx, dirty) {
-      var _a2, _b2, _c2;
+      var _a2;
       ctx = new_ctx;
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
-      65544 && !src_url_equal(img.src, img_src_value = /*exc*/
-      ctx[71].img)) {
+      131080 && !src_url_equal(img.src, img_src_value = /*exc*/
+      ctx[73].img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
-      65544 && t1_value !== (t1_value = /*exc*/
-      ctx[71].name + "")) set_data(t1, t1_value);
+      131080 && t1_value !== (t1_value = /*exc*/
+      ctx[73].name + "")) set_data(t1, t1_value);
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
-      65544 && t4_value !== (t4_value = /*exc*/
-      (((_a2 = ctx[71].system) == null ? void 0 : _a2.category) || "Geral") + "")) set_data(t4, t4_value);
-      if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
-      65544 && t7_value !== (t7_value = /*exc*/
-      (((_c2 = (_b2 = ctx[71].system) == null ? void 0 : _b2.description) == null ? void 0 : _c2.replace(/<[^>]+>/g, "")) || "Sem descrição.") + "")) set_data(t7, t7_value);
+      131080 && t4_value !== (t4_value = /*exc*/
+      (((_a2 = ctx[73].system) == null ? void 0 : _a2.category) || "Geral") + "")) set_data(t4, t4_value);
+      if (!/*isExpanded*/
+      ctx[74]) {
+        if (if_block0) {
+          if_block0.p(ctx, dirty);
+        } else {
+          if_block0 = create_if_block_16$4(ctx);
+          if_block0.c();
+          if_block0.m(div0, null);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
       if (
         /*isGM*/
-        ctx[19]
-      ) if_block.p(ctx, dirty);
+        ctx[20]
+      ) if_block1.p(ctx, dirty);
+      if (
+        /*isExpanded*/
+        ctx[74]
+      ) {
+        if (if_block2) {
+          if_block2.p(ctx, dirty);
+        } else {
+          if_block2 = create_if_block_14$6(ctx);
+          if_block2.c();
+          if_block2.m(div2, null);
+        }
+      } else if (if_block2) {
+        if_block2.d(1);
+        if_block2 = null;
+      }
+      if (dirty[0] & /*expandedExcIds, selectedExcGroup, excSearchTerm*/
+      133128) {
+        set_style(
+          div2,
+          "align-items",
+          /*isExpanded*/
+          ctx[74] ? "flex-start" : "center"
+        );
+      }
+      if (dirty[0] & /*expandedExcIds, selectedExcGroup, excSearchTerm*/
+      133128) {
+        set_style(
+          div2,
+          "flex-direction",
+          /*isExpanded*/
+          ctx[74] ? "column" : "row"
+        );
+      }
     },
     d(detaching) {
       if (detaching) {
-        detach(div1);
+        detach(div2);
       }
-      if (if_block) if_block.d();
+      if (if_block0) if_block0.d();
+      if (if_block1) if_block1.d();
+      if (if_block2) if_block2.d();
       mounted = false;
-      run_all(dispose);
+      dispose();
     }
   };
 }
@@ -97344,7 +97663,7 @@ function create_else_block_2$3(ctx) {
           button,
           "click",
           /*handleCreateExcGroup*/
-          ctx[26]
+          ctx[28]
         );
         mounted = true;
       }
@@ -97385,13 +97704,13 @@ function create_if_block_11$6(ctx) {
             button0,
             "click",
             /*handleUpdateExcGroup*/
-            ctx[27]
+            ctx[29]
           ),
           listen(
             button1,
             "click",
             /*click_handler_10*/
-            ctx[52]
+            ctx[54]
           )
         ];
         mounted = true;
@@ -97427,7 +97746,7 @@ function create_if_block_9$9(ctx) {
           button,
           "click",
           /*click_handler_2*/
-          ctx[39]
+          ctx[41]
         );
         mounted = true;
       }
@@ -97449,9 +97768,9 @@ function create_if_block_8$b(ctx) {
   function click_handler_3() {
     return (
       /*click_handler_3*/
-      ctx[40](
+      ctx[42](
         /*a*/
-        ctx[68]
+        ctx[70]
       )
     );
   }
@@ -97488,7 +97807,7 @@ function create_each_block_1$j(ctx) {
   let span;
   let t1_value = (
     /*a*/
-    ctx[68].name + ""
+    ctx[70].name + ""
   );
   let t1;
   let t2;
@@ -97498,14 +97817,14 @@ function create_each_block_1$j(ctx) {
   let dispose;
   let if_block = (
     /*isGM*/
-    ctx[19] && create_if_block_8$b(ctx)
+    ctx[20] && create_if_block_8$b(ctx)
   );
   function click_handler_4() {
     return (
       /*click_handler_4*/
-      ctx[41](
+      ctx[43](
         /*a*/
-        ctx[68]
+        ctx[70]
       )
     );
   }
@@ -97520,13 +97839,13 @@ function create_each_block_1$j(ctx) {
       if (if_block) if_block.c();
       t3 = space();
       if (!src_url_equal(img.src, img_src_value = /*a*/
-      ctx[68].icon)) attr(img, "src", img_src_value);
+      ctx[70].icon)) attr(img, "src", img_src_value);
       attr(img, "alt", "icon");
       attr(img, "class", "svelte-u4oq5");
       attr(span, "class", "svelte-u4oq5");
       attr(div, "class", div_class_value = "s-item " + /*selectedArchId*/
       (ctx[1] === /*a*/
-      ctx[68].id ? "active" : "") + " svelte-u4oq5");
+      ctx[70].id ? "active" : "") + " svelte-u4oq5");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -97546,20 +97865,20 @@ function create_each_block_1$j(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*archetypes*/
       1 && !src_url_equal(img.src, img_src_value = /*a*/
-      ctx[68].icon)) {
+      ctx[70].icon)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*archetypes*/
       1 && t1_value !== (t1_value = /*a*/
-      ctx[68].name + "")) set_data(t1, t1_value);
+      ctx[70].name + "")) set_data(t1, t1_value);
       if (
         /*isGM*/
-        ctx[19]
+        ctx[20]
       ) if_block.p(ctx, dirty);
       if (dirty[0] & /*selectedArchId, archetypes*/
       3 && div_class_value !== (div_class_value = "s-item " + /*selectedArchId*/
       (ctx[1] === /*a*/
-      ctx[68].id ? "active" : "") + " svelte-u4oq5")) {
+      ctx[70].id ? "active" : "") + " svelte-u4oq5")) {
         attr(div, "class", div_class_value);
       }
     },
@@ -97583,14 +97902,14 @@ function create_if_block_4$h(ctx) {
   let h2;
   let t1_value = (
     /*selectedArch*/
-    ctx[17].name + ""
+    ctx[18].name + ""
   );
   let t1;
   let t2;
   let p;
   let t3_value = (
     /*selectedArch*/
-    ctx[17].description + ""
+    ctx[18].description + ""
   );
   let t3;
   let t4;
@@ -97602,11 +97921,11 @@ function create_if_block_4$h(ctx) {
   let t8;
   let if_block0 = (
     /*isGM*/
-    ctx[19] && create_if_block_7$c(ctx)
+    ctx[20] && create_if_block_7$c(ctx)
   );
   let each_value = ensure_array_like(
     /*selectedArch*/
-    ctx[17].talents
+    ctx[18].talents
   );
   let each_blocks = [];
   for (let i = 0; i < each_value.length; i += 1) {
@@ -97614,7 +97933,7 @@ function create_if_block_4$h(ctx) {
   }
   let if_block1 = (
     /*selectedArch*/
-    ctx[17].talents.length === 0 && create_if_block_5$d()
+    ctx[18].talents.length === 0 && create_if_block_5$d()
   );
   return {
     c() {
@@ -97634,7 +97953,7 @@ function create_if_block_4$h(ctx) {
       div4 = element("div");
       div2 = element("div");
       div2.textContent = `${/*isGM*/
-      ctx[19] ? "TALENTOS (Arraste itens do Foundry para cá)" : "TALENTOS"}`;
+      ctx[20] ? "TALENTOS (Arraste itens do Foundry para cá)" : "TALENTOS"}`;
       t7 = space();
       div3 = element("div");
       for (let i = 0; i < each_blocks.length; i += 1) {
@@ -97643,7 +97962,7 @@ function create_if_block_4$h(ctx) {
       t8 = space();
       if (if_block1) if_block1.c();
       if (!src_url_equal(img.src, img_src_value = /*selectedArch*/
-      ctx[17].icon)) attr(img, "src", img_src_value);
+      ctx[18].icon)) attr(img, "src", img_src_value);
       attr(img, "alt", "icon");
       attr(img, "class", "svelte-u4oq5");
       attr(h2, "class", "svelte-u4oq5");
@@ -97683,25 +98002,25 @@ function create_if_block_4$h(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*selectedArch*/
-      131072 && !src_url_equal(img.src, img_src_value = /*selectedArch*/
-      ctx2[17].icon)) {
+      262144 && !src_url_equal(img.src, img_src_value = /*selectedArch*/
+      ctx2[18].icon)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*selectedArch*/
-      131072 && t1_value !== (t1_value = /*selectedArch*/
-      ctx2[17].name + "")) set_data(t1, t1_value);
+      262144 && t1_value !== (t1_value = /*selectedArch*/
+      ctx2[18].name + "")) set_data(t1, t1_value);
       if (dirty[0] & /*selectedArch*/
-      131072 && t3_value !== (t3_value = /*selectedArch*/
-      ctx2[17].description + "")) set_data(t3, t3_value);
+      262144 && t3_value !== (t3_value = /*selectedArch*/
+      ctx2[18].description + "")) set_data(t3, t3_value);
       if (
         /*isGM*/
-        ctx2[19]
+        ctx2[20]
       ) if_block0.p(ctx2, dirty);
       if (dirty[0] & /*removeArchTalent, selectedArch, isGM*/
-      34209792) {
+      135528448) {
         each_value = ensure_array_like(
           /*selectedArch*/
-          ctx2[17].talents
+          ctx2[18].talents
         );
         let i;
         for (i = 0; i < each_value.length; i += 1) {
@@ -97721,7 +98040,7 @@ function create_if_block_4$h(ctx) {
       }
       if (
         /*selectedArch*/
-        ctx2[17].talents.length === 0
+        ctx2[18].talents.length === 0
       ) {
         if (if_block1) ;
         else {
@@ -97877,19 +98196,19 @@ function create_if_block_2$s(ctx) {
             input0,
             "input",
             /*input0_input_handler*/
-            ctx[42]
+            ctx[44]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler*/
-            ctx[43]
+            ctx[45]
           ),
           listen(
             textarea,
             "input",
             /*textarea_input_handler*/
-            ctx[44]
+            ctx[46]
           )
         ];
         mounted = true;
@@ -97969,7 +98288,7 @@ function create_if_block_7$c(ctx) {
           button,
           "click",
           /*startEditArch*/
-          ctx[24]
+          ctx[26]
         );
         mounted = true;
       }
@@ -97991,9 +98310,9 @@ function create_if_block_6$d(ctx) {
   function click_handler_6() {
     return (
       /*click_handler_6*/
-      ctx[46](
+      ctx[48](
         /*t*/
-        ctx[65]
+        ctx[67]
       )
     );
   }
@@ -98031,7 +98350,7 @@ function create_each_block$q(ctx) {
   let span0;
   let t1_value = (
     /*t*/
-    ctx[65].name + ""
+    ctx[67].name + ""
   );
   let t1;
   let t2;
@@ -98039,13 +98358,13 @@ function create_each_block$q(ctx) {
   let t3;
   let t4_value = (
     /*t*/
-    ctx[65].cost + ""
+    ctx[67].cost + ""
   );
   let t4;
   let t5;
   let if_block = (
     /*isGM*/
-    ctx[19] && create_if_block_6$d(ctx)
+    ctx[20] && create_if_block_6$d(ctx)
   );
   return {
     c() {
@@ -98062,7 +98381,7 @@ function create_each_block$q(ctx) {
       t5 = space();
       if (if_block) if_block.c();
       if (!src_url_equal(img.src, img_src_value = /*t*/
-      ctx[65].img)) attr(img, "src", img_src_value);
+      ctx[67].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "talent");
       attr(img, "class", "svelte-u4oq5");
       attr(span0, "class", "t-name svelte-u4oq5");
@@ -98086,19 +98405,19 @@ function create_each_block$q(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*selectedArch*/
-      131072 && !src_url_equal(img.src, img_src_value = /*t*/
-      ctx2[65].img)) {
+      262144 && !src_url_equal(img.src, img_src_value = /*t*/
+      ctx2[67].img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*selectedArch*/
-      131072 && t1_value !== (t1_value = /*t*/
-      ctx2[65].name + "")) set_data(t1, t1_value);
+      262144 && t1_value !== (t1_value = /*t*/
+      ctx2[67].name + "")) set_data(t1, t1_value);
       if (dirty[0] & /*selectedArch*/
-      131072 && t4_value !== (t4_value = /*t*/
-      ctx2[65].cost + "")) set_data(t4, t4_value);
+      262144 && t4_value !== (t4_value = /*t*/
+      ctx2[67].cost + "")) set_data(t4, t4_value);
       if (
         /*isGM*/
-        ctx2[19]
+        ctx2[20]
       ) if_block.p(ctx2, dirty);
     },
     d(detaching) {
@@ -98147,7 +98466,7 @@ function create_else_block$o(ctx) {
           button,
           "click",
           /*handleCreateArch*/
-          ctx[20]
+          ctx[22]
         );
         mounted = true;
       }
@@ -98188,13 +98507,13 @@ function create_if_block_3$n(ctx) {
             button0,
             "click",
             /*handleUpdateArch*/
-            ctx[21]
+            ctx[23]
           ),
           listen(
             button1,
             "click",
             /*click_handler_5*/
-            ctx[45]
+            ctx[47]
           )
         ];
         mounted = true;
@@ -98218,7 +98537,7 @@ function create_if_block$B(ctx) {
   let h2;
   let t0_value = (
     /*editExcId*/
-    ctx[12] ? "EDITAR EXCLUSIVIDADE" : "NOVA EXCLUSIVIDADE"
+    ctx[13] ? "EDITAR EXCLUSIVIDADE" : "NOVA EXCLUSIVIDADE"
   );
   let t0;
   let t1;
@@ -98315,7 +98634,7 @@ function create_if_block$B(ctx) {
       set_input_value(
         input0,
         /*excDataName*/
-        ctx[13]
+        ctx[14]
       );
       append(div4, t4);
       append(div4, div1);
@@ -98325,7 +98644,7 @@ function create_if_block$B(ctx) {
       set_input_value(
         input1,
         /*excDataCategory*/
-        ctx[14]
+        ctx[15]
       );
       append(div4, t7);
       append(div4, div2);
@@ -98335,7 +98654,7 @@ function create_if_block$B(ctx) {
       set_input_value(
         textarea,
         /*excDataDesc*/
-        ctx[15]
+        ctx[16]
       );
       append(div4, t10);
       append(div4, div3);
@@ -98348,31 +98667,31 @@ function create_if_block$B(ctx) {
             input0,
             "input",
             /*input0_input_handler_1*/
-            ctx[58]
+            ctx[60]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler_1*/
-            ctx[59]
+            ctx[61]
           ),
           listen(
             textarea,
             "input",
             /*textarea_input_handler_1*/
-            ctx[60]
+            ctx[62]
           ),
           listen(
             button0,
             "click",
             /*saveExcForm*/
-            ctx[33]
+            ctx[35]
           ),
           listen(
             button1,
             "click",
-            /*click_handler_14*/
-            ctx[61]
+            /*click_handler_15*/
+            ctx[63]
           )
         ];
         mounted = true;
@@ -98380,32 +98699,32 @@ function create_if_block$B(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*editExcId*/
-      4096 && t0_value !== (t0_value = /*editExcId*/
-      ctx2[12] ? "EDITAR EXCLUSIVIDADE" : "NOVA EXCLUSIVIDADE")) set_data(t0, t0_value);
+      8192 && t0_value !== (t0_value = /*editExcId*/
+      ctx2[13] ? "EDITAR EXCLUSIVIDADE" : "NOVA EXCLUSIVIDADE")) set_data(t0, t0_value);
       if (dirty[0] & /*excDataName*/
-      8192 && input0.value !== /*excDataName*/
-      ctx2[13]) {
+      16384 && input0.value !== /*excDataName*/
+      ctx2[14]) {
         set_input_value(
           input0,
           /*excDataName*/
-          ctx2[13]
-        );
-      }
-      if (dirty[0] & /*excDataCategory*/
-      16384 && input1.value !== /*excDataCategory*/
-      ctx2[14]) {
-        set_input_value(
-          input1,
-          /*excDataCategory*/
           ctx2[14]
         );
       }
+      if (dirty[0] & /*excDataCategory*/
+      32768 && input1.value !== /*excDataCategory*/
+      ctx2[15]) {
+        set_input_value(
+          input1,
+          /*excDataCategory*/
+          ctx2[15]
+        );
+      }
       if (dirty[0] & /*excDataDesc*/
-      32768) {
+      65536) {
         set_input_value(
           textarea,
           /*excDataDesc*/
-          ctx2[15]
+          ctx2[16]
         );
       }
     },
@@ -98443,7 +98762,7 @@ function create_fragment$D(ctx) {
   let if_block0 = current_block_type(ctx);
   let if_block1 = (
     /*showExcForm*/
-    ctx[11] && create_if_block$B(ctx)
+    ctx[12] && create_if_block$B(ctx)
   );
   return {
     c() {
@@ -98483,13 +98802,13 @@ function create_fragment$D(ctx) {
             button0,
             "click",
             /*click_handler*/
-            ctx[37]
+            ctx[39]
           ),
           listen(
             button1,
             "click",
             /*click_handler_1*/
-            ctx[38]
+            ctx[40]
           )
         ];
         mounted = true;
@@ -98518,7 +98837,7 @@ function create_fragment$D(ctx) {
       }
       if (
         /*showExcForm*/
-        ctx2[11]
+        ctx2[12]
       ) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
@@ -98545,9 +98864,6 @@ function create_fragment$D(ctx) {
     }
   };
 }
-function onDragStartExclusivity(e, exc) {
-  e.dataTransfer.setData("text/plain", JSON.stringify({ type: "Exclusivity", data: exc }));
-}
 const dragover_handler$2 = (e) => e.preventDefault();
 const dragover_handler_1 = (e) => e.preventDefault();
 function instance$D($$self, $$props, $$invalidate) {
@@ -98569,6 +98885,15 @@ function instance$D($$self, $$props, $$invalidate) {
   let editModeExcGroup = false;
   let excGroupName = "";
   let excSearchTerm = "";
+  let expandedExcIds = /* @__PURE__ */ new Set();
+  function toggleExcExpand(id) {
+    if (expandedExcIds.has(id)) {
+      expandedExcIds.delete(id);
+    } else {
+      expandedExcIds.add(id);
+    }
+    $$invalidate(11, expandedExcIds);
+  }
   let showExcForm = false;
   let editExcId = null;
   let excDataName = "";
@@ -98585,7 +98910,7 @@ function instance$D($$self, $$props, $$invalidate) {
     if (selectedArchId && !archetypes.find((a) => a.id === selectedArchId)) $$invalidate(1, selectedArchId = null);
   }
   function refreshExc() {
-    $$invalidate(36, excGroups = ExclusivityDatabase.getGroups());
+    $$invalidate(38, excGroups = ExclusivityDatabase.getGroups());
     if (selectedExcGroupId && !excGroups.find((g) => g.id === selectedExcGroupId)) $$invalidate(2, selectedExcGroupId = null);
   }
   async function handleCreateArch() {
@@ -98661,17 +98986,17 @@ function instance$D($$self, $$props, $$invalidate) {
   function openExcForm(exc = null) {
     var _a, _b;
     if (exc) {
-      $$invalidate(12, editExcId = exc.id);
-      $$invalidate(13, excDataName = exc.name);
-      $$invalidate(14, excDataCategory = ((_a = exc.system) == null ? void 0 : _a.category) || "Geral");
-      $$invalidate(15, excDataDesc = ((_b = exc.system) == null ? void 0 : _b.description) || "");
+      $$invalidate(13, editExcId = exc.id);
+      $$invalidate(14, excDataName = exc.name);
+      $$invalidate(15, excDataCategory = ((_a = exc.system) == null ? void 0 : _a.category) || "Geral");
+      $$invalidate(16, excDataDesc = ((_b = exc.system) == null ? void 0 : _b.description) || "");
     } else {
-      $$invalidate(12, editExcId = null);
-      $$invalidate(13, excDataName = "");
-      $$invalidate(14, excDataCategory = "Geral");
-      $$invalidate(15, excDataDesc = "");
+      $$invalidate(13, editExcId = null);
+      $$invalidate(14, excDataName = "");
+      $$invalidate(15, excDataCategory = "Geral");
+      $$invalidate(16, excDataDesc = "");
     }
-    $$invalidate(11, showExcForm = true);
+    $$invalidate(12, showExcForm = true);
   }
   async function saveExcForm() {
     if (!excDataName.trim()) return ui.notifications.warn("Nome inválido!");
@@ -98690,7 +99015,7 @@ function instance$D($$self, $$props, $$invalidate) {
         description: excDataDesc
       });
     }
-    $$invalidate(11, showExcForm = false);
+    $$invalidate(12, showExcForm = false);
   }
   async function onDrop(e) {
     if (!isGM) return;
@@ -98760,41 +99085,39 @@ function instance$D($$self, $$props, $$invalidate) {
     const t = excSearchTerm.toLowerCase();
     return e.name.toLowerCase().includes(t) || e.system && e.system.description && e.system.description.toLowerCase().includes(t);
   };
-  const click_handler_12 = (exc) => removeExclusivity(exc.id);
-  const dragstart_handler = (exc, e) => onDragStartExclusivity(e, exc);
-  const click_handler_13 = (exc) => {
-    if (isGM) openExcForm(exc);
-  };
+  const click_handler_12 = (exc) => openExcForm(exc);
+  const click_handler_13 = (exc) => removeExclusivity(exc.id);
+  const click_handler_14 = (exc) => toggleExcExpand(exc.id);
   function input0_input_handler_1() {
     excDataName = this.value;
-    $$invalidate(13, excDataName);
+    $$invalidate(14, excDataName);
   }
   function input1_input_handler_1() {
     excDataCategory = this.value;
-    $$invalidate(14, excDataCategory);
+    $$invalidate(15, excDataCategory);
   }
   function textarea_input_handler_1() {
     excDataDesc = this.value;
-    $$invalidate(15, excDataDesc);
+    $$invalidate(16, excDataDesc);
   }
-  const click_handler_14 = () => $$invalidate(11, showExcForm = false);
+  const click_handler_15 = () => $$invalidate(12, showExcForm = false);
   $$self.$$set = ($$props2) => {
-    if ("application" in $$props2) $$invalidate(35, application = $$props2.application);
+    if ("application" in $$props2) $$invalidate(37, application = $$props2.application);
   };
   $$self.$$.update = () => {
     if ($$self.$$.dirty[0] & /*archetypes, selectedArchId*/
     3) {
-      $$invalidate(17, selectedArch = archetypes.find((a) => a.id === selectedArchId));
+      $$invalidate(18, selectedArch = archetypes.find((a) => a.id === selectedArchId));
     }
     if ($$self.$$.dirty[0] & /*selectedExcGroupId*/
     4 | $$self.$$.dirty[1] & /*excGroups*/
-    32) {
-      $$invalidate(16, selectedExcGroup = excGroups.find((g) => g.id === selectedExcGroupId));
+    128) {
+      $$invalidate(17, selectedExcGroup = excGroups.find((g) => g.id === selectedExcGroupId));
     }
     if ($$self.$$.dirty[0] & /*excSearchTerm*/
     8 | $$self.$$.dirty[1] & /*excGroups*/
-    32) {
-      $$invalidate(18, filteredExcGroups = excGroups.filter((g) => {
+    128) {
+      $$invalidate(19, filteredExcGroups = excGroups.filter((g) => {
         if (!excSearchTerm.trim()) return true;
         const term = excSearchTerm.toLowerCase();
         if (g.name.toLowerCase().includes(term)) return true;
@@ -98814,6 +99137,7 @@ function instance$D($$self, $$props, $$invalidate) {
     archIcon,
     editModeExcGroup,
     excGroupName,
+    expandedExcIds,
     showExcForm,
     editExcId,
     excDataName,
@@ -98823,6 +99147,7 @@ function instance$D($$self, $$props, $$invalidate) {
     selectedArch,
     filteredExcGroups,
     isGM,
+    toggleExcExpand,
     handleCreateArch,
     handleUpdateArch,
     handleDeleteArch,
@@ -98859,18 +99184,18 @@ function instance$D($$self, $$props, $$invalidate) {
     click_handler_11,
     func2,
     click_handler_12,
-    dragstart_handler,
     click_handler_13,
+    click_handler_14,
     input0_input_handler_1,
     input1_input_handler_1,
     textarea_input_handler_1,
-    click_handler_14
+    click_handler_15
   ];
 }
 class ArchetypeManager extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$D, create_fragment$D, safe_not_equal, { application: 35 }, null, [-1, -1, -1]);
+    init(this, options, instance$D, create_fragment$D, safe_not_equal, { application: 37 }, null, [-1, -1, -1]);
   }
 }
 const { window: window_1$4 } = globals;
@@ -129321,6 +129646,8 @@ function instance$c($$self, $$props, $$invalidate) {
   async function sendSignal() {
     rollCompleted = true;
     const setValues = validSets.map((s) => s.h);
+    let normalTens = rolledDice.filter((d) => d.val === 10 && d.type === "d").length;
+    let isCrit = normalTens >= 3;
     let content = `
             <div style="border: 1px solid #444; background: #fafafa; padding: 12px; font-family: sans-serif; color: #222; border-radius: 5px;">
                 ${imageUrl ? `<img src="${imageUrl}" style="width: 100%; border-radius: 4px; margin-bottom: 10px;"/>` : ""}
@@ -129329,14 +129656,18 @@ function instance$c($$self, $$props, $$invalidate) {
                     ${actionName}
                 </h3>
                 
+                ${isCrit ? `<div style="background: #000; color: #fff; text-align: center; font-weight: bold; padding: 5px; margin-bottom: 10px; border: 1px dashed #fff; border-radius: 4px; box-shadow: 0 0 10px #000;">CRÍTICO!</div>` : ""}
+
                 <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px;">
                     ${rolledDice.map((d) => {
       const isSet = setValues.includes(d.val);
-      const borderColor = d.type === "hd" ? "#cc0000" : d.type === "wd" ? "#b8860b" : "#333";
-      const bgColor = isSet ? "#e6f7ff" : "#eee";
+      const isWhiteCrit = isCrit && d.val === 10 && d.type === "d";
+      const borderColor = isWhiteCrit ? "#ffffff" : d.type === "hd" ? "#cc0000" : d.type === "wd" ? "#b8860b" : "#333";
+      const bgColor = isWhiteCrit ? "#000000" : isSet ? "#e6f7ff" : "#eee";
+      const textColor = isWhiteCrit ? "#ffffff" : "#222";
       return `
-                        <span style="border: 2px solid ${borderColor}; padding: 4px 8px; font-size: 14px; 
-                                     background: ${bgColor}; font-weight: bold; border-radius: 4px;">
+                        <span style="border: 2px solid ${borderColor}; padding: 4px 8px; font-size: 14px; color: ${textColor};
+                                     background: ${bgColor}; font-weight: bold; border-radius: 4px; ${isWhiteCrit ? "box-shadow: 0 0 5px #000;" : ""}">
                             ${d.val}
                         </span>`;
     }).join("")}
@@ -132253,7 +132584,7 @@ function create_else_block_2$1(ctx) {
   let t26;
   let mounted;
   let dispose;
-  let if_block0 = game.user.isGM && create_if_block_24(ctx);
+  let if_block0 = game.user.isGM && create_if_block_24$1(ctx);
   let if_block1 = show_if_1 && create_if_block_23$1(ctx);
   let if_block2 = show_if && create_if_block_18$1(ctx);
   let each_value_4 = ensure_array_like(
@@ -132974,7 +133305,7 @@ function create_if_block_17$2(ctx) {
     }
   };
 }
-function create_if_block_24(ctx) {
+function create_if_block_24$1(ctx) {
   let div;
   let input;
   let t0;
@@ -152469,22 +152800,45 @@ function get_if_ctx(ctx) {
     /*item*/
     child_ctx[88].set.targetId
   );
-  child_ctx[105] = constants_0;
+  child_ctx[107] = constants_0;
   return child_ctx;
 }
 function get_each_context_7(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[93] = list[i];
+  const constants_0 = (
+    /*isCrit*/
+    child_ctx[106] && /*die*/
+    child_ctx[93].type === "d"
+  );
+  child_ctx[108] = constants_0;
   return child_ctx;
 }
 function get_if_ctx_1(ctx) {
+  const child_ctx = ctx.slice();
+  const constants_0 = (
+    /*item*/
+    child_ctx[88].set.h === 10 ? (
+      /*item*/
+      (child_ctx[88].set.dice || []).filter((d) => d.type === "d").length
+    ) : 0
+  );
+  child_ctx[105] = constants_0;
+  const constants_1 = (
+    /*normalTens*/
+    child_ctx[105] >= 3
+  );
+  child_ctx[106] = constants_1;
+  return child_ctx;
+}
+function get_if_ctx_2(ctx) {
   const child_ctx = ctx.slice();
   const constants_0 = (
     /*combatResolutions*/
     child_ctx[5].length > 0 && /*combatResolutions*/
     child_ctx[5].every((a) => a.public)
   );
-  child_ctx[108] = constants_0;
+  child_ctx[111] = constants_0;
   return child_ctx;
 }
 function get_each_context_8(ctx, list, i) {
@@ -152496,7 +152850,7 @@ function get_each_context_8(ctx, list, i) {
     ((_a = child_ctx[8]) == null ? void 0 : _a.id) === /*c*/
     child_ctx[98].id
   );
-  child_ctx[109] = constants_0;
+  child_ctx[112] = constants_0;
   return child_ctx;
 }
 function get_each_context_9(ctx, list, i) {
@@ -152609,7 +152963,7 @@ function create_if_block_9(ctx) {
     if (
       /*selectedActor*/
       ctx2[22]
-    ) return create_if_block_23;
+    ) return create_if_block_24;
     return create_else_block_3;
   }
   let current_block_type = select_block_type(ctx);
@@ -152617,7 +152971,7 @@ function create_if_block_9(ctx) {
   let if_block1 = (
     /*showActorDropdown*/
     ctx[9] && /*myActorsInCombat*/
-    ctx[6].length > 0 && create_if_block_21(ctx)
+    ctx[6].length > 0 && create_if_block_22(ctx)
   );
   let each_value_8 = ensure_array_like(
     /*combatants*/
@@ -152629,15 +152983,15 @@ function create_if_block_9(ctx) {
   }
   let if_block2 = (
     /*showScaleSettings*/
-    ctx[19] && create_if_block_19(ctx)
+    ctx[19] && create_if_block_20(ctx)
   );
   let if_block3 = (
     /*isGM*/
-    ctx[4] && create_if_block_18(get_if_ctx_1(ctx))
+    ctx[4] && create_if_block_19(get_if_ctx_2(ctx))
   );
   let if_block4 = (
     /*visibleSets*/
-    ctx[21].length === 0 && create_if_block_17()
+    ctx[21].length === 0 && create_if_block_18()
   );
   let each_value_5 = ensure_array_like(
     /*visibleSets*/
@@ -153101,7 +153455,7 @@ function create_if_block_9(ctx) {
             transition_in(if_block1, 1);
           }
         } else {
-          if_block1 = create_if_block_21(ctx2);
+          if_block1 = create_if_block_22(ctx2);
           if_block1.c();
           transition_in(if_block1, 1);
           if_block1.m(div1, null);
@@ -153205,7 +153559,7 @@ function create_if_block_9(ctx) {
         if (if_block2) {
           if_block2.p(ctx2, dirty);
         } else {
-          if_block2 = create_if_block_19(ctx2);
+          if_block2 = create_if_block_20(ctx2);
           if_block2.c();
           if_block2.m(div10, t39);
         }
@@ -153218,9 +153572,9 @@ function create_if_block_9(ctx) {
         ctx2[4]
       ) {
         if (if_block3) {
-          if_block3.p(get_if_ctx_1(ctx2), dirty);
+          if_block3.p(get_if_ctx_2(ctx2), dirty);
         } else {
-          if_block3 = create_if_block_18(get_if_ctx_1(ctx2));
+          if_block3 = create_if_block_19(get_if_ctx_2(ctx2));
           if_block3.c();
           if_block3.m(div14, t44);
         }
@@ -153239,7 +153593,7 @@ function create_if_block_9(ctx) {
       ) {
         if (if_block4) ;
         else {
-          if_block4 = create_if_block_17();
+          if_block4 = create_if_block_18();
           if_block4.c();
           if_block4.m(div16, t46);
         }
@@ -153351,7 +153705,7 @@ function create_else_block_3(ctx) {
     }
   };
 }
-function create_if_block_23(ctx) {
+function create_if_block_24(ctx) {
   let img;
   let img_src_value;
   let t0;
@@ -153407,7 +153761,7 @@ function create_if_block_23(ctx) {
     }
   };
 }
-function create_if_block_21(ctx) {
+function create_if_block_22(ctx) {
   let div;
   let div_transition;
   let current;
@@ -153487,7 +153841,7 @@ function create_if_block_21(ctx) {
     }
   };
 }
-function create_if_block_22(ctx) {
+function create_if_block_23(ctx) {
   let div;
   let img;
   let img_src_value;
@@ -153560,7 +153914,7 @@ function create_each_block_9(ctx) {
   let if_block_anchor;
   let if_block = (
     /*combatant*/
-    ctx[85].actor && create_if_block_22(ctx)
+    ctx[85].actor && create_if_block_23(ctx)
   );
   return {
     c() {
@@ -153579,7 +153933,7 @@ function create_each_block_9(ctx) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
-          if_block = create_if_block_22(ctx2);
+          if_block = create_if_block_23(ctx2);
           if_block.c();
           if_block.m(if_block_anchor.parentNode, if_block_anchor);
         }
@@ -153596,7 +153950,7 @@ function create_each_block_9(ctx) {
     }
   };
 }
-function create_if_block_20(ctx) {
+function create_if_block_21(ctx) {
   let div;
   return {
     c() {
@@ -153626,7 +153980,7 @@ function create_each_block_8(ctx) {
   let dispose;
   let if_block = (
     /*isCurrent*/
-    ctx[109] && create_if_block_20()
+    ctx[112] && create_if_block_21()
   );
   function contextmenu_handler() {
     return (
@@ -153658,7 +154012,7 @@ function create_each_block_8(ctx) {
       attr(img, "alt", "c");
       attr(img, "class", "svelte-1al12rf");
       attr(div, "class", div_class_value = "init-item " + /*isCurrent*/
-      (ctx[109] ? "active" : "") + " svelte-1al12rf");
+      (ctx[112] ? "active" : "") + " svelte-1al12rf");
       attr(div, "title", div_title_value = /*c*/
       ctx[98].name + " (Score: " + /*c*/
       ctx[98].initiative + ") " + /*isGM*/
@@ -153687,11 +154041,11 @@ function create_each_block_8(ctx) {
       }
       if (
         /*isCurrent*/
-        ctx[109]
+        ctx[112]
       ) {
         if (if_block) ;
         else {
-          if_block = create_if_block_20();
+          if_block = create_if_block_21();
           if_block.c();
           if_block.m(div, t1);
         }
@@ -153701,7 +154055,7 @@ function create_each_block_8(ctx) {
       }
       if (dirty[0] & /*currentTurnCombatant, combatants*/
       260 && div_class_value !== (div_class_value = "init-item " + /*isCurrent*/
-      (ctx[109] ? "active" : "") + " svelte-1al12rf")) {
+      (ctx[112] ? "active" : "") + " svelte-1al12rf")) {
         attr(div, "class", div_class_value);
       }
       if (dirty[0] & /*combatants, isGM*/
@@ -153722,7 +154076,7 @@ function create_each_block_8(ctx) {
     }
   };
 }
-function create_if_block_19(ctx) {
+function create_if_block_20(ctx) {
   let div;
   let label;
   let t0;
@@ -153815,7 +154169,7 @@ function create_if_block_19(ctx) {
     }
   };
 }
-function create_if_block_18(ctx) {
+function create_if_block_19(ctx) {
   let button0;
   let i0;
   let button0_class_value;
@@ -153833,7 +154187,7 @@ function create_if_block_18(ctx) {
       attr(i0, "class", "fas fa-eye");
       attr(button0, "title", "Alternar Visibilidade de Todas as Resoluções");
       attr(button0, "class", button0_class_value = "eye-btn " + /*allPublic*/
-      (ctx[108] ? "active" : "") + " svelte-1al12rf");
+      (ctx[111] ? "active" : "") + " svelte-1al12rf");
       attr(button1, "title", "Limpar Resoluções");
       attr(button1, "class", "clear-btn svelte-1al12rf");
     },
@@ -153863,7 +154217,7 @@ function create_if_block_18(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*combatResolutions*/
       32 && button0_class_value !== (button0_class_value = "eye-btn " + /*allPublic*/
-      (ctx2[108] ? "active" : "") + " svelte-1al12rf")) {
+      (ctx2[111] ? "active" : "") + " svelte-1al12rf")) {
         attr(button0, "class", button0_class_value);
       }
     },
@@ -153878,7 +154232,7 @@ function create_if_block_18(ctx) {
     }
   };
 }
-function create_if_block_17(ctx) {
+function create_if_block_18(ctx) {
   let div;
   return {
     c() {
@@ -153896,7 +154250,7 @@ function create_if_block_17(ctx) {
     }
   };
 }
-function create_if_block_16(ctx) {
+function create_if_block_17(ctx) {
   let i;
   let i_class_value;
   let mounted;
@@ -154025,7 +154379,7 @@ function create_if_block_10(ctx) {
   let t;
   let if_block0 = (
     /*item*/
-    ctx[88].type === "set" && create_if_block_12(ctx)
+    ctx[88].type === "set" && create_if_block_12(get_if_ctx_1(ctx))
   );
   let if_block1 = (
     /*item*/
@@ -154061,9 +154415,9 @@ function create_if_block_10(ctx) {
         ctx2[88].type === "set"
       ) {
         if (if_block0) {
-          if_block0.p(ctx2, dirty);
+          if_block0.p(get_if_ctx_1(ctx2), dirty);
         } else {
-          if_block0 = create_if_block_12(ctx2);
+          if_block0 = create_if_block_12(get_if_ctx_1(ctx2));
           if_block0.c();
           if_block0.m(div, t);
         }
@@ -154123,10 +154477,15 @@ function create_if_block_12(ctx) {
   );
   let t3;
   let t4;
-  let span;
   let t5;
-  let i;
+  let span;
   let t6;
+  let i;
+  let t7;
+  let if_block0 = (
+    /*isCrit*/
+    ctx[106] && create_if_block_16()
+  );
   let each_value_7 = ensure_array_like(
     /*item*/
     ctx[88].set.dice || Array(
@@ -154154,7 +154513,7 @@ function create_if_block_12(ctx) {
     return ctx2;
   }
   let current_block_type = select_block_type_2(ctx);
-  let if_block = current_block_type(select_block_ctx(ctx, current_block_type));
+  let if_block1 = current_block_type(select_block_ctx(ctx, current_block_type));
   return {
     c() {
       div1 = element("div");
@@ -154165,14 +154524,16 @@ function create_if_block_12(ctx) {
       t2 = text("x");
       t3 = text(t3_value);
       t4 = space();
+      if (if_block0) if_block0.c();
+      t5 = space();
       span = element("span");
       for (let i2 = 0; i2 < each_blocks.length; i2 += 1) {
         each_blocks[i2].c();
       }
-      t5 = space();
-      i = element("i");
       t6 = space();
-      if_block.c();
+      i = element("i");
+      t7 = space();
+      if_block1.c();
       if (!src_url_equal(img.src, img_src_value = /*item*/
       ctx[88].res.img)) attr(img, "src", img_src_value);
       attr(img, "alt", "Origin");
@@ -154205,16 +154566,18 @@ function create_if_block_12(ctx) {
       append(div0, t2);
       append(div0, t3);
       append(div0, t4);
+      if (if_block0) if_block0.m(div0, null);
+      append(div0, t5);
       append(div0, span);
       for (let i2 = 0; i2 < each_blocks.length; i2 += 1) {
         if (each_blocks[i2]) {
           each_blocks[i2].m(span, null);
         }
       }
-      append(div1, t5);
-      append(div1, i);
       append(div1, t6);
-      if_block.m(div1, null);
+      append(div1, i);
+      append(div1, t7);
+      if_block1.m(div1, null);
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*visibleSets*/
@@ -154228,7 +154591,21 @@ function create_if_block_12(ctx) {
       if (dirty[0] & /*visibleSets*/
       2097152 && t3_value !== (t3_value = /*item*/
       ctx2[88].set.h + "")) set_data(t3, t3_value);
-      if (dirty[0] & /*getDieBoxBg, visibleSets, getBorderColor*/
+      if (
+        /*isCrit*/
+        ctx2[106]
+      ) {
+        if (if_block0) ;
+        else {
+          if_block0 = create_if_block_16();
+          if_block0.c();
+          if_block0.m(div0, t5);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (dirty[0] & /*visibleSets, getDieBoxBg, getBorderColor*/
       52428800 | dirty[1] & /*changeWD*/
       4) {
         each_value_7 = ensure_array_like(
@@ -154254,14 +154631,14 @@ function create_if_block_12(ctx) {
         }
         each_blocks.length = each_value_7.length;
       }
-      if (current_block_type === (current_block_type = select_block_type_2(ctx2)) && if_block) {
-        if_block.p(select_block_ctx(ctx2, current_block_type), dirty);
+      if (current_block_type === (current_block_type = select_block_type_2(ctx2)) && if_block1) {
+        if_block1.p(select_block_ctx(ctx2, current_block_type), dirty);
       } else {
-        if_block.d(1);
-        if_block = current_block_type(select_block_ctx(ctx2, current_block_type));
-        if (if_block) {
-          if_block.c();
-          if_block.m(div1, null);
+        if_block1.d(1);
+        if_block1 = current_block_type(select_block_ctx(ctx2, current_block_type));
+        if (if_block1) {
+          if_block1.c();
+          if_block1.m(div1, null);
         }
       }
     },
@@ -154269,8 +154646,34 @@ function create_if_block_12(ctx) {
       if (detaching) {
         detach(div1);
       }
+      if (if_block0) if_block0.d();
       destroy_each(each_blocks, detaching);
-      if_block.d();
+      if_block1.d();
+    }
+  };
+}
+function create_if_block_16(ctx) {
+  let span;
+  return {
+    c() {
+      span = element("span");
+      span.textContent = "CRÍTICO";
+      set_style(span, "font-size", "8px");
+      set_style(span, "background", "#fff");
+      set_style(span, "color", "#000");
+      set_style(span, "padding", "2px 4px");
+      set_style(span, "border-radius", "2px");
+      set_style(span, "margin-left", "5px");
+      set_style(span, "font-weight", "bold");
+      set_style(span, "box-shadow", "0 0 5px #fff");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
     }
   };
 }
@@ -154309,33 +154712,51 @@ function create_each_block_7(ctx) {
       set_style(
         div,
         "background",
-        /*getDieBoxBg*/
-        ctx[25](
+        /*isCritDie*/
+        ctx[108] ? "#000" : (
+          /*getDieBoxBg*/
+          ctx[25](
+            /*item*/
+            ctx[88].res.type
+          )
+        )
+      );
+      set_style(
+        div,
+        "border",
+        /*isCritDie*/
+        ctx[108] ? "1px solid #fff" : "none"
+      );
+      set_style(div, "border-radius", "2px");
+      set_style(div, "box-shadow", "0 0 5px " + /*isCritDie*/
+      (ctx[108] ? "#fff" : (
+        /*getBorderColor*/
+        ctx[24](
           /*item*/
           ctx[88].res.type
         )
-      );
-      set_style(div, "border-radius", "2px");
-      set_style(div, "box-shadow", "0 0 5px " + /*getBorderColor*/
-      ctx[24](
-        /*item*/
-        ctx[88].res.type
-      ));
+      )));
       set_style(div, "display", "flex");
       set_style(div, "align-items", "center");
       set_style(div, "justify-content", "center");
       set_style(div, "font-size", "9px");
       set_style(div, "font-weight", "bold");
-      set_style(div, "color", getDieTextColor(
-        /*item*/
-        ctx[88].res.type
-      ));
+      set_style(
+        div,
+        "color",
+        /*isCritDie*/
+        ctx[108] ? "#fff" : getDieTextColor(
+          /*item*/
+          ctx[88].res.type
+        )
+      );
       set_style(
         div,
         "cursor",
         /*die*/
         ctx[93].type === "wd" ? "pointer" : "default"
       );
+      set_style(div, "box-sizing", "border-box");
       attr(div, "title", div_title_value = /*die*/
       ctx[93].type === "wd" ? "Clique para ajustar WD" : "");
     },
@@ -154361,27 +154782,47 @@ function create_each_block_7(ctx) {
         set_style(
           div,
           "background",
-          /*getDieBoxBg*/
-          ctx[25](
-            /*item*/
-            ctx[88].res.type
+          /*isCritDie*/
+          ctx[108] ? "#000" : (
+            /*getDieBoxBg*/
+            ctx[25](
+              /*item*/
+              ctx[88].res.type
+            )
           )
         );
       }
       if (dirty[0] & /*visibleSets*/
       2097152) {
-        set_style(div, "box-shadow", "0 0 5px " + /*getBorderColor*/
-        ctx[24](
-          /*item*/
-          ctx[88].res.type
-        ));
+        set_style(
+          div,
+          "border",
+          /*isCritDie*/
+          ctx[108] ? "1px solid #fff" : "none"
+        );
       }
       if (dirty[0] & /*visibleSets*/
       2097152) {
-        set_style(div, "color", getDieTextColor(
-          /*item*/
-          ctx[88].res.type
-        ));
+        set_style(div, "box-shadow", "0 0 5px " + /*isCritDie*/
+        (ctx[108] ? "#fff" : (
+          /*getBorderColor*/
+          ctx[24](
+            /*item*/
+            ctx[88].res.type
+          )
+        )));
+      }
+      if (dirty[0] & /*visibleSets*/
+      2097152) {
+        set_style(
+          div,
+          "color",
+          /*isCritDie*/
+          ctx[108] ? "#fff" : getDieTextColor(
+            /*item*/
+            ctx[88].res.type
+          )
+        );
       }
       if (dirty[0] & /*visibleSets*/
       2097152) {
@@ -154453,7 +154894,7 @@ function create_if_block_14(ctx) {
   let dispose;
   let if_block = (
     /*tgt*/
-    ctx[105] && create_if_block_15(ctx)
+    ctx[107] && create_if_block_15(ctx)
   );
   function click_handler_16() {
     return (
@@ -154471,7 +154912,7 @@ function create_if_block_14(ctx) {
       if (if_block) if_block.c();
       attr(div, "class", "target-btn svelte-1al12rf");
       attr(div, "title", div_title_value = "Alvo: " + /*tgt*/
-      ((_a = ctx[105]) == null ? void 0 : _a.name));
+      ((_a = ctx[107]) == null ? void 0 : _a.name));
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -154486,7 +154927,7 @@ function create_if_block_14(ctx) {
       ctx = new_ctx;
       if (
         /*tgt*/
-        ctx[105]
+        ctx[107]
       ) {
         if (if_block) {
           if_block.p(ctx, dirty);
@@ -154501,7 +154942,7 @@ function create_if_block_14(ctx) {
       }
       if (dirty[0] & /*visibleSets*/
       2097152 && div_title_value !== (div_title_value = "Alvo: " + /*tgt*/
-      ((_a = ctx[105]) == null ? void 0 : _a.name))) {
+      ((_a = ctx[107]) == null ? void 0 : _a.name))) {
         attr(div, "title", div_title_value);
       }
     },
@@ -154561,7 +155002,7 @@ function create_if_block_15(ctx) {
     c() {
       img = element("img");
       if (!src_url_equal(img.src, img_src_value = /*tgt*/
-      ctx[105].img)) attr(img, "src", img_src_value);
+      ctx[107].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "Tgt");
       set_style(img, "width", "100%");
       set_style(img, "height", "100%");
@@ -154574,7 +155015,7 @@ function create_if_block_15(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*visibleSets*/
       2097152 && !src_url_equal(img.src, img_src_value = /*tgt*/
-      ctx2[105].img)) {
+      ctx2[107].img)) {
         attr(img, "src", img_src_value);
       }
     },
@@ -154791,7 +155232,7 @@ function create_each_block_5(key_1, ctx) {
   let if_block0 = (
     /*isGM*/
     ctx[4] && /*item*/
-    ctx[88].res.public !== void 0 && create_if_block_16(ctx)
+    ctx[88].res.public !== void 0 && create_if_block_17(ctx)
   );
   function select_block_type_1(ctx2, dirty) {
     if (
@@ -154894,7 +155335,7 @@ function create_each_block_5(key_1, ctx) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
         } else {
-          if_block0 = create_if_block_16(ctx);
+          if_block0 = create_if_block_17(ctx);
           if_block0.c();
           if_block0.m(div0, null);
         }
