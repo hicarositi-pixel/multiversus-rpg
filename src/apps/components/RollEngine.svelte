@@ -99,11 +99,13 @@
             <div style="padding: 10px;">
         `;
 
-        let normalTens = rolledDice.filter(d => d.val === 10 && d.type === 'd').length;
-        let isCrit = normalTens >= 3;
+        let first10Normal = rolledDice.filter(d => d.type === 'd').slice(0, 10);
+        let normalTens = first10Normal.filter(d => d.val === 10).length;
+        let critsAmount = Math.floor(normalTens / 3);
+        let isCrit = critsAmount >= 1;
 
         if (isCrit) {
-            html += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO!</div>`;
+            html += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO ${critsAmount}x!</div>`;
         }
 
         if (finalResults.validSets.length > 0) {

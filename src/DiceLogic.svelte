@@ -120,8 +120,19 @@
         rollCompleted = true; 
         const setValues = validSets.map(s => s.h);
 
-        let normalTens = rolledDice.filter(d => d.val === 10 && d.type === 'd').length;
-        let isCrit = normalTens >= 3;
+        let normalDiceCount = 0;
+        rolledDice.forEach(d => {
+            if (d.type === 'd') {
+                d._isFirst10 = (normalDiceCount < 10);
+                normalDiceCount++;
+            } else {
+                d._isFirst10 = false;
+            }
+        });
+
+        let normalTens = rolledDice.filter(d => d.val === 10 && d.type === 'd' && d._isFirst10).length;
+        let critsAmount = Math.floor(normalTens / 3);
+        let isCrit = critsAmount >= 1;
 
         let content = `
             <div style="border: 1px solid #444; background: #fafafa; padding: 12px; font-family: sans-serif; color: #222; border-radius: 5px;">
@@ -131,12 +142,12 @@
                     ${actionName}
                 </h3>
                 
-                ${isCrit ? `<div style="background: #000; color: #fff; text-align: center; font-weight: bold; padding: 5px; margin-bottom: 10px; border: 1px dashed #fff; border-radius: 4px; box-shadow: 0 0 10px #000;">CRÍTICO!</div>` : ''}
+                ${isCrit ? `<div style="background: #000; color: #fff; text-align: center; font-weight: bold; padding: 5px; margin-bottom: 10px; border: 1px dashed #fff; border-radius: 4px; box-shadow: 0 0 10px #000;">CRÍTICO ${critsAmount}x!</div>` : ''}
 
                 <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px;">
                     ${rolledDice.map(d => {
                         const isSet = setValues.includes(d.val);
-                        const isWhiteCrit = isCrit && d.val === 10 && d.type === 'd';
+                        const isWhiteCrit = isCrit && d.val === 10 && d.type === 'd' && d._isFirst10;
                         const borderColor = isWhiteCrit ? '#ffffff' : (d.type === 'hd' ? '#cc0000' : d.type === 'wd' ? '#b8860b' : '#333');
                         const bgColor = isWhiteCrit ? '#000000' : (isSet ? '#e6f7ff' : '#eee');
                         const textColor = isWhiteCrit ? '#ffffff' : '#222';

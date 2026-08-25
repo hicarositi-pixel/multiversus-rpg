@@ -158,7 +158,6 @@ export class SocialHubDatabase {
             hubChatStore.update(messages => {
                 if (messages.find(m => m.id === finalMsg.id)) return messages;
                 const arr = [...messages, finalMsg];
-                if (arr.length > 200) arr.shift();
                 return arr;
             });
             Hooks.callAll("socialHubUpdate");

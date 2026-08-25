@@ -27,6 +27,14 @@ export class SocialNetworkDB {
         return { posts, users };
     }
 
+    static async clearFeed() {
+        if (!game.user.isGM) return;
+        const db = await this.getDB();
+        if (!db) return;
+        await db.setFlag(MODULE_ID, "posts", []);
+        this.notifyUpdate();
+    }
+
     static async publishPost(authorId, text, attachments, newFollowersGained, isPrivate = false) {
         const db = await this.getDB();
         if (!db) return;
@@ -52,7 +60,6 @@ export class SocialNetworkDB {
         };
         
         posts.unshift(newPost); // Adiciona no início (Feed em ordem cronológica reversa)
-        if (posts.length > 500) posts.pop(); // Limita a 500 postagens na rede toda
         
         await db.setFlag(MODULE_ID, "posts", posts);
         await db.setFlag(MODULE_ID, "users", users);

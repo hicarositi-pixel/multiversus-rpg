@@ -296,6 +296,13 @@ Hooks.on("deleteChatMessage", (message) => {
             Hooks.callAll("socialHubUpdate");
         }).catch(() => {});
     }
+    
+    // Se o chat foi totalmente limpo (botão Limpar Chat)
+    if (game.messages && game.messages.size === 0) {
+        import('./database/SocialNetworkDB.js').then(({ SocialNetworkDB }) => {
+            SocialNetworkDB.clearFeed();
+        }).catch(() => {});
+    }
 });
 
 import CombatHUD from './apps/combat/CombatHUD.svelte';

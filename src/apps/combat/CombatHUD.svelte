@@ -782,18 +782,20 @@
                         {#if item.res.result}
                             <div class="ore-result" style="margin-top: 5px; border-top: 1px solid #333; padding-top: 5px; border-left: 2px solid {getBorderColor(item.res.type)}; padding-left: 5px;">
                                 {#if item.type === 'set'}
-                                    {@const normalTens = item.set.h === 10 ? (item.set.dice || []).filter(d => d.type === 'd').length : 0}
-                                    {@const isCrit = normalTens >= 3}
+                                    {@const first10Normals = (item.res.rolledDice || []).filter(d => d.type === 'd').slice(0, 10)}
+                                    {@const normalTens = item.set.h === 10 ? first10Normals.filter(d => d.val === 10).length : 0}
+                                    {@const critsAmount = Math.floor(normalTens / 3)}
+                                    {@const isCrit = critsAmount >= 1}
                                     <div style="display:flex; align-items:center; gap:5px;">
                                         <img src={item.res.img} alt="Origin" style="width:16px;height:16px;border-radius:50%;" title="Originador" />
                                         <div class="set-line" style="font-size: 13px; font-weight: bold; color: #fff;">
                                             {item.set.w}x{item.set.h} 
                                             {#if isCrit}
-                                                <span style="font-size: 8px; background: #fff; color: #000; padding: 2px 4px; border-radius: 2px; margin-left: 5px; font-weight: bold; box-shadow: 0 0 5px #fff;">CRÍTICO</span>
+                                                <span style="font-size: 8px; background: #fff; color: #000; padding: 2px 4px; border-radius: 2px; margin-left: 5px; font-weight: bold; box-shadow: 0 0 5px #fff;">CRÍTICO {critsAmount}x</span>
                                             {/if}
                                             <span class="boxes" style="display:inline-flex; gap: 2px; margin-left: 5px;">
-                                                {#each (item.set.dice || Array(item.set.w).fill({})) as die}
-                                                    {@const isCritDie = isCrit && die.type === 'd'}
+                                                {#each (item.set.dice || Array(item.set.w).fill({})) as die, idx}
+                                                    {@const isCritDie = isCrit && die.type === 'd' && idx < normalTens}
                                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                                                     <!-- svelte-ignore a11y-no-static-element-interactions -->
                                                     <div 

@@ -34,8 +34,66 @@
 
     // --- PASSO 2: ARQUÉTIPOS (Talentos) ---
     let selectedTalents = [];
+    let expandedTalentsIds = new Set();
     let selectedArchetypes = new Set();
     $: canProceedArchetypes = selectedTalents.length === 3; // Regra: Escolher 3 talentos
+
+    function toggleTalentExpand(id) {
+        if (expandedTalentsIds.has(id)) expandedTalentsIds.delete(id);
+        else expandedTalentsIds.add(id);
+        expandedTalentsIds = expandedTalentsIds;
+    }
+
+    function formatPowerStructure(item) {
+        if (!item || item.type !== 'power') {
+            return item?.system?.description || 'Sem descrição.';
+        }
+        const flags = item.flags?.["multiversus-rpg"] || {};
+        const qualities = flags.qualities || [];
+        
+        const getQ = (types) => qualities.filter(q => types.includes(q.type?.toUpperCase()) || types.includes(q.name?.toUpperCase()));
+        const attackQ = getQ(['A', 'ATAQUE']);
+        const defenseQ = getQ(['D', 'DEFESA']);
+        const utilityQ = getQ(['U', 'UTILIDADE']);
+
+        let detailsHTML = "";
+        const formatCat = (list, label, color, icon) => {
+            if (!list.length) return "";
+            let h = `<div style="margin-top: 10px; border-left: 2px solid ${color}; padding-left: 8px;">
+                        <h4 style="margin: 0 0 5px 0; color: ${color}; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
+                            <span style="background: ${color}; color: #000; padding: 1px 4px; border-radius: 2px;">${icon}</span> ${label}
+                        </h4>`;
+            list.forEach(q => {
+                h += `<div style="font-size: 11px; margin-bottom: 4px; color: #ddd; font-family: sans-serif;">
+                        <strong>${q.name || 'Sub-rotina'}:</strong> ${q.description || 'Sem descrição específica.'}
+                      </div>`;
+            });
+            h += `</div>`;
+            return h;
+        };
+
+        detailsHTML += formatCat(attackQ, "ATAQUE", "#ff4444", "A");
+        detailsHTML += formatCat(defenseQ, "DEFESA", "#44aaff", "D");
+        detailsHTML += formatCat(utilityQ, "UTILIDADE", "#ffaa00", "U");
+
+        const sysNotes = flags.notes || flags.systemNotes || item.system?.notes || item.system?.description;
+        const notesText = typeof sysNotes === 'string' ? sysNotes : sysNotes?.value;
+        if (notesText && notesText.trim() !== '' && notesText.trim() !== '<p></p>') {
+            detailsHTML += `<div style="margin-top: 10px; border-top: 1px dashed #00ff41; padding-top: 8px;">
+                                <h4 style="margin: 0 0 5px 0; color: #00ff41; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
+                                    NOTAS DE SISTEMA
+                                </h4>
+                                <div style="font-size: 11px; color: #ccc; font-family: sans-serif;">
+                                    ${notesText}
+                                </div>
+                            </div>`;
+        }
+
+        if (!detailsHTML) {
+            detailsHTML = `<div style="margin-top: 10px; font-style: italic; color: #888; font-size: 11px; font-family: monospace;">Nenhuma sub-rotina ou nota registrada.</div>`;
+        }
+        return detailsHTML;
+    }
 
     // --- PASSO 3: ATRIBUTOS E PERÍCIAS ---
     let totalPoints = 100;
@@ -370,15 +428,32 @@
                                 </summary>
                                 <div class="arch-talents">
                                     {#each arch.talents as t}
-                                        <div class="talent-card {selectedTalents.find(st => st.id === t.id) ? 'selected' : ''}" 
-                                             on:click={() => toggleTalent(t, arch.id)}>
-                                            <img src={t.img} alt=""/>
-                                            <div class="t-info">
-                                                <b>{t.name}</b>
-                                                <span>Custo por Dado: {t.cost}</span>
+                                        {@const isSelected = selectedTalents.find(st => st.id === t.id)}
+                                        {@const isExpanded = expandedTalentsIds.has(t.id)}
+                                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                        <div class="talent-card {isSelected ? 'selected' : ''}" 
+                                             on:click={() => toggleTalentExpand(t.id)}
+                                             style="align-items: {isExpanded ? 'flex-start' : 'center'}; flex-direction: {isExpanded ? 'column' : 'row'};">
+                                            
+                                            <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
+                                                <img src={t.img} alt=""/>
+                                                <div class="t-info">
+                                                    <b>{t.name}</b>
+                                                    {#if !isExpanded}
+                                                    <span>Custo por Dado: {t.cost}</span>
+                                                    {/if}
+                                                </div>
+                                                <button class="select-btn" on:click|stopPropagation={() => toggleTalent(t, arch.id)} style="background: {isSelected ? '#00ff41' : 'transparent'}; color: {isSelected ? '#000' : '#00ff41'}; border: 1px solid #00ff41; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 10px; font-weight: bold; margin-left: auto;">
+                                                    {isSelected ? 'SELECIONADO' : 'SELECIONAR'}
+                                                </button>
                                             </div>
-                                            {#if selectedTalents.find(st => st.id === t.id)}
-                                                <i class="fas fa-check-circle check-icon"></i>
+
+                                            {#if isExpanded}
+                                                <div style="margin-top: 10px; color: #ccc; font-size: 12px; width: 100%;">
+                                                    <div style="color: #00ff41; margin-bottom: 5px; font-weight: bold;">Custo por Dado: {t.cost}</div>
+                                                    {@html formatPowerStructure(t)}
+                                                </div>
                                             {/if}
                                         </div>
                                     {/each}

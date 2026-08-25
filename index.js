@@ -5919,7 +5919,7 @@ function create_each_block_10$2(key_2, ctx) {
     }
   };
 }
-function create_if_block_20$4(ctx) {
+function create_if_block_20$5(ctx) {
   let div3;
   let div2;
   let div0;
@@ -5956,7 +5956,7 @@ function create_if_block_20$4(ctx) {
   }
   let if_block1 = (
     /*exclusividades*/
-    ctx[28].length === 0 && create_if_block_21$4()
+    ctx[28].length === 0 && create_if_block_21$5()
   );
   return {
     c() {
@@ -6070,7 +6070,7 @@ function create_if_block_20$4(ctx) {
       ) {
         if (if_block1) ;
         else {
-          if_block1 = create_if_block_21$4();
+          if_block1 = create_if_block_21$5();
           if_block1.c();
           if_block1.m(div1, null);
         }
@@ -6591,7 +6591,7 @@ function create_each_block_9$3(key_2, ctx) {
     }
   };
 }
-function create_if_block_21$4(ctx) {
+function create_if_block_21$5(ctx) {
   let div;
   return {
     c() {
@@ -7745,7 +7745,7 @@ function create_if_block_12$i(ctx) {
     }
   };
 }
-function create_if_block_10$l(ctx) {
+function create_if_block_10$m(ctx) {
   let div;
   let button;
   let t1;
@@ -9639,7 +9639,7 @@ function create_fragment$1i(ctx) {
   );
   let if_block2 = (
     /*showExclusividades*/
-    ctx[27] && create_if_block_20$4(ctx)
+    ctx[27] && create_if_block_20$5(ctx)
   );
   let if_block3 = (
     /*showExcPicker*/
@@ -9670,7 +9670,7 @@ function create_fragment$1i(ctx) {
   ctx[45] <= 0 && create_if_block_12$i(ctx);
   let if_block10 = (
     /*isGM*/
-    ctx[57] && create_if_block_10$l(ctx)
+    ctx[57] && create_if_block_10$m(ctx)
   );
   let if_block11 = !/*gmMode*/
   ctx[2] && create_if_block_9$r(ctx);
@@ -10790,7 +10790,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block2, 1);
           }
         } else {
-          if_block2 = create_if_block_20$4(ctx2);
+          if_block2 = create_if_block_20$5(ctx2);
           if_block2.c();
           transition_in(if_block2, 1);
           if_block2.m(div56, t2);
@@ -14759,7 +14759,7 @@ function create_else_block_1$v(ctx) {
     }
   };
 }
-function create_if_block_10$k(ctx) {
+function create_if_block_10$l(ctx) {
   let input0;
   let t;
   let input1;
@@ -15112,7 +15112,7 @@ function create_each_block_3$n(key_2, ctx) {
     if (
       /*editingMode*/
       ctx2[9]
-    ) return create_if_block_10$k;
+    ) return create_if_block_10$l;
     return create_else_block_1$v;
   }
   let current_block_type = select_block_type_1(ctx);
@@ -29788,7 +29788,7 @@ function create_else_block$N(ctx) {
   );
   let if_block1 = (
     /*showRename*/
-    ctx[11] && create_if_block_10$j(ctx)
+    ctx[11] && create_if_block_10$k(ctx)
   );
   const if_block_creators = [create_if_block_2$T, create_else_block_1$r];
   const if_blocks = [];
@@ -29848,7 +29848,7 @@ function create_else_block$N(ctx) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
         } else {
-          if_block1 = create_if_block_10$j(ctx2);
+          if_block1 = create_if_block_10$k(ctx2);
           if_block1.c();
           if_block1.m(t1.parentNode, t1);
         }
@@ -30043,7 +30043,7 @@ function create_if_block_11$h(ctx) {
     }
   };
 }
-function create_if_block_10$j(ctx) {
+function create_if_block_10$k(ctx) {
   let div3;
   let div2;
   let header;
@@ -38125,10 +38125,12 @@ function instance$17($$self, $$props, $$invalidate) {
             </header>
             <div style="padding: 10px;">
         `;
-    let normalTens = rolledDice.filter((d) => d.val === 10 && d.type === "d").length;
-    let isCrit = normalTens >= 3;
+    let first10Normal = rolledDice.filter((d) => d.type === "d").slice(0, 10);
+    let normalTens = first10Normal.filter((d) => d.val === 10).length;
+    let critsAmount = Math.floor(normalTens / 3);
+    let isCrit = critsAmount >= 1;
     if (isCrit) {
-      html += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO!</div>`;
+      html += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO ${critsAmount}x!</div>`;
     }
     if (finalResults.validSets.length > 0) {
       html += `<div style="font-weight: bold; font-size: 12px; color: #aaa; margin-bottom: 5px;">CONJUNTOS VÁLIDOS (L x A)</div>`;
@@ -48910,7 +48912,7 @@ function create_else_block_2$c(ctx) {
     }
   };
 }
-function create_if_block_21$3(ctx) {
+function create_if_block_21$4(ctx) {
   let img;
   let img_src_value;
   return {
@@ -48967,7 +48969,7 @@ function create_else_block_1$n(ctx) {
     }
   };
 }
-function create_if_block_20$3(ctx) {
+function create_if_block_20$4(ctx) {
   let input;
   let mounted;
   let dispose;
@@ -49473,7 +49475,7 @@ function create_if_block_5$t(ctx) {
   );
   let if_block1 = (
     /*canEdit*/
-    ctx[17] && create_if_block_10$i(ctx)
+    ctx[17] && create_if_block_10$j(ctx)
   );
   let if_block2 = (
     /*canEdit*/
@@ -49631,7 +49633,7 @@ function create_if_block_5$t(ctx) {
         if (if_block1) {
           if_block1.p(ctx, dirty);
         } else {
-          if_block1 = create_if_block_10$i(ctx);
+          if_block1 = create_if_block_10$j(ctx);
           if_block1.c();
           if_block1.m(div0, null);
         }
@@ -49778,7 +49780,7 @@ function create_if_block_11$g(ctx) {
     }
   };
 }
-function create_if_block_10$i(ctx) {
+function create_if_block_10$j(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -49995,7 +49997,7 @@ function create_each_block_1$B(ctx) {
     if (
       /*skill*/
       ctx2[86].img
-    ) return create_if_block_21$3;
+    ) return create_if_block_21$4;
     return create_else_block_2$c;
   }
   let current_block_type = select_block_type_1(ctx);
@@ -50016,7 +50018,7 @@ function create_each_block_1$B(ctx) {
       /*canEdit*/
       ctx2[17] && /*skill*/
       ctx2[86].isCustom
-    ) return create_if_block_20$3;
+    ) return create_if_block_20$4;
     return create_else_block_1$n;
   }
   let current_block_type_1 = select_block_type_2(ctx);
@@ -53301,7 +53303,7 @@ function create_if_block_9$k(ctx) {
     ctx[53].tags && create_if_block_11$f(ctx)
   );
   let if_block1 = (game.user.isGM || /*item*/
-  ctx[52].isOwner) && create_if_block_10$h(ctx);
+  ctx[52].isOwner) && create_if_block_10$i(ctx);
   function click_handler_6() {
     return (
       /*click_handler_6*/
@@ -53374,7 +53376,7 @@ function create_if_block_9$k(ctx) {
         if (if_block1) {
           if_block1.p(ctx, dirty);
         } else {
-          if_block1 = create_if_block_10$h(ctx);
+          if_block1 = create_if_block_10$i(ctx);
           if_block1.c();
           if_block1.m(div2, t4);
         }
@@ -53466,7 +53468,7 @@ function create_if_block_11$f(ctx) {
     }
   };
 }
-function create_if_block_10$h(ctx) {
+function create_if_block_10$i(ctx) {
   let div;
   let button;
   let mounted;
@@ -56500,7 +56502,7 @@ function create_if_block_14$c(ctx) {
     if (
       /*isEditing*/
       ctx2[1]
-    ) return create_if_block_21$2;
+    ) return create_if_block_21$3;
     return create_else_block_9;
   }
   let current_block_type = select_block_type_3(ctx);
@@ -56509,7 +56511,7 @@ function create_if_block_14$c(ctx) {
     if (
       /*isEditing*/
       ctx2[1]
-    ) return create_if_block_20$2;
+    ) return create_if_block_20$3;
     return create_else_block_8;
   }
   let current_block_type_1 = select_block_type_4(ctx);
@@ -56782,7 +56784,7 @@ function create_else_block_9(ctx) {
     }
   };
 }
-function create_if_block_21$2(ctx) {
+function create_if_block_21$3(ctx) {
   let input;
   let mounted;
   let dispose;
@@ -56858,7 +56860,7 @@ function create_else_block_8(ctx) {
     }
   };
 }
-function create_if_block_20$2(ctx) {
+function create_if_block_20$3(ctx) {
   let input;
   let mounted;
   let dispose;
@@ -57285,7 +57287,7 @@ function create_if_block_15$b(ctx) {
     }
   };
 }
-function create_if_block_10$g(ctx) {
+function create_if_block_10$h(ctx) {
   let div3;
   let div0;
   let h30;
@@ -58507,7 +58509,7 @@ function create_fragment$Y(ctx) {
   );
   let if_block5 = (
     /*activeTab*/
-    ctx[2] === "historia" && create_if_block_10$g(ctx)
+    ctx[2] === "historia" && create_if_block_10$h(ctx)
   );
   let if_block6 = (
     /*activeTab*/
@@ -58946,7 +58948,7 @@ function create_fragment$Y(ctx) {
             transition_in(if_block5, 1);
           }
         } else {
-          if_block5 = create_if_block_10$g(ctx2);
+          if_block5 = create_if_block_10$h(ctx2);
           if_block5.c();
           transition_in(if_block5, 1);
           if_block5.m(div13, t40);
@@ -59386,7 +59388,7 @@ function create_if_block_9$i(ctx) {
   let div;
   function select_block_type_3(ctx2, dirty) {
     if (!/*memorialUnlocked*/
-    ctx2[8]) return create_if_block_10$f;
+    ctx2[8]) return create_if_block_10$g;
     return create_else_block_2$8;
   }
   let current_block_type = select_block_type_3(ctx);
@@ -59703,7 +59705,7 @@ function create_else_block_2$8(ctx) {
     }
   };
 }
-function create_if_block_10$f(ctx) {
+function create_if_block_10$g(ctx) {
   let div1;
   let i0;
   let t0;
@@ -67609,7 +67611,7 @@ function create_if_block_9$h(ctx) {
   );
   let if_block3 = (
     /*editTab*/
-    ctx[7] === "trends" && create_if_block_10$e(ctx)
+    ctx[7] === "trends" && create_if_block_10$f(ctx)
   );
   datahellentry = new DataHellEntry({
     props: { data: (
@@ -67828,7 +67830,7 @@ function create_if_block_9$h(ctx) {
         if (if_block3) {
           if_block3.p(ctx2, dirty);
         } else {
-          if_block3 = create_if_block_10$e(ctx2);
+          if_block3 = create_if_block_10$f(ctx2);
           if_block3.c();
           if_block3.m(div1, null);
         }
@@ -69037,7 +69039,7 @@ function create_each_block_4$c(ctx) {
     }
   };
 }
-function create_if_block_10$e(ctx) {
+function create_if_block_10$f(ctx) {
   let h3;
   let t0;
   let button;
@@ -73140,7 +73142,7 @@ function create_if_block_9$g(ctx) {
   let dispose;
   let if_block = (
     /*activeModal*/
-    ctx[8] && create_if_block_10$d(ctx)
+    ctx[8] && create_if_block_10$e(ctx)
   );
   return {
     c() {
@@ -73174,7 +73176,7 @@ function create_if_block_9$g(ctx) {
             transition_in(if_block, 1);
           }
         } else {
-          if_block = create_if_block_10$d(ctx2);
+          if_block = create_if_block_10$e(ctx2);
           if_block.c();
           transition_in(if_block, 1);
           if_block.m(div, null);
@@ -73214,7 +73216,7 @@ function create_if_block_9$g(ctx) {
     }
   };
 }
-function create_if_block_10$d(ctx) {
+function create_if_block_10$e(ctx) {
   let div;
   let div_intro;
   let mounted;
@@ -76248,7 +76250,7 @@ function create_if_block_12$a(ctx) {
     }
   };
 }
-function create_if_block_10$c(ctx) {
+function create_if_block_10$d(ctx) {
   let div;
   let button;
   let t;
@@ -76399,7 +76401,7 @@ function create_each_block$B(key_1, ctx) {
   let if_block0 = current_block_type(ctx);
   let if_block1 = (
     /*isGM*/
-    ctx[17] && create_if_block_10$c(ctx)
+    ctx[17] && create_if_block_10$d(ctx)
   );
   function click_handler_12() {
     return (
@@ -80757,7 +80759,7 @@ function create_else_block_2$5(ctx) {
     create_if_block_7$g,
     create_if_block_8$f,
     create_if_block_9$d,
-    create_if_block_10$b,
+    create_if_block_10$c,
     create_if_block_11$9,
     create_if_block_12$9,
     create_if_block_13$9,
@@ -81319,7 +81321,7 @@ function create_if_block_11$9(ctx) {
     }
   };
 }
-function create_if_block_10$b(ctx) {
+function create_if_block_10$c(ctx) {
   let testamentoapp;
   let current;
   testamentoapp = new TestamentoApp({
@@ -86763,7 +86765,7 @@ function create_if_block_9$c(ctx) {
     if (
       /*thematicSettings*/
       ctx2[15].isActive
-    ) return create_if_block_10$a;
+    ) return create_if_block_10$b;
     return create_else_block_1$c;
   }
   let current_block_type = select_block_type_2(ctx);
@@ -86901,7 +86903,7 @@ function create_else_block_1$c(ctx) {
     }
   };
 }
-function create_if_block_10$a(ctx) {
+function create_if_block_10$b(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -89990,7 +89992,7 @@ function create_if_block_11$7(ctx) {
     }
   };
 }
-function create_if_block_10$9(ctx) {
+function create_if_block_10$a(ctx) {
   let div;
   return {
     c() {
@@ -90035,7 +90037,7 @@ function create_each_block_4$a(ctx) {
   );
   let if_block1 = (
     /*item*/
-    ctx[51].isPassItem && create_if_block_10$9()
+    ctx[51].isPassItem && create_if_block_10$a()
   );
   return {
     c() {
@@ -90097,7 +90099,7 @@ function create_each_block_4$a(ctx) {
       ) {
         if (if_block1) ;
         else {
-          if_block1 = create_if_block_10$9();
+          if_block1 = create_if_block_10$a();
           if_block1.c();
           if_block1.m(div, t2);
         }
@@ -94638,7 +94640,7 @@ function create_else_block_1$a(ctx) {
   let dispose;
   let if_block0 = (
     /*hasNotes*/
-    ctx[49] && create_if_block_10$8()
+    ctx[49] && create_if_block_10$9()
   );
   let if_block1 = (
     /*hasEvents*/
@@ -94705,7 +94707,7 @@ function create_else_block_1$a(ctx) {
       ) {
         if (if_block0) ;
         else {
-          if_block0 = create_if_block_10$8();
+          if_block0 = create_if_block_10$9();
           if_block0.c();
           if_block0.m(div0, t2);
         }
@@ -94779,7 +94781,7 @@ function create_if_block_7$d(ctx) {
     }
   };
 }
-function create_if_block_10$8(ctx) {
+function create_if_block_10$9(ctx) {
   let span;
   return {
     c() {
@@ -96452,30 +96454,38 @@ class ArchetypeDatabase {
 }
 function get_each_context_2$d(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[73] = list[i];
+  child_ctx[75] = list[i];
   const constants_0 = (
     /*expandedExcIds*/
     child_ctx[11].has(
       /*exc*/
-      child_ctx[73].id
+      child_ctx[75].id
     )
   );
-  child_ctx[74] = constants_0;
+  child_ctx[69] = constants_0;
   return child_ctx;
 }
 function get_each_context_3$a(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[77] = list[i];
+  child_ctx[78] = list[i];
   return child_ctx;
 }
 function get_each_context$q(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[67] = list[i];
+  child_ctx[68] = list[i];
+  const constants_0 = (
+    /*expandedExcIds*/
+    child_ctx[11].has(
+      /*t*/
+      child_ctx[68].id
+    )
+  );
+  child_ctx[69] = constants_0;
   return child_ctx;
 }
 function get_each_context_1$j(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[70] = list[i];
+  child_ctx[72] = list[i];
   return child_ctx;
 }
 function create_else_block_1$9(ctx) {
@@ -96495,7 +96505,7 @@ function create_else_block_1$9(ctx) {
   let dispose;
   let if_block0 = (
     /*isGM*/
-    ctx[20] && create_if_block_19$2(ctx)
+    ctx[20] && create_if_block_21$2(ctx)
   );
   let each_value_3 = ensure_array_like(
     /*filteredExcGroups*/
@@ -96509,11 +96519,11 @@ function create_else_block_1$9(ctx) {
     if ((!/*selectedExcGroupId*/
     ctx2[2] || /*editModeExcGroup*/
     ctx2[9]) && /*isGM*/
-    ctx2[20]) return create_if_block_10$7;
+    ctx2[20]) return create_if_block_12$6;
     if (
       /*selectedExcGroup*/
       ctx2[17]
-    ) return create_if_block_12$6;
+    ) return create_if_block_14$6;
   }
   let current_block_type = select_block_type_3(ctx);
   let if_block1 = current_block_type && current_block_type(ctx);
@@ -96586,7 +96596,7 @@ function create_else_block_1$9(ctx) {
             input,
             "input",
             /*input_input_handler*/
-            ctx[50]
+            ctx[51]
           ),
           listen(
             div4,
@@ -96674,7 +96684,7 @@ function create_if_block_1$v(ctx) {
   let dispose;
   let if_block0 = (
     /*isGM*/
-    ctx[20] && create_if_block_9$9(ctx)
+    ctx[20] && create_if_block_11$6(ctx)
   );
   let each_value_1 = ensure_array_like(
     /*archetypes*/
@@ -96802,7 +96812,7 @@ function create_if_block_1$v(ctx) {
     }
   };
 }
-function create_if_block_19$2(ctx) {
+function create_if_block_21$2(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -96819,8 +96829,8 @@ function create_if_block_19$2(ctx) {
         dispose = listen(
           button,
           "click",
-          /*click_handler_7*/
-          ctx[49]
+          /*click_handler_8*/
+          ctx[50]
         );
         mounted = true;
       }
@@ -96835,16 +96845,16 @@ function create_if_block_19$2(ctx) {
     }
   };
 }
-function create_if_block_18$3(ctx) {
+function create_if_block_20$2(ctx) {
   let button;
   let mounted;
   let dispose;
-  function click_handler_8() {
+  function click_handler_9() {
     return (
-      /*click_handler_8*/
-      ctx[51](
+      /*click_handler_9*/
+      ctx[52](
         /*g*/
-        ctx[77]
+        ctx[78]
       )
     );
   }
@@ -96857,7 +96867,7 @@ function create_if_block_18$3(ctx) {
     m(target, anchor) {
       insert(target, button, anchor);
       if (!mounted) {
-        dispose = listen(button, "click", stop_propagation(click_handler_8));
+        dispose = listen(button, "click", stop_propagation(click_handler_9));
         mounted = true;
       }
     },
@@ -96880,7 +96890,7 @@ function create_each_block_3$a(ctx) {
   let t0;
   let t1_value = (
     /*g*/
-    ctx[77].name + ""
+    ctx[78].name + ""
   );
   let t1;
   let t2;
@@ -96890,14 +96900,14 @@ function create_each_block_3$a(ctx) {
   let dispose;
   let if_block = (
     /*isGM*/
-    ctx[20] && create_if_block_18$3(ctx)
+    ctx[20] && create_if_block_20$2(ctx)
   );
-  function click_handler_9() {
+  function click_handler_10() {
     return (
-      /*click_handler_9*/
-      ctx[52](
+      /*click_handler_10*/
+      ctx[53](
         /*g*/
-        ctx[77]
+        ctx[78]
       )
     );
   }
@@ -96916,7 +96926,7 @@ function create_each_block_3$a(ctx) {
       attr(span, "class", "svelte-u4oq5");
       attr(div, "class", div_class_value = "s-item " + /*selectedExcGroupId*/
       (ctx[2] === /*g*/
-      ctx[77].id ? "active" : "") + " svelte-u4oq5");
+      ctx[78].id ? "active" : "") + " svelte-u4oq5");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -96928,7 +96938,7 @@ function create_each_block_3$a(ctx) {
       if (if_block) if_block.m(div, null);
       append(div, t3);
       if (!mounted) {
-        dispose = listen(div, "click", click_handler_9);
+        dispose = listen(div, "click", click_handler_10);
         mounted = true;
       }
     },
@@ -96936,7 +96946,7 @@ function create_each_block_3$a(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*filteredExcGroups*/
       524288 && t1_value !== (t1_value = /*g*/
-      ctx[77].name + "")) set_data(t1, t1_value);
+      ctx[78].name + "")) set_data(t1, t1_value);
       if (
         /*isGM*/
         ctx[20]
@@ -96944,7 +96954,7 @@ function create_each_block_3$a(ctx) {
       if (dirty[0] & /*selectedExcGroupId, filteredExcGroups*/
       524292 && div_class_value !== (div_class_value = "s-item " + /*selectedExcGroupId*/
       (ctx[2] === /*g*/
-      ctx[77].id ? "active" : "") + " svelte-u4oq5")) {
+      ctx[78].id ? "active" : "") + " svelte-u4oq5")) {
         attr(div, "class", div_class_value);
       }
     },
@@ -96958,7 +96968,7 @@ function create_each_block_3$a(ctx) {
     }
   };
 }
-function create_if_block_12$6(ctx) {
+function create_if_block_14$6(ctx) {
   let div5;
   let div1;
   let div0;
@@ -96981,13 +96991,13 @@ function create_if_block_12$6(ctx) {
   let t8;
   let if_block0 = (
     /*isGM*/
-    ctx[20] && create_if_block_17$4(ctx)
+    ctx[20] && create_if_block_19$2(ctx)
   );
   let each_value_2 = ensure_array_like(
     /*selectedExcGroup*/
     ctx[17].exclusivities.filter(
       /*func*/
-      ctx[56]
+      ctx[57]
     )
   );
   let each_blocks = [];
@@ -96996,7 +97006,7 @@ function create_if_block_12$6(ctx) {
   }
   let if_block1 = (
     /*selectedExcGroup*/
-    ctx[17].exclusivities.length === 0 && create_if_block_13$6()
+    ctx[17].exclusivities.length === 0 && create_if_block_15$5()
   );
   return {
     c() {
@@ -97077,7 +97087,7 @@ function create_if_block_12$6(ctx) {
           /*selectedExcGroup*/
           ctx2[17].exclusivities.filter(
             /*func*/
-            ctx2[56]
+            ctx2[57]
           )
         );
         let i2;
@@ -97102,7 +97112,7 @@ function create_if_block_12$6(ctx) {
       ) {
         if (if_block1) ;
         else {
-          if_block1 = create_if_block_13$6();
+          if_block1 = create_if_block_15$5();
           if_block1.c();
           if_block1.m(div3, null);
         }
@@ -97121,7 +97131,7 @@ function create_if_block_12$6(ctx) {
     }
   };
 }
-function create_if_block_10$7(ctx) {
+function create_if_block_12$6(ctx) {
   let div2;
   let h2;
   let t0_value = (
@@ -97142,7 +97152,7 @@ function create_if_block_10$7(ctx) {
     if (
       /*editModeExcGroup*/
       ctx2[9]
-    ) return create_if_block_11$6;
+    ) return create_if_block_13$6;
     return create_else_block_2$3;
   }
   let current_block_type = select_block_type_4(ctx);
@@ -97192,7 +97202,7 @@ function create_if_block_10$7(ctx) {
           input,
           "input",
           /*input_input_handler_1*/
-          ctx[53]
+          ctx[54]
         );
         mounted = true;
       }
@@ -97231,7 +97241,7 @@ function create_if_block_10$7(ctx) {
     }
   };
 }
-function create_if_block_17$4(ctx) {
+function create_if_block_19$2(ctx) {
   let div;
   let button0;
   let t1;
@@ -97266,8 +97276,8 @@ function create_if_block_17$4(ctx) {
           listen(
             button0,
             "click",
-            /*click_handler_11*/
-            ctx[55]
+            /*click_handler_12*/
+            ctx[56]
           ),
           listen(
             button1,
@@ -97289,12 +97299,12 @@ function create_if_block_17$4(ctx) {
     }
   };
 }
-function create_if_block_16$4(ctx) {
+function create_if_block_18$3(ctx) {
   var _a, _b;
   let span;
   let t_1_value = (
     /*exc*/
-    (((_b = (_a = ctx[73].system) == null ? void 0 : _a.description) == null ? void 0 : _b.replace(/<[^>]+>/g, "")) || "Sem descrição.") + ""
+    (((_b = (_a = ctx[75].system) == null ? void 0 : _a.description) == null ? void 0 : _b.replace(/<[^>]+>/g, "")) || "Sem descrição.") + ""
   );
   let t_1;
   return {
@@ -97315,7 +97325,7 @@ function create_if_block_16$4(ctx) {
       var _a2, _b2;
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
       131080 && t_1_value !== (t_1_value = /*exc*/
-      (((_b2 = (_a2 = ctx2[73].system) == null ? void 0 : _a2.description) == null ? void 0 : _b2.replace(/<[^>]+>/g, "")) || "Sem descrição.") + "")) set_data(t_1, t_1_value);
+      (((_b2 = (_a2 = ctx2[75].system) == null ? void 0 : _a2.description) == null ? void 0 : _b2.replace(/<[^>]+>/g, "")) || "Sem descrição.") + "")) set_data(t_1, t_1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -97324,28 +97334,28 @@ function create_if_block_16$4(ctx) {
     }
   };
 }
-function create_if_block_15$5(ctx) {
+function create_if_block_17$4(ctx) {
   let div;
   let button0;
   let t_1;
   let button1;
   let mounted;
   let dispose;
-  function click_handler_12() {
-    return (
-      /*click_handler_12*/
-      ctx[57](
-        /*exc*/
-        ctx[73]
-      )
-    );
-  }
   function click_handler_13() {
     return (
       /*click_handler_13*/
       ctx[58](
         /*exc*/
-        ctx[73]
+        ctx[75]
+      )
+    );
+  }
+  function click_handler_14() {
+    return (
+      /*click_handler_14*/
+      ctx[59](
+        /*exc*/
+        ctx[75]
       )
     );
   }
@@ -97376,8 +97386,8 @@ function create_if_block_15$5(ctx) {
       append(div, button1);
       if (!mounted) {
         dispose = [
-          listen(button0, "click", stop_propagation(click_handler_12)),
-          listen(button1, "click", stop_propagation(click_handler_13))
+          listen(button0, "click", stop_propagation(click_handler_13)),
+          listen(button1, "click", stop_propagation(click_handler_14))
         ];
         mounted = true;
       }
@@ -97394,13 +97404,12 @@ function create_if_block_15$5(ctx) {
     }
   };
 }
-function create_if_block_14$6(ctx) {
-  var _a;
+function create_if_block_16$4(ctx) {
   let div;
-  let raw_value = (
+  let raw_value = formatPowerStructure$1(
     /*exc*/
-    (((_a = ctx[73].system) == null ? void 0 : _a.description) || "Sem descrição.") + ""
-  );
+    ctx[75]
+  ) + "";
   return {
     c() {
       div = element("div");
@@ -97417,10 +97426,11 @@ function create_if_block_14$6(ctx) {
       div.innerHTML = raw_value;
     },
     p(ctx2, dirty) {
-      var _a2;
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
-      131080 && raw_value !== (raw_value = /*exc*/
-      (((_a2 = ctx2[73].system) == null ? void 0 : _a2.description) || "Sem descrição.") + "")) div.innerHTML = raw_value;
+      131080 && raw_value !== (raw_value = formatPowerStructure$1(
+        /*exc*/
+        ctx2[75]
+      ) + "")) div.innerHTML = raw_value;
     },
     d(detaching) {
       if (detaching) {
@@ -97440,7 +97450,7 @@ function create_each_block_2$d(ctx) {
   let span1;
   let t1_value = (
     /*exc*/
-    ctx[73].name + ""
+    ctx[75].name + ""
   );
   let t1;
   let t2;
@@ -97448,7 +97458,7 @@ function create_each_block_2$d(ctx) {
   let t3;
   let t4_value = (
     /*exc*/
-    (((_a = ctx[73].system) == null ? void 0 : _a.category) || "Geral") + ""
+    (((_a = ctx[75].system) == null ? void 0 : _a.category) || "Geral") + ""
   );
   let t4;
   let t5;
@@ -97458,21 +97468,21 @@ function create_each_block_2$d(ctx) {
   let mounted;
   let dispose;
   let if_block0 = !/*isExpanded*/
-  ctx[74] && create_if_block_16$4(ctx);
+  ctx[69] && create_if_block_18$3(ctx);
   let if_block1 = (
     /*isGM*/
-    ctx[20] && create_if_block_15$5(ctx)
+    ctx[20] && create_if_block_17$4(ctx)
   );
   let if_block2 = (
     /*isExpanded*/
-    ctx[74] && create_if_block_14$6(ctx)
+    ctx[69] && create_if_block_16$4(ctx)
   );
-  function click_handler_14() {
+  function click_handler_15() {
     return (
-      /*click_handler_14*/
-      ctx[59](
+      /*click_handler_15*/
+      ctx[60](
         /*exc*/
-        ctx[73]
+        ctx[75]
       )
     );
   }
@@ -97497,7 +97507,7 @@ function create_each_block_2$d(ctx) {
       t8 = space();
       if (if_block2) if_block2.c();
       if (!src_url_equal(img.src, img_src_value = /*exc*/
-      ctx[73].img)) attr(img, "src", img_src_value);
+      ctx[75].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "exc");
       attr(img, "class", "svelte-u4oq5");
       set_style(span0, "color", "#00ff41");
@@ -97515,13 +97525,13 @@ function create_each_block_2$d(ctx) {
         div2,
         "align-items",
         /*isExpanded*/
-        ctx[74] ? "flex-start" : "center"
+        ctx[69] ? "flex-start" : "center"
       );
       set_style(
         div2,
         "flex-direction",
         /*isExpanded*/
-        ctx[74] ? "column" : "row"
+        ctx[69] ? "column" : "row"
       );
     },
     m(target, anchor) {
@@ -97544,7 +97554,7 @@ function create_each_block_2$d(ctx) {
       append(div2, t8);
       if (if_block2) if_block2.m(div2, null);
       if (!mounted) {
-        dispose = listen(div2, "click", click_handler_14);
+        dispose = listen(div2, "click", click_handler_15);
         mounted = true;
       }
     },
@@ -97553,21 +97563,21 @@ function create_each_block_2$d(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
       131080 && !src_url_equal(img.src, img_src_value = /*exc*/
-      ctx[73].img)) {
+      ctx[75].img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
       131080 && t1_value !== (t1_value = /*exc*/
-      ctx[73].name + "")) set_data(t1, t1_value);
+      ctx[75].name + "")) set_data(t1, t1_value);
       if (dirty[0] & /*selectedExcGroup, excSearchTerm*/
       131080 && t4_value !== (t4_value = /*exc*/
-      (((_a2 = ctx[73].system) == null ? void 0 : _a2.category) || "Geral") + "")) set_data(t4, t4_value);
+      (((_a2 = ctx[75].system) == null ? void 0 : _a2.category) || "Geral") + "")) set_data(t4, t4_value);
       if (!/*isExpanded*/
-      ctx[74]) {
+      ctx[69]) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
         } else {
-          if_block0 = create_if_block_16$4(ctx);
+          if_block0 = create_if_block_18$3(ctx);
           if_block0.c();
           if_block0.m(div0, null);
         }
@@ -97581,12 +97591,12 @@ function create_each_block_2$d(ctx) {
       ) if_block1.p(ctx, dirty);
       if (
         /*isExpanded*/
-        ctx[74]
+        ctx[69]
       ) {
         if (if_block2) {
           if_block2.p(ctx, dirty);
         } else {
-          if_block2 = create_if_block_14$6(ctx);
+          if_block2 = create_if_block_16$4(ctx);
           if_block2.c();
           if_block2.m(div2, null);
         }
@@ -97600,7 +97610,7 @@ function create_each_block_2$d(ctx) {
           div2,
           "align-items",
           /*isExpanded*/
-          ctx[74] ? "flex-start" : "center"
+          ctx[69] ? "flex-start" : "center"
         );
       }
       if (dirty[0] & /*expandedExcIds, selectedExcGroup, excSearchTerm*/
@@ -97609,7 +97619,7 @@ function create_each_block_2$d(ctx) {
           div2,
           "flex-direction",
           /*isExpanded*/
-          ctx[74] ? "column" : "row"
+          ctx[69] ? "column" : "row"
         );
       }
     },
@@ -97625,7 +97635,7 @@ function create_each_block_2$d(ctx) {
     }
   };
 }
-function create_if_block_13$6(ctx) {
+function create_if_block_15$5(ctx) {
   let div;
   return {
     c() {
@@ -97678,7 +97688,7 @@ function create_else_block_2$3(ctx) {
     }
   };
 }
-function create_if_block_11$6(ctx) {
+function create_if_block_13$6(ctx) {
   let button0;
   let t1;
   let button1;
@@ -97709,8 +97719,8 @@ function create_if_block_11$6(ctx) {
           listen(
             button1,
             "click",
-            /*click_handler_10*/
-            ctx[54]
+            /*click_handler_11*/
+            ctx[55]
           )
         ];
         mounted = true;
@@ -97728,7 +97738,7 @@ function create_if_block_11$6(ctx) {
     }
   };
 }
-function create_if_block_9$9(ctx) {
+function create_if_block_11$6(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -97761,7 +97771,7 @@ function create_if_block_9$9(ctx) {
     }
   };
 }
-function create_if_block_8$b(ctx) {
+function create_if_block_10$8(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -97770,7 +97780,7 @@ function create_if_block_8$b(ctx) {
       /*click_handler_3*/
       ctx[42](
         /*a*/
-        ctx[70]
+        ctx[72]
       )
     );
   }
@@ -97807,7 +97817,7 @@ function create_each_block_1$j(ctx) {
   let span;
   let t1_value = (
     /*a*/
-    ctx[70].name + ""
+    ctx[72].name + ""
   );
   let t1;
   let t2;
@@ -97817,14 +97827,14 @@ function create_each_block_1$j(ctx) {
   let dispose;
   let if_block = (
     /*isGM*/
-    ctx[20] && create_if_block_8$b(ctx)
+    ctx[20] && create_if_block_10$8(ctx)
   );
   function click_handler_4() {
     return (
       /*click_handler_4*/
       ctx[43](
         /*a*/
-        ctx[70]
+        ctx[72]
       )
     );
   }
@@ -97839,13 +97849,13 @@ function create_each_block_1$j(ctx) {
       if (if_block) if_block.c();
       t3 = space();
       if (!src_url_equal(img.src, img_src_value = /*a*/
-      ctx[70].icon)) attr(img, "src", img_src_value);
+      ctx[72].icon)) attr(img, "src", img_src_value);
       attr(img, "alt", "icon");
       attr(img, "class", "svelte-u4oq5");
       attr(span, "class", "svelte-u4oq5");
       attr(div, "class", div_class_value = "s-item " + /*selectedArchId*/
       (ctx[1] === /*a*/
-      ctx[70].id ? "active" : "") + " svelte-u4oq5");
+      ctx[72].id ? "active" : "") + " svelte-u4oq5");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -97865,12 +97875,12 @@ function create_each_block_1$j(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*archetypes*/
       1 && !src_url_equal(img.src, img_src_value = /*a*/
-      ctx[70].icon)) {
+      ctx[72].icon)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*archetypes*/
       1 && t1_value !== (t1_value = /*a*/
-      ctx[70].name + "")) set_data(t1, t1_value);
+      ctx[72].name + "")) set_data(t1, t1_value);
       if (
         /*isGM*/
         ctx[20]
@@ -97878,7 +97888,7 @@ function create_each_block_1$j(ctx) {
       if (dirty[0] & /*selectedArchId, archetypes*/
       3 && div_class_value !== (div_class_value = "s-item " + /*selectedArchId*/
       (ctx[1] === /*a*/
-      ctx[70].id ? "active" : "") + " svelte-u4oq5")) {
+      ctx[72].id ? "active" : "") + " svelte-u4oq5")) {
         attr(div, "class", div_class_value);
       }
     },
@@ -97921,7 +97931,7 @@ function create_if_block_4$h(ctx) {
   let t8;
   let if_block0 = (
     /*isGM*/
-    ctx[20] && create_if_block_7$c(ctx)
+    ctx[20] && create_if_block_9$9(ctx)
   );
   let each_value = ensure_array_like(
     /*selectedArch*/
@@ -98016,8 +98026,8 @@ function create_if_block_4$h(ctx) {
         /*isGM*/
         ctx2[20]
       ) if_block0.p(ctx2, dirty);
-      if (dirty[0] & /*removeArchTalent, selectedArch, isGM*/
-      135528448) {
+      if (dirty[0] & /*expandedExcIds, selectedArch, toggleExcExpand, removeArchTalent, isGM*/
+      137627648) {
         each_value = ensure_array_like(
           /*selectedArch*/
           ctx2[18].talents
@@ -98270,7 +98280,7 @@ function create_if_block_2$s(ctx) {
     }
   };
 }
-function create_if_block_7$c(ctx) {
+function create_if_block_9$9(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -98303,7 +98313,39 @@ function create_if_block_7$c(ctx) {
     }
   };
 }
-function create_if_block_6$d(ctx) {
+function create_if_block_8$b(ctx) {
+  let span;
+  let t0;
+  let t1_value = (
+    /*t*/
+    ctx[68].cost + ""
+  );
+  let t1;
+  return {
+    c() {
+      span = element("span");
+      t0 = text("Custo por Dado: ");
+      t1 = text(t1_value);
+      attr(span, "class", "t-cost svelte-u4oq5");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t0);
+      append(span, t1);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*selectedArch*/
+      262144 && t1_value !== (t1_value = /*t*/
+      ctx2[68].cost + "")) set_data(t1, t1_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_7$c(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -98312,7 +98354,7 @@ function create_if_block_6$d(ctx) {
       /*click_handler_6*/
       ctx[48](
         /*t*/
-        ctx[67]
+        ctx[68]
       )
     );
   }
@@ -98321,11 +98363,14 @@ function create_if_block_6$d(ctx) {
       button = element("button");
       button.innerHTML = `<i class="fas fa-times"></i>`;
       attr(button, "class", "btn-trash-t svelte-u4oq5");
+      set_style(button, "position", "static");
+      set_style(button, "margin-left", "auto");
+      set_style(button, "opacity", "1");
     },
     m(target, anchor) {
       insert(target, button, anchor);
       if (!mounted) {
-        dispose = listen(button, "click", click_handler_6);
+        dispose = listen(button, "click", stop_propagation(click_handler_6));
         mounted = true;
       }
     },
@@ -98341,90 +98386,230 @@ function create_if_block_6$d(ctx) {
     }
   };
 }
-function create_each_block$q(ctx) {
+function create_if_block_6$d(ctx) {
   let div1;
-  let img;
-  let img_src_value;
-  let t0;
   let div0;
-  let span0;
+  let t0;
   let t1_value = (
     /*t*/
-    ctx[67].name + ""
+    ctx[68].cost + ""
   );
   let t1;
   let t2;
-  let span1;
-  let t3;
-  let t4_value = (
+  let html_tag;
+  let raw_value = formatPowerStructure$1(
     /*t*/
-    ctx[67].cost + ""
-  );
-  let t4;
-  let t5;
-  let if_block = (
-    /*isGM*/
-    ctx[20] && create_if_block_6$d(ctx)
-  );
+    ctx[68]
+  ) + "";
   return {
     c() {
       div1 = element("div");
-      img = element("img");
-      t0 = space();
       div0 = element("div");
-      span0 = element("span");
+      t0 = text("Custo por Dado: ");
       t1 = text(t1_value);
       t2 = space();
-      span1 = element("span");
-      t3 = text("Custo por Dado: ");
-      t4 = text(t4_value);
-      t5 = space();
-      if (if_block) if_block.c();
-      if (!src_url_equal(img.src, img_src_value = /*t*/
-      ctx[67].img)) attr(img, "src", img_src_value);
-      attr(img, "alt", "talent");
-      attr(img, "class", "svelte-u4oq5");
-      attr(span0, "class", "t-name svelte-u4oq5");
-      attr(span1, "class", "t-cost svelte-u4oq5");
-      attr(div0, "class", "t-info svelte-u4oq5");
-      attr(div1, "class", "t-card svelte-u4oq5");
+      html_tag = new HtmlTag(false);
+      set_style(div0, "color", "#00ff41");
+      set_style(div0, "margin-bottom", "5px");
+      set_style(div0, "font-weight", "bold");
+      html_tag.a = null;
+      set_style(div1, "margin-top", "10px");
+      set_style(div1, "color", "#ccc");
+      set_style(div1, "font-size", "12px");
+      set_style(div1, "width", "100%");
     },
     m(target, anchor) {
       insert(target, div1, anchor);
-      append(div1, img);
-      append(div1, t0);
       append(div1, div0);
-      append(div0, span0);
-      append(span0, t1);
-      append(div0, t2);
-      append(div0, span1);
-      append(span1, t3);
-      append(span1, t4);
-      append(div1, t5);
-      if (if_block) if_block.m(div1, null);
+      append(div0, t0);
+      append(div0, t1);
+      append(div1, t2);
+      html_tag.m(raw_value, div1);
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*selectedArch*/
-      262144 && !src_url_equal(img.src, img_src_value = /*t*/
-      ctx2[67].img)) {
-        attr(img, "src", img_src_value);
-      }
-      if (dirty[0] & /*selectedArch*/
       262144 && t1_value !== (t1_value = /*t*/
-      ctx2[67].name + "")) set_data(t1, t1_value);
+      ctx2[68].cost + "")) set_data(t1, t1_value);
       if (dirty[0] & /*selectedArch*/
-      262144 && t4_value !== (t4_value = /*t*/
-      ctx2[67].cost + "")) set_data(t4, t4_value);
-      if (
-        /*isGM*/
-        ctx2[20]
-      ) if_block.p(ctx2, dirty);
+      262144 && raw_value !== (raw_value = formatPowerStructure$1(
+        /*t*/
+        ctx2[68]
+      ) + "")) html_tag.p(raw_value);
     },
     d(detaching) {
       if (detaching) {
         detach(div1);
       }
-      if (if_block) if_block.d();
+    }
+  };
+}
+function create_each_block$q(ctx) {
+  let div2;
+  let div1;
+  let img;
+  let img_src_value;
+  let t0;
+  let div0;
+  let span;
+  let t1_value = (
+    /*t*/
+    ctx[68].name + ""
+  );
+  let t1;
+  let t2;
+  let t3;
+  let t4;
+  let mounted;
+  let dispose;
+  let if_block0 = !/*isExpanded*/
+  ctx[69] && create_if_block_8$b(ctx);
+  let if_block1 = (
+    /*isGM*/
+    ctx[20] && create_if_block_7$c(ctx)
+  );
+  let if_block2 = (
+    /*isExpanded*/
+    ctx[69] && create_if_block_6$d(ctx)
+  );
+  function click_handler_7() {
+    return (
+      /*click_handler_7*/
+      ctx[49](
+        /*t*/
+        ctx[68]
+      )
+    );
+  }
+  return {
+    c() {
+      div2 = element("div");
+      div1 = element("div");
+      img = element("img");
+      t0 = space();
+      div0 = element("div");
+      span = element("span");
+      t1 = text(t1_value);
+      t2 = space();
+      if (if_block0) if_block0.c();
+      t3 = space();
+      if (if_block1) if_block1.c();
+      t4 = space();
+      if (if_block2) if_block2.c();
+      if (!src_url_equal(img.src, img_src_value = /*t*/
+      ctx[68].img)) attr(img, "src", img_src_value);
+      attr(img, "alt", "talent");
+      attr(img, "class", "svelte-u4oq5");
+      attr(span, "class", "t-name svelte-u4oq5");
+      attr(div0, "class", "t-info svelte-u4oq5");
+      set_style(div1, "display", "flex");
+      set_style(div1, "gap", "10px");
+      set_style(div1, "width", "100%");
+      set_style(div1, "align-items", "center");
+      attr(div2, "class", "t-card svelte-u4oq5");
+      attr(div2, "title", "Clique para expandir/recolher");
+      set_style(div2, "cursor", "pointer");
+      set_style(
+        div2,
+        "align-items",
+        /*isExpanded*/
+        ctx[69] ? "flex-start" : "center"
+      );
+      set_style(
+        div2,
+        "flex-direction",
+        /*isExpanded*/
+        ctx[69] ? "column" : "row"
+      );
+    },
+    m(target, anchor) {
+      insert(target, div2, anchor);
+      append(div2, div1);
+      append(div1, img);
+      append(div1, t0);
+      append(div1, div0);
+      append(div0, span);
+      append(span, t1);
+      append(div0, t2);
+      if (if_block0) if_block0.m(div0, null);
+      append(div1, t3);
+      if (if_block1) if_block1.m(div1, null);
+      append(div2, t4);
+      if (if_block2) if_block2.m(div2, null);
+      if (!mounted) {
+        dispose = listen(div2, "click", click_handler_7);
+        mounted = true;
+      }
+    },
+    p(new_ctx, dirty) {
+      ctx = new_ctx;
+      if (dirty[0] & /*selectedArch*/
+      262144 && !src_url_equal(img.src, img_src_value = /*t*/
+      ctx[68].img)) {
+        attr(img, "src", img_src_value);
+      }
+      if (dirty[0] & /*selectedArch*/
+      262144 && t1_value !== (t1_value = /*t*/
+      ctx[68].name + "")) set_data(t1, t1_value);
+      if (!/*isExpanded*/
+      ctx[69]) {
+        if (if_block0) {
+          if_block0.p(ctx, dirty);
+        } else {
+          if_block0 = create_if_block_8$b(ctx);
+          if_block0.c();
+          if_block0.m(div0, null);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (
+        /*isGM*/
+        ctx[20]
+      ) if_block1.p(ctx, dirty);
+      if (
+        /*isExpanded*/
+        ctx[69]
+      ) {
+        if (if_block2) {
+          if_block2.p(ctx, dirty);
+        } else {
+          if_block2 = create_if_block_6$d(ctx);
+          if_block2.c();
+          if_block2.m(div2, null);
+        }
+      } else if (if_block2) {
+        if_block2.d(1);
+        if_block2 = null;
+      }
+      if (dirty[0] & /*expandedExcIds, selectedArch*/
+      264192) {
+        set_style(
+          div2,
+          "align-items",
+          /*isExpanded*/
+          ctx[69] ? "flex-start" : "center"
+        );
+      }
+      if (dirty[0] & /*expandedExcIds, selectedArch*/
+      264192) {
+        set_style(
+          div2,
+          "flex-direction",
+          /*isExpanded*/
+          ctx[69] ? "column" : "row"
+        );
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div2);
+      }
+      if (if_block0) if_block0.d();
+      if (if_block1) if_block1.d();
+      if (if_block2) if_block2.d();
+      mounted = false;
+      dispose();
     }
   };
 }
@@ -98667,19 +98852,19 @@ function create_if_block$B(ctx) {
             input0,
             "input",
             /*input0_input_handler_1*/
-            ctx[60]
+            ctx[61]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler_1*/
-            ctx[61]
+            ctx[62]
           ),
           listen(
             textarea,
             "input",
             /*textarea_input_handler_1*/
-            ctx[62]
+            ctx[63]
           ),
           listen(
             button0,
@@ -98690,8 +98875,8 @@ function create_if_block$B(ctx) {
           listen(
             button1,
             "click",
-            /*click_handler_15*/
-            ctx[63]
+            /*click_handler_16*/
+            ctx[64]
           )
         ];
         mounted = true;
@@ -98863,6 +99048,55 @@ function create_fragment$D(ctx) {
       run_all(dispose);
     }
   };
+}
+function formatPowerStructure$1(item) {
+  var _a, _b, _c, _d;
+  if (!item || item.type !== "power") {
+    return ((_a = item == null ? void 0 : item.system) == null ? void 0 : _a.description) || "Sem descrição.";
+  }
+  const flags = ((_b = item.flags) == null ? void 0 : _b["multiversus-rpg"]) || {};
+  const qualities = flags.qualities || [];
+  const getQ = (types) => qualities.filter((q) => {
+    var _a2, _b2;
+    return types.includes((_a2 = q.type) == null ? void 0 : _a2.toUpperCase()) || types.includes((_b2 = q.name) == null ? void 0 : _b2.toUpperCase());
+  });
+  const attackQ = getQ(["A", "ATAQUE"]);
+  const defenseQ = getQ(["D", "DEFESA"]);
+  const utilityQ = getQ(["U", "UTILIDADE"]);
+  let detailsHTML = "";
+  const formatCat = (list, label, color, icon) => {
+    if (!list.length) return "";
+    let h = `<div style="margin-top: 10px; border-left: 2px solid ${color}; padding-left: 8px;">
+                        <h4 style="margin: 0 0 5px 0; color: ${color}; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
+                            <span style="background: ${color}; color: #000; padding: 1px 4px; border-radius: 2px;">${icon}</span> ${label}
+                        </h4>`;
+    list.forEach((q) => {
+      h += `<div style="font-size: 11px; margin-bottom: 4px; color: #ddd; font-family: sans-serif;">
+                        <strong>${q.name || "Sub-rotina"}:</strong> ${q.description || "Sem descrição específica."}
+                      </div>`;
+    });
+    h += `</div>`;
+    return h;
+  };
+  detailsHTML += formatCat(attackQ, "ATAQUE", "#ff4444", "A");
+  detailsHTML += formatCat(defenseQ, "DEFESA", "#44aaff", "D");
+  detailsHTML += formatCat(utilityQ, "UTILIDADE", "#ffaa00", "U");
+  const sysNotes = flags.notes || flags.systemNotes || ((_c = item.system) == null ? void 0 : _c.notes) || ((_d = item.system) == null ? void 0 : _d.description);
+  const notesText = typeof sysNotes === "string" ? sysNotes : sysNotes == null ? void 0 : sysNotes.value;
+  if (notesText && notesText.trim() !== "" && notesText.trim() !== "<p></p>") {
+    detailsHTML += `<div style="margin-top: 10px; border-top: 1px dashed #00ff41; padding-top: 8px;">
+                                <h4 style="margin: 0 0 5px 0; color: #00ff41; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
+                                    NOTAS DE SISTEMA
+                                </h4>
+                                <div style="font-size: 11px; color: #ccc; font-family: sans-serif;">
+                                    ${notesText}
+                                </div>
+                            </div>`;
+  }
+  if (!detailsHTML) {
+    detailsHTML = `<div style="margin-top: 10px; font-style: italic; color: #888; font-size: 11px; font-family: monospace;">Nenhuma sub-rotina ou nota registrada.</div>`;
+  }
+  return detailsHTML;
 }
 const dragover_handler$2 = (e) => e.preventDefault();
 const dragover_handler_1 = (e) => e.preventDefault();
@@ -99061,7 +99295,8 @@ function instance$D($$self, $$props, $$invalidate) {
   }
   const click_handler_5 = () => $$invalidate(5, editModeArch = false);
   const click_handler_6 = (t) => removeArchTalent(t.id);
-  const click_handler_7 = () => {
+  const click_handler_7 = (t) => toggleExcExpand(t.id);
+  const click_handler_8 = () => {
     $$invalidate(2, selectedExcGroupId = null);
     resetFormExcGroup();
   };
@@ -99069,8 +99304,8 @@ function instance$D($$self, $$props, $$invalidate) {
     excSearchTerm = this.value;
     $$invalidate(3, excSearchTerm);
   }
-  const click_handler_8 = (g) => handleDeleteExcGroup(g.id);
-  const click_handler_9 = (g) => {
+  const click_handler_9 = (g) => handleDeleteExcGroup(g.id);
+  const click_handler_10 = (g) => {
     $$invalidate(2, selectedExcGroupId = g.id);
     $$invalidate(9, editModeExcGroup = false);
   };
@@ -99078,16 +99313,16 @@ function instance$D($$self, $$props, $$invalidate) {
     excGroupName = this.value;
     $$invalidate(10, excGroupName);
   }
-  const click_handler_10 = () => $$invalidate(9, editModeExcGroup = false);
-  const click_handler_11 = () => openExcForm();
+  const click_handler_11 = () => $$invalidate(9, editModeExcGroup = false);
+  const click_handler_12 = () => openExcForm();
   const func2 = (e) => {
     if (!excSearchTerm) return true;
     const t = excSearchTerm.toLowerCase();
     return e.name.toLowerCase().includes(t) || e.system && e.system.description && e.system.description.toLowerCase().includes(t);
   };
-  const click_handler_12 = (exc) => openExcForm(exc);
-  const click_handler_13 = (exc) => removeExclusivity(exc.id);
-  const click_handler_14 = (exc) => toggleExcExpand(exc.id);
+  const click_handler_13 = (exc) => openExcForm(exc);
+  const click_handler_14 = (exc) => removeExclusivity(exc.id);
+  const click_handler_15 = (exc) => toggleExcExpand(exc.id);
   function input0_input_handler_1() {
     excDataName = this.value;
     $$invalidate(14, excDataName);
@@ -99100,7 +99335,7 @@ function instance$D($$self, $$props, $$invalidate) {
     excDataDesc = this.value;
     $$invalidate(16, excDataDesc);
   }
-  const click_handler_15 = () => $$invalidate(12, showExcForm = false);
+  const click_handler_16 = () => $$invalidate(12, showExcForm = false);
   $$self.$$set = ($$props2) => {
     if ("application" in $$props2) $$invalidate(37, application = $$props2.application);
   };
@@ -99176,20 +99411,21 @@ function instance$D($$self, $$props, $$invalidate) {
     click_handler_5,
     click_handler_6,
     click_handler_7,
-    input_input_handler,
     click_handler_8,
+    input_input_handler,
     click_handler_9,
-    input_input_handler_1,
     click_handler_10,
+    input_input_handler_1,
     click_handler_11,
-    func2,
     click_handler_12,
+    func2,
     click_handler_13,
     click_handler_14,
+    click_handler_15,
     input0_input_handler_1,
     input1_input_handler_1,
     textarea_input_handler_1,
-    click_handler_15
+    click_handler_16
   ];
 }
 class ArchetypeManager extends SvelteComponent {
@@ -99232,7 +99468,7 @@ function create_else_block$n(ctx) {
   let dispose;
   let if_block0 = (
     /*currentApp*/
-    ctx[2] !== "desktop" && create_if_block_10$6(ctx)
+    ctx[2] !== "desktop" && create_if_block_10$7(ctx)
   );
   const if_block_creators = [
     create_if_block_1$u,
@@ -99376,7 +99612,7 @@ function create_else_block$n(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_10$6(ctx2);
+          if_block0 = create_if_block_10$7(ctx2);
           if_block0.c();
           if_block0.m(div3, t6);
         }
@@ -99561,7 +99797,7 @@ function create_if_block$A(ctx) {
     }
   };
 }
-function create_if_block_10$6(ctx) {
+function create_if_block_10$7(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -105508,7 +105744,7 @@ function create_if_block_4$d(ctx) {
   let dispose;
   let if_block0 = (
     /*action*/
-    ctx[0].utility.style === "power" && create_if_block_10$5(ctx)
+    ctx[0].utility.style === "power" && create_if_block_10$6(ctx)
   );
   let if_block1 = (
     /*action*/
@@ -105770,7 +106006,7 @@ function create_if_block_4$d(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_10$5(ctx2);
+          if_block0 = create_if_block_10$6(ctx2);
           if_block0.c();
           if_block0.m(t10.parentNode, t10);
         }
@@ -105859,7 +106095,7 @@ function create_if_block_4$d(ctx) {
     }
   };
 }
-function create_if_block_10$5(ctx) {
+function create_if_block_10$6(ctx) {
   let div1;
   let span;
   let t1;
@@ -117052,40 +117288,62 @@ const AuxiliarSystem = {
 };
 function get_each_context$h(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[51] = list[i];
+  child_ctx[53] = list[i];
   return child_ctx;
 }
 function get_each_context_1$f(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[54] = list[i];
+  child_ctx[56] = list[i];
   return child_ctx;
 }
 function get_each_context_2$b(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[54] = list[i];
+  child_ctx[56] = list[i];
   return child_ctx;
 }
 function get_each_context_3$8(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[59] = list[i];
+  child_ctx[61] = list[i];
   return child_ctx;
 }
 function get_each_context_4$7(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[62] = list[i];
+  child_ctx[64] = list[i];
+  const constants_0 = (
+    /*selectedTalents*/
+    child_ctx[2].find(function func2(...args) {
+      return (
+        /*func*/
+        ctx[43](
+          /*t*/
+          child_ctx[64],
+          ...args
+        )
+      );
+    })
+  );
+  child_ctx[65] = constants_0;
+  const constants_1 = (
+    /*expandedTalentsIds*/
+    child_ctx[15].has(
+      /*t*/
+      child_ctx[64].id
+    )
+  );
+  child_ctx[66] = constants_1;
   return child_ctx;
 }
 function get_each_context_5$5(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[65] = list[i];
+  child_ctx[69] = list[i];
   return child_ctx;
 }
 function get_each_context_6$4(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[68] = list[i];
+  child_ctx[72] = list[i];
   return child_ctx;
 }
-function create_if_block_9$5(ctx) {
+function create_if_block_10$5(ctx) {
   let div;
   let div_transition;
   let current;
@@ -117133,7 +117391,7 @@ function create_if_block_9$5(ctx) {
     }
   };
 }
-function create_if_block_8$5(ctx) {
+function create_if_block_9$5(ctx) {
   let div;
   let input0;
   let t_1;
@@ -117175,25 +117433,25 @@ function create_if_block_8$5(ctx) {
             input0,
             "input",
             /*input0_input_handler*/
-            ctx[29]
+            ctx[30]
           ),
           listen(
             input0,
             "blur",
             /*blur_handler*/
-            ctx[30]
+            ctx[31]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler*/
-            ctx[31]
+            ctx[32]
           ),
           listen(
             input1,
             "blur",
             /*blur_handler_1*/
-            ctx[32]
+            ctx[33]
           )
         ];
         mounted = true;
@@ -117228,7 +117486,7 @@ function create_if_block_8$5(ctx) {
     }
   };
 }
-function create_if_block_4$7(ctx) {
+function create_if_block_5$6(ctx) {
   let div2;
   let h2;
   let t1;
@@ -117249,11 +117507,11 @@ function create_if_block_4$7(ctx) {
   let dispose;
   let if_block0 = (
     /*rollCategory*/
-    ctx[14] && create_if_block_7$6(ctx)
+    ctx[14] && create_if_block_8$5(ctx)
   );
   let each_value_6 = ensure_array_like(
     /*filteredOrigins*/
-    ctx[16]
+    ctx[17]
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_6.length; i += 1) {
@@ -117261,7 +117519,7 @@ function create_if_block_4$7(ctx) {
   }
   let if_block1 = (
     /*selectedOrigin*/
-    ctx[13] && create_if_block_5$6(ctx)
+    ctx[13] && create_if_block_6$6(ctx)
   );
   return {
     c() {
@@ -117335,19 +117593,19 @@ function create_if_block_4$7(ctx) {
             input,
             "input",
             /*input_input_handler*/
-            ctx[37]
+            ctx[38]
           ),
           listen(
             button0,
             "click",
             /*rollOrigin*/
-            ctx[20]
+            ctx[22]
           ),
           listen(
             button1,
             "click",
             /*click_handler_6*/
-            ctx[39]
+            ctx[40]
           )
         ];
         mounted = true;
@@ -117370,7 +117628,7 @@ function create_if_block_4$7(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_7$6(ctx2);
+          if_block0 = create_if_block_8$5(ctx2);
           if_block0.c();
           if_block0.m(div2, t6);
         }
@@ -117379,10 +117637,10 @@ function create_if_block_4$7(ctx) {
         if_block0 = null;
       }
       if (dirty[0] & /*selectedOrigin, filteredOrigins*/
-      73728) {
+      139264) {
         each_value_6 = ensure_array_like(
           /*filteredOrigins*/
-          ctx2[16]
+          ctx2[17]
         );
         let i;
         for (i = 0; i < each_value_6.length; i += 1) {
@@ -117407,7 +117665,7 @@ function create_if_block_4$7(ctx) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
         } else {
-          if_block1 = create_if_block_5$6(ctx2);
+          if_block1 = create_if_block_6$6(ctx2);
           if_block1.c();
           if_block1.m(div2, t8);
         }
@@ -117439,7 +117697,7 @@ function create_if_block_4$7(ctx) {
     }
   };
 }
-function create_if_block_7$6(ctx) {
+function create_if_block_8$5(ctx) {
   let div1;
   let div0;
   let t_1;
@@ -117479,14 +117737,14 @@ function create_each_block_6$4(ctx) {
   let div0;
   let t0_value = (
     /*org*/
-    ctx[68].name + ""
+    ctx[72].name + ""
   );
   let t0;
   let t1;
   let div1;
   let t2_value = (
     /*org*/
-    ctx[68].type + ""
+    ctx[72].type + ""
   );
   let t2;
   let t3;
@@ -117496,9 +117754,9 @@ function create_each_block_6$4(ctx) {
   function click_handler_5() {
     return (
       /*click_handler_5*/
-      ctx[38](
+      ctx[39](
         /*org*/
-        ctx[68]
+        ctx[72]
       )
     );
   }
@@ -117516,7 +117774,7 @@ function create_each_block_6$4(ctx) {
       attr(div1, "class", "item-meta svelte-2kwuzr");
       attr(div2, "class", div2_class_value = "list-item " + /*selectedOrigin*/
       (((_a = ctx[13]) == null ? void 0 : _a.id) === /*org*/
-      ctx[68].id ? "selected" : "") + " svelte-2kwuzr");
+      ctx[72].id ? "selected" : "") + " svelte-2kwuzr");
     },
     m(target, anchor) {
       insert(target, div2, anchor);
@@ -117535,15 +117793,15 @@ function create_each_block_6$4(ctx) {
       var _a;
       ctx = new_ctx;
       if (dirty[0] & /*filteredOrigins*/
-      65536 && t0_value !== (t0_value = /*org*/
-      ctx[68].name + "")) set_data(t0, t0_value);
+      131072 && t0_value !== (t0_value = /*org*/
+      ctx[72].name + "")) set_data(t0, t0_value);
       if (dirty[0] & /*filteredOrigins*/
-      65536 && t2_value !== (t2_value = /*org*/
-      ctx[68].type + "")) set_data(t2, t2_value);
+      131072 && t2_value !== (t2_value = /*org*/
+      ctx[72].type + "")) set_data(t2, t2_value);
       if (dirty[0] & /*selectedOrigin, filteredOrigins*/
-      73728 && div2_class_value !== (div2_class_value = "list-item " + /*selectedOrigin*/
+      139264 && div2_class_value !== (div2_class_value = "list-item " + /*selectedOrigin*/
       (((_a = ctx[13]) == null ? void 0 : _a.id) === /*org*/
-      ctx[68].id ? "selected" : "") + " svelte-2kwuzr")) {
+      ctx[72].id ? "selected" : "") + " svelte-2kwuzr")) {
         attr(div2, "class", div2_class_value);
       }
     },
@@ -117556,7 +117814,7 @@ function create_each_block_6$4(ctx) {
     }
   };
 }
-function create_if_block_5$6(ctx) {
+function create_if_block_6$6(ctx) {
   let div1;
   let h3;
   let t0_value = (
@@ -117574,7 +117832,7 @@ function create_if_block_5$6(ctx) {
   let if_block = (
     /*selectedOrigin*/
     ctx[13].traits && /*selectedOrigin*/
-    ctx[13].traits.length > 0 && create_if_block_6$6(ctx)
+    ctx[13].traits.length > 0 && create_if_block_7$6(ctx)
   );
   return {
     c() {
@@ -117614,7 +117872,7 @@ function create_if_block_5$6(ctx) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
-          if_block = create_if_block_6$6(ctx2);
+          if_block = create_if_block_7$6(ctx2);
           if_block.c();
           if_block.m(div1, null);
         }
@@ -117631,7 +117889,7 @@ function create_if_block_5$6(ctx) {
     }
   };
 }
-function create_if_block_6$6(ctx) {
+function create_if_block_7$6(ctx) {
   let h4;
   let t1;
   let ul;
@@ -117704,14 +117962,14 @@ function create_each_block_5$5(ctx) {
   let b;
   let t0_value = (
     /*trait*/
-    ctx[65].name + ""
+    ctx[69].name + ""
   );
   let t0;
   let t1;
   let t2;
   let t3_value = (
     /*trait*/
-    ctx[65].effect + ""
+    ctx[69].effect + ""
   );
   let t3;
   return {
@@ -117734,10 +117992,10 @@ function create_each_block_5$5(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*selectedOrigin*/
       8192 && t0_value !== (t0_value = /*trait*/
-      ctx2[65].name + "")) set_data(t0, t0_value);
+      ctx2[69].name + "")) set_data(t0, t0_value);
       if (dirty[0] & /*selectedOrigin*/
       8192 && t3_value !== (t3_value = /*trait*/
-      ctx2[65].effect + "")) set_data(t3, t3_value);
+      ctx2[69].effect + "")) set_data(t3, t3_value);
     },
     d(detaching) {
       if (detaching) {
@@ -117832,8 +118090,8 @@ function create_if_block_2$f(ctx) {
         dispose = listen(
           button,
           "click",
-          /*click_handler_8*/
-          ctx[42]
+          /*click_handler_9*/
+          ctx[44]
         );
         mounted = true;
       }
@@ -117851,8 +118109,8 @@ function create_if_block_2$f(ctx) {
           ctx2[2].length === 3 ? "#00ff41" : "#fff"
         );
       }
-      if (dirty[0] & /*archetypes, selectedTalents, toggleTalent*/
-      2097220) {
+      if (dirty[0] & /*archetypes, selectedTalents, expandedTalentsIds, toggleTalentExpand, toggleTalent*/
+      9470020) {
         each_value_3 = ensure_array_like(
           /*archetypes*/
           ctx2[6]
@@ -117895,24 +118153,97 @@ function create_if_block_2$f(ctx) {
     }
   };
 }
-function create_if_block_3$c(ctx) {
-  let i;
+function create_if_block_4$7(ctx) {
+  let span;
+  let t0;
+  let t1_value = (
+    /*t*/
+    ctx[64].cost + ""
+  );
+  let t1;
   return {
     c() {
-      i = element("i");
-      attr(i, "class", "fas fa-check-circle check-icon svelte-2kwuzr");
+      span = element("span");
+      t0 = text("Custo por Dado: ");
+      t1 = text(t1_value);
+      attr(span, "class", "svelte-2kwuzr");
     },
     m(target, anchor) {
-      insert(target, i, anchor);
+      insert(target, span, anchor);
+      append(span, t0);
+      append(span, t1);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*archetypes*/
+      64 && t1_value !== (t1_value = /*t*/
+      ctx2[64].cost + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
-        detach(i);
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_3$c(ctx) {
+  let div1;
+  let div0;
+  let t0;
+  let t1_value = (
+    /*t*/
+    ctx[64].cost + ""
+  );
+  let t1;
+  let t2;
+  let html_tag;
+  let raw_value = formatPowerStructure(
+    /*t*/
+    ctx[64]
+  ) + "";
+  return {
+    c() {
+      div1 = element("div");
+      div0 = element("div");
+      t0 = text("Custo por Dado: ");
+      t1 = text(t1_value);
+      t2 = space();
+      html_tag = new HtmlTag(false);
+      set_style(div0, "color", "#00ff41");
+      set_style(div0, "margin-bottom", "5px");
+      set_style(div0, "font-weight", "bold");
+      html_tag.a = null;
+      set_style(div1, "margin-top", "10px");
+      set_style(div1, "color", "#ccc");
+      set_style(div1, "font-size", "12px");
+      set_style(div1, "width", "100%");
+    },
+    m(target, anchor) {
+      insert(target, div1, anchor);
+      append(div1, div0);
+      append(div0, t0);
+      append(div0, t1);
+      append(div1, t2);
+      html_tag.m(raw_value, div1);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*archetypes*/
+      64 && t1_value !== (t1_value = /*t*/
+      ctx2[64].cost + "")) set_data(t1, t1_value);
+      if (dirty[0] & /*archetypes*/
+      64 && raw_value !== (raw_value = formatPowerStructure(
+        /*t*/
+        ctx2[64]
+      ) + "")) html_tag.p(raw_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div1);
       }
     }
   };
 }
 function create_each_block_4$7(ctx) {
+  let div2;
   let div1;
   let img;
   let img_src_value;
@@ -117921,60 +118252,51 @@ function create_each_block_4$7(ctx) {
   let b;
   let t1_value = (
     /*t*/
-    ctx[62].name + ""
+    ctx[64].name + ""
   );
   let t1;
   let t2;
-  let span;
   let t3;
+  let button;
   let t4_value = (
-    /*t*/
-    ctx[62].cost + ""
+    /*isSelected*/
+    ctx[65] ? "SELECIONADO" : "SELECIONAR"
   );
   let t4;
   let t5;
-  let show_if = (
-    /*selectedTalents*/
-    ctx[2].find(func2)
-  );
   let t6;
-  let div1_class_value;
+  let div2_class_value;
   let mounted;
   let dispose;
-  function func2(...args) {
-    return (
-      /*func*/
-      ctx[27](
-        /*t*/
-        ctx[62],
-        ...args
-      )
-    );
-  }
-  let if_block = show_if && create_if_block_3$c();
-  function func_12(...args) {
-    return (
-      /*func_1*/
-      ctx[40](
-        /*t*/
-        ctx[62],
-        ...args
-      )
-    );
-  }
+  let if_block0 = !/*isExpanded*/
+  ctx[66] && create_if_block_4$7(ctx);
   function click_handler_7() {
     return (
       /*click_handler_7*/
       ctx[41](
         /*t*/
-        ctx[62],
+        ctx[64],
         /*arch*/
-        ctx[59]
+        ctx[61]
+      )
+    );
+  }
+  let if_block1 = (
+    /*isExpanded*/
+    ctx[66] && create_if_block_3$c(ctx)
+  );
+  function click_handler_8() {
+    return (
+      /*click_handler_8*/
+      ctx[42](
+        /*t*/
+        ctx[64]
       )
     );
   }
   return {
     c() {
+      div2 = element("div");
       div1 = element("div");
       img = element("img");
       t0 = space();
@@ -117982,38 +118304,79 @@ function create_each_block_4$7(ctx) {
       b = element("b");
       t1 = text(t1_value);
       t2 = space();
-      span = element("span");
-      t3 = text("Custo por Dado: ");
+      if (if_block0) if_block0.c();
+      t3 = space();
+      button = element("button");
       t4 = text(t4_value);
       t5 = space();
-      if (if_block) if_block.c();
+      if (if_block1) if_block1.c();
       t6 = space();
       if (!src_url_equal(img.src, img_src_value = /*t*/
-      ctx[62].img)) attr(img, "src", img_src_value);
+      ctx[64].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "");
       attr(img, "class", "svelte-2kwuzr");
       attr(b, "class", "svelte-2kwuzr");
-      attr(span, "class", "svelte-2kwuzr");
       attr(div0, "class", "t-info svelte-2kwuzr");
-      attr(div1, "class", div1_class_value = "talent-card " + /*selectedTalents*/
-      (ctx[2].find(func_12) ? "selected" : "") + " svelte-2kwuzr");
+      attr(button, "class", "select-btn");
+      set_style(
+        button,
+        "background",
+        /*isSelected*/
+        ctx[65] ? "#00ff41" : "transparent"
+      );
+      set_style(
+        button,
+        "color",
+        /*isSelected*/
+        ctx[65] ? "#000" : "#00ff41"
+      );
+      set_style(button, "border", "1px solid #00ff41");
+      set_style(button, "border-radius", "4px");
+      set_style(button, "padding", "5px 10px");
+      set_style(button, "cursor", "pointer");
+      set_style(button, "font-size", "10px");
+      set_style(button, "font-weight", "bold");
+      set_style(button, "margin-left", "auto");
+      set_style(div1, "display", "flex");
+      set_style(div1, "gap", "10px");
+      set_style(div1, "width", "100%");
+      set_style(div1, "align-items", "center");
+      attr(div2, "class", div2_class_value = "talent-card " + /*isSelected*/
+      (ctx[65] ? "selected" : "") + " svelte-2kwuzr");
+      set_style(
+        div2,
+        "align-items",
+        /*isExpanded*/
+        ctx[66] ? "flex-start" : "center"
+      );
+      set_style(
+        div2,
+        "flex-direction",
+        /*isExpanded*/
+        ctx[66] ? "column" : "row"
+      );
     },
     m(target, anchor) {
-      insert(target, div1, anchor);
+      insert(target, div2, anchor);
+      append(div2, div1);
       append(div1, img);
       append(div1, t0);
       append(div1, div0);
       append(div0, b);
       append(b, t1);
       append(div0, t2);
-      append(div0, span);
-      append(span, t3);
-      append(span, t4);
-      append(div1, t5);
-      if (if_block) if_block.m(div1, null);
-      append(div1, t6);
+      if (if_block0) if_block0.m(div0, null);
+      append(div1, t3);
+      append(div1, button);
+      append(button, t4);
+      append(div2, t5);
+      if (if_block1) if_block1.m(div2, null);
+      append(div2, t6);
       if (!mounted) {
-        dispose = listen(div1, "click", click_handler_7);
+        dispose = [
+          listen(button, "click", stop_propagation(click_handler_7)),
+          listen(div2, "click", click_handler_8)
+        ];
         mounted = true;
       }
     },
@@ -118021,42 +118384,93 @@ function create_each_block_4$7(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*archetypes*/
       64 && !src_url_equal(img.src, img_src_value = /*t*/
-      ctx[62].img)) {
+      ctx[64].img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*archetypes*/
       64 && t1_value !== (t1_value = /*t*/
-      ctx[62].name + "")) set_data(t1, t1_value);
-      if (dirty[0] & /*archetypes*/
-      64 && t4_value !== (t4_value = /*t*/
-      ctx[62].cost + "")) set_data(t4, t4_value);
-      if (dirty[0] & /*selectedTalents, archetypes*/
-      68) show_if = /*selectedTalents*/
-      ctx[2].find(func2);
-      if (show_if) {
-        if (if_block) ;
-        else {
-          if_block = create_if_block_3$c();
-          if_block.c();
-          if_block.m(div1, t6);
+      ctx[64].name + "")) set_data(t1, t1_value);
+      if (!/*isExpanded*/
+      ctx[66]) {
+        if (if_block0) {
+          if_block0.p(ctx, dirty);
+        } else {
+          if_block0 = create_if_block_4$7(ctx);
+          if_block0.c();
+          if_block0.m(div0, null);
         }
-      } else if (if_block) {
-        if_block.d(1);
-        if_block = null;
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
       }
       if (dirty[0] & /*selectedTalents, archetypes*/
-      68 && div1_class_value !== (div1_class_value = "talent-card " + /*selectedTalents*/
-      (ctx[2].find(func_12) ? "selected" : "") + " svelte-2kwuzr")) {
-        attr(div1, "class", div1_class_value);
+      68 && t4_value !== (t4_value = /*isSelected*/
+      ctx[65] ? "SELECIONADO" : "SELECIONAR")) set_data(t4, t4_value);
+      if (dirty[0] & /*selectedTalents, archetypes*/
+      68) {
+        set_style(
+          button,
+          "background",
+          /*isSelected*/
+          ctx[65] ? "#00ff41" : "transparent"
+        );
+      }
+      if (dirty[0] & /*selectedTalents, archetypes*/
+      68) {
+        set_style(
+          button,
+          "color",
+          /*isSelected*/
+          ctx[65] ? "#000" : "#00ff41"
+        );
+      }
+      if (
+        /*isExpanded*/
+        ctx[66]
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx, dirty);
+        } else {
+          if_block1 = create_if_block_3$c(ctx);
+          if_block1.c();
+          if_block1.m(div2, t6);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+      if (dirty[0] & /*selectedTalents, archetypes*/
+      68 && div2_class_value !== (div2_class_value = "talent-card " + /*isSelected*/
+      (ctx[65] ? "selected" : "") + " svelte-2kwuzr")) {
+        attr(div2, "class", div2_class_value);
+      }
+      if (dirty[0] & /*expandedTalentsIds, archetypes*/
+      32832) {
+        set_style(
+          div2,
+          "align-items",
+          /*isExpanded*/
+          ctx[66] ? "flex-start" : "center"
+        );
+      }
+      if (dirty[0] & /*expandedTalentsIds, archetypes*/
+      32832) {
+        set_style(
+          div2,
+          "flex-direction",
+          /*isExpanded*/
+          ctx[66] ? "column" : "row"
+        );
       }
     },
     d(detaching) {
       if (detaching) {
-        detach(div1);
+        detach(div2);
       }
-      if (if_block) if_block.d();
+      if (if_block0) if_block0.d();
+      if (if_block1) if_block1.d();
       mounted = false;
-      dispose();
+      run_all(dispose);
     }
   };
 }
@@ -118068,7 +118482,7 @@ function create_each_block_3$8(ctx) {
   let t0;
   let t1_value = (
     /*arch*/
-    ctx[59].name + ""
+    ctx[61].name + ""
   );
   let t1;
   let t2;
@@ -118076,7 +118490,7 @@ function create_each_block_3$8(ctx) {
   let t3;
   let t4_value = (
     /*arch*/
-    ctx[59].talents.length + ""
+    ctx[61].talents.length + ""
   );
   let t4;
   let t5;
@@ -118085,7 +118499,7 @@ function create_each_block_3$8(ctx) {
   let t7;
   let each_value_4 = ensure_array_like(
     /*arch*/
-    ctx[59].talents
+    ctx[61].talents
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_4.length; i += 1) {
@@ -118110,7 +118524,7 @@ function create_each_block_3$8(ctx) {
       }
       t7 = space();
       if (!src_url_equal(img.src, img_src_value = /*arch*/
-      ctx[59].icon)) attr(img, "src", img_src_value);
+      ctx[61].icon)) attr(img, "src", img_src_value);
       attr(img, "alt", "");
       attr(img, "class", "svelte-2kwuzr");
       attr(span, "class", "svelte-2kwuzr");
@@ -118141,20 +118555,20 @@ function create_each_block_3$8(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*archetypes*/
       64 && !src_url_equal(img.src, img_src_value = /*arch*/
-      ctx2[59].icon)) {
+      ctx2[61].icon)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*archetypes*/
       64 && t1_value !== (t1_value = /*arch*/
-      ctx2[59].name + "")) set_data(t1, t1_value);
+      ctx2[61].name + "")) set_data(t1, t1_value);
       if (dirty[0] & /*archetypes*/
       64 && t4_value !== (t4_value = /*arch*/
-      ctx2[59].talents.length + "")) set_data(t4, t4_value);
-      if (dirty[0] & /*selectedTalents, archetypes, toggleTalent*/
-      2097220) {
+      ctx2[61].talents.length + "")) set_data(t4, t4_value);
+      if (dirty[0] & /*selectedTalents, archetypes, expandedTalentsIds, toggleTalentExpand, toggleTalent*/
+      9470020) {
         each_value_4 = ensure_array_like(
           /*arch*/
-          ctx2[59].talents
+          ctx2[61].talents
         );
         let i;
         for (i = 0; i < each_value_4.length; i += 1) {
@@ -118227,7 +118641,7 @@ function create_if_block$l(ctx) {
   }
   let each_value = ensure_array_like(
     /*playerList*/
-    ctx[18]
+    ctx[19]
   );
   let each_blocks = [];
   for (let i = 0; i < each_value.length; i += 1) {
@@ -118324,7 +118738,7 @@ function create_if_block$l(ctx) {
         ctx[8] === void 0
       ) add_render_callback(() => (
         /*select_change_handler*/
-        ctx[48].call(select)
+        ctx[50].call(select)
       ));
       attr(div4, "class", "finish-zone svelte-2kwuzr");
       attr(div5, "class", "step-content svelte-2kwuzr");
@@ -118387,13 +118801,13 @@ function create_if_block$l(ctx) {
             input,
             "input",
             /*input_input_handler_1*/
-            ctx[47]
+            ctx[49]
           ),
           listen(
             select,
             "change",
             /*select_change_handler*/
-            ctx[48]
+            ctx[50]
           )
         ];
         mounted = true;
@@ -118425,7 +118839,7 @@ function create_if_block$l(ctx) {
         );
       }
       if (dirty[0] & /*increaseStat, attributes, decreaseStat*/
-      12582920) {
+      50331656) {
         each_value_2 = ensure_array_like(Object.keys(
           /*attributes*/
           ctx2[3]
@@ -118447,7 +118861,7 @@ function create_if_block$l(ctx) {
         each_blocks_2.length = each_value_2.length;
       }
       if (dirty[0] & /*increaseStat, skills, decreaseStat*/
-      12582928) {
+      50331664) {
         each_value_1 = ensure_array_like(Object.keys(
           /*skills*/
           ctx2[4]
@@ -118483,10 +118897,10 @@ function create_if_block$l(ctx) {
         );
       }
       if (dirty[0] & /*playerList*/
-      262144) {
+      524288) {
         each_value = ensure_array_like(
           /*playerList*/
-          ctx2[18]
+          ctx2[19]
         );
         let i;
         for (i = 0; i < each_value.length; i += 1) {
@@ -118510,7 +118924,7 @@ function create_if_block$l(ctx) {
         ctx2[9];
       }
       if (dirty[0] & /*selectedPlayerId, playerList*/
-      262400) {
+      524544) {
         select_option(
           select,
           /*selectedPlayerId*/
@@ -118559,7 +118973,7 @@ function create_each_block_2$b(ctx) {
     /*attributes*/
     ctx[3][
       /*key*/
-      ctx[54]
+      ctx[56]
     ].name + ""
   );
   let t0;
@@ -118572,7 +118986,7 @@ function create_each_block_2$b(ctx) {
     /*attributes*/
     ctx[3][
       /*key*/
-      ctx[54]
+      ctx[56]
     ].val + ""
   );
   let t3;
@@ -118581,21 +118995,21 @@ function create_each_block_2$b(ctx) {
   let t5;
   let mounted;
   let dispose;
-  function click_handler_9() {
-    return (
-      /*click_handler_9*/
-      ctx[43](
-        /*key*/
-        ctx[54]
-      )
-    );
-  }
   function click_handler_10() {
     return (
       /*click_handler_10*/
-      ctx[44](
+      ctx[45](
         /*key*/
-        ctx[54]
+        ctx[56]
+      )
+    );
+  }
+  function click_handler_11() {
+    return (
+      /*click_handler_11*/
+      ctx[46](
+        /*key*/
+        ctx[56]
       )
     );
   }
@@ -118637,8 +119051,8 @@ function create_each_block_2$b(ctx) {
       append(div2, t5);
       if (!mounted) {
         dispose = [
-          listen(button0, "click", click_handler_9),
-          listen(button1, "click", click_handler_10)
+          listen(button0, "click", click_handler_10),
+          listen(button1, "click", click_handler_11)
         ];
         mounted = true;
       }
@@ -118649,13 +119063,13 @@ function create_each_block_2$b(ctx) {
       8 && t0_value !== (t0_value = /*attributes*/
       ctx[3][
         /*key*/
-        ctx[54]
+        ctx[56]
       ].name + "")) set_data(t0, t0_value);
       if (dirty[0] & /*attributes*/
       8 && t3_value !== (t3_value = /*attributes*/
       ctx[3][
         /*key*/
-        ctx[54]
+        ctx[56]
       ].val + "")) set_data(t3, t3_value);
     },
     d(detaching) {
@@ -118674,7 +119088,7 @@ function create_each_block_1$f(ctx) {
     /*skills*/
     ctx[4][
       /*key*/
-      ctx[54]
+      ctx[56]
     ].name + ""
   );
   let t0;
@@ -118687,7 +119101,7 @@ function create_each_block_1$f(ctx) {
     /*skills*/
     ctx[4][
       /*key*/
-      ctx[54]
+      ctx[56]
     ].val + ""
   );
   let t3;
@@ -118696,21 +119110,21 @@ function create_each_block_1$f(ctx) {
   let t5;
   let mounted;
   let dispose;
-  function click_handler_11() {
-    return (
-      /*click_handler_11*/
-      ctx[45](
-        /*key*/
-        ctx[54]
-      )
-    );
-  }
   function click_handler_12() {
     return (
       /*click_handler_12*/
-      ctx[46](
+      ctx[47](
         /*key*/
-        ctx[54]
+        ctx[56]
+      )
+    );
+  }
+  function click_handler_13() {
+    return (
+      /*click_handler_13*/
+      ctx[48](
+        /*key*/
+        ctx[56]
       )
     );
   }
@@ -118752,8 +119166,8 @@ function create_each_block_1$f(ctx) {
       append(div2, t5);
       if (!mounted) {
         dispose = [
-          listen(button0, "click", click_handler_11),
-          listen(button1, "click", click_handler_12)
+          listen(button0, "click", click_handler_12),
+          listen(button1, "click", click_handler_13)
         ];
         mounted = true;
       }
@@ -118764,13 +119178,13 @@ function create_each_block_1$f(ctx) {
       16 && t0_value !== (t0_value = /*skills*/
       ctx[4][
         /*key*/
-        ctx[54]
+        ctx[56]
       ].name + "")) set_data(t0, t0_value);
       if (dirty[0] & /*skills*/
       16 && t3_value !== (t3_value = /*skills*/
       ctx[4][
         /*key*/
-        ctx[54]
+        ctx[56]
       ].val + "")) set_data(t3, t3_value);
     },
     d(detaching) {
@@ -118786,7 +119200,7 @@ function create_each_block$h(ctx) {
   let option;
   let t_1_value = (
     /*p*/
-    ctx[51].name + ""
+    ctx[53].name + ""
   );
   let t_1;
   return {
@@ -118794,7 +119208,7 @@ function create_each_block$h(ctx) {
       option = element("option");
       t_1 = text(t_1_value);
       option.__value = /*p*/
-      ctx[51].id;
+      ctx[53].id;
       set_input_value(option, option.__value);
       attr(option, "class", "svelte-2kwuzr");
     },
@@ -118822,7 +119236,7 @@ function create_else_block$c(ctx) {
       t_1 = text("FINALIZAR CRIAÇÃO");
       attr(button, "class", "btn-finish svelte-2kwuzr");
       button.disabled = button_disabled_value = !/*canProceedPoints*/
-      ctx[15];
+      ctx[16];
     },
     m(target, anchor) {
       insert(target, button, anchor);
@@ -118832,15 +119246,15 @@ function create_else_block$c(ctx) {
           button,
           "click",
           /*confirmCreation*/
-          ctx[24]
+          ctx[26]
         );
         mounted = true;
       }
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*canProceedPoints*/
-      32768 && button_disabled_value !== (button_disabled_value = !/*canProceedPoints*/
-      ctx2[15])) {
+      65536 && button_disabled_value !== (button_disabled_value = !/*canProceedPoints*/
+      ctx2[16])) {
         button.disabled = button_disabled_value;
       }
     },
@@ -118935,12 +119349,12 @@ function create_fragment$m(ctx) {
   let dispose;
   let if_block0 = (
     /*bgUrl*/
-    ctx[11] && create_if_block_9$5(ctx)
+    ctx[11] && create_if_block_10$5(ctx)
   );
-  let if_block1 = game.user.isGM && create_if_block_8$5(ctx);
+  let if_block1 = game.user.isGM && create_if_block_9$5(ctx);
   let if_block2 = (
     /*currentStep*/
-    ctx[7] === 1 && create_if_block_4$7(ctx)
+    ctx[7] === 1 && create_if_block_5$6(ctx)
   );
   let if_block3 = (
     /*currentStep*/
@@ -119065,31 +119479,31 @@ function create_fragment$m(ctx) {
             div0,
             "click",
             /*click_handler*/
-            ctx[28]
+            ctx[29]
           ),
           listen(
             button,
             "click",
             /*click_handler_1*/
-            ctx[33]
+            ctx[34]
           ),
           listen(
             div5,
             "click",
             /*click_handler_2*/
-            ctx[34]
+            ctx[35]
           ),
           listen(
             div6,
             "click",
             /*click_handler_3*/
-            ctx[35]
+            ctx[36]
           ),
           listen(
             div7,
             "click",
             /*click_handler_4*/
-            ctx[36]
+            ctx[37]
           )
         ];
         mounted = true;
@@ -119107,7 +119521,7 @@ function create_fragment$m(ctx) {
             transition_in(if_block0, 1);
           }
         } else {
-          if_block0 = create_if_block_9$5(ctx2);
+          if_block0 = create_if_block_10$5(ctx2);
           if_block0.c();
           transition_in(if_block0, 1);
           if_block0.m(t1.parentNode, t1);
@@ -119160,7 +119574,7 @@ function create_fragment$m(ctx) {
             transition_in(if_block2, 1);
           }
         } else {
-          if_block2 = create_if_block_4$7(ctx2);
+          if_block2 = create_if_block_5$6(ctx2);
           if_block2.c();
           transition_in(if_block2, 1);
           if_block2.m(div9, t17);
@@ -119273,6 +119687,55 @@ function create_fragment$m(ctx) {
 }
 const MODULE_ID$c = "multiversus-rpg";
 let totalPoints = 100;
+function formatPowerStructure(item) {
+  var _a, _b, _c, _d;
+  if (!item || item.type !== "power") {
+    return ((_a = item == null ? void 0 : item.system) == null ? void 0 : _a.description) || "Sem descrição.";
+  }
+  const flags = ((_b = item.flags) == null ? void 0 : _b["multiversus-rpg"]) || {};
+  const qualities = flags.qualities || [];
+  const getQ = (types) => qualities.filter((q) => {
+    var _a2, _b2;
+    return types.includes((_a2 = q.type) == null ? void 0 : _a2.toUpperCase()) || types.includes((_b2 = q.name) == null ? void 0 : _b2.toUpperCase());
+  });
+  const attackQ = getQ(["A", "ATAQUE"]);
+  const defenseQ = getQ(["D", "DEFESA"]);
+  const utilityQ = getQ(["U", "UTILIDADE"]);
+  let detailsHTML = "";
+  const formatCat = (list, label, color, icon) => {
+    if (!list.length) return "";
+    let h = `<div style="margin-top: 10px; border-left: 2px solid ${color}; padding-left: 8px;">
+                        <h4 style="margin: 0 0 5px 0; color: ${color}; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
+                            <span style="background: ${color}; color: #000; padding: 1px 4px; border-radius: 2px;">${icon}</span> ${label}
+                        </h4>`;
+    list.forEach((q) => {
+      h += `<div style="font-size: 11px; margin-bottom: 4px; color: #ddd; font-family: sans-serif;">
+                        <strong>${q.name || "Sub-rotina"}:</strong> ${q.description || "Sem descrição específica."}
+                      </div>`;
+    });
+    h += `</div>`;
+    return h;
+  };
+  detailsHTML += formatCat(attackQ, "ATAQUE", "#ff4444", "A");
+  detailsHTML += formatCat(defenseQ, "DEFESA", "#44aaff", "D");
+  detailsHTML += formatCat(utilityQ, "UTILIDADE", "#ffaa00", "U");
+  const sysNotes = flags.notes || flags.systemNotes || ((_c = item.system) == null ? void 0 : _c.notes) || ((_d = item.system) == null ? void 0 : _d.description);
+  const notesText = typeof sysNotes === "string" ? sysNotes : sysNotes == null ? void 0 : sysNotes.value;
+  if (notesText && notesText.trim() !== "" && notesText.trim() !== "<p></p>") {
+    detailsHTML += `<div style="margin-top: 10px; border-top: 1px dashed #00ff41; padding-top: 8px;">
+                                <h4 style="margin: 0 0 5px 0; color: #00ff41; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
+                                    NOTAS DE SISTEMA
+                                </h4>
+                                <div style="font-size: 11px; color: #ccc; font-family: sans-serif;">
+                                    ${notesText}
+                                </div>
+                            </div>`;
+  }
+  if (!detailsHTML) {
+    detailsHTML = `<div style="margin-top: 10px; font-style: italic; color: #888; font-size: 11px; font-family: monospace;">Nenhuma sub-rotina ou nota registrada.</div>`;
+  }
+  return detailsHTML;
+}
 function calculateUsedPoints(attrs, skls) {
   let pts = 0;
   for (let k in attrs) {
@@ -119303,6 +119766,12 @@ function instance$m($$self, $$props, $$invalidate) {
   let selectedOrigin = null;
   let rollCategory = "";
   let selectedTalents = [];
+  let expandedTalentsIds = /* @__PURE__ */ new Set();
+  function toggleTalentExpand(id) {
+    if (expandedTalentsIds.has(id)) expandedTalentsIds.delete(id);
+    else expandedTalentsIds.add(id);
+    $$invalidate(15, expandedTalentsIds);
+  }
   let attributes = {
     body: { name: "Corpo", val: 1 },
     coordination: { name: "Coordenação", val: 1 },
@@ -119352,7 +119821,7 @@ function instance$m($$self, $$props, $$invalidate) {
   };
   onMount(async () => {
     const oDict = await OriginDatabase.load();
-    $$invalidate(25, origins = Object.values(oDict));
+    $$invalidate(27, origins = Object.values(oDict));
     $$invalidate(6, archetypes = ArchetypeDatabase.getArchetypes());
   });
   async function updateGMConfig(type) {
@@ -119649,7 +120118,6 @@ function instance$m($$self, $$props, $$invalidate) {
       $$invalidate(10, progress = 0);
     }
   }
-  const func2 = (t, st) => st.id === t.id;
   const click_handler = () => dispatch2("close");
   function input0_input_handler() {
     bgUrl = this.value;
@@ -119679,13 +120147,14 @@ function instance$m($$self, $$props, $$invalidate) {
   }
   const click_handler_5 = (org) => $$invalidate(13, selectedOrigin = org);
   const click_handler_6 = () => $$invalidate(7, currentStep = 2);
-  const func_12 = (t, st) => st.id === t.id;
   const click_handler_7 = (t, arch) => toggleTalent(t, arch.id);
-  const click_handler_8 = () => $$invalidate(7, currentStep = 3);
-  const click_handler_9 = (key) => decreaseStat(attributes, key, true);
-  const click_handler_10 = (key) => increaseStat(attributes, key, true);
-  const click_handler_11 = (key) => decreaseStat(skills, key, false);
-  const click_handler_12 = (key) => increaseStat(skills, key, false);
+  const click_handler_8 = (t) => toggleTalentExpand(t.id);
+  const func2 = (t, st) => st.id === t.id;
+  const click_handler_9 = () => $$invalidate(7, currentStep = 3);
+  const click_handler_10 = (key) => decreaseStat(attributes, key, true);
+  const click_handler_11 = (key) => increaseStat(attributes, key, true);
+  const click_handler_12 = (key) => decreaseStat(skills, key, false);
+  const click_handler_13 = (key) => increaseStat(skills, key, false);
   function input_input_handler_1() {
     newCharName = this.value;
     $$invalidate(0, newCharName);
@@ -119693,12 +120162,12 @@ function instance$m($$self, $$props, $$invalidate) {
   function select_change_handler() {
     selectedPlayerId = select_value(this);
     $$invalidate(8, selectedPlayerId);
-    $$invalidate(18, playerList);
+    $$invalidate(19, playerList);
   }
   $$self.$$.update = () => {
     if ($$self.$$.dirty[0] & /*origins, originSearch*/
-    33554434) {
-      $$invalidate(16, filteredOrigins = origins.filter((o) => o.name.toLowerCase().includes(originSearch.toLowerCase())));
+    134217730) {
+      $$invalidate(17, filteredOrigins = origins.filter((o) => o.name.toLowerCase().includes(originSearch.toLowerCase())));
     }
     if ($$self.$$.dirty[0] & /*selectedTalents*/
     4) {
@@ -119706,15 +120175,15 @@ function instance$m($$self, $$props, $$invalidate) {
     }
     if ($$self.$$.dirty[0] & /*attributes, skills*/
     24) {
-      $$invalidate(26, usedPoints = calculateUsedPoints(attributes, skills));
+      $$invalidate(28, usedPoints = calculateUsedPoints(attributes, skills));
     }
     if ($$self.$$.dirty[0] & /*usedPoints*/
-    67108864) {
+    268435456) {
       $$invalidate(5, pointsLeft = totalPoints - usedPoints);
     }
     if ($$self.$$.dirty[0] & /*pointsLeft, newCharName*/
     33) {
-      $$invalidate(15, canProceedPoints = pointsLeft === 0 && newCharName.trim() !== "");
+      $$invalidate(16, canProceedPoints = pointsLeft === 0 && newCharName.trim() !== "");
     }
   };
   return [
@@ -119733,10 +120202,12 @@ function instance$m($$self, $$props, $$invalidate) {
     avatarUrl,
     selectedOrigin,
     rollCategory,
+    expandedTalentsIds,
     canProceedPoints,
     filteredOrigins,
     dispatch2,
     playerList,
+    toggleTalentExpand,
     updateGMConfig,
     rollOrigin,
     toggleTalent,
@@ -119745,7 +120216,6 @@ function instance$m($$self, $$props, $$invalidate) {
     confirmCreation,
     origins,
     usedPoints,
-    func2,
     click_handler,
     input0_input_handler,
     blur_handler,
@@ -119758,13 +120228,14 @@ function instance$m($$self, $$props, $$invalidate) {
     input_input_handler,
     click_handler_5,
     click_handler_6,
-    func_12,
     click_handler_7,
     click_handler_8,
+    func2,
     click_handler_9,
     click_handler_10,
     click_handler_11,
     click_handler_12,
+    click_handler_13,
     input_input_handler_1,
     select_change_handler
   ];
@@ -127463,6 +127934,13 @@ class SocialNetworkDB {
     const users = db.getFlag(MODULE_ID$6, "users") || {};
     return { posts, users };
   }
+  static async clearFeed() {
+    if (!game.user.isGM) return;
+    const db = await this.getDB();
+    if (!db) return;
+    await db.setFlag(MODULE_ID$6, "posts", []);
+    this.notifyUpdate();
+  }
   static async publishPost(authorId, text2, attachments, newFollowersGained, isPrivate = false) {
     const db = await this.getDB();
     if (!db) return;
@@ -127483,7 +127961,6 @@ class SocialNetworkDB {
       comments: []
     };
     posts.unshift(newPost);
-    if (posts.length > 500) posts.pop();
     await db.setFlag(MODULE_ID$6, "posts", posts);
     await db.setFlag(MODULE_ID$6, "users", users);
     this.notifyUpdate();
@@ -127567,6 +128044,10 @@ class SocialNetworkDB {
     this.notifyUpdate();
   }
 }
+const SocialNetworkDB$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  SocialNetworkDB
+}, Symbol.toStringTag, { value: "Module" }));
 const snPostsStore = writable([]);
 const snUsersStore = writable({});
 async function updateSNStore() {
@@ -129646,8 +130127,18 @@ function instance$c($$self, $$props, $$invalidate) {
   async function sendSignal() {
     rollCompleted = true;
     const setValues = validSets.map((s) => s.h);
-    let normalTens = rolledDice.filter((d) => d.val === 10 && d.type === "d").length;
-    let isCrit = normalTens >= 3;
+    let normalDiceCount = 0;
+    rolledDice.forEach((d) => {
+      if (d.type === "d") {
+        d._isFirst10 = normalDiceCount < 10;
+        normalDiceCount++;
+      } else {
+        d._isFirst10 = false;
+      }
+    });
+    let normalTens = rolledDice.filter((d) => d.val === 10 && d.type === "d" && d._isFirst10).length;
+    let critsAmount = Math.floor(normalTens / 3);
+    let isCrit = critsAmount >= 1;
     let content = `
             <div style="border: 1px solid #444; background: #fafafa; padding: 12px; font-family: sans-serif; color: #222; border-radius: 5px;">
                 ${imageUrl ? `<img src="${imageUrl}" style="width: 100%; border-radius: 4px; margin-bottom: 10px;"/>` : ""}
@@ -129656,12 +130147,12 @@ function instance$c($$self, $$props, $$invalidate) {
                     ${actionName}
                 </h3>
                 
-                ${isCrit ? `<div style="background: #000; color: #fff; text-align: center; font-weight: bold; padding: 5px; margin-bottom: 10px; border: 1px dashed #fff; border-radius: 4px; box-shadow: 0 0 10px #000;">CRÍTICO!</div>` : ""}
+                ${isCrit ? `<div style="background: #000; color: #fff; text-align: center; font-weight: bold; padding: 5px; margin-bottom: 10px; border: 1px dashed #fff; border-radius: 4px; box-shadow: 0 0 10px #000;">CRÍTICO ${critsAmount}x!</div>` : ""}
 
                 <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px;">
                     ${rolledDice.map((d) => {
       const isSet = setValues.includes(d.val);
-      const isWhiteCrit = isCrit && d.val === 10 && d.type === "d";
+      const isWhiteCrit = isCrit && d.val === 10 && d.type === "d" && d._isFirst10;
       const borderColor = isWhiteCrit ? "#ffffff" : d.type === "hd" ? "#cc0000" : d.type === "wd" ? "#b8860b" : "#333";
       const bgColor = isWhiteCrit ? "#000000" : isSet ? "#e6f7ff" : "#eee";
       const textColor = isWhiteCrit ? "#ffffff" : "#222";
@@ -130082,7 +130573,6 @@ class SocialHubDatabase {
       hubChatStore2.update((messages) => {
         if (messages.find((m) => m.id === finalMsg.id)) return messages;
         const arr = [...messages, finalMsg];
-        if (arr.length > 200) arr.shift();
         return arr;
       });
       Hooks.callAll("socialHubUpdate");
@@ -152800,35 +153290,48 @@ function get_if_ctx(ctx) {
     /*item*/
     child_ctx[88].set.targetId
   );
-  child_ctx[107] = constants_0;
+  child_ctx[109] = constants_0;
   return child_ctx;
 }
 function get_each_context_7(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[93] = list[i];
+  child_ctx[112] = i;
   const constants_0 = (
     /*isCrit*/
-    child_ctx[106] && /*die*/
-    child_ctx[93].type === "d"
+    child_ctx[108] && /*die*/
+    child_ctx[93].type === "d" && /*idx*/
+    child_ctx[112] < /*normalTens*/
+    child_ctx[106]
   );
-  child_ctx[108] = constants_0;
+  child_ctx[110] = constants_0;
   return child_ctx;
 }
 function get_if_ctx_1(ctx) {
   const child_ctx = ctx.slice();
   const constants_0 = (
     /*item*/
-    child_ctx[88].set.h === 10 ? (
-      /*item*/
-      (child_ctx[88].set.dice || []).filter((d) => d.type === "d").length
-    ) : 0
+    (child_ctx[88].res.rolledDice || []).filter((d) => d.type === "d").slice(0, 10)
   );
   child_ctx[105] = constants_0;
   const constants_1 = (
-    /*normalTens*/
-    child_ctx[105] >= 3
+    /*item*/
+    child_ctx[88].set.h === 10 ? (
+      /*first10Normals*/
+      child_ctx[105].filter((d) => d.val === 10).length
+    ) : 0
   );
   child_ctx[106] = constants_1;
+  const constants_2 = Math.floor(
+    /*normalTens*/
+    child_ctx[106] / 3
+  );
+  child_ctx[107] = constants_2;
+  const constants_3 = (
+    /*critsAmount*/
+    child_ctx[107] >= 1
+  );
+  child_ctx[108] = constants_3;
   return child_ctx;
 }
 function get_if_ctx_2(ctx) {
@@ -152838,7 +153341,7 @@ function get_if_ctx_2(ctx) {
     child_ctx[5].length > 0 && /*combatResolutions*/
     child_ctx[5].every((a) => a.public)
   );
-  child_ctx[111] = constants_0;
+  child_ctx[113] = constants_0;
   return child_ctx;
 }
 function get_each_context_8(ctx, list, i) {
@@ -152850,7 +153353,7 @@ function get_each_context_8(ctx, list, i) {
     ((_a = child_ctx[8]) == null ? void 0 : _a.id) === /*c*/
     child_ctx[98].id
   );
-  child_ctx[112] = constants_0;
+  child_ctx[114] = constants_0;
   return child_ctx;
 }
 function get_each_context_9(ctx, list, i) {
@@ -153980,7 +154483,7 @@ function create_each_block_8(ctx) {
   let dispose;
   let if_block = (
     /*isCurrent*/
-    ctx[112] && create_if_block_21()
+    ctx[114] && create_if_block_21()
   );
   function contextmenu_handler() {
     return (
@@ -154012,7 +154515,7 @@ function create_each_block_8(ctx) {
       attr(img, "alt", "c");
       attr(img, "class", "svelte-1al12rf");
       attr(div, "class", div_class_value = "init-item " + /*isCurrent*/
-      (ctx[112] ? "active" : "") + " svelte-1al12rf");
+      (ctx[114] ? "active" : "") + " svelte-1al12rf");
       attr(div, "title", div_title_value = /*c*/
       ctx[98].name + " (Score: " + /*c*/
       ctx[98].initiative + ") " + /*isGM*/
@@ -154041,7 +154544,7 @@ function create_each_block_8(ctx) {
       }
       if (
         /*isCurrent*/
-        ctx[112]
+        ctx[114]
       ) {
         if (if_block) ;
         else {
@@ -154055,7 +154558,7 @@ function create_each_block_8(ctx) {
       }
       if (dirty[0] & /*currentTurnCombatant, combatants*/
       260 && div_class_value !== (div_class_value = "init-item " + /*isCurrent*/
-      (ctx[112] ? "active" : "") + " svelte-1al12rf")) {
+      (ctx[114] ? "active" : "") + " svelte-1al12rf")) {
         attr(div, "class", div_class_value);
       }
       if (dirty[0] & /*combatants, isGM*/
@@ -154187,7 +154690,7 @@ function create_if_block_19(ctx) {
       attr(i0, "class", "fas fa-eye");
       attr(button0, "title", "Alternar Visibilidade de Todas as Resoluções");
       attr(button0, "class", button0_class_value = "eye-btn " + /*allPublic*/
-      (ctx[111] ? "active" : "") + " svelte-1al12rf");
+      (ctx[113] ? "active" : "") + " svelte-1al12rf");
       attr(button1, "title", "Limpar Resoluções");
       attr(button1, "class", "clear-btn svelte-1al12rf");
     },
@@ -154217,7 +154720,7 @@ function create_if_block_19(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*combatResolutions*/
       32 && button0_class_value !== (button0_class_value = "eye-btn " + /*allPublic*/
-      (ctx2[111] ? "active" : "") + " svelte-1al12rf")) {
+      (ctx2[113] ? "active" : "") + " svelte-1al12rf")) {
         attr(button0, "class", button0_class_value);
       }
     },
@@ -154484,7 +154987,7 @@ function create_if_block_12(ctx) {
   let t7;
   let if_block0 = (
     /*isCrit*/
-    ctx[106] && create_if_block_16()
+    ctx[108] && create_if_block_16(ctx)
   );
   let each_value_7 = ensure_array_like(
     /*item*/
@@ -154593,11 +155096,12 @@ function create_if_block_12(ctx) {
       ctx2[88].set.h + "")) set_data(t3, t3_value);
       if (
         /*isCrit*/
-        ctx2[106]
+        ctx2[108]
       ) {
-        if (if_block0) ;
-        else {
-          if_block0 = create_if_block_16();
+        if (if_block0) {
+          if_block0.p(ctx2, dirty);
+        } else {
+          if_block0 = create_if_block_16(ctx2);
           if_block0.c();
           if_block0.m(div0, t5);
         }
@@ -154654,10 +155158,19 @@ function create_if_block_12(ctx) {
 }
 function create_if_block_16(ctx) {
   let span;
+  let t0;
+  let t1_value = (
+    /*critsAmount*/
+    ctx[107] + ""
+  );
+  let t1;
+  let t2;
   return {
     c() {
       span = element("span");
-      span.textContent = "CRÍTICO";
+      t0 = text("CRÍTICO ");
+      t1 = text(t1_value);
+      t2 = text("x");
       set_style(span, "font-size", "8px");
       set_style(span, "background", "#fff");
       set_style(span, "color", "#000");
@@ -154669,6 +155182,14 @@ function create_if_block_16(ctx) {
     },
     m(target, anchor) {
       insert(target, span, anchor);
+      append(span, t0);
+      append(span, t1);
+      append(span, t2);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*visibleSets*/
+      2097152 && t1_value !== (t1_value = /*critsAmount*/
+      ctx2[107] + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -154713,7 +155234,7 @@ function create_each_block_7(ctx) {
         div,
         "background",
         /*isCritDie*/
-        ctx[108] ? "#000" : (
+        ctx[110] ? "#000" : (
           /*getDieBoxBg*/
           ctx[25](
             /*item*/
@@ -154725,11 +155246,11 @@ function create_each_block_7(ctx) {
         div,
         "border",
         /*isCritDie*/
-        ctx[108] ? "1px solid #fff" : "none"
+        ctx[110] ? "1px solid #fff" : "none"
       );
       set_style(div, "border-radius", "2px");
       set_style(div, "box-shadow", "0 0 5px " + /*isCritDie*/
-      (ctx[108] ? "#fff" : (
+      (ctx[110] ? "#fff" : (
         /*getBorderColor*/
         ctx[24](
           /*item*/
@@ -154745,7 +155266,7 @@ function create_each_block_7(ctx) {
         div,
         "color",
         /*isCritDie*/
-        ctx[108] ? "#fff" : getDieTextColor(
+        ctx[110] ? "#fff" : getDieTextColor(
           /*item*/
           ctx[88].res.type
         )
@@ -154783,7 +155304,7 @@ function create_each_block_7(ctx) {
           div,
           "background",
           /*isCritDie*/
-          ctx[108] ? "#000" : (
+          ctx[110] ? "#000" : (
             /*getDieBoxBg*/
             ctx[25](
               /*item*/
@@ -154798,13 +155319,13 @@ function create_each_block_7(ctx) {
           div,
           "border",
           /*isCritDie*/
-          ctx[108] ? "1px solid #fff" : "none"
+          ctx[110] ? "1px solid #fff" : "none"
         );
       }
       if (dirty[0] & /*visibleSets*/
       2097152) {
         set_style(div, "box-shadow", "0 0 5px " + /*isCritDie*/
-        (ctx[108] ? "#fff" : (
+        (ctx[110] ? "#fff" : (
           /*getBorderColor*/
           ctx[24](
             /*item*/
@@ -154818,7 +155339,7 @@ function create_each_block_7(ctx) {
           div,
           "color",
           /*isCritDie*/
-          ctx[108] ? "#fff" : getDieTextColor(
+          ctx[110] ? "#fff" : getDieTextColor(
             /*item*/
             ctx[88].res.type
           )
@@ -154894,7 +155415,7 @@ function create_if_block_14(ctx) {
   let dispose;
   let if_block = (
     /*tgt*/
-    ctx[107] && create_if_block_15(ctx)
+    ctx[109] && create_if_block_15(ctx)
   );
   function click_handler_16() {
     return (
@@ -154912,7 +155433,7 @@ function create_if_block_14(ctx) {
       if (if_block) if_block.c();
       attr(div, "class", "target-btn svelte-1al12rf");
       attr(div, "title", div_title_value = "Alvo: " + /*tgt*/
-      ((_a = ctx[107]) == null ? void 0 : _a.name));
+      ((_a = ctx[109]) == null ? void 0 : _a.name));
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -154927,7 +155448,7 @@ function create_if_block_14(ctx) {
       ctx = new_ctx;
       if (
         /*tgt*/
-        ctx[107]
+        ctx[109]
       ) {
         if (if_block) {
           if_block.p(ctx, dirty);
@@ -154942,7 +155463,7 @@ function create_if_block_14(ctx) {
       }
       if (dirty[0] & /*visibleSets*/
       2097152 && div_title_value !== (div_title_value = "Alvo: " + /*tgt*/
-      ((_a = ctx[107]) == null ? void 0 : _a.name))) {
+      ((_a = ctx[109]) == null ? void 0 : _a.name))) {
         attr(div, "title", div_title_value);
       }
     },
@@ -155002,7 +155523,7 @@ function create_if_block_15(ctx) {
     c() {
       img = element("img");
       if (!src_url_equal(img.src, img_src_value = /*tgt*/
-      ctx[107].img)) attr(img, "src", img_src_value);
+      ctx[109].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "Tgt");
       set_style(img, "width", "100%");
       set_style(img, "height", "100%");
@@ -155015,7 +155536,7 @@ function create_if_block_15(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*visibleSets*/
       2097152 && !src_url_equal(img.src, img_src_value = /*tgt*/
-      ctx2[107].img)) {
+      ctx2[109].img)) {
         attr(img, "src", img_src_value);
       }
     },
@@ -158419,6 +158940,12 @@ Hooks.on("deleteChatMessage", (message) => {
     Promise.resolve().then(() => SocialHubStore).then(({ updateHubStore: updateHubStore2 }) => {
       updateHubStore2();
       Hooks.callAll("socialHubUpdate");
+    }).catch(() => {
+    });
+  }
+  if (game.messages && game.messages.size === 0) {
+    Promise.resolve().then(() => SocialNetworkDB$1).then(({ SocialNetworkDB: SocialNetworkDB2 }) => {
+      SocialNetworkDB2.clearFeed();
     }).catch(() => {
     });
   }
