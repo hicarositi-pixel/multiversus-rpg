@@ -200,9 +200,16 @@
             if (hyperSum > 0) extraPercent = 2 + (hyperSum * 0.1);
             else extraPercent = 0;
         }
-        else {
+        else if (currentFollowers < 150000000) {
             baseDiceQty = 10; baseDiceType = 12;
             if (hyperSum > 0) extraPercent = (hyperSum * 0.1);
+            else extraPercent = 0;
+        }
+        else {
+            // Após 150 Milhões, freia drasticamente para impedir que atinjam 200M facilmente
+            baseDiceQty = 5; baseDiceType = 12;
+            modMult = Math.max(1, Math.floor(modMult * 0.1));
+            if (hyperSum > 0) extraPercent = (hyperSum * 0.01);
             else extraPercent = 0;
         }
 

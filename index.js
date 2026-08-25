@@ -136831,10 +136831,16 @@ function instance$b($$self, $$props, $$invalidate) {
       baseDiceType = 12;
       if (hyperSum > 0) extraPercent = 2 + hyperSum * 0.1;
       else extraPercent = 0;
-    } else {
+    } else if (currentFollowers < 15e7) {
       baseDiceQty = 10;
       baseDiceType = 12;
       if (hyperSum > 0) extraPercent = hyperSum * 0.1;
+      else extraPercent = 0;
+    } else {
+      baseDiceQty = 5;
+      baseDiceType = 12;
+      modMult = Math.max(1, Math.floor(modMult * 0.1));
+      if (hyperSum > 0) extraPercent = hyperSum * 0.01;
       else extraPercent = 0;
     }
     let finalDiceQty = baseDiceQty * modMult;
