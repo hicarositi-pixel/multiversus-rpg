@@ -7690,7 +7690,7 @@ function create_if_block_13$h(ctx) {
     }
   };
 }
-function create_if_block_12$i(ctx) {
+function create_if_block_12$j(ctx) {
   let button;
   let button_transition;
   let current;
@@ -9667,7 +9667,7 @@ function create_fragment$1i(ctx) {
   );
   let if_block9 = !/*gmMode*/
   ctx[2] && /*missingXP*/
-  ctx[45] <= 0 && create_if_block_12$i(ctx);
+  ctx[45] <= 0 && create_if_block_12$j(ctx);
   let if_block10 = (
     /*isGM*/
     ctx[57] && create_if_block_10$n(ctx)
@@ -10975,7 +10975,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block9, 1);
           }
         } else {
-          if_block9 = create_if_block_12$i(ctx2);
+          if_block9 = create_if_block_12$j(ctx2);
           if_block9.c();
           transition_in(if_block9, 1);
           if_block9.m(div4, null);
@@ -15070,7 +15070,7 @@ function create_else_block_2$i(ctx) {
   let if_block1_anchor;
   let if_block0 = (
     /*limb*/
-    ((_a = ctx[140].alt) == null ? void 0 : _a.lar) > 0 && create_if_block_12$h(ctx)
+    ((_a = ctx[140].alt) == null ? void 0 : _a.lar) > 0 && create_if_block_12$i(ctx)
   );
   let if_block1 = (
     /*limb*/
@@ -15098,7 +15098,7 @@ function create_else_block_2$i(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_12$h(ctx2);
+          if_block0 = create_if_block_12$i(ctx2);
           if_block0.c();
           if_block0.m(t.parentNode, t);
         }
@@ -15198,7 +15198,7 @@ function create_if_block_8$v(ctx) {
     }
   };
 }
-function create_if_block_12$h(ctx) {
+function create_if_block_12$i(ctx) {
   let span;
   let t_value = (
     /*limb*/
@@ -40623,21 +40623,49 @@ class InventoryCard extends SvelteComponent {
 }
 function get_each_context$P(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[59] = list[i];
+  child_ctx[60] = list[i];
   return child_ctx;
 }
 function get_each_context_1$E(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[62] = list[i];
-  child_ctx[63] = list;
-  child_ctx[64] = i;
+  child_ctx[63] = list[i];
+  child_ctx[64] = list;
+  child_ctx[65] = i;
   return child_ctx;
 }
 function get_each_context_2$n(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[65] = list[i];
-  child_ctx[67] = i;
+  child_ctx[66] = list[i];
+  child_ctx[68] = i;
   return child_ctx;
+}
+function create_if_block_12$h(ctx) {
+  let img;
+  let img_src_value;
+  return {
+    c() {
+      img = element("img");
+      if (!src_url_equal(img.src, img_src_value = /*currentBg*/
+      ctx[13])) attr(img, "src", img_src_value);
+      attr(img, "class", "bg-layer svelte-1bdln1y");
+      attr(img, "alt", "bg");
+    },
+    m(target, anchor) {
+      insert(target, img, anchor);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentBg*/
+      8192 && !src_url_equal(img.src, img_src_value = /*currentBg*/
+      ctx2[13])) {
+        attr(img, "src", img_src_value);
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(img);
+      }
+    }
+  };
 }
 function create_if_block_11$h(ctx) {
   let div;
@@ -40654,11 +40682,11 @@ function create_if_block_11$h(ctx) {
       t1 = space();
       button1 = element("button");
       button1.innerHTML = `<i class="fas fa-sync"></i> RESETAR LAYOUT`;
-      attr(button0, "class", "add svelte-1dymk5b");
-      attr(button1, "class", "add svelte-1dymk5b");
+      attr(button0, "class", "add svelte-1bdln1y");
+      attr(button1, "class", "add svelte-1bdln1y");
       set_style(button1, "background", "#ff4444");
       set_style(button1, "color", "white");
-      attr(div, "class", "edit-overlay-controls svelte-1dymk5b");
+      attr(div, "class", "edit-overlay-controls svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -40671,13 +40699,13 @@ function create_if_block_11$h(ctx) {
             button0,
             "click",
             /*addSlot*/
-            ctx[16]
+            ctx[17]
           ),
           listen(
             button1,
             "click",
             /*resetLayout*/
-            ctx[15]
+            ctx[16]
           )
         ];
         mounted = true;
@@ -40697,14 +40725,14 @@ function create_else_block_3$6(ctx) {
   let span0;
   let t0_value = (
     /*slot*/
-    ctx[62].loc + ""
+    ctx[63].loc + ""
   );
   let t0;
   let t1;
   let span1;
   let t2_value = (
     /*slot*/
-    ctx[62].name + ""
+    ctx[63].name + ""
   );
   let t2;
   return {
@@ -40714,8 +40742,8 @@ function create_else_block_3$6(ctx) {
       t1 = space();
       span1 = element("span");
       t2 = text(t2_value);
-      attr(span0, "class", "loc svelte-1dymk5b");
-      attr(span1, "class", "name svelte-1dymk5b");
+      attr(span0, "class", "loc svelte-1bdln1y");
+      attr(span1, "class", "name svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, span0, anchor);
@@ -40727,10 +40755,10 @@ function create_else_block_3$6(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t0_value !== (t0_value = /*slot*/
-      ctx2[62].loc + "")) set_data(t0, t0_value);
+      ctx2[63].loc + "")) set_data(t0, t0_value);
       if (dirty[0] & /*equipmentSlots*/
       2 && t2_value !== (t2_value = /*slot*/
-      ctx2[62].name + "")) set_data(t2, t2_value);
+      ctx2[63].name + "")) set_data(t2, t2_value);
     },
     d(detaching) {
       if (detaching) {
@@ -40748,21 +40776,21 @@ function create_if_block_10$k(ctx) {
   let mounted;
   let dispose;
   function input0_input_handler() {
-    ctx[33].call(
+    ctx[34].call(
       input0,
       /*each_value_1*/
-      ctx[63],
+      ctx[64],
       /*slot_index*/
-      ctx[64]
+      ctx[65]
     );
   }
   function input1_input_handler() {
-    ctx[34].call(
+    ctx[35].call(
       input1,
       /*each_value_1*/
-      ctx[63],
+      ctx[64],
       /*slot_index*/
-      ctx[64]
+      ctx[65]
     );
   }
   return {
@@ -40770,23 +40798,23 @@ function create_if_block_10$k(ctx) {
       input0 = element("input");
       t = space();
       input1 = element("input");
-      attr(input0, "class", "mini-edit svelte-1dymk5b");
+      attr(input0, "class", "mini-edit svelte-1bdln1y");
       attr(input0, "placeholder", "Loc");
-      attr(input1, "class", "mini-edit svelte-1dymk5b");
+      attr(input1, "class", "mini-edit svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, input0, anchor);
       set_input_value(
         input0,
         /*slot*/
-        ctx[62].loc
+        ctx[63].loc
       );
       insert(target, t, anchor);
       insert(target, input1, anchor);
       set_input_value(
         input1,
         /*slot*/
-        ctx[62].name
+        ctx[63].name
       );
       if (!mounted) {
         dispose = [
@@ -40795,14 +40823,14 @@ function create_if_block_10$k(ctx) {
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           ),
           listen(input1, "input", input1_input_handler),
           listen(
             input1,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           )
         ];
         mounted = true;
@@ -40812,20 +40840,20 @@ function create_if_block_10$k(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*equipmentSlots*/
       2 && input0.value !== /*slot*/
-      ctx[62].loc) {
+      ctx[63].loc) {
         set_input_value(
           input0,
           /*slot*/
-          ctx[62].loc
+          ctx[63].loc
         );
       }
       if (dirty[0] & /*equipmentSlots*/
       2 && input1.value !== /*slot*/
-      ctx[62].name) {
+      ctx[63].name) {
         set_input_value(
           input1,
           /*slot*/
-          ctx[62].name
+          ctx[63].name
         );
       }
     },
@@ -40846,7 +40874,7 @@ function create_else_block_2$e(ctx) {
     c() {
       div = element("div");
       div.textContent = "VAZIO";
-      attr(div, "class", "empty-slot-hint svelte-1dymk5b");
+      attr(div, "class", "empty-slot-hint svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -40878,14 +40906,14 @@ function create_if_block_8$p(ctx) {
       if (!src_url_equal(img.src, img_src_value = /*activeSet*/
       ctx[4] === 1 ? (
         /*slot*/
-        ctx[62].itemUrl
+        ctx[63].itemUrl
       ) : (
         /*slot*/
-        (_a = ctx[62].alt) == null ? void 0 : _a.itemUrl
+        (_a = ctx[63].alt) == null ? void 0 : _a.itemUrl
       ))) attr(img, "src", img_src_value);
       attr(img, "alt", "item");
-      attr(img, "class", "svelte-1dymk5b");
-      attr(div, "class", "item-pic-frame svelte-1dymk5b");
+      attr(img, "class", "svelte-1bdln1y");
+      attr(div, "class", "item-pic-frame svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -40899,10 +40927,10 @@ function create_if_block_8$p(ctx) {
       18 && !src_url_equal(img.src, img_src_value = /*activeSet*/
       ctx2[4] === 1 ? (
         /*slot*/
-        ctx2[62].itemUrl
+        ctx2[63].itemUrl
       ) : (
         /*slot*/
-        (_a = ctx2[62].alt) == null ? void 0 : _a.itemUrl
+        (_a = ctx2[63].alt) == null ? void 0 : _a.itemUrl
       ))) {
         attr(img, "src", img_src_value);
       }
@@ -40937,9 +40965,9 @@ function create_if_block_9$n(ctx) {
   function click_handler_3() {
     return (
       /*click_handler_3*/
-      ctx[35](
+      ctx[36](
         /*slot*/
-        ctx[62]
+        ctx[63]
       )
     );
   }
@@ -40947,7 +40975,7 @@ function create_if_block_9$n(ctx) {
     c() {
       button = element("button");
       button.textContent = "X";
-      attr(button, "class", "btn-unequip svelte-1dymk5b");
+      attr(button, "class", "btn-unequip svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, button, anchor);
@@ -40975,13 +41003,13 @@ function create_each_block_2$n(ctx) {
     c() {
       div = element("div");
       attr(div, "class", div_class_value = "hp-slot " + /*i*/
-      (ctx[67] < /*slot*/
-      ctx[62].killing ? "killing" : (
+      (ctx[68] < /*slot*/
+      ctx[63].killing ? "killing" : (
         /*i*/
-        ctx[67] < /*slot*/
-        ctx[62].killing + /*slot*/
-        ctx[62].shock ? "shock" : "empty"
-      )) + " svelte-1dymk5b");
+        ctx[68] < /*slot*/
+        ctx[63].killing + /*slot*/
+        ctx[63].shock ? "shock" : "empty"
+      )) + " svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -40989,13 +41017,13 @@ function create_each_block_2$n(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && div_class_value !== (div_class_value = "hp-slot " + /*i*/
-      (ctx2[67] < /*slot*/
-      ctx2[62].killing ? "killing" : (
+      (ctx2[68] < /*slot*/
+      ctx2[63].killing ? "killing" : (
         /*i*/
-        ctx2[67] < /*slot*/
-        ctx2[62].killing + /*slot*/
-        ctx2[62].shock ? "shock" : "empty"
-      )) + " svelte-1dymk5b")) {
+        ctx2[68] < /*slot*/
+        ctx2[63].killing + /*slot*/
+        ctx2[63].shock ? "shock" : "empty"
+      )) + " svelte-1bdln1y")) {
         attr(div, "class", div_class_value);
       }
     },
@@ -41012,11 +41040,11 @@ function create_else_block_1$p(ctx) {
   let if_block1_anchor;
   let if_block0 = (
     /*slot*/
-    ((_a = ctx[62].alt) == null ? void 0 : _a.lar) > 0 && create_if_block_7$s(ctx)
+    ((_a = ctx[63].alt) == null ? void 0 : _a.lar) > 0 && create_if_block_7$s(ctx)
   );
   let if_block1 = (
     /*slot*/
-    ((_b = ctx[62].alt) == null ? void 0 : _b.har) > 0 && create_if_block_6$w(ctx)
+    ((_b = ctx[63].alt) == null ? void 0 : _b.har) > 0 && create_if_block_6$w(ctx)
   );
   return {
     c() {
@@ -41035,7 +41063,7 @@ function create_else_block_1$p(ctx) {
       var _a2, _b2;
       if (
         /*slot*/
-        ((_a2 = ctx2[62].alt) == null ? void 0 : _a2.lar) > 0
+        ((_a2 = ctx2[63].alt) == null ? void 0 : _a2.lar) > 0
       ) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
@@ -41050,7 +41078,7 @@ function create_else_block_1$p(ctx) {
       }
       if (
         /*slot*/
-        ((_b2 = ctx2[62].alt) == null ? void 0 : _b2.har) > 0
+        ((_b2 = ctx2[63].alt) == null ? void 0 : _b2.har) > 0
       ) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
@@ -41079,11 +41107,11 @@ function create_if_block_3$J(ctx) {
   let if_block1_anchor;
   let if_block0 = (
     /*slot*/
-    ctx[62].lar > 0 && create_if_block_5$w(ctx)
+    ctx[63].lar > 0 && create_if_block_5$w(ctx)
   );
   let if_block1 = (
     /*slot*/
-    ctx[62].har > 0 && create_if_block_4$C(ctx)
+    ctx[63].har > 0 && create_if_block_4$C(ctx)
   );
   return {
     c() {
@@ -41101,7 +41129,7 @@ function create_if_block_3$J(ctx) {
     p(ctx2, dirty) {
       if (
         /*slot*/
-        ctx2[62].lar > 0
+        ctx2[63].lar > 0
       ) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
@@ -41116,7 +41144,7 @@ function create_if_block_3$J(ctx) {
       }
       if (
         /*slot*/
-        ctx2[62].har > 0
+        ctx2[63].har > 0
       ) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
@@ -41144,14 +41172,14 @@ function create_if_block_7$s(ctx) {
   let span;
   let t_value = (
     /*slot*/
-    ctx[62].alt.lar + ""
+    ctx[63].alt.lar + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag l svelte-1dymk5b");
+      attr(span, "class", "a-flag l svelte-1bdln1y");
       attr(span, "title", "Leve");
     },
     m(target, anchor) {
@@ -41161,7 +41189,7 @@ function create_if_block_7$s(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t_value !== (t_value = /*slot*/
-      ctx2[62].alt.lar + "")) set_data(t, t_value);
+      ctx2[63].alt.lar + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -41174,14 +41202,14 @@ function create_if_block_6$w(ctx) {
   let span;
   let t_value = (
     /*slot*/
-    ctx[62].alt.har + ""
+    ctx[63].alt.har + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag h svelte-1dymk5b");
+      attr(span, "class", "a-flag h svelte-1bdln1y");
       attr(span, "title", "Pesada");
     },
     m(target, anchor) {
@@ -41191,7 +41219,7 @@ function create_if_block_6$w(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t_value !== (t_value = /*slot*/
-      ctx2[62].alt.har + "")) set_data(t, t_value);
+      ctx2[63].alt.har + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -41204,14 +41232,14 @@ function create_if_block_5$w(ctx) {
   let span;
   let t_value = (
     /*slot*/
-    ctx[62].lar + ""
+    ctx[63].lar + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag l svelte-1dymk5b");
+      attr(span, "class", "a-flag l svelte-1bdln1y");
       attr(span, "title", "Leve");
     },
     m(target, anchor) {
@@ -41221,7 +41249,7 @@ function create_if_block_5$w(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t_value !== (t_value = /*slot*/
-      ctx2[62].lar + "")) set_data(t, t_value);
+      ctx2[63].lar + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -41234,14 +41262,14 @@ function create_if_block_4$C(ctx) {
   let span;
   let t_value = (
     /*slot*/
-    ctx[62].har + ""
+    ctx[63].har + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag h svelte-1dymk5b");
+      attr(span, "class", "a-flag h svelte-1bdln1y");
       attr(span, "title", "Pesada");
     },
     m(target, anchor) {
@@ -41251,7 +41279,7 @@ function create_if_block_4$C(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t_value !== (t_value = /*slot*/
-      ctx2[62].har + "")) set_data(t, t_value);
+      ctx2[63].har + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -41267,9 +41295,9 @@ function create_if_block_2$O(ctx) {
   function click_handler_4() {
     return (
       /*click_handler_4*/
-      ctx[36](
+      ctx[37](
         /*slot*/
-        ctx[62]
+        ctx[63]
       )
     );
   }
@@ -41277,7 +41305,7 @@ function create_if_block_2$O(ctx) {
     c() {
       button = element("button");
       button.textContent = "X";
-      attr(button, "class", "node-del svelte-1dymk5b");
+      attr(button, "class", "node-del svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, button, anchor);
@@ -41327,10 +41355,10 @@ function create_each_block_1$E(key_1, ctx) {
       /*activeSet*/
       ctx2[4] === 1 ? (
         /*slot*/
-        ctx2[62].itemUrl
+        ctx2[63].itemUrl
       ) : (
         /*slot*/
-        (_a = ctx2[62].alt) == null ? void 0 : _a.itemUrl
+        (_a = ctx2[63].alt) == null ? void 0 : _a.itemUrl
       )
     ) return create_if_block_8$p;
     return create_else_block_2$e;
@@ -41339,7 +41367,7 @@ function create_each_block_1$E(key_1, ctx) {
   let if_block1 = current_block_type_1(ctx);
   let each_value_2 = ensure_array_like(Array(
     /*slot*/
-    ctx[62].hp
+    ctx[63].hp
   ));
   let each_blocks = [];
   for (let i = 0; i < each_value_2.length; i += 1) {
@@ -41361,9 +41389,9 @@ function create_each_block_1$E(key_1, ctx) {
   function dragstart_handler(...args) {
     return (
       /*dragstart_handler*/
-      ctx[37](
+      ctx[38](
         /*slot*/
-        ctx[62],
+        ctx[63],
         ...args
       )
     );
@@ -41371,9 +41399,9 @@ function create_each_block_1$E(key_1, ctx) {
   function drop_handler(...args) {
     return (
       /*drop_handler*/
-      ctx[38](
+      ctx[39](
         /*slot*/
-        ctx[62],
+        ctx[63],
         ...args
       )
     );
@@ -41381,9 +41409,9 @@ function create_each_block_1$E(key_1, ctx) {
   function click_handler_5() {
     return (
       /*click_handler_5*/
-      ctx[39](
+      ctx[40](
         /*slot*/
-        ctx[62]
+        ctx[63]
       )
     );
   }
@@ -41408,24 +41436,24 @@ function create_each_block_1$E(key_1, ctx) {
       t3 = space();
       if (if_block3) if_block3.c();
       t4 = space();
-      attr(div0, "class", "node-header svelte-1dymk5b");
-      attr(div1, "class", "equipped-item-area svelte-1dymk5b");
-      attr(div2, "class", "hp-grid svelte-1dymk5b");
-      attr(div3, "class", "armor-flags svelte-1dymk5b");
+      attr(div0, "class", "node-header svelte-1bdln1y");
+      attr(div1, "class", "equipped-item-area svelte-1bdln1y");
+      attr(div2, "class", "hp-grid svelte-1bdln1y");
+      attr(div3, "class", "armor-flags svelte-1bdln1y");
       attr(div4, "class", div4_class_value = "limb-node " + /*selectedSlotId*/
       (ctx[2] === /*slot*/
-      ctx[62].id ? "selected" : "") + " svelte-1dymk5b");
+      ctx[63].id ? "selected" : "") + " svelte-1bdln1y");
       set_style(
         div4,
         "left",
         /*slot*/
-        ctx[62].x + "%"
+        ctx[63].x + "%"
       );
       set_style(
         div4,
         "top",
         /*slot*/
-        ctx[62].y + "%"
+        ctx[63].y + "%"
       );
       attr(
         div4,
@@ -41460,7 +41488,7 @@ function create_each_block_1$E(key_1, ctx) {
           listen(div4, "dragstart", dragstart_handler),
           listen(div4, "dragover", prevent_default(
             /*dragover_handler_1*/
-            ctx[29]
+            ctx[30]
           )),
           listen(div4, "drop", drop_handler),
           listen(div4, "click", click_handler_5)
@@ -41494,7 +41522,7 @@ function create_each_block_1$E(key_1, ctx) {
       2) {
         each_value_2 = ensure_array_like(Array(
           /*slot*/
-          ctx[62].hp
+          ctx[63].hp
         ));
         let i;
         for (i = 0; i < each_value_2.length; i += 1) {
@@ -41540,7 +41568,7 @@ function create_each_block_1$E(key_1, ctx) {
       if (dirty[0] & /*selectedSlotId, equipmentSlots*/
       6 && div4_class_value !== (div4_class_value = "limb-node " + /*selectedSlotId*/
       (ctx[2] === /*slot*/
-      ctx[62].id ? "selected" : "") + " svelte-1dymk5b")) {
+      ctx[63].id ? "selected" : "") + " svelte-1bdln1y")) {
         attr(div4, "class", div4_class_value);
       }
       if (dirty[0] & /*equipmentSlots*/
@@ -41549,7 +41577,7 @@ function create_each_block_1$E(key_1, ctx) {
           div4,
           "left",
           /*slot*/
-          ctx[62].x + "%"
+          ctx[63].x + "%"
         );
       }
       if (dirty[0] & /*equipmentSlots*/
@@ -41558,7 +41586,7 @@ function create_each_block_1$E(key_1, ctx) {
           div4,
           "top",
           /*slot*/
-          ctx[62].y + "%"
+          ctx[63].y + "%"
         );
       }
       if (dirty[0] & /*editingMode*/
@@ -41685,41 +41713,41 @@ function create_if_block$$(ctx) {
       button2 = element("button");
       button2.innerHTML = `<i class="fas fa-tools"></i>`;
       attr(input0, "type", "number");
-      attr(input0, "class", "svelte-1dymk5b");
-      attr(label0, "class", "svelte-1dymk5b");
-      attr(div0, "class", "armor-edit svelte-1dymk5b");
+      attr(input0, "class", "svelte-1bdln1y");
+      attr(label0, "class", "svelte-1bdln1y");
+      attr(div0, "class", "armor-edit svelte-1bdln1y");
       set_style(label1, "color", "#eab308");
-      attr(label1, "class", "svelte-1dymk5b");
+      attr(label1, "class", "svelte-1bdln1y");
       attr(input1, "type", "number");
-      attr(input1, "class", "svelte-1dymk5b");
-      attr(div1, "class", "grp svelte-1dymk5b");
+      attr(input1, "class", "svelte-1bdln1y");
+      attr(div1, "class", "grp svelte-1bdln1y");
       set_style(label2, "color", "#ef4444");
-      attr(label2, "class", "svelte-1dymk5b");
+      attr(label2, "class", "svelte-1bdln1y");
       attr(input2, "type", "number");
-      attr(input2, "class", "svelte-1dymk5b");
-      attr(div2, "class", "grp svelte-1dymk5b");
+      attr(input2, "class", "svelte-1bdln1y");
+      attr(div2, "class", "grp svelte-1bdln1y");
       set_style(label3, "color", "#00fbff");
-      attr(label3, "class", "svelte-1dymk5b");
+      attr(label3, "class", "svelte-1bdln1y");
       attr(input3, "type", "number");
-      attr(input3, "class", "svelte-1dymk5b");
-      attr(div3, "class", "grp svelte-1dymk5b");
+      attr(input3, "class", "svelte-1bdln1y");
+      attr(div3, "class", "grp svelte-1bdln1y");
       set_style(label4, "color", "#a855f7");
-      attr(label4, "class", "svelte-1dymk5b");
+      attr(label4, "class", "svelte-1bdln1y");
       attr(input4, "type", "checkbox");
-      attr(input4, "class", "custom-chk non-phys svelte-1dymk5b");
-      attr(div4, "class", "grp svelte-1dymk5b");
+      attr(input4, "class", "custom-chk non-phys svelte-1bdln1y");
+      attr(div4, "class", "grp svelte-1bdln1y");
       set_style(label5, "color", "#f75555");
-      attr(label5, "class", "svelte-1dymk5b");
+      attr(label5, "class", "svelte-1bdln1y");
       attr(input5, "type", "checkbox");
-      attr(input5, "class", "custom-chk engulf svelte-1dymk5b");
-      attr(div5, "class", "grp svelte-1dymk5b");
-      attr(div6, "class", "dmg-inputs svelte-1dymk5b");
-      attr(button0, "class", "btn-hit svelte-1dymk5b");
+      attr(input5, "class", "custom-chk engulf svelte-1bdln1y");
+      attr(div5, "class", "grp svelte-1bdln1y");
+      attr(div6, "class", "dmg-inputs svelte-1bdln1y");
+      attr(button0, "class", "btn-hit svelte-1bdln1y");
       attr(input6, "type", "number");
       attr(input6, "placeholder", "Reparo");
       set_style(input6, "flex", "1");
-      attr(input6, "class", "svelte-1dymk5b");
-      attr(button1, "class", "btn-square-heal svelte-1dymk5b");
+      attr(input6, "class", "svelte-1bdln1y");
+      attr(button1, "class", "btn-square-heal svelte-1bdln1y");
       attr(div7, "class", "heal-row");
       set_style(div7, "display", "flex");
       set_style(div7, "gap", "5px");
@@ -41727,10 +41755,10 @@ function create_if_block$$(ctx) {
       attr(input7, "placeholder", "Reparo Engolf");
       set_style(input7, "border-color", "#3b82f6");
       set_style(input7, "flex", "1");
-      attr(input7, "class", "svelte-1dymk5b");
+      attr(input7, "class", "svelte-1bdln1y");
       set_style(button2, "background", "#3b82f6");
       set_style(button2, "color", "#fff");
-      attr(button2, "class", "btn-square-heal svelte-1dymk5b");
+      attr(button2, "class", "btn-square-heal svelte-1bdln1y");
       attr(button2, "title", "Reparo Todos");
       attr(div8, "class", "heal-row");
       set_style(div8, "display", "flex");
@@ -41817,73 +41845,73 @@ function create_if_block$$(ctx) {
             input0,
             "input",
             /*input0_input_handler_3*/
-            ctx[46]
+            ctx[47]
           ),
           listen(
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler_3*/
-            ctx[47]
+            ctx[48]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler*/
-            ctx[48]
+            ctx[49]
           ),
           listen(
             input3,
             "input",
             /*input3_input_handler*/
-            ctx[49]
+            ctx[50]
           ),
           listen(
             input4,
             "change",
             /*input4_change_handler*/
-            ctx[50]
+            ctx[51]
           ),
           listen(
             input5,
             "change",
             /*input5_change_handler*/
-            ctx[51]
+            ctx[52]
           ),
           listen(
             button0,
             "click",
             /*applyDamage*/
-            ctx[18]
+            ctx[19]
           ),
           listen(
             input6,
             "input",
             /*input6_input_handler*/
-            ctx[52]
+            ctx[53]
           ),
           listen(
             button1,
             "click",
             /*applyHeal*/
-            ctx[19]
+            ctx[20]
           ),
           listen(
             input7,
             "input",
             /*input7_input_handler*/
-            ctx[53]
+            ctx[54]
           ),
           listen(
             button2,
             "click",
             /*applyRegen*/
-            ctx[20]
+            ctx[21]
           )
         ];
         mounted = true;
@@ -42011,15 +42039,15 @@ function create_else_block$K(ctx) {
       t4 = text("Não-Físico");
       input2 = element("input");
       attr(input0, "type", "number");
-      attr(input0, "class", "svelte-1dymk5b");
-      attr(label0, "class", "svelte-1dymk5b");
+      attr(input0, "class", "svelte-1bdln1y");
+      attr(label0, "class", "svelte-1bdln1y");
       attr(input1, "type", "number");
-      attr(input1, "class", "svelte-1dymk5b");
-      attr(label1, "class", "svelte-1dymk5b");
+      attr(input1, "class", "svelte-1bdln1y");
+      attr(label1, "class", "svelte-1bdln1y");
       attr(input2, "type", "checkbox");
-      attr(input2, "class", "custom-chk non-phys svelte-1dymk5b");
+      attr(input2, "class", "custom-chk non-phys svelte-1bdln1y");
       set_style(label2, "color", "#a855f7");
-      attr(label2, "class", "svelte-1dymk5b");
+      attr(label2, "class", "svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, label0, anchor);
@@ -42051,37 +42079,37 @@ function create_else_block$K(ctx) {
             input0,
             "input",
             /*input0_input_handler_2*/
-            ctx[43]
+            ctx[44]
           ),
           listen(
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler_2*/
-            ctx[44]
+            ctx[45]
           ),
           listen(
             input1,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           ),
           listen(
             input2,
             "change",
             /*input2_change_handler_1*/
-            ctx[45]
+            ctx[46]
           ),
           listen(
             input2,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           )
         ];
         mounted = true;
@@ -42153,15 +42181,15 @@ function create_if_block_1$U(ctx) {
       t4 = text("Não-Físico");
       input2 = element("input");
       attr(input0, "type", "number");
-      attr(input0, "class", "svelte-1dymk5b");
-      attr(label0, "class", "svelte-1dymk5b");
+      attr(input0, "class", "svelte-1bdln1y");
+      attr(label0, "class", "svelte-1bdln1y");
       attr(input1, "type", "number");
-      attr(input1, "class", "svelte-1dymk5b");
-      attr(label1, "class", "svelte-1dymk5b");
+      attr(input1, "class", "svelte-1bdln1y");
+      attr(label1, "class", "svelte-1bdln1y");
       attr(input2, "type", "checkbox");
-      attr(input2, "class", "custom-chk non-phys svelte-1dymk5b");
+      attr(input2, "class", "custom-chk non-phys svelte-1bdln1y");
       set_style(label2, "color", "#a855f7");
-      attr(label2, "class", "svelte-1dymk5b");
+      attr(label2, "class", "svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, label0, anchor);
@@ -42193,37 +42221,37 @@ function create_if_block_1$U(ctx) {
             input0,
             "input",
             /*input0_input_handler_1*/
-            ctx[40]
+            ctx[41]
           ),
           listen(
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler_1*/
-            ctx[41]
+            ctx[42]
           ),
           listen(
             input1,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           ),
           listen(
             input2,
             "change",
             /*input2_change_handler*/
-            ctx[42]
+            ctx[43]
           ),
           listen(
             input2,
             "change",
             /*triggerReactivity*/
-            ctx[14]
+            ctx[15]
           )
         ];
         mounted = true;
@@ -42275,7 +42303,7 @@ function create_each_block$P(ctx) {
   let span;
   let t1_value = (
     /*item*/
-    ctx[59].name + ""
+    ctx[60].name + ""
   );
   let t1;
   let t2;
@@ -42284,9 +42312,9 @@ function create_each_block$P(ctx) {
   function dragstart_handler_1(...args) {
     return (
       /*dragstart_handler_1*/
-      ctx[54](
+      ctx[55](
         /*item*/
-        ctx[59],
+        ctx[60],
         ...args
       )
     );
@@ -42300,11 +42328,11 @@ function create_each_block$P(ctx) {
       t1 = text(t1_value);
       t2 = space();
       if (!src_url_equal(img.src, img_src_value = /*item*/
-      ctx[59].img)) attr(img, "src", img_src_value);
+      ctx[60].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "img");
-      attr(img, "class", "svelte-1dymk5b");
-      attr(span, "class", "svelte-1dymk5b");
-      attr(div, "class", "mini-item svelte-1dymk5b");
+      attr(img, "class", "svelte-1bdln1y");
+      attr(span, "class", "svelte-1bdln1y");
+      attr(div, "class", "mini-item svelte-1bdln1y");
       attr(div, "draggable", "true");
     },
     m(target, anchor) {
@@ -42323,12 +42351,12 @@ function create_each_block$P(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*items*/
       1 && !src_url_equal(img.src, img_src_value = /*item*/
-      ctx[59].img)) {
+      ctx[60].img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*items*/
       1 && t1_value !== (t1_value = /*item*/
-      ctx[59].name + "")) set_data(t1, t1_value);
+      ctx[60].name + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -42358,32 +42386,37 @@ function create_fragment$14(ctx) {
   let t5;
   let div8;
   let div2;
+  let t6;
   let img;
   let img_src_value;
-  let t6;
   let t7;
+  let t8;
   let each_blocks_1 = [];
   let each0_lookup = /* @__PURE__ */ new Map();
-  let t8;
+  let t9;
   let div7;
   let div4;
   let div3;
-  let t9_value = (
+  let t10_value = (
     /*selectedSlot*/
     (ctx[12] ? (
       /*selectedSlot*/
       ctx[12].name
     ) : "SELECIONE SLOT") + ""
   );
-  let t9;
   let t10;
   let t11;
+  let t12;
   let div6;
   let div5;
-  let t13;
+  let t14;
   let mounted;
   let dispose;
   let if_block0 = (
+    /*currentBg*/
+    ctx[13] && create_if_block_12$h(ctx)
+  );
+  let if_block1 = (
     /*editingMode*/
     ctx[3] && create_if_block_11$h(ctx)
   );
@@ -42393,14 +42426,14 @@ function create_fragment$14(ctx) {
   );
   const get_key = (ctx2) => (
     /*slot*/
-    ctx2[62].id
+    ctx2[63].id
   );
   for (let i2 = 0; i2 < each_value_1.length; i2 += 1) {
     let child_ctx = get_each_context_1$E(ctx, each_value_1, i2);
     let key = get_key(child_ctx);
     each0_lookup.set(key, each_blocks_1[i2] = create_each_block_1$E(key, child_ctx));
   }
-  let if_block1 = (
+  let if_block2 = (
     /*selectedSlot*/
     ctx[12] && create_if_block$$(ctx)
   );
@@ -42429,50 +42462,52 @@ function create_fragment$14(ctx) {
       t5 = space();
       div8 = element("div");
       div2 = element("div");
-      img = element("img");
-      t6 = space();
       if (if_block0) if_block0.c();
+      t6 = space();
+      img = element("img");
       t7 = space();
+      if (if_block1) if_block1.c();
+      t8 = space();
       for (let i2 = 0; i2 < each_blocks_1.length; i2 += 1) {
         each_blocks_1[i2].c();
       }
-      t8 = space();
+      t9 = space();
       div7 = element("div");
       div4 = element("div");
       div3 = element("div");
-      t9 = text(t9_value);
-      t10 = space();
-      if (if_block1) if_block1.c();
+      t10 = text(t10_value);
       t11 = space();
+      if (if_block2) if_block2.c();
+      t12 = space();
       div6 = element("div");
       div5 = element("div");
       div5.textContent = "ARRASTE PARA EQUIPAR";
-      t13 = space();
+      t14 = space();
       for (let i2 = 0; i2 < each_blocks.length; i2 += 1) {
         each_blocks[i2].c();
       }
       attr(button0, "class", button0_class_value = "tool-btn " + /*activeSet*/
-      (ctx[4] === 1 ? "on" : "") + " svelte-1dymk5b");
+      (ctx[4] === 1 ? "on" : "") + " svelte-1bdln1y");
       attr(button1, "class", button1_class_value = "tool-btn " + /*activeSet*/
-      (ctx[4] === 2 ? "on" : "") + " svelte-1dymk5b");
+      (ctx[4] === 2 ? "on" : "") + " svelte-1bdln1y");
       attr(i, "class", "fas fa-edit");
       attr(button2, "class", button2_class_value = "tool-btn " + /*editingMode*/
-      (ctx[3] ? "on" : "") + " svelte-1dymk5b");
+      (ctx[3] ? "on" : "") + " svelte-1bdln1y");
       attr(button2, "title", "Modo Edição");
-      attr(div0, "class", "tools svelte-1dymk5b");
-      attr(div1, "class", "dash-header svelte-1dymk5b");
+      attr(div0, "class", "tools svelte-1bdln1y");
+      attr(div1, "class", "dash-header svelte-1bdln1y");
       if (!src_url_equal(img.src, img_src_value = /*currentImg*/
-      ctx[13])) attr(img, "src", img_src_value);
-      attr(img, "class", "silhouette-layer svelte-1dymk5b");
+      ctx[14])) attr(img, "src", img_src_value);
+      attr(img, "class", "silhouette-layer svelte-1bdln1y");
       attr(img, "alt", "silhouette");
-      attr(div2, "class", "canvas-area svelte-1dymk5b");
-      attr(div3, "class", "calc-title svelte-1dymk5b");
-      attr(div4, "class", "calc-box svelte-1dymk5b");
-      attr(div5, "class", "mini-title svelte-1dymk5b");
-      attr(div6, "class", "inventory-mini-list custom-scroll svelte-1dymk5b");
-      attr(div7, "class", "sidebar svelte-1dymk5b");
-      attr(div8, "class", "dash-content svelte-1dymk5b");
-      attr(div9, "class", "equip-dashboard svelte-1dymk5b");
+      attr(div2, "class", "canvas-area svelte-1bdln1y");
+      attr(div3, "class", "calc-title svelte-1bdln1y");
+      attr(div4, "class", "calc-box svelte-1bdln1y");
+      attr(div5, "class", "mini-title svelte-1bdln1y");
+      attr(div6, "class", "inventory-mini-list custom-scroll svelte-1bdln1y");
+      attr(div7, "class", "sidebar svelte-1bdln1y");
+      attr(div8, "class", "dash-content svelte-1bdln1y");
+      attr(div9, "class", "equip-dashboard svelte-1bdln1y");
     },
     m(target, anchor) {
       insert(target, div9, anchor);
@@ -42490,26 +42525,28 @@ function create_fragment$14(ctx) {
       append(div9, t5);
       append(div9, div8);
       append(div8, div2);
-      append(div2, img);
-      append(div2, t6);
       if (if_block0) if_block0.m(div2, null);
+      append(div2, t6);
+      append(div2, img);
       append(div2, t7);
+      if (if_block1) if_block1.m(div2, null);
+      append(div2, t8);
       for (let i2 = 0; i2 < each_blocks_1.length; i2 += 1) {
         if (each_blocks_1[i2]) {
           each_blocks_1[i2].m(div2, null);
         }
       }
-      append(div8, t8);
+      append(div8, t9);
       append(div8, div7);
       append(div7, div4);
       append(div4, div3);
-      append(div3, t9);
-      append(div4, t10);
-      if (if_block1) if_block1.m(div4, null);
-      append(div7, t11);
+      append(div3, t10);
+      append(div4, t11);
+      if (if_block2) if_block2.m(div4, null);
+      append(div7, t12);
       append(div7, div6);
       append(div6, div5);
-      append(div6, t13);
+      append(div6, t14);
       for (let i2 = 0; i2 < each_blocks.length; i2 += 1) {
         if (each_blocks[i2]) {
           each_blocks[i2].m(div6, null);
@@ -42521,29 +42558,29 @@ function create_fragment$14(ctx) {
             button0,
             "click",
             /*click_handler*/
-            ctx[30]
+            ctx[31]
           ),
           listen(
             button1,
             "click",
             /*click_handler_1*/
-            ctx[31]
+            ctx[32]
           ),
           listen(
             button2,
             "click",
             /*click_handler_2*/
-            ctx[32]
+            ctx[33]
           ),
           listen(div2, "dragover", prevent_default(
             /*dragover_handler*/
-            ctx[28]
+            ctx[29]
           )),
           listen(
             div2,
             "drop",
             /*onCanvasDrop*/
-            ctx[22]
+            ctx[23]
           )
         ];
         mounted = true;
@@ -42552,36 +42589,56 @@ function create_fragment$14(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*activeSet*/
       16 && button0_class_value !== (button0_class_value = "tool-btn " + /*activeSet*/
-      (ctx2[4] === 1 ? "on" : "") + " svelte-1dymk5b")) {
+      (ctx2[4] === 1 ? "on" : "") + " svelte-1bdln1y")) {
         attr(button0, "class", button0_class_value);
       }
       if (dirty[0] & /*activeSet*/
       16 && button1_class_value !== (button1_class_value = "tool-btn " + /*activeSet*/
-      (ctx2[4] === 2 ? "on" : "") + " svelte-1dymk5b")) {
+      (ctx2[4] === 2 ? "on" : "") + " svelte-1bdln1y")) {
         attr(button1, "class", button1_class_value);
       }
       if (dirty[0] & /*editingMode*/
       8 && button2_class_value !== (button2_class_value = "tool-btn " + /*editingMode*/
-      (ctx2[3] ? "on" : "") + " svelte-1dymk5b")) {
+      (ctx2[3] ? "on" : "") + " svelte-1bdln1y")) {
         attr(button2, "class", button2_class_value);
       }
       if (
-        /*editingMode*/
-        ctx2[3]
+        /*currentBg*/
+        ctx2[13]
       ) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_11$h(ctx2);
+          if_block0 = create_if_block_12$h(ctx2);
           if_block0.c();
-          if_block0.m(div2, t7);
+          if_block0.m(div2, t6);
         }
       } else if (if_block0) {
         if_block0.d(1);
         if_block0 = null;
       }
+      if (dirty[0] & /*currentImg*/
+      16384 && !src_url_equal(img.src, img_src_value = /*currentImg*/
+      ctx2[14])) {
+        attr(img, "src", img_src_value);
+      }
+      if (
+        /*editingMode*/
+        ctx2[3]
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx2, dirty);
+        } else {
+          if_block1 = create_if_block_11$h(ctx2);
+          if_block1.c();
+          if_block1.m(div2, t8);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
       if (dirty[0] & /*selectedSlotId, equipmentSlots, editingMode, onNodeDragStart, onSlotDrop, deleteSlot, activeSet, clearSlotItem, triggerReactivity*/
-      52576286) {
+      105152542) {
         each_value_1 = ensure_array_like(
           /*equipmentSlots*/
           ctx2[1]
@@ -42589,28 +42646,28 @@ function create_fragment$14(ctx) {
         each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx2, each_value_1, each0_lookup, div2, destroy_block, create_each_block_1$E, null, get_each_context_1$E);
       }
       if (dirty[0] & /*selectedSlot*/
-      4096 && t9_value !== (t9_value = /*selectedSlot*/
+      4096 && t10_value !== (t10_value = /*selectedSlot*/
       (ctx2[12] ? (
         /*selectedSlot*/
         ctx2[12].name
-      ) : "SELECIONE SLOT") + "")) set_data(t9, t9_value);
+      ) : "SELECIONE SLOT") + "")) set_data(t10, t10_value);
       if (
         /*selectedSlot*/
         ctx2[12]
       ) {
-        if (if_block1) {
-          if_block1.p(ctx2, dirty);
+        if (if_block2) {
+          if_block2.p(ctx2, dirty);
         } else {
-          if_block1 = create_if_block$$(ctx2);
-          if_block1.c();
-          if_block1.m(div4, null);
+          if_block2 = create_if_block$$(ctx2);
+          if_block2.c();
+          if_block2.m(div4, null);
         }
-      } else if (if_block1) {
-        if_block1.d(1);
-        if_block1 = null;
+      } else if (if_block2) {
+        if_block2.d(1);
+        if_block2 = null;
       }
       if (dirty[0] & /*onItemDragStart, items*/
-      8388609) {
+      16777217) {
         each_value = ensure_array_like(
           /*items*/
           ctx2[0]
@@ -42639,10 +42696,11 @@ function create_fragment$14(ctx) {
         detach(div9);
       }
       if (if_block0) if_block0.d();
+      if (if_block1) if_block1.d();
       for (let i2 = 0; i2 < each_blocks_1.length; i2 += 1) {
         each_blocks_1[i2].d();
       }
-      if (if_block1) if_block1.d();
+      if (if_block2) if_block2.d();
       destroy_each(each_blocks, detaching);
       mounted = false;
       run_all(dispose);
@@ -42651,6 +42709,8 @@ function create_fragment$14(ctx) {
 }
 const MODULE_ID$B = "multiversus-rpg";
 function instance$14($$self, $$props, $$invalidate) {
+  let currentImg;
+  let currentBg;
   let selectedSlot;
   let { actor } = $$props;
   let { isGM } = $$props;
@@ -42775,7 +42835,6 @@ function instance$14($$self, $$props, $$invalidate) {
   let selectedSlotId = null;
   let editingMode = false;
   let activeSet = 1;
-  let currentImg = actor.getFlag(MODULE_ID$B, "img_base") || "https://i.imgur.com/1DyBPgD.png";
   let inputShock = null;
   let inputKilling = null;
   let inputPenetration = null;
@@ -43033,11 +43092,19 @@ function instance$14($$self, $$props, $$invalidate) {
   }
   const dragstart_handler_1 = (item, e) => onItemDragStart(e, item);
   $$self.$$set = ($$props2) => {
-    if ("actor" in $$props2) $$invalidate(26, actor = $$props2.actor);
-    if ("isGM" in $$props2) $$invalidate(27, isGM = $$props2.isGM);
+    if ("actor" in $$props2) $$invalidate(27, actor = $$props2.actor);
+    if ("isGM" in $$props2) $$invalidate(28, isGM = $$props2.isGM);
     if ("items" in $$props2) $$invalidate(0, items = $$props2.items);
   };
   $$self.$$.update = () => {
+    if ($$self.$$.dirty[0] & /*actor*/
+    134217728) {
+      $$invalidate(14, currentImg = actor.getFlag(MODULE_ID$B, "img_base") || "https://i.imgur.com/1DyBPgD.png");
+    }
+    if ($$self.$$.dirty[0] & /*actor*/
+    134217728) {
+      $$invalidate(13, currentBg = actor.getFlag(MODULE_ID$B, "bg_base") || "");
+    }
     if ($$self.$$.dirty[0] & /*equipmentSlots, selectedSlotId*/
     6) {
       $$invalidate(12, selectedSlot = equipmentSlots.find((l) => l.id === selectedSlotId));
@@ -43057,6 +43124,7 @@ function instance$14($$self, $$props, $$invalidate) {
     inputHeal,
     inputRegen,
     selectedSlot,
+    currentBg,
     currentImg,
     triggerReactivity,
     resetLayout,
@@ -43104,7 +43172,7 @@ function instance$14($$self, $$props, $$invalidate) {
 class EquipmentPanel extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$14, create_fragment$14, safe_not_equal, { actor: 26, isGM: 27, items: 0 }, null, [-1, -1, -1]);
+    init(this, options, instance$14, create_fragment$14, safe_not_equal, { actor: 27, isGM: 28, items: 0 }, null, [-1, -1, -1]);
   }
 }
 class CraftDB {
