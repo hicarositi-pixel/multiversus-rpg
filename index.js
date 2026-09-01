@@ -5919,7 +5919,7 @@ function create_each_block_10$2(key_2, ctx) {
     }
   };
 }
-function create_if_block_20$5(ctx) {
+function create_if_block_20$6(ctx) {
   let div3;
   let div2;
   let div0;
@@ -6202,7 +6202,7 @@ function create_if_block_25$3(ctx) {
     }
   };
 }
-function create_else_block_2$h(ctx) {
+function create_else_block_2$j(ctx) {
   let i;
   let i_class_value;
   return {
@@ -6450,7 +6450,7 @@ function create_each_block_9$3(key_2, ctx) {
       /*isGM*/
       ctx2[57]
     ) return create_if_block_24$4;
-    return create_else_block_2$h;
+    return create_else_block_2$j;
   }
   let current_block_type = select_block_type(ctx);
   let if_block1 = current_block_type(ctx);
@@ -6612,7 +6612,7 @@ function create_if_block_21$5(ctx) {
     }
   };
 }
-function create_if_block_19$5(ctx) {
+function create_if_block_19$6(ctx) {
   let div3;
   let div2;
   let div0;
@@ -6897,7 +6897,7 @@ function create_each_block_7$5(ctx) {
     }
   };
 }
-function create_if_block_18$9(ctx) {
+function create_if_block_18$a(ctx) {
   let div3;
   let div2;
   let div0;
@@ -7023,7 +7023,7 @@ function create_if_block_18$9(ctx) {
     }
   };
 }
-function create_if_block_17$b(ctx) {
+function create_if_block_17$c(ctx) {
   let div4;
   let header;
   let div0;
@@ -7745,7 +7745,7 @@ function create_if_block_12$i(ctx) {
     }
   };
 }
-function create_if_block_10$m(ctx) {
+function create_if_block_10$n(ctx) {
   let div;
   let button;
   let t1;
@@ -7753,7 +7753,7 @@ function create_if_block_10$m(ctx) {
   let dispose;
   let if_block = (
     /*gmMode*/
-    ctx[2] && create_if_block_11$j(ctx)
+    ctx[2] && create_if_block_11$k(ctx)
   );
   return {
     c() {
@@ -7808,7 +7808,7 @@ function create_if_block_10$m(ctx) {
             transition_in(if_block, 1);
           }
         } else {
-          if_block = create_if_block_11$j(ctx2);
+          if_block = create_if_block_11$k(ctx2);
           if_block.c();
           transition_in(if_block, 1);
           if_block.m(div, null);
@@ -7831,7 +7831,7 @@ function create_if_block_10$m(ctx) {
     }
   };
 }
-function create_if_block_11$j(ctx) {
+function create_if_block_11$k(ctx) {
   let div;
   let label0;
   let t0;
@@ -8021,7 +8021,7 @@ function create_each_block_6$9(ctx) {
     }
   };
 }
-function create_if_block_9$r(ctx) {
+function create_if_block_9$s(ctx) {
   let div;
   let t0;
   let t1_value = (
@@ -8076,7 +8076,7 @@ function create_if_block_9$r(ctx) {
     }
   };
 }
-function create_if_block_8$v(ctx) {
+function create_if_block_8$w(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -9639,19 +9639,19 @@ function create_fragment$1i(ctx) {
   );
   let if_block2 = (
     /*showExclusividades*/
-    ctx[27] && create_if_block_20$5(ctx)
+    ctx[27] && create_if_block_20$6(ctx)
   );
   let if_block3 = (
     /*showExcPicker*/
-    ctx[30] && create_if_block_19$5(ctx)
+    ctx[30] && create_if_block_19$6(ctx)
   );
   let if_block4 = (
     /*activePopup*/
-    ctx[33] && create_if_block_18$9(ctx)
+    ctx[33] && create_if_block_18$a(ctx)
   );
   let if_block5 = (
     /*activeViewer*/
-    ctx[37] && create_if_block_17$b(ctx)
+    ctx[37] && create_if_block_17$c(ctx)
   );
   let if_block6 = (
     /*activeEditor*/
@@ -9670,11 +9670,11 @@ function create_fragment$1i(ctx) {
   ctx[45] <= 0 && create_if_block_12$i(ctx);
   let if_block10 = (
     /*isGM*/
-    ctx[57] && create_if_block_10$m(ctx)
+    ctx[57] && create_if_block_10$n(ctx)
   );
   let if_block11 = !/*gmMode*/
-  ctx[2] && create_if_block_9$r(ctx);
-  let if_block12 = game.user.isGM && create_if_block_8$v(ctx);
+  ctx[2] && create_if_block_9$s(ctx);
+  let if_block12 = game.user.isGM && create_if_block_8$w(ctx);
   let if_block13 = (
     /*showImages*/
     ctx[49] && create_if_block_7$z(ctx)
@@ -10790,7 +10790,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block2, 1);
           }
         } else {
-          if_block2 = create_if_block_20$5(ctx2);
+          if_block2 = create_if_block_20$6(ctx2);
           if_block2.c();
           transition_in(if_block2, 1);
           if_block2.m(div56, t2);
@@ -10813,7 +10813,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block3, 1);
           }
         } else {
-          if_block3 = create_if_block_19$5(ctx2);
+          if_block3 = create_if_block_19$6(ctx2);
           if_block3.c();
           transition_in(if_block3, 1);
           if_block3.m(div56, t3);
@@ -10836,7 +10836,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block4, 1);
           }
         } else {
-          if_block4 = create_if_block_18$9(ctx2);
+          if_block4 = create_if_block_18$a(ctx2);
           if_block4.c();
           transition_in(if_block4, 1);
           if_block4.m(div56, t4);
@@ -10859,7 +10859,7 @@ function create_fragment$1i(ctx) {
             transition_in(if_block5, 1);
           }
         } else {
-          if_block5 = create_if_block_17$b(ctx2);
+          if_block5 = create_if_block_17$c(ctx2);
           if_block5.c();
           transition_in(if_block5, 1);
           if_block5.m(div56, t5);
@@ -11023,7 +11023,7 @@ function create_fragment$1i(ctx) {
         if (if_block11) {
           if_block11.p(ctx2, dirty);
         } else {
-          if_block11 = create_if_block_9$r(ctx2);
+          if_block11 = create_if_block_9$s(ctx2);
           if_block11.c();
           if_block11.m(div10, null);
         }
@@ -13739,62 +13739,62 @@ const CombatThemes = {
 };
 function get_each_context$Z(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[123] = list[i][0];
-  child_ctx[124] = list[i][1];
+  child_ctx[130] = list[i][0];
+  child_ctx[131] = list[i][1];
   return child_ctx;
 }
 function get_each_context_2$s(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[123] = list[i][0];
-  child_ctx[130] = list[i][1];
+  child_ctx[130] = list[i][0];
+  child_ctx[137] = list[i][1];
   return child_ctx;
 }
 function get_each_context_3$n(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[133] = list[i];
-  child_ctx[134] = list;
-  child_ctx[135] = i;
+  child_ctx[140] = list[i];
+  child_ctx[141] = list;
+  child_ctx[142] = i;
   return child_ctx;
 }
 function get_each_context_4$j(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[136] = list[i];
-  child_ctx[139] = i;
+  child_ctx[143] = list[i];
+  child_ctx[146] = i;
   const constants_0 = (
     /*getSlotState*/
-    child_ctx[48](
+    child_ctx[50](
       /*limb*/
-      child_ctx[133],
+      child_ctx[140],
       /*i*/
-      child_ctx[139]
+      child_ctx[146]
     )
   );
-  child_ctx[137] = constants_0;
+  child_ctx[144] = constants_0;
   return child_ctx;
 }
 function get_each_context_1$M(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[127] = list[i];
-  child_ctx[128] = list;
-  child_ctx[129] = i;
+  child_ctx[134] = list[i];
+  child_ctx[135] = list;
+  child_ctx[136] = i;
   return child_ctx;
 }
 function get_each_context_5$e(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[140] = list[i];
-  child_ctx[129] = i;
+  child_ctx[147] = list[i];
+  child_ctx[136] = i;
   return child_ctx;
 }
-function create_if_block_16$d(ctx) {
+function create_if_block_20$5(ctx) {
   let button;
   let mounted;
   let dispose;
   function click_handler_4() {
     return (
       /*click_handler_4*/
-      ctx[67](
+      ctx[69](
         /*form*/
-        ctx[140]
+        ctx[147]
       )
     );
   }
@@ -13829,16 +13829,16 @@ function create_if_block_16$d(ctx) {
     }
   };
 }
-function create_if_block_15$e(ctx) {
+function create_if_block_19$5(ctx) {
   let button;
   let mounted;
   let dispose;
   function click_handler_5() {
     return (
       /*click_handler_5*/
-      ctx[68](
+      ctx[70](
         /*form*/
-        ctx[140]
+        ctx[147]
       )
     );
   }
@@ -13846,7 +13846,7 @@ function create_if_block_15$e(ctx) {
     c() {
       button = element("button");
       button.innerHTML = `<i class="fas fa-times"></i>`;
-      attr(button, "class", "tab-del svelte-6d4af5");
+      attr(button, "class", "tab-del svelte-1958nee");
       attr(button, "title", "Excluir");
     },
     m(target, anchor) {
@@ -13873,7 +13873,7 @@ function create_each_block_5$e(ctx) {
   let button;
   let t0_value = (
     /*form*/
-    ctx[140].name + ""
+    ctx[147].name + ""
   );
   let t0;
   let button_class_value;
@@ -13884,20 +13884,20 @@ function create_each_block_5$e(ctx) {
   function click_handler_3() {
     return (
       /*click_handler_3*/
-      ctx[66](
+      ctx[68](
         /*form*/
-        ctx[140]
+        ctx[147]
       )
     );
   }
   let if_block0 = (
     /*editingMode*/
-    ctx[9] && create_if_block_16$d(ctx)
+    ctx[10] && create_if_block_20$5(ctx)
   );
   let if_block1 = (
     /*editingMode*/
-    ctx[9] && /*combatForms*/
-    ctx[3].length > 1 && create_if_block_15$e(ctx)
+    ctx[10] && /*combatForms*/
+    ctx[3].length > 1 && create_if_block_19$5(ctx)
   );
   return {
     c() {
@@ -13910,7 +13910,7 @@ function create_each_block_5$e(ctx) {
       if (if_block1) if_block1.c();
       attr(button, "class", button_class_value = "tab " + /*activeFormId*/
       (ctx[2] === /*form*/
-      ctx[140].id ? "active trans-mode" : "") + " svelte-6d4af5");
+      ctx[147].id ? "active trans-mode" : "") + " svelte-1958nee");
       attr(div, "class", "tab-wrapper");
       set_style(div, "display", "flex");
       set_style(div, "align-items", "center");
@@ -13932,21 +13932,21 @@ function create_each_block_5$e(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*combatForms*/
       8 && t0_value !== (t0_value = /*form*/
-      ctx[140].name + "")) set_data(t0, t0_value);
+      ctx[147].name + "")) set_data(t0, t0_value);
       if (dirty[0] & /*activeFormId, combatForms*/
       12 && button_class_value !== (button_class_value = "tab " + /*activeFormId*/
       (ctx[2] === /*form*/
-      ctx[140].id ? "active trans-mode" : "") + " svelte-6d4af5")) {
+      ctx[147].id ? "active trans-mode" : "") + " svelte-1958nee")) {
         attr(button, "class", button_class_value);
       }
       if (
         /*editingMode*/
-        ctx[9]
+        ctx[10]
       ) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
         } else {
-          if_block0 = create_if_block_16$d(ctx);
+          if_block0 = create_if_block_20$5(ctx);
           if_block0.c();
           if_block0.m(div, t2);
         }
@@ -13956,13 +13956,13 @@ function create_each_block_5$e(ctx) {
       }
       if (
         /*editingMode*/
-        ctx[9] && /*combatForms*/
+        ctx[10] && /*combatForms*/
         ctx[3].length > 1
       ) {
         if (if_block1) {
           if_block1.p(ctx, dirty);
         } else {
-          if_block1 = create_if_block_15$e(ctx);
+          if_block1 = create_if_block_19$5(ctx);
           if_block1.c();
           if_block1.m(div, null);
         }
@@ -13982,7 +13982,7 @@ function create_each_block_5$e(ctx) {
     }
   };
 }
-function create_if_block_14$f(ctx) {
+function create_if_block_18$9(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -13990,7 +13990,7 @@ function create_if_block_14$f(ctx) {
     c() {
       button = element("button");
       button.textContent = "+";
-      attr(button, "class", "tab add-tab svelte-6d4af5");
+      attr(button, "class", "tab add-tab svelte-1958nee");
       attr(button, "title", "Adicionar Forma");
     },
     m(target, anchor) {
@@ -13999,8 +13999,8 @@ function create_if_block_14$f(ctx) {
         dispose = listen(
           button,
           "click",
-          /*addNewForm*/
-          ctx[30]
+          /*addForm*/
+          ctx[32]
         );
         mounted = true;
       }
@@ -14015,50 +14015,102 @@ function create_if_block_14$f(ctx) {
     }
   };
 }
-function create_if_block_13$g(ctx) {
-  let button;
+function create_if_block_17$b(ctx) {
+  let button0;
+  let t0;
+  let button0_class_value;
+  let t1;
+  let button1;
+  let t2;
+  let button1_class_value;
+  let t3;
+  let button2;
   let i;
-  let t;
-  let button_class_value;
+  let t4;
+  let button2_class_value;
   let mounted;
   let dispose;
   return {
     c() {
-      button = element("button");
+      button0 = element("button");
+      t0 = text("SET 1");
+      t1 = space();
+      button1 = element("button");
+      t2 = text("SET 2");
+      t3 = space();
+      button2 = element("button");
       i = element("i");
-      t = text(" EDITAR");
+      t4 = text(" EDITAR");
+      attr(button0, "class", button0_class_value = "tool-btn " + /*activeSet*/
+      (ctx[8] === 1 ? "on" : "") + " svelte-1958nee");
+      attr(button1, "class", button1_class_value = "tool-btn " + /*activeSet*/
+      (ctx[8] === 2 ? "on" : "") + " svelte-1958nee");
       attr(i, "class", "fas fa-edit");
-      attr(button, "class", button_class_value = "tool-btn " + /*editingMode*/
-      (ctx[9] ? "on" : "") + " svelte-6d4af5");
-      attr(button, "title", "Modo Edição");
+      attr(button2, "class", button2_class_value = "tool-btn " + /*editingMode*/
+      (ctx[10] ? "on" : "") + " svelte-1958nee");
+      attr(button2, "title", "Modo Edição");
     },
     m(target, anchor) {
-      insert(target, button, anchor);
-      append(button, i);
-      append(button, t);
+      insert(target, button0, anchor);
+      append(button0, t0);
+      insert(target, t1, anchor);
+      insert(target, button1, anchor);
+      append(button1, t2);
+      insert(target, t3, anchor);
+      insert(target, button2, anchor);
+      append(button2, i);
+      append(button2, t4);
       if (!mounted) {
-        dispose = listen(
-          button,
-          "click",
-          /*click_handler_7*/
-          ctx[70]
-        );
+        dispose = [
+          listen(
+            button0,
+            "click",
+            /*click_handler_7*/
+            ctx[72]
+          ),
+          listen(
+            button1,
+            "click",
+            /*click_handler_8*/
+            ctx[73]
+          ),
+          listen(
+            button2,
+            "click",
+            /*click_handler_9*/
+            ctx[74]
+          )
+        ];
         mounted = true;
       }
     },
     p(ctx2, dirty) {
+      if (dirty[0] & /*activeSet*/
+      256 && button0_class_value !== (button0_class_value = "tool-btn " + /*activeSet*/
+      (ctx2[8] === 1 ? "on" : "") + " svelte-1958nee")) {
+        attr(button0, "class", button0_class_value);
+      }
+      if (dirty[0] & /*activeSet*/
+      256 && button1_class_value !== (button1_class_value = "tool-btn " + /*activeSet*/
+      (ctx2[8] === 2 ? "on" : "") + " svelte-1958nee")) {
+        attr(button1, "class", button1_class_value);
+      }
       if (dirty[0] & /*editingMode*/
-      512 && button_class_value !== (button_class_value = "tool-btn " + /*editingMode*/
-      (ctx2[9] ? "on" : "") + " svelte-6d4af5")) {
-        attr(button, "class", button_class_value);
+      1024 && button2_class_value !== (button2_class_value = "tool-btn " + /*editingMode*/
+      (ctx2[10] ? "on" : "") + " svelte-1958nee")) {
+        attr(button2, "class", button2_class_value);
       }
     },
     d(detaching) {
       if (detaching) {
-        detach(button);
+        detach(button0);
+        detach(t1);
+        detach(button1);
+        detach(t3);
+        detach(button2);
       }
       mounted = false;
-      dispose();
+      run_all(dispose);
     }
   };
 }
@@ -14096,9 +14148,9 @@ function create_else_block$T(ctx) {
   let div6;
   let t16_value = (
     /*selectedLimb*/
-    (ctx[23] ? (
+    (ctx[24] ? (
       /*selectedLimb*/
-      ctx[23].name
+      ctx[24].name
     ) : "SELECIONE ALVO") + ""
   );
   let t16;
@@ -14115,11 +14167,11 @@ function create_else_block$T(ctx) {
   let dispose;
   let if_block0 = (
     /*currentBg*/
-    ctx[24] && create_if_block_12$h(ctx)
+    ctx[25] && create_if_block_16$d(ctx)
   );
   let if_block1 = (
     /*editingMode*/
-    ctx[9] && create_if_block_11$i(ctx)
+    ctx[10] && create_if_block_15$e(ctx)
   );
   let each_value_3 = ensure_array_like(
     /*currentLimbs*/
@@ -14127,7 +14179,7 @@ function create_else_block$T(ctx) {
   );
   const get_key = (ctx2) => (
     /*limb*/
-    ctx2[133].id
+    ctx2[140].id
   );
   for (let i = 0; i < each_value_3.length; i += 1) {
     let child_ctx = get_each_context_3$n(ctx, each_value_3, i);
@@ -14136,7 +14188,7 @@ function create_else_block$T(ctx) {
   }
   let if_block2 = (
     /*selectedLimb*/
-    ctx[23] && create_if_block_5$F(ctx)
+    ctx[24] && create_if_block_5$F(ctx)
   );
   let each_value_2 = ensure_array_like(Object.entries(
     /*traumaDB*/
@@ -14207,15 +14259,15 @@ function create_else_block$T(ctx) {
         each_blocks[i].c();
       }
       if (!src_url_equal(img.src, img_src_value = /*currentImg*/
-      ctx[25])) attr(img, "src", img_src_value);
-      attr(img, "class", "silhouette-layer svelte-6d4af5");
+      ctx[26])) attr(img, "src", img_src_value);
+      attr(img, "class", "silhouette-layer svelte-1958nee");
       attr(img, "alt", "silhouette");
-      attr(div0, "class", "canvas-area svelte-6d4af5");
+      attr(div0, "class", "canvas-area svelte-1958nee");
       set_style(span0, "color", "var(--c-shock)");
       set_style(span0, "font-weight", "bold");
       set_style(span1, "color", "#fff");
-      attr(div1, "class", "mana-head svelte-6d4af5");
-      attr(div2, "class", "mana-bar-fill svelte-6d4af5");
+      attr(div1, "class", "mana-head svelte-1958nee");
+      attr(div2, "class", "mana-bar-fill svelte-1958nee");
       set_style(
         div2,
         "width",
@@ -14224,20 +14276,20 @@ function create_else_block$T(ctx) {
         ctx[6] * 100 + "%"
       );
       set_style(div2, "background", "var(--c-shock)");
-      attr(div3, "class", "mana-bar-bg svelte-6d4af5");
-      attr(button0, "class", "m-btn svelte-6d4af5");
+      attr(div3, "class", "mana-bar-bg svelte-1958nee");
+      attr(button0, "class", "m-btn svelte-1958nee");
       attr(input, "type", "number");
-      attr(input, "class", "m-input svelte-6d4af5");
-      attr(button1, "class", "m-btn svelte-6d4af5");
-      attr(div4, "class", "mana-controls svelte-6d4af5");
-      attr(div5, "class", "mana-module svelte-6d4af5");
-      attr(div6, "class", "calc-title svelte-6d4af5");
-      attr(div7, "class", "calc-box svelte-6d4af5");
-      attr(button2, "class", "add-cond svelte-6d4af5");
-      attr(div8, "class", "box-title svelte-6d4af5");
-      attr(div9, "class", "t-list custom-scroll svelte-6d4af5");
-      attr(div10, "class", "trauma-box svelte-6d4af5");
-      attr(div11, "class", "sidebar custom-scroll svelte-6d4af5");
+      attr(input, "class", "m-input svelte-1958nee");
+      attr(button1, "class", "m-btn svelte-1958nee");
+      attr(div4, "class", "mana-controls svelte-1958nee");
+      attr(div5, "class", "mana-module svelte-1958nee");
+      attr(div6, "class", "calc-title svelte-1958nee");
+      attr(div7, "class", "calc-box svelte-1958nee");
+      attr(button2, "class", "add-cond svelte-1958nee");
+      attr(div8, "class", "box-title svelte-1958nee");
+      attr(div9, "class", "t-list custom-scroll svelte-1958nee");
+      attr(div10, "class", "trauma-box svelte-1958nee");
+      attr(div11, "class", "sidebar custom-scroll svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div0, anchor);
@@ -14300,43 +14352,43 @@ function create_else_block$T(ctx) {
         dispose = [
           listen(div0, "dragover", prevent_default(
             /*dragover_handler*/
-            ctx[64]
+            ctx[66]
           )),
           listen(
             div0,
             "drop",
             /*onCanvasDrop*/
-            ctx[37]
+            ctx[39]
           ),
           listen(
             button0,
             "click",
-            /*click_handler_16*/
-            ctx[88]
+            /*click_handler_18*/
+            ctx[92]
           ),
           listen(
             input,
             "input",
             /*input_input_handler_1*/
-            ctx[89]
+            ctx[93]
           ),
           listen(
             input,
             "change",
             /*setMana*/
-            ctx[28]
+            ctx[29]
           ),
           listen(
             button1,
             "click",
-            /*click_handler_17*/
-            ctx[90]
+            /*click_handler_19*/
+            ctx[94]
           ),
           listen(
             button2,
             "click",
-            /*click_handler_18*/
-            ctx[102]
+            /*click_handler_20*/
+            ctx[109]
           )
         ];
         mounted = true;
@@ -14345,12 +14397,12 @@ function create_else_block$T(ctx) {
     p(ctx2, dirty) {
       if (
         /*currentBg*/
-        ctx2[24]
+        ctx2[25]
       ) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_12$h(ctx2);
+          if_block0 = create_if_block_16$d(ctx2);
           if_block0.c();
           if_block0.m(div0, t0);
         }
@@ -14359,18 +14411,18 @@ function create_else_block$T(ctx) {
         if_block0 = null;
       }
       if (dirty[0] & /*currentImg*/
-      33554432 && !src_url_equal(img.src, img_src_value = /*currentImg*/
-      ctx2[25])) {
+      67108864 && !src_url_equal(img.src, img_src_value = /*currentImg*/
+      ctx2[26])) {
         attr(img, "src", img_src_value);
       }
       if (
         /*editingMode*/
-        ctx2[9]
+        ctx2[10]
       ) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
         } else {
-          if_block1 = create_if_block_11$i(ctx2);
+          if_block1 = create_if_block_15$e(ctx2);
           if_block1.c();
           if_block1.m(div0, t2);
         }
@@ -14378,9 +14430,9 @@ function create_else_block$T(ctx) {
         if_block1.d(1);
         if_block1 = null;
       }
-      if (dirty[0] & /*selectedLimbId, currentLimbs, editingMode, triggerReactivity*/
-      536871472 | dirty[1] & /*onNodeDragStart, deleteLimb, getSlotState, onTraumaDrop, removeTrauma*/
-      197024) {
+      if (dirty[0] & /*selectedLimbId, currentLimbs, editingMode, activeSet*/
+      1328 | dirty[1] & /*onNodeDragStart, deleteLimb, getSlotState, onTraumaDrop, removeTrauma, triggerReactivity*/
+      788097) {
         each_value_3 = ensure_array_like(
           /*currentLimbs*/
           ctx2[5]
@@ -14419,14 +14471,14 @@ function create_else_block$T(ctx) {
         );
       }
       if (dirty[0] & /*selectedLimb*/
-      8388608 && t16_value !== (t16_value = /*selectedLimb*/
-      (ctx2[23] ? (
+      16777216 && t16_value !== (t16_value = /*selectedLimb*/
+      (ctx2[24] ? (
         /*selectedLimb*/
-        ctx2[23].name
+        ctx2[24].name
       ) : "SELECIONE ALVO") + "")) set_data(t16, t16_value);
       if (
         /*selectedLimb*/
-        ctx2[23]
+        ctx2[24]
       ) {
         if (if_block2) {
           if_block2.p(ctx2, dirty);
@@ -14440,8 +14492,8 @@ function create_else_block$T(ctx) {
         if_block2 = null;
       }
       if (dirty[0] & /*draggingTrauma, traumaDB*/
-      4194432 | dirty[1] & /*deleteGlobalTrauma*/
-      1024) {
+      8388736 | dirty[1] & /*deleteGlobalTrauma*/
+      4096) {
         each_value_2 = ensure_array_like(Object.entries(
           /*traumaDB*/
           ctx2[7]
@@ -14498,7 +14550,7 @@ function create_if_block_3$T(ctx) {
   let dispose;
   let each_value_1 = ensure_array_like(
     /*galleryItems*/
-    ctx[8]
+    ctx[9]
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_1.length; i += 1) {
@@ -14509,7 +14561,7 @@ function create_if_block_3$T(ctx) {
   });
   let if_block = (
     /*galleryItems*/
-    ctx[8].length === 0 && create_if_block_4$L()
+    ctx[9].length === 0 && create_if_block_4$L()
   );
   return {
     c() {
@@ -14523,9 +14575,9 @@ function create_if_block_3$T(ctx) {
       }
       t2 = space();
       if (if_block) if_block.c();
-      attr(button, "class", "add-gallery-btn svelte-6d4af5");
-      attr(div0, "class", "gallery-grid svelte-6d4af5");
-      attr(div1, "class", "gallery-area custom-scroll svelte-6d4af5");
+      attr(button, "class", "add-gallery-btn svelte-1958nee");
+      attr(div0, "class", "gallery-grid svelte-1958nee");
+      attr(div1, "class", "gallery-area custom-scroll svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div1, anchor);
@@ -14544,19 +14596,19 @@ function create_if_block_3$T(ctx) {
         dispose = listen(
           button,
           "click",
-          /*click_handler_9*/
-          ctx[72]
+          /*click_handler_11*/
+          ctx[76]
         );
         mounted = true;
       }
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*galleryItems*/
-      256 | dirty[1] & /*removeGalleryItem, updateGalleryItem, openImageModal*/
-      26624) {
+      512 | dirty[1] & /*removeGalleryItem, updateGalleryItem, openImageModal*/
+      106496) {
         each_value_1 = ensure_array_like(
           /*galleryItems*/
-          ctx2[8]
+          ctx2[9]
         );
         let i;
         for (i = 0; i < each_value_1.length; i += 1) {
@@ -14579,7 +14631,7 @@ function create_if_block_3$T(ctx) {
       }
       if (
         /*galleryItems*/
-        ctx2[8].length === 0
+        ctx2[9].length === 0
       ) {
         if (if_block) ;
         else {
@@ -14617,15 +14669,15 @@ function create_if_block_3$T(ctx) {
     }
   };
 }
-function create_if_block_12$h(ctx) {
+function create_if_block_16$d(ctx) {
   let img;
   let img_src_value;
   return {
     c() {
       img = element("img");
       if (!src_url_equal(img.src, img_src_value = /*currentBg*/
-      ctx[24])) attr(img, "src", img_src_value);
-      attr(img, "class", "bg-layer svelte-6d4af5");
+      ctx[25])) attr(img, "src", img_src_value);
+      attr(img, "class", "bg-layer svelte-1958nee");
       attr(img, "alt", "bg");
     },
     m(target, anchor) {
@@ -14633,8 +14685,8 @@ function create_if_block_12$h(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*currentBg*/
-      16777216 && !src_url_equal(img.src, img_src_value = /*currentBg*/
-      ctx2[24])) {
+      33554432 && !src_url_equal(img.src, img_src_value = /*currentBg*/
+      ctx2[25])) {
         attr(img, "src", img_src_value);
       }
     },
@@ -14645,13 +14697,15 @@ function create_if_block_12$h(ctx) {
     }
   };
 }
-function create_if_block_11$i(ctx) {
+function create_if_block_15$e(ctx) {
   let div;
   let button0;
   let t1;
   let button1;
   let t3;
   let button2;
+  let t5;
+  let button3;
   let mounted;
   let dispose;
   return {
@@ -14665,10 +14719,16 @@ function create_if_block_11$i(ctx) {
       t3 = space();
       button2 = element("button");
       button2.innerHTML = `<i class="fas fa-plus"></i> NOVO MEMBRO`;
-      attr(button0, "class", "svelte-6d4af5");
-      attr(button1, "class", "svelte-6d4af5");
-      attr(button2, "class", "add svelte-6d4af5");
-      attr(div, "class", "edit-overlay-controls svelte-6d4af5");
+      t5 = space();
+      button3 = element("button");
+      button3.innerHTML = `<i class="fas fa-sync"></i> RESETAR LAYOUT`;
+      attr(button0, "class", "svelte-1958nee");
+      attr(button1, "class", "svelte-1958nee");
+      attr(button2, "class", "add svelte-1958nee");
+      attr(button3, "class", "add svelte-1958nee");
+      set_style(button3, "background", "#ff4444");
+      set_style(button3, "color", "white");
+      attr(div, "class", "edit-overlay-controls svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -14677,25 +14737,33 @@ function create_if_block_11$i(ctx) {
       append(div, button1);
       append(div, t3);
       append(div, button2);
+      append(div, t5);
+      append(div, button3);
       if (!mounted) {
         dispose = [
           listen(
             button0,
             "click",
-            /*click_handler_12*/
-            ctx[79]
+            /*click_handler_14*/
+            ctx[83]
           ),
           listen(
             button1,
             "click",
-            /*click_handler_13*/
-            ctx[80]
+            /*click_handler_15*/
+            ctx[84]
           ),
           listen(
             button2,
             "click",
             /*addLimb*/
-            ctx[46]
+            ctx[48]
+          ),
+          listen(
+            button3,
+            "click",
+            /*resetLayout*/
+            ctx[30]
           )
         ];
         mounted = true;
@@ -14711,18 +14779,18 @@ function create_if_block_11$i(ctx) {
     }
   };
 }
-function create_else_block_1$v(ctx) {
+function create_else_block_3$8(ctx) {
   let span0;
   let t0_value = (
     /*limb*/
-    ctx[133].loc + ""
+    ctx[140].loc + ""
   );
   let t0;
   let t1;
   let span1;
   let t2_value = (
     /*limb*/
-    ctx[133].name + ""
+    ctx[140].name + ""
   );
   let t2;
   return {
@@ -14732,8 +14800,8 @@ function create_else_block_1$v(ctx) {
       t1 = space();
       span1 = element("span");
       t2 = text(t2_value);
-      attr(span0, "class", "loc svelte-6d4af5");
-      attr(span1, "class", "name svelte-6d4af5");
+      attr(span0, "class", "loc svelte-1958nee");
+      attr(span1, "class", "name svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, span0, anchor);
@@ -14745,10 +14813,10 @@ function create_else_block_1$v(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*currentLimbs*/
       32 && t0_value !== (t0_value = /*limb*/
-      ctx2[133].loc + "")) set_data(t0, t0_value);
+      ctx2[140].loc + "")) set_data(t0, t0_value);
       if (dirty[0] & /*currentLimbs*/
       32 && t2_value !== (t2_value = /*limb*/
-      ctx2[133].name + "")) set_data(t2, t2_value);
+      ctx2[140].name + "")) set_data(t2, t2_value);
     },
     d(detaching) {
       if (detaching) {
@@ -14759,28 +14827,28 @@ function create_else_block_1$v(ctx) {
     }
   };
 }
-function create_if_block_10$l(ctx) {
+function create_if_block_14$f(ctx) {
   let input0;
   let t;
   let input1;
   let mounted;
   let dispose;
   function input0_input_handler() {
-    ctx[81].call(
+    ctx[85].call(
       input0,
       /*each_value_3*/
-      ctx[134],
+      ctx[141],
       /*limb_index*/
-      ctx[135]
+      ctx[142]
     );
   }
   function input1_input_handler() {
-    ctx[82].call(
+    ctx[86].call(
       input1,
       /*each_value_3*/
-      ctx[134],
+      ctx[141],
       /*limb_index*/
-      ctx[135]
+      ctx[142]
     );
   }
   return {
@@ -14788,23 +14856,23 @@ function create_if_block_10$l(ctx) {
       input0 = element("input");
       t = space();
       input1 = element("input");
-      attr(input0, "class", "mini-edit svelte-6d4af5");
+      attr(input0, "class", "mini-edit svelte-1958nee");
       attr(input0, "placeholder", "Loc");
-      attr(input1, "class", "mini-edit svelte-6d4af5");
+      attr(input1, "class", "mini-edit svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, input0, anchor);
       set_input_value(
         input0,
         /*limb*/
-        ctx[133].loc
+        ctx[140].loc
       );
       insert(target, t, anchor);
       insert(target, input1, anchor);
       set_input_value(
         input1,
         /*limb*/
-        ctx[133].name
+        ctx[140].name
       );
       if (!mounted) {
         dispose = [
@@ -14813,14 +14881,14 @@ function create_if_block_10$l(ctx) {
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[29]
+            ctx[31]
           ),
           listen(input1, "input", input1_input_handler),
           listen(
             input1,
             "change",
             /*triggerReactivity*/
-            ctx[29]
+            ctx[31]
           )
         ];
         mounted = true;
@@ -14830,20 +14898,20 @@ function create_if_block_10$l(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*currentLimbs*/
       32 && input0.value !== /*limb*/
-      ctx[133].loc) {
+      ctx[140].loc) {
         set_input_value(
           input0,
           /*limb*/
-          ctx[133].loc
+          ctx[140].loc
         );
       }
       if (dirty[0] & /*currentLimbs*/
       32 && input1.value !== /*limb*/
-      ctx[133].name) {
+      ctx[140].name) {
         set_input_value(
           input1,
           /*limb*/
-          ctx[133].name
+          ctx[140].name
         );
       }
     },
@@ -14858,7 +14926,7 @@ function create_if_block_10$l(ctx) {
     }
   };
 }
-function create_if_block_9$q(ctx) {
+function create_if_block_13$g(ctx) {
   let i;
   return {
     c() {
@@ -14868,7 +14936,7 @@ function create_if_block_9$q(ctx) {
         i,
         "color",
         /*slot*/
-        ctx[137].data.color
+        ctx[144].data.color
       );
     },
     m(target, anchor) {
@@ -14881,7 +14949,7 @@ function create_if_block_9$q(ctx) {
           i,
           "color",
           /*slot*/
-          ctx2[137].data.color
+          ctx2[144].data.color
         );
       }
     },
@@ -14901,16 +14969,16 @@ function create_each_block_4$j(ctx) {
   let dispose;
   let if_block = (
     /*slot*/
-    ctx[137].status === "trauma" && create_if_block_9$q(ctx)
+    ctx[144].status === "trauma" && create_if_block_13$g(ctx)
   );
   function drop_handler(...args) {
     return (
       /*drop_handler*/
-      ctx[83](
+      ctx[87](
         /*limb*/
-        ctx[133],
+        ctx[140],
         /*i*/
-        ctx[139],
+        ctx[146],
         ...args
       )
     );
@@ -14918,11 +14986,11 @@ function create_each_block_4$j(ctx) {
   function contextmenu_handler() {
     return (
       /*contextmenu_handler*/
-      ctx[84](
+      ctx[88](
         /*limb*/
-        ctx[133],
+        ctx[140],
         /*slot*/
-        ctx[137]
+        ctx[144]
       )
     );
   }
@@ -14932,11 +15000,11 @@ function create_each_block_4$j(ctx) {
       if (if_block) if_block.c();
       t = space();
       attr(div, "class", div_class_value = "hp-slot " + /*slot*/
-      ctx[137].status + " svelte-6d4af5");
+      ctx[144].status + " svelte-1958nee");
       attr(div, "title", div_title_value = /*slot*/
-      ctx[137].status === "trauma" ? (
+      ctx[144].status === "trauma" ? (
         /*slot*/
-        ctx[137].data.label
+        ctx[144].data.label
       ) : "");
     },
     m(target, anchor) {
@@ -14947,7 +15015,7 @@ function create_each_block_4$j(ctx) {
         dispose = [
           listen(div, "dragover", prevent_default(
             /*dragover_handler_1*/
-            ctx[65]
+            ctx[67]
           )),
           listen(div, "drop", stop_propagation(drop_handler)),
           listen(div, "contextmenu", stop_propagation(prevent_default(contextmenu_handler)))
@@ -14959,12 +15027,12 @@ function create_each_block_4$j(ctx) {
       ctx = new_ctx;
       if (
         /*slot*/
-        ctx[137].status === "trauma"
+        ctx[144].status === "trauma"
       ) {
         if (if_block) {
           if_block.p(ctx, dirty);
         } else {
-          if_block = create_if_block_9$q(ctx);
+          if_block = create_if_block_13$g(ctx);
           if_block.c();
           if_block.m(div, t);
         }
@@ -14974,14 +15042,14 @@ function create_each_block_4$j(ctx) {
       }
       if (dirty[0] & /*currentLimbs*/
       32 && div_class_value !== (div_class_value = "hp-slot " + /*slot*/
-      ctx[137].status + " svelte-6d4af5")) {
+      ctx[144].status + " svelte-1958nee")) {
         attr(div, "class", div_class_value);
       }
       if (dirty[0] & /*currentLimbs*/
       32 && div_title_value !== (div_title_value = /*slot*/
-      ctx[137].status === "trauma" ? (
+      ctx[144].status === "trauma" ? (
         /*slot*/
-        ctx[137].data.label
+        ctx[144].data.label
       ) : "")) {
         attr(div, "title", div_title_value);
       }
@@ -14996,18 +15064,152 @@ function create_each_block_4$j(ctx) {
     }
   };
 }
-function create_if_block_8$u(ctx) {
+function create_else_block_2$i(ctx) {
+  var _a, _b;
+  let t;
+  let if_block1_anchor;
+  let if_block0 = (
+    /*limb*/
+    ((_a = ctx[140].alt) == null ? void 0 : _a.lar) > 0 && create_if_block_12$h(ctx)
+  );
+  let if_block1 = (
+    /*limb*/
+    ((_b = ctx[140].alt) == null ? void 0 : _b.har) > 0 && create_if_block_11$j(ctx)
+  );
+  return {
+    c() {
+      if (if_block0) if_block0.c();
+      t = space();
+      if (if_block1) if_block1.c();
+      if_block1_anchor = empty();
+    },
+    m(target, anchor) {
+      if (if_block0) if_block0.m(target, anchor);
+      insert(target, t, anchor);
+      if (if_block1) if_block1.m(target, anchor);
+      insert(target, if_block1_anchor, anchor);
+    },
+    p(ctx2, dirty) {
+      var _a2, _b2;
+      if (
+        /*limb*/
+        ((_a2 = ctx2[140].alt) == null ? void 0 : _a2.lar) > 0
+      ) {
+        if (if_block0) {
+          if_block0.p(ctx2, dirty);
+        } else {
+          if_block0 = create_if_block_12$h(ctx2);
+          if_block0.c();
+          if_block0.m(t.parentNode, t);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (
+        /*limb*/
+        ((_b2 = ctx2[140].alt) == null ? void 0 : _b2.har) > 0
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx2, dirty);
+        } else {
+          if_block1 = create_if_block_11$j(ctx2);
+          if_block1.c();
+          if_block1.m(if_block1_anchor.parentNode, if_block1_anchor);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(t);
+        detach(if_block1_anchor);
+      }
+      if (if_block0) if_block0.d(detaching);
+      if (if_block1) if_block1.d(detaching);
+    }
+  };
+}
+function create_if_block_8$v(ctx) {
+  let t;
+  let if_block1_anchor;
+  let if_block0 = (
+    /*limb*/
+    ctx[140].lar > 0 && create_if_block_10$m(ctx)
+  );
+  let if_block1 = (
+    /*limb*/
+    ctx[140].har > 0 && create_if_block_9$r(ctx)
+  );
+  return {
+    c() {
+      if (if_block0) if_block0.c();
+      t = space();
+      if (if_block1) if_block1.c();
+      if_block1_anchor = empty();
+    },
+    m(target, anchor) {
+      if (if_block0) if_block0.m(target, anchor);
+      insert(target, t, anchor);
+      if (if_block1) if_block1.m(target, anchor);
+      insert(target, if_block1_anchor, anchor);
+    },
+    p(ctx2, dirty) {
+      if (
+        /*limb*/
+        ctx2[140].lar > 0
+      ) {
+        if (if_block0) {
+          if_block0.p(ctx2, dirty);
+        } else {
+          if_block0 = create_if_block_10$m(ctx2);
+          if_block0.c();
+          if_block0.m(t.parentNode, t);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (
+        /*limb*/
+        ctx2[140].har > 0
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx2, dirty);
+        } else {
+          if_block1 = create_if_block_9$r(ctx2);
+          if_block1.c();
+          if_block1.m(if_block1_anchor.parentNode, if_block1_anchor);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(t);
+        detach(if_block1_anchor);
+      }
+      if (if_block0) if_block0.d(detaching);
+      if (if_block1) if_block1.d(detaching);
+    }
+  };
+}
+function create_if_block_12$h(ctx) {
   let span;
   let t_value = (
     /*limb*/
-    ctx[133].lar + ""
+    ctx[140].alt.lar + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag l svelte-6d4af5");
+      attr(span, "class", "a-flag l svelte-1958nee");
       attr(span, "title", "Leve");
     },
     m(target, anchor) {
@@ -15017,7 +15219,7 @@ function create_if_block_8$u(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*currentLimbs*/
       32 && t_value !== (t_value = /*limb*/
-      ctx2[133].lar + "")) set_data(t, t_value);
+      ctx2[140].alt.lar + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -15026,18 +15228,18 @@ function create_if_block_8$u(ctx) {
     }
   };
 }
-function create_if_block_7$y(ctx) {
+function create_if_block_11$j(ctx) {
   let span;
   let t_value = (
     /*limb*/
-    ctx[133].har + ""
+    ctx[140].alt.har + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag h svelte-6d4af5");
+      attr(span, "class", "a-flag h svelte-1958nee");
       attr(span, "title", "Pesada (Visual)");
     },
     m(target, anchor) {
@@ -15047,7 +15249,7 @@ function create_if_block_7$y(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*currentLimbs*/
       32 && t_value !== (t_value = /*limb*/
-      ctx2[133].har + "")) set_data(t, t_value);
+      ctx2[140].alt.har + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -15056,16 +15258,76 @@ function create_if_block_7$y(ctx) {
     }
   };
 }
-function create_if_block_6$C(ctx) {
+function create_if_block_10$m(ctx) {
+  let span;
+  let t_value = (
+    /*limb*/
+    ctx[140].lar + ""
+  );
+  let t;
+  return {
+    c() {
+      span = element("span");
+      t = text(t_value);
+      attr(span, "class", "a-flag l svelte-1958nee");
+      attr(span, "title", "Leve");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentLimbs*/
+      32 && t_value !== (t_value = /*limb*/
+      ctx2[140].lar + "")) set_data(t, t_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_9$r(ctx) {
+  let span;
+  let t_value = (
+    /*limb*/
+    ctx[140].har + ""
+  );
+  let t;
+  return {
+    c() {
+      span = element("span");
+      t = text(t_value);
+      attr(span, "class", "a-flag h svelte-1958nee");
+      attr(span, "title", "Pesada (Visual)");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*currentLimbs*/
+      32 && t_value !== (t_value = /*limb*/
+      ctx2[140].har + "")) set_data(t, t_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_7$y(ctx) {
   let button;
   let mounted;
   let dispose;
-  function click_handler_14() {
+  function click_handler_16() {
     return (
-      /*click_handler_14*/
-      ctx[85](
+      /*click_handler_16*/
+      ctx[89](
         /*limb*/
-        ctx[133]
+        ctx[140]
       )
     );
   }
@@ -15073,12 +15335,12 @@ function create_if_block_6$C(ctx) {
     c() {
       button = element("button");
       button.textContent = "X";
-      attr(button, "class", "node-del svelte-6d4af5");
+      attr(button, "class", "node-del svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, button, anchor);
       if (!mounted) {
-        dispose = listen(button, "click", stop_propagation(click_handler_14));
+        dispose = listen(button, "click", stop_propagation(click_handler_16));
         mounted = true;
       }
     },
@@ -15103,7 +15365,6 @@ function create_each_block_3$n(key_2, ctx) {
   let div2;
   let t2;
   let t3;
-  let t4;
   let div3_class_value;
   let div3_intro;
   let mounted;
@@ -15111,48 +15372,49 @@ function create_each_block_3$n(key_2, ctx) {
   function select_block_type_1(ctx2, dirty) {
     if (
       /*editingMode*/
-      ctx2[9]
-    ) return create_if_block_10$l;
-    return create_else_block_1$v;
+      ctx2[10]
+    ) return create_if_block_14$f;
+    return create_else_block_3$8;
   }
   let current_block_type = select_block_type_1(ctx);
   let if_block0 = current_block_type(ctx);
   let each_value_4 = ensure_array_like(Array(
     /*limb*/
-    ctx[133].hp
+    ctx[140].hp
   ));
   let each_blocks = [];
   for (let i = 0; i < each_value_4.length; i += 1) {
     each_blocks[i] = create_each_block_4$j(get_each_context_4$j(ctx, each_value_4, i));
   }
-  let if_block1 = (
-    /*limb*/
-    ctx[133].lar > 0 && create_if_block_8$u(ctx)
-  );
+  function select_block_type_2(ctx2, dirty) {
+    if (
+      /*activeSet*/
+      ctx2[8] === 1
+    ) return create_if_block_8$v;
+    return create_else_block_2$i;
+  }
+  let current_block_type_1 = select_block_type_2(ctx);
+  let if_block1 = current_block_type_1(ctx);
   let if_block2 = (
-    /*limb*/
-    ctx[133].har > 0 && create_if_block_7$y(ctx)
-  );
-  let if_block3 = (
     /*editingMode*/
-    ctx[9] && create_if_block_6$C(ctx)
+    ctx[10] && create_if_block_7$y(ctx)
   );
   function dragstart_handler(...args) {
     return (
       /*dragstart_handler*/
-      ctx[86](
+      ctx[90](
         /*limb*/
-        ctx[133],
+        ctx[140],
         ...args
       )
     );
   }
-  function click_handler_15() {
+  function click_handler_17() {
     return (
-      /*click_handler_15*/
-      ctx[87](
+      /*click_handler_17*/
+      ctx[91](
         /*limb*/
-        ctx[133]
+        ctx[140]
       )
     );
   }
@@ -15170,35 +15432,33 @@ function create_each_block_3$n(key_2, ctx) {
       }
       t1 = space();
       div2 = element("div");
-      if (if_block1) if_block1.c();
+      if_block1.c();
       t2 = space();
       if (if_block2) if_block2.c();
       t3 = space();
-      if (if_block3) if_block3.c();
-      t4 = space();
-      attr(div0, "class", "node-header svelte-6d4af5");
-      attr(div1, "class", "hp-grid svelte-6d4af5");
-      attr(div2, "class", "armor-flags svelte-6d4af5");
+      attr(div0, "class", "node-header svelte-1958nee");
+      attr(div1, "class", "hp-grid svelte-1958nee");
+      attr(div2, "class", "armor-flags svelte-1958nee");
       attr(div3, "class", div3_class_value = "limb-node " + /*selectedLimbId*/
       (ctx[4] === /*limb*/
-      ctx[133].id ? "selected" : "") + " svelte-6d4af5");
+      ctx[140].id ? "selected" : "") + " svelte-1958nee");
       set_style(
         div3,
         "left",
         /*limb*/
-        ctx[133].x + "%"
+        ctx[140].x + "%"
       );
       set_style(
         div3,
         "top",
         /*limb*/
-        ctx[133].y + "%"
+        ctx[140].y + "%"
       );
       attr(
         div3,
         "draggable",
         /*editingMode*/
-        ctx[9]
+        ctx[10]
       );
       this.first = div3;
     },
@@ -15215,16 +15475,14 @@ function create_each_block_3$n(key_2, ctx) {
       }
       append(div3, t1);
       append(div3, div2);
-      if (if_block1) if_block1.m(div2, null);
-      append(div2, t2);
-      if (if_block2) if_block2.m(div2, null);
+      if_block1.m(div2, null);
+      append(div3, t2);
+      if (if_block2) if_block2.m(div3, null);
       append(div3, t3);
-      if (if_block3) if_block3.m(div3, null);
-      append(div3, t4);
       if (!mounted) {
         dispose = [
           listen(div3, "dragstart", dragstart_handler),
-          listen(div3, "click", click_handler_15)
+          listen(div3, "click", click_handler_17)
         ];
         mounted = true;
       }
@@ -15243,10 +15501,10 @@ function create_each_block_3$n(key_2, ctx) {
       }
       if (dirty[0] & /*currentLimbs*/
       32 | dirty[1] & /*getSlotState, onTraumaDrop, removeTrauma*/
-      131456) {
+      525824) {
         each_value_4 = ensure_array_like(Array(
           /*limb*/
-          ctx[133].hp
+          ctx[140].hp
         ));
         let i;
         for (i = 0; i < each_value_4.length; i += 1) {
@@ -15264,55 +15522,35 @@ function create_each_block_3$n(key_2, ctx) {
         }
         each_blocks.length = each_value_4.length;
       }
-      if (
-        /*limb*/
-        ctx[133].lar > 0
-      ) {
-        if (if_block1) {
-          if_block1.p(ctx, dirty);
-        } else {
-          if_block1 = create_if_block_8$u(ctx);
-          if_block1.c();
-          if_block1.m(div2, t2);
-        }
-      } else if (if_block1) {
+      if (current_block_type_1 === (current_block_type_1 = select_block_type_2(ctx)) && if_block1) {
+        if_block1.p(ctx, dirty);
+      } else {
         if_block1.d(1);
-        if_block1 = null;
+        if_block1 = current_block_type_1(ctx);
+        if (if_block1) {
+          if_block1.c();
+          if_block1.m(div2, null);
+        }
       }
       if (
-        /*limb*/
-        ctx[133].har > 0
+        /*editingMode*/
+        ctx[10]
       ) {
         if (if_block2) {
           if_block2.p(ctx, dirty);
         } else {
           if_block2 = create_if_block_7$y(ctx);
           if_block2.c();
-          if_block2.m(div2, null);
+          if_block2.m(div3, t3);
         }
       } else if (if_block2) {
         if_block2.d(1);
         if_block2 = null;
       }
-      if (
-        /*editingMode*/
-        ctx[9]
-      ) {
-        if (if_block3) {
-          if_block3.p(ctx, dirty);
-        } else {
-          if_block3 = create_if_block_6$C(ctx);
-          if_block3.c();
-          if_block3.m(div3, t4);
-        }
-      } else if (if_block3) {
-        if_block3.d(1);
-        if_block3 = null;
-      }
       if (dirty[0] & /*selectedLimbId, currentLimbs*/
       48 && div3_class_value !== (div3_class_value = "limb-node " + /*selectedLimbId*/
       (ctx[4] === /*limb*/
-      ctx[133].id ? "selected" : "") + " svelte-6d4af5")) {
+      ctx[140].id ? "selected" : "") + " svelte-1958nee")) {
         attr(div3, "class", div3_class_value);
       }
       if (dirty[0] & /*currentLimbs*/
@@ -15321,7 +15559,7 @@ function create_each_block_3$n(key_2, ctx) {
           div3,
           "left",
           /*limb*/
-          ctx[133].x + "%"
+          ctx[140].x + "%"
         );
       }
       if (dirty[0] & /*currentLimbs*/
@@ -15330,16 +15568,16 @@ function create_each_block_3$n(key_2, ctx) {
           div3,
           "top",
           /*limb*/
-          ctx[133].y + "%"
+          ctx[140].y + "%"
         );
       }
       if (dirty[0] & /*editingMode*/
-      512) {
+      1024) {
         attr(
           div3,
           "draggable",
           /*editingMode*/
-          ctx[9]
+          ctx[10]
         );
       }
     },
@@ -15360,9 +15598,8 @@ function create_each_block_3$n(key_2, ctx) {
       }
       if_block0.d();
       destroy_each(each_blocks, detaching);
-      if (if_block1) if_block1.d();
+      if_block1.d();
       if (if_block2) if_block2.d();
-      if (if_block3) if_block3.d();
       mounted = false;
       run_all(dispose);
     }
@@ -15370,6 +15607,403 @@ function create_each_block_3$n(key_2, ctx) {
 }
 function create_if_block_5$F(ctx) {
   let div0;
+  let t0;
+  let label0;
+  let t1;
+  let input0;
+  let t2;
+  let div6;
+  let div1;
+  let label1;
+  let input1;
+  let t4;
+  let div2;
+  let label2;
+  let input2;
+  let t6;
+  let div3;
+  let label3;
+  let input3;
+  let t8;
+  let div4;
+  let label4;
+  let input4;
+  let t10;
+  let div5;
+  let label5;
+  let input5;
+  let t12;
+  let button0;
+  let t14;
+  let div7;
+  let input6;
+  let t15;
+  let button1;
+  let t17;
+  let div8;
+  let input7;
+  let t18;
+  let button2;
+  let mounted;
+  let dispose;
+  function select_block_type_3(ctx2, dirty) {
+    if (
+      /*activeSet*/
+      ctx2[8] === 1
+    ) return create_if_block_6$C;
+    return create_else_block_1$v;
+  }
+  let current_block_type = select_block_type_3(ctx);
+  let if_block = current_block_type(ctx);
+  return {
+    c() {
+      div0 = element("div");
+      if_block.c();
+      t0 = space();
+      label0 = element("label");
+      t1 = text("HP Total");
+      input0 = element("input");
+      t2 = space();
+      div6 = element("div");
+      div1 = element("div");
+      label1 = element("label");
+      label1.textContent = "Não Letal";
+      input1 = element("input");
+      t4 = space();
+      div2 = element("div");
+      label2 = element("label");
+      label2.textContent = "Letal";
+      input2 = element("input");
+      t6 = space();
+      div3 = element("div");
+      label3 = element("label");
+      label3.textContent = "Perf.";
+      input3 = element("input");
+      t8 = space();
+      div4 = element("div");
+      label4 = element("label");
+      label4.textContent = "Não-Físico?";
+      input4 = element("input");
+      t10 = space();
+      div5 = element("div");
+      label5 = element("label");
+      label5.textContent = "Engolfar";
+      input5 = element("input");
+      t12 = space();
+      button0 = element("button");
+      button0.textContent = "DANO";
+      t14 = space();
+      div7 = element("div");
+      input6 = element("input");
+      t15 = space();
+      button1 = element("button");
+      button1.textContent = "+";
+      t17 = space();
+      div8 = element("div");
+      input7 = element("input");
+      t18 = space();
+      button2 = element("button");
+      button2.innerHTML = `<i class="fas fa-dna"></i>`;
+      attr(input0, "type", "number");
+      attr(input0, "class", "svelte-1958nee");
+      attr(label0, "class", "svelte-1958nee");
+      attr(div0, "class", "armor-edit svelte-1958nee");
+      set_style(label1, "color", "var(--c-shock)");
+      attr(label1, "class", "svelte-1958nee");
+      attr(input1, "type", "number");
+      attr(input1, "class", "svelte-1958nee");
+      attr(div1, "class", "grp svelte-1958nee");
+      set_style(label2, "color", "var(--c-kill)");
+      attr(label2, "class", "svelte-1958nee");
+      attr(input2, "type", "number");
+      attr(input2, "class", "svelte-1958nee");
+      attr(div2, "class", "grp svelte-1958nee");
+      set_style(label3, "color", "#00fbff");
+      attr(label3, "class", "svelte-1958nee");
+      attr(input3, "type", "number");
+      attr(input3, "class", "svelte-1958nee");
+      attr(div3, "class", "grp svelte-1958nee");
+      set_style(label4, "color", "#a855f7");
+      attr(label4, "class", "svelte-1958nee");
+      attr(input4, "type", "checkbox");
+      attr(input4, "class", "custom-chk non-phys svelte-1958nee");
+      attr(div4, "class", "grp svelte-1958nee");
+      set_style(label5, "color", "#f75555");
+      attr(label5, "class", "svelte-1958nee");
+      attr(input5, "type", "checkbox");
+      attr(input5, "class", "custom-chk engulf svelte-1958nee");
+      attr(div5, "class", "grp svelte-1958nee");
+      attr(div6, "class", "dmg-inputs svelte-1958nee");
+      attr(button0, "class", "btn-hit svelte-1958nee");
+      attr(input6, "type", "number");
+      attr(input6, "placeholder", "Cura");
+      set_style(input6, "flex", "1");
+      attr(input6, "class", "svelte-1958nee");
+      attr(button1, "class", "btn-square-heal svelte-1958nee");
+      attr(div7, "class", "heal-row svelte-1958nee");
+      set_style(div7, "display", "flex");
+      set_style(div7, "gap", "5px");
+      attr(input7, "type", "number");
+      attr(input7, "placeholder", "Regen");
+      set_style(input7, "border-color", "#3b82f6");
+      set_style(input7, "flex", "1");
+      attr(input7, "class", "svelte-1958nee");
+      set_style(button2, "background", "#3b82f6");
+      set_style(button2, "color", "#fff");
+      attr(button2, "class", "btn-square-heal svelte-1958nee");
+      attr(button2, "title", "Regen Corpo Todo");
+      attr(div8, "class", "heal-row svelte-1958nee");
+      set_style(div8, "display", "flex");
+      set_style(div8, "gap", "5px");
+      set_style(div8, "margin-top", "5px");
+    },
+    m(target, anchor) {
+      insert(target, div0, anchor);
+      if_block.m(div0, null);
+      append(div0, t0);
+      append(div0, label0);
+      append(label0, t1);
+      append(label0, input0);
+      set_input_value(
+        input0,
+        /*selectedLimb*/
+        ctx[24].hp
+      );
+      insert(target, t2, anchor);
+      insert(target, div6, anchor);
+      append(div6, div1);
+      append(div1, label1);
+      append(div1, input1);
+      set_input_value(
+        input1,
+        /*inputShock*/
+        ctx[15]
+      );
+      append(div6, t4);
+      append(div6, div2);
+      append(div2, label2);
+      append(div2, input2);
+      set_input_value(
+        input2,
+        /*inputKilling*/
+        ctx[16]
+      );
+      append(div6, t6);
+      append(div6, div3);
+      append(div3, label3);
+      append(div3, input3);
+      set_input_value(
+        input3,
+        /*inputPenetration*/
+        ctx[18]
+      );
+      append(div6, t8);
+      append(div6, div4);
+      append(div4, label4);
+      append(div4, input4);
+      input4.checked = /*inputNonPhysical*/
+      ctx[19];
+      append(div6, t10);
+      append(div6, div5);
+      append(div5, label5);
+      append(div5, input5);
+      input5.checked = /*inputEngolfar*/
+      ctx[20];
+      insert(target, t12, anchor);
+      insert(target, button0, anchor);
+      insert(target, t14, anchor);
+      insert(target, div7, anchor);
+      append(div7, input6);
+      set_input_value(
+        input6,
+        /*inputHeal*/
+        ctx[17]
+      );
+      append(div7, t15);
+      append(div7, button1);
+      insert(target, t17, anchor);
+      insert(target, div8, anchor);
+      append(div8, input7);
+      set_input_value(
+        input7,
+        /*inputRegen*/
+        ctx[21]
+      );
+      append(div8, t18);
+      append(div8, button2);
+      if (!mounted) {
+        dispose = [
+          listen(
+            input0,
+            "input",
+            /*input0_input_handler_3*/
+            ctx[101]
+          ),
+          listen(
+            input0,
+            "change",
+            /*triggerReactivity*/
+            ctx[31]
+          ),
+          listen(
+            input1,
+            "input",
+            /*input1_input_handler_3*/
+            ctx[102]
+          ),
+          listen(
+            input2,
+            "input",
+            /*input2_input_handler*/
+            ctx[103]
+          ),
+          listen(
+            input3,
+            "input",
+            /*input3_input_handler*/
+            ctx[104]
+          ),
+          listen(
+            input4,
+            "change",
+            /*input4_change_handler*/
+            ctx[105]
+          ),
+          listen(
+            input5,
+            "change",
+            /*input5_change_handler*/
+            ctx[106]
+          ),
+          listen(
+            button0,
+            "click",
+            /*applyDamage*/
+            ctx[35]
+          ),
+          listen(
+            input6,
+            "input",
+            /*input6_input_handler*/
+            ctx[107]
+          ),
+          listen(
+            button1,
+            "click",
+            /*applyHeal*/
+            ctx[36]
+          ),
+          listen(
+            input7,
+            "input",
+            /*input7_input_handler*/
+            ctx[108]
+          ),
+          listen(
+            button2,
+            "click",
+            /*applyRegen*/
+            ctx[37]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (current_block_type === (current_block_type = select_block_type_3(ctx2)) && if_block) {
+        if_block.p(ctx2, dirty);
+      } else {
+        if_block.d(1);
+        if_block = current_block_type(ctx2);
+        if (if_block) {
+          if_block.c();
+          if_block.m(div0, t0);
+        }
+      }
+      if (dirty[0] & /*selectedLimb*/
+      16777216 && to_number(input0.value) !== /*selectedLimb*/
+      ctx2[24].hp) {
+        set_input_value(
+          input0,
+          /*selectedLimb*/
+          ctx2[24].hp
+        );
+      }
+      if (dirty[0] & /*inputShock*/
+      32768 && to_number(input1.value) !== /*inputShock*/
+      ctx2[15]) {
+        set_input_value(
+          input1,
+          /*inputShock*/
+          ctx2[15]
+        );
+      }
+      if (dirty[0] & /*inputKilling*/
+      65536 && to_number(input2.value) !== /*inputKilling*/
+      ctx2[16]) {
+        set_input_value(
+          input2,
+          /*inputKilling*/
+          ctx2[16]
+        );
+      }
+      if (dirty[0] & /*inputPenetration*/
+      262144 && to_number(input3.value) !== /*inputPenetration*/
+      ctx2[18]) {
+        set_input_value(
+          input3,
+          /*inputPenetration*/
+          ctx2[18]
+        );
+      }
+      if (dirty[0] & /*inputNonPhysical*/
+      524288) {
+        input4.checked = /*inputNonPhysical*/
+        ctx2[19];
+      }
+      if (dirty[0] & /*inputEngolfar*/
+      1048576) {
+        input5.checked = /*inputEngolfar*/
+        ctx2[20];
+      }
+      if (dirty[0] & /*inputHeal*/
+      131072 && to_number(input6.value) !== /*inputHeal*/
+      ctx2[17]) {
+        set_input_value(
+          input6,
+          /*inputHeal*/
+          ctx2[17]
+        );
+      }
+      if (dirty[0] & /*inputRegen*/
+      2097152 && to_number(input7.value) !== /*inputRegen*/
+      ctx2[21]) {
+        set_input_value(
+          input7,
+          /*inputRegen*/
+          ctx2[21]
+        );
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div0);
+        detach(t2);
+        detach(div6);
+        detach(t12);
+        detach(button0);
+        detach(t14);
+        detach(div7);
+        detach(t17);
+        detach(div8);
+      }
+      if_block.d();
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_else_block_1$v(ctx) {
   let label0;
   let t0;
   let input0;
@@ -15381,48 +16015,10 @@ function create_if_block_5$F(ctx) {
   let label2;
   let t4;
   let input2;
-  let t5;
-  let label3;
-  let t6;
-  let input3;
-  let t7;
-  let div6;
-  let div1;
-  let label4;
-  let input4;
-  let t9;
-  let div2;
-  let label5;
-  let input5;
-  let t11;
-  let div3;
-  let label6;
-  let input6;
-  let t13;
-  let div4;
-  let label7;
-  let input7;
-  let t15;
-  let div5;
-  let label8;
-  let input8;
-  let t17;
-  let button0;
-  let t19;
-  let div7;
-  let input9;
-  let t20;
-  let button1;
-  let t22;
-  let div8;
-  let input10;
-  let t23;
-  let button2;
   let mounted;
   let dispose;
   return {
     c() {
-      div0 = element("div");
       label0 = element("label");
       t0 = text("Arm. Leve");
       input0 = element("input");
@@ -15432,321 +16028,80 @@ function create_if_block_5$F(ctx) {
       input1 = element("input");
       t3 = space();
       label2 = element("label");
-      t4 = text("HP Total");
+      t4 = text("Não-Físico");
       input2 = element("input");
-      t5 = space();
-      label3 = element("label");
-      t6 = text("Não-Físico");
-      input3 = element("input");
-      t7 = space();
-      div6 = element("div");
-      div1 = element("div");
-      label4 = element("label");
-      label4.textContent = "Não Letal";
-      input4 = element("input");
-      t9 = space();
-      div2 = element("div");
-      label5 = element("label");
-      label5.textContent = "Letal";
-      input5 = element("input");
-      t11 = space();
-      div3 = element("div");
-      label6 = element("label");
-      label6.textContent = "Perf.";
-      input6 = element("input");
-      t13 = space();
-      div4 = element("div");
-      label7 = element("label");
-      label7.textContent = "Não-Físico?";
-      input7 = element("input");
-      t15 = space();
-      div5 = element("div");
-      label8 = element("label");
-      label8.textContent = "Engolfar";
-      input8 = element("input");
-      t17 = space();
-      button0 = element("button");
-      button0.textContent = "DANO";
-      t19 = space();
-      div7 = element("div");
-      input9 = element("input");
-      t20 = space();
-      button1 = element("button");
-      button1.textContent = "+";
-      t22 = space();
-      div8 = element("div");
-      input10 = element("input");
-      t23 = space();
-      button2 = element("button");
-      button2.innerHTML = `<i class="fas fa-dna"></i>`;
       attr(input0, "type", "number");
-      attr(input0, "class", "svelte-6d4af5");
-      attr(label0, "class", "svelte-6d4af5");
+      attr(input0, "class", "svelte-1958nee");
+      attr(label0, "class", "svelte-1958nee");
       attr(input1, "type", "number");
-      attr(input1, "class", "svelte-6d4af5");
-      attr(label1, "class", "svelte-6d4af5");
-      attr(input2, "type", "number");
-      attr(input2, "class", "svelte-6d4af5");
-      attr(label2, "class", "svelte-6d4af5");
-      attr(input3, "type", "checkbox");
-      attr(input3, "class", "custom-chk non-phys svelte-6d4af5");
-      set_style(label3, "color", "#a855f7");
-      attr(label3, "class", "svelte-6d4af5");
-      attr(div0, "class", "armor-edit svelte-6d4af5");
-      set_style(label4, "color", "var(--c-shock)");
-      attr(label4, "class", "svelte-6d4af5");
-      attr(input4, "type", "number");
-      attr(input4, "class", "svelte-6d4af5");
-      attr(div1, "class", "grp svelte-6d4af5");
-      set_style(label5, "color", "var(--c-kill)");
-      attr(label5, "class", "svelte-6d4af5");
-      attr(input5, "type", "number");
-      attr(input5, "class", "svelte-6d4af5");
-      attr(div2, "class", "grp svelte-6d4af5");
-      set_style(label6, "color", "#00fbff");
-      attr(label6, "class", "svelte-6d4af5");
-      attr(input6, "type", "number");
-      attr(input6, "class", "svelte-6d4af5");
-      attr(div3, "class", "grp svelte-6d4af5");
-      set_style(label7, "color", "#a855f7");
-      attr(label7, "class", "svelte-6d4af5");
-      attr(input7, "type", "checkbox");
-      attr(input7, "class", "custom-chk non-phys svelte-6d4af5");
-      attr(div4, "class", "grp svelte-6d4af5");
-      set_style(label8, "color", "#f75555");
-      attr(label8, "class", "svelte-6d4af5");
-      attr(input8, "type", "checkbox");
-      attr(input8, "class", "custom-chk engulf svelte-6d4af5");
-      attr(div5, "class", "grp svelte-6d4af5");
-      attr(div6, "class", "dmg-inputs svelte-6d4af5");
-      attr(button0, "class", "btn-hit svelte-6d4af5");
-      attr(input9, "type", "number");
-      attr(input9, "placeholder", "Cura");
-      set_style(input9, "flex", "1");
-      attr(input9, "class", "svelte-6d4af5");
-      attr(button1, "class", "btn-square-heal svelte-6d4af5");
-      attr(div7, "class", "heal-row svelte-6d4af5");
-      set_style(div7, "display", "flex");
-      set_style(div7, "gap", "5px");
-      attr(input10, "type", "number");
-      attr(input10, "placeholder", "Regen");
-      set_style(input10, "border-color", "#3b82f6");
-      set_style(input10, "flex", "1");
-      attr(input10, "class", "svelte-6d4af5");
-      set_style(button2, "background", "#3b82f6");
-      set_style(button2, "color", "#fff");
-      attr(button2, "class", "btn-square-heal svelte-6d4af5");
-      attr(button2, "title", "Regen Corpo Todo");
-      attr(div8, "class", "heal-row svelte-6d4af5");
-      set_style(div8, "display", "flex");
-      set_style(div8, "gap", "5px");
-      set_style(div8, "margin-top", "5px");
+      attr(input1, "class", "svelte-1958nee");
+      attr(label1, "class", "svelte-1958nee");
+      attr(input2, "type", "checkbox");
+      attr(input2, "class", "custom-chk non-phys svelte-1958nee");
+      set_style(label2, "color", "#a855f7");
+      attr(label2, "class", "svelte-1958nee");
     },
     m(target, anchor) {
-      insert(target, div0, anchor);
-      append(div0, label0);
+      insert(target, label0, anchor);
       append(label0, t0);
       append(label0, input0);
       set_input_value(
         input0,
         /*selectedLimb*/
-        ctx[23].lar
+        ctx[24].alt.lar
       );
-      append(div0, t1);
-      append(div0, label1);
+      insert(target, t1, anchor);
+      insert(target, label1, anchor);
       append(label1, t2);
       append(label1, input1);
       set_input_value(
         input1,
         /*selectedLimb*/
-        ctx[23].har
+        ctx[24].alt.har
       );
-      append(div0, t3);
-      append(div0, label2);
+      insert(target, t3, anchor);
+      insert(target, label2, anchor);
       append(label2, t4);
       append(label2, input2);
-      set_input_value(
-        input2,
-        /*selectedLimb*/
-        ctx[23].hp
-      );
-      append(div0, t5);
-      append(div0, label3);
-      append(label3, t6);
-      append(label3, input3);
-      input3.checked = /*selectedLimb*/
-      ctx[23].nonPhysicalDef;
-      insert(target, t7, anchor);
-      insert(target, div6, anchor);
-      append(div6, div1);
-      append(div1, label4);
-      append(div1, input4);
-      set_input_value(
-        input4,
-        /*inputShock*/
-        ctx[14]
-      );
-      append(div6, t9);
-      append(div6, div2);
-      append(div2, label5);
-      append(div2, input5);
-      set_input_value(
-        input5,
-        /*inputKilling*/
-        ctx[15]
-      );
-      append(div6, t11);
-      append(div6, div3);
-      append(div3, label6);
-      append(div3, input6);
-      set_input_value(
-        input6,
-        /*inputPenetration*/
-        ctx[17]
-      );
-      append(div6, t13);
-      append(div6, div4);
-      append(div4, label7);
-      append(div4, input7);
-      input7.checked = /*inputNonPhysical*/
-      ctx[18];
-      append(div6, t15);
-      append(div6, div5);
-      append(div5, label8);
-      append(div5, input8);
-      input8.checked = /*inputEngolfar*/
-      ctx[19];
-      insert(target, t17, anchor);
-      insert(target, button0, anchor);
-      insert(target, t19, anchor);
-      insert(target, div7, anchor);
-      append(div7, input9);
-      set_input_value(
-        input9,
-        /*inputHeal*/
-        ctx[16]
-      );
-      append(div7, t20);
-      append(div7, button1);
-      insert(target, t22, anchor);
-      insert(target, div8, anchor);
-      append(div8, input10);
-      set_input_value(
-        input10,
-        /*inputRegen*/
-        ctx[20]
-      );
-      append(div8, t23);
-      append(div8, button2);
+      input2.checked = /*selectedLimb*/
+      ctx[24].alt.nonPhysicalDef;
       if (!mounted) {
         dispose = [
           listen(
             input0,
             "input",
-            /*input0_input_handler_1*/
-            ctx[91]
+            /*input0_input_handler_2*/
+            ctx[98]
           ),
           listen(
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[29]
+            ctx[31]
           ),
           listen(
             input1,
             "input",
-            /*input1_input_handler_1*/
-            ctx[92]
-          ),
-          listen(
-            input1,
-            "change",
-            /*triggerReactivity*/
-            ctx[29]
-          ),
-          listen(
-            input2,
-            "input",
-            /*input2_input_handler*/
-            ctx[93]
-          ),
-          listen(
-            input2,
-            "change",
-            /*triggerReactivity*/
-            ctx[29]
-          ),
-          listen(
-            input3,
-            "change",
-            /*input3_change_handler*/
-            ctx[94]
-          ),
-          listen(
-            input3,
-            "change",
-            /*triggerReactivity*/
-            ctx[29]
-          ),
-          listen(
-            input4,
-            "input",
-            /*input4_input_handler*/
-            ctx[95]
-          ),
-          listen(
-            input5,
-            "input",
-            /*input5_input_handler*/
-            ctx[96]
-          ),
-          listen(
-            input6,
-            "input",
-            /*input6_input_handler*/
-            ctx[97]
-          ),
-          listen(
-            input7,
-            "change",
-            /*input7_change_handler*/
-            ctx[98]
-          ),
-          listen(
-            input8,
-            "change",
-            /*input8_change_handler*/
+            /*input1_input_handler_2*/
             ctx[99]
           ),
           listen(
-            button0,
-            "click",
-            /*applyDamage*/
-            ctx[33]
+            input1,
+            "change",
+            /*triggerReactivity*/
+            ctx[31]
           ),
           listen(
-            input9,
-            "input",
-            /*input9_input_handler*/
+            input2,
+            "change",
+            /*input2_change_handler_1*/
             ctx[100]
           ),
           listen(
-            button1,
-            "click",
-            /*applyHeal*/
-            ctx[34]
-          ),
-          listen(
-            input10,
-            "input",
-            /*input10_input_handler*/
-            ctx[101]
-          ),
-          listen(
-            button2,
-            "click",
-            /*applyRegen*/
-            ctx[35]
+            input2,
+            "change",
+            /*triggerReactivity*/
+            ctx[31]
           )
         ];
         mounted = true;
@@ -15754,104 +16109,178 @@ function create_if_block_5$F(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*selectedLimb*/
-      8388608 && to_number(input0.value) !== /*selectedLimb*/
-      ctx2[23].lar) {
+      16777216 && to_number(input0.value) !== /*selectedLimb*/
+      ctx2[24].alt.lar) {
         set_input_value(
           input0,
           /*selectedLimb*/
-          ctx2[23].lar
+          ctx2[24].alt.lar
         );
       }
       if (dirty[0] & /*selectedLimb*/
-      8388608 && to_number(input1.value) !== /*selectedLimb*/
-      ctx2[23].har) {
+      16777216 && to_number(input1.value) !== /*selectedLimb*/
+      ctx2[24].alt.har) {
         set_input_value(
           input1,
           /*selectedLimb*/
-          ctx2[23].har
+          ctx2[24].alt.har
         );
       }
       if (dirty[0] & /*selectedLimb*/
-      8388608 && to_number(input2.value) !== /*selectedLimb*/
-      ctx2[23].hp) {
-        set_input_value(
-          input2,
-          /*selectedLimb*/
-          ctx2[23].hp
-        );
-      }
-      if (dirty[0] & /*selectedLimb*/
-      8388608) {
-        input3.checked = /*selectedLimb*/
-        ctx2[23].nonPhysicalDef;
-      }
-      if (dirty[0] & /*inputShock*/
-      16384 && to_number(input4.value) !== /*inputShock*/
-      ctx2[14]) {
-        set_input_value(
-          input4,
-          /*inputShock*/
-          ctx2[14]
-        );
-      }
-      if (dirty[0] & /*inputKilling*/
-      32768 && to_number(input5.value) !== /*inputKilling*/
-      ctx2[15]) {
-        set_input_value(
-          input5,
-          /*inputKilling*/
-          ctx2[15]
-        );
-      }
-      if (dirty[0] & /*inputPenetration*/
-      131072 && to_number(input6.value) !== /*inputPenetration*/
-      ctx2[17]) {
-        set_input_value(
-          input6,
-          /*inputPenetration*/
-          ctx2[17]
-        );
-      }
-      if (dirty[0] & /*inputNonPhysical*/
-      262144) {
-        input7.checked = /*inputNonPhysical*/
-        ctx2[18];
-      }
-      if (dirty[0] & /*inputEngolfar*/
-      524288) {
-        input8.checked = /*inputEngolfar*/
-        ctx2[19];
-      }
-      if (dirty[0] & /*inputHeal*/
-      65536 && to_number(input9.value) !== /*inputHeal*/
-      ctx2[16]) {
-        set_input_value(
-          input9,
-          /*inputHeal*/
-          ctx2[16]
-        );
-      }
-      if (dirty[0] & /*inputRegen*/
-      1048576 && to_number(input10.value) !== /*inputRegen*/
-      ctx2[20]) {
-        set_input_value(
-          input10,
-          /*inputRegen*/
-          ctx2[20]
-        );
+      16777216) {
+        input2.checked = /*selectedLimb*/
+        ctx2[24].alt.nonPhysicalDef;
       }
     },
     d(detaching) {
       if (detaching) {
-        detach(div0);
-        detach(t7);
-        detach(div6);
-        detach(t17);
-        detach(button0);
-        detach(t19);
-        detach(div7);
-        detach(t22);
-        detach(div8);
+        detach(label0);
+        detach(t1);
+        detach(label1);
+        detach(t3);
+        detach(label2);
+      }
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_6$C(ctx) {
+  let label0;
+  let t0;
+  let input0;
+  let t1;
+  let label1;
+  let t2;
+  let input1;
+  let t3;
+  let label2;
+  let t4;
+  let input2;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      label0 = element("label");
+      t0 = text("Arm. Leve");
+      input0 = element("input");
+      t1 = space();
+      label1 = element("label");
+      t2 = text("Arm. Pesada");
+      input1 = element("input");
+      t3 = space();
+      label2 = element("label");
+      t4 = text("Não-Físico");
+      input2 = element("input");
+      attr(input0, "type", "number");
+      attr(input0, "class", "svelte-1958nee");
+      attr(label0, "class", "svelte-1958nee");
+      attr(input1, "type", "number");
+      attr(input1, "class", "svelte-1958nee");
+      attr(label1, "class", "svelte-1958nee");
+      attr(input2, "type", "checkbox");
+      attr(input2, "class", "custom-chk non-phys svelte-1958nee");
+      set_style(label2, "color", "#a855f7");
+      attr(label2, "class", "svelte-1958nee");
+    },
+    m(target, anchor) {
+      insert(target, label0, anchor);
+      append(label0, t0);
+      append(label0, input0);
+      set_input_value(
+        input0,
+        /*selectedLimb*/
+        ctx[24].lar
+      );
+      insert(target, t1, anchor);
+      insert(target, label1, anchor);
+      append(label1, t2);
+      append(label1, input1);
+      set_input_value(
+        input1,
+        /*selectedLimb*/
+        ctx[24].har
+      );
+      insert(target, t3, anchor);
+      insert(target, label2, anchor);
+      append(label2, t4);
+      append(label2, input2);
+      input2.checked = /*selectedLimb*/
+      ctx[24].nonPhysicalDef;
+      if (!mounted) {
+        dispose = [
+          listen(
+            input0,
+            "input",
+            /*input0_input_handler_1*/
+            ctx[95]
+          ),
+          listen(
+            input0,
+            "change",
+            /*triggerReactivity*/
+            ctx[31]
+          ),
+          listen(
+            input1,
+            "input",
+            /*input1_input_handler_1*/
+            ctx[96]
+          ),
+          listen(
+            input1,
+            "change",
+            /*triggerReactivity*/
+            ctx[31]
+          ),
+          listen(
+            input2,
+            "change",
+            /*input2_change_handler*/
+            ctx[97]
+          ),
+          listen(
+            input2,
+            "change",
+            /*triggerReactivity*/
+            ctx[31]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*selectedLimb*/
+      16777216 && to_number(input0.value) !== /*selectedLimb*/
+      ctx2[24].lar) {
+        set_input_value(
+          input0,
+          /*selectedLimb*/
+          ctx2[24].lar
+        );
+      }
+      if (dirty[0] & /*selectedLimb*/
+      16777216 && to_number(input1.value) !== /*selectedLimb*/
+      ctx2[24].har) {
+        set_input_value(
+          input1,
+          /*selectedLimb*/
+          ctx2[24].har
+        );
+      }
+      if (dirty[0] & /*selectedLimb*/
+      16777216) {
+        input2.checked = /*selectedLimb*/
+        ctx2[24].nonPhysicalDef;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(label0);
+        detach(t1);
+        detach(label1);
+        detach(t3);
+        detach(label2);
       }
       mounted = false;
       run_all(dispose);
@@ -15865,7 +16294,7 @@ function create_each_block_2$s(ctx) {
   let span;
   let t1_value = (
     /*data*/
-    ctx[130].label + ""
+    ctx[137].label + ""
   );
   let t1;
   let t2;
@@ -15873,21 +16302,21 @@ function create_each_block_2$s(ctx) {
   let t4;
   let mounted;
   let dispose;
-  function click_handler_19() {
+  function click_handler_21() {
     return (
-      /*click_handler_19*/
-      ctx[103](
+      /*click_handler_21*/
+      ctx[110](
         /*key*/
-        ctx[123]
+        ctx[130]
       )
     );
   }
   function dragstart_handler_1(...args) {
     return (
       /*dragstart_handler_1*/
-      ctx[104](
+      ctx[111](
         /*key*/
-        ctx[123],
+        ctx[130],
         ...args
       )
     );
@@ -15908,11 +16337,11 @@ function create_each_block_2$s(ctx) {
         i,
         "color",
         /*data*/
-        ctx[130].color
+        ctx[137].color
       );
-      attr(span, "class", "t-name svelte-6d4af5");
-      attr(button, "class", "t-del svelte-6d4af5");
-      attr(div, "class", "t-item svelte-6d4af5");
+      attr(span, "class", "t-name svelte-1958nee");
+      attr(button, "class", "t-del svelte-1958nee");
+      attr(div, "class", "t-item svelte-1958nee");
       attr(div, "draggable", "true");
     },
     m(target, anchor) {
@@ -15926,7 +16355,7 @@ function create_each_block_2$s(ctx) {
       append(div, t4);
       if (!mounted) {
         dispose = [
-          listen(button, "click", click_handler_19),
+          listen(button, "click", click_handler_21),
           listen(div, "dragstart", dragstart_handler_1)
         ];
         mounted = true;
@@ -15940,12 +16369,12 @@ function create_each_block_2$s(ctx) {
           i,
           "color",
           /*data*/
-          ctx[130].color
+          ctx[137].color
         );
       }
       if (dirty[0] & /*traumaDB*/
       128 && t1_value !== (t1_value = /*data*/
-      ctx[130].label + "")) set_data(t1, t1_value);
+      ctx[137].label + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -15974,63 +16403,63 @@ function create_each_block_1$M(ctx) {
   let current;
   let mounted;
   let dispose;
-  function click_handler_10() {
+  function click_handler_12() {
     return (
-      /*click_handler_10*/
-      ctx[73](
+      /*click_handler_12*/
+      ctx[77](
         /*idx*/
-        ctx[129],
+        ctx[136],
         /*item*/
-        ctx[127]
+        ctx[134]
       )
     );
   }
   function input_input_handler() {
-    ctx[74].call(
+    ctx[78].call(
       input,
       /*each_value_1*/
-      ctx[128],
+      ctx[135],
       /*idx*/
-      ctx[129]
+      ctx[136]
     );
   }
   function change_handler() {
     return (
       /*change_handler*/
-      ctx[75](
+      ctx[79](
         /*idx*/
-        ctx[129],
+        ctx[136],
         /*item*/
-        ctx[127]
+        ctx[134]
       )
     );
   }
   function textarea_input_handler() {
-    ctx[76].call(
+    ctx[80].call(
       textarea,
       /*each_value_1*/
-      ctx[128],
+      ctx[135],
       /*idx*/
-      ctx[129]
+      ctx[136]
     );
   }
   function change_handler_1() {
     return (
       /*change_handler_1*/
-      ctx[77](
+      ctx[81](
         /*idx*/
-        ctx[129],
+        ctx[136],
         /*item*/
-        ctx[127]
+        ctx[134]
       )
     );
   }
-  function click_handler_11() {
+  function click_handler_13() {
     return (
-      /*click_handler_11*/
-      ctx[78](
+      /*click_handler_13*/
+      ctx[82](
         /*item*/
-        ctx[127]
+        ctx[134]
       )
     );
   }
@@ -16051,19 +16480,19 @@ function create_each_block_1$M(ctx) {
       button = element("button");
       button.innerHTML = `<i class="fas fa-trash"></i> EXCLUIR`;
       if (!src_url_equal(img.src, img_src_value = /*item*/
-      ctx[127].url)) attr(img, "src", img_src_value);
+      ctx[134].url)) attr(img, "src", img_src_value);
       attr(img, "alt", "Arte");
-      attr(img, "class", "svelte-6d4af5");
-      attr(div0, "class", "overlay-hint svelte-6d4af5");
-      attr(div1, "class", "art-frame svelte-6d4af5");
+      attr(img, "class", "svelte-1958nee");
+      attr(div0, "class", "overlay-hint svelte-1958nee");
+      attr(div1, "class", "art-frame svelte-1958nee");
       attr(input, "type", "text");
-      attr(input, "class", "art-title svelte-6d4af5");
+      attr(input, "class", "art-title svelte-1958nee");
       attr(input, "placeholder", "Título/Tema");
-      attr(textarea, "class", "art-desc custom-scroll svelte-6d4af5");
+      attr(textarea, "class", "art-desc custom-scroll svelte-1958nee");
       attr(textarea, "placeholder", "Anotações sobre este visual...");
-      attr(button, "class", "art-del svelte-6d4af5");
-      attr(div2, "class", "art-info svelte-6d4af5");
-      attr(div3, "class", "gallery-card svelte-6d4af5");
+      attr(button, "class", "art-del svelte-1958nee");
+      attr(div2, "class", "art-info svelte-1958nee");
+      attr(div3, "class", "gallery-card svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div3, anchor);
@@ -16077,26 +16506,26 @@ function create_each_block_1$M(ctx) {
       set_input_value(
         input,
         /*item*/
-        ctx[127].title
+        ctx[134].title
       );
       append(div2, t3);
       append(div2, textarea);
       set_input_value(
         textarea,
         /*item*/
-        ctx[127].desc
+        ctx[134].desc
       );
       append(div2, t4);
       append(div2, button);
       current = true;
       if (!mounted) {
         dispose = [
-          listen(div1, "click", click_handler_10),
+          listen(div1, "click", click_handler_12),
           listen(input, "input", input_input_handler),
           listen(input, "change", change_handler),
           listen(textarea, "input", textarea_input_handler),
           listen(textarea, "change", change_handler_1),
-          listen(button, "click", click_handler_11)
+          listen(button, "click", click_handler_13)
         ];
         mounted = true;
       }
@@ -16104,25 +16533,25 @@ function create_each_block_1$M(ctx) {
     p(new_ctx, dirty) {
       ctx = new_ctx;
       if (!current || dirty[0] & /*galleryItems*/
-      256 && !src_url_equal(img.src, img_src_value = /*item*/
-      ctx[127].url)) {
+      512 && !src_url_equal(img.src, img_src_value = /*item*/
+      ctx[134].url)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*galleryItems*/
-      256 && input.value !== /*item*/
-      ctx[127].title) {
+      512 && input.value !== /*item*/
+      ctx[134].title) {
         set_input_value(
           input,
           /*item*/
-          ctx[127].title
+          ctx[134].title
         );
       }
       if (dirty[0] & /*galleryItems*/
-      256) {
+      512) {
         set_input_value(
           textarea,
           /*item*/
-          ctx[127].desc
+          ctx[134].desc
         );
       }
     },
@@ -16160,7 +16589,7 @@ function create_if_block_4$L(ctx) {
     c() {
       div = element("div");
       div.innerHTML = `<i class="fas fa-images"></i> <p>Sua galeria está vazia.</p>`;
-      attr(div, "class", "empty-gallery svelte-6d4af5");
+      attr(div, "class", "empty-gallery svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -16245,10 +16674,10 @@ function create_if_block_2$_(ctx) {
       set_style(div1, "display", "flex");
       set_style(div1, "flex-direction", "column");
       set_style(div1, "gap", "10px");
-      attr(div2, "class", "modal-win svelte-6d4af5");
+      attr(div2, "class", "modal-win svelte-1958nee");
       set_style(div2, "width", "450px");
       attr(div2, "role", "dialog");
-      attr(div3, "class", "modal-overlay svelte-6d4af5");
+      attr(div3, "class", "modal-overlay svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div3, anchor);
@@ -16265,7 +16694,7 @@ function create_if_block_2$_(ctx) {
       set_input_value(
         input,
         /*imgModalUrl*/
-        ctx[13]
+        ctx[14]
       );
       append(div1, t5);
       append(div1, button1);
@@ -16276,30 +16705,30 @@ function create_if_block_2$_(ctx) {
           listen(
             button0,
             "click",
-            /*click_handler_20*/
-            ctx[105]
+            /*click_handler_22*/
+            ctx[112]
           ),
           listen(
             input,
             "input",
             /*input_input_handler_2*/
-            ctx[106]
+            ctx[113]
           ),
           listen(
             button1,
             "click",
             /*applyImageUpdate*/
-            ctx[43]
+            ctx[45]
           ),
           listen(div2, "click", stop_propagation(
             /*click_handler*/
-            ctx[63]
+            ctx[65]
           )),
           listen(
             div3,
             "click",
-            /*click_handler_21*/
-            ctx[107]
+            /*click_handler_23*/
+            ctx[114]
           )
         ];
         mounted = true;
@@ -16307,12 +16736,12 @@ function create_if_block_2$_(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*imgModalUrl*/
-      8192 && input.value !== /*imgModalUrl*/
-      ctx2[13]) {
+      16384 && input.value !== /*imgModalUrl*/
+      ctx2[14]) {
         set_input_value(
           input,
           /*imgModalUrl*/
-          ctx2[13]
+          ctx2[14]
         );
       }
     },
@@ -16387,11 +16816,11 @@ function create_if_block_1$14(ctx) {
       button.textContent = "FECHAR";
       set_style(h3, "color", "var(--c-primary)");
       set_style(h3, "margin-top", "0");
-      attr(div0, "class", "theme-list custom-scroll svelte-6d4af5");
+      attr(div0, "class", "theme-list custom-scroll svelte-1958nee");
       set_style(div0, "max-height", "300px");
-      attr(button, "class", "close-btn svelte-6d4af5");
-      attr(div1, "class", "modal-win svelte-6d4af5");
-      attr(div2, "class", "modal-overlay svelte-6d4af5");
+      attr(button, "class", "close-btn svelte-1958nee");
+      attr(div1, "class", "modal-win svelte-1958nee");
+      attr(div2, "class", "modal-overlay svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div2, anchor);
@@ -16411,18 +16840,18 @@ function create_if_block_1$14(ctx) {
           listen(
             button,
             "click",
-            /*click_handler_23*/
-            ctx[109]
+            /*click_handler_25*/
+            ctx[116]
           ),
           listen(div1, "click", stop_propagation(
             /*click_handler_1*/
-            ctx[62]
+            ctx[64]
           )),
           listen(
             div2,
             "click",
-            /*click_handler_24*/
-            ctx[110]
+            /*click_handler_26*/
+            ctx[117]
           )
         ];
         mounted = true;
@@ -16463,18 +16892,18 @@ function create_each_block$Z(ctx) {
   let button;
   let t_value = (
     /*val*/
-    ctx[124].name + ""
+    ctx[131].name + ""
   );
   let t;
   let button_class_value;
   let mounted;
   let dispose;
-  function click_handler_22() {
+  function click_handler_24() {
     return (
-      /*click_handler_22*/
-      ctx[108](
+      /*click_handler_24*/
+      ctx[115](
         /*key*/
-        ctx[123]
+        ctx[130]
       )
     );
   }
@@ -16483,14 +16912,14 @@ function create_each_block$Z(ctx) {
       button = element("button");
       t = text(t_value);
       attr(button, "class", button_class_value = "theme-btn " + /*key*/
-      (ctx[123] === /*currentThemeKey*/
-      ctx[0] ? "selected" : "") + " svelte-6d4af5");
+      (ctx[130] === /*currentThemeKey*/
+      ctx[0] ? "selected" : "") + " svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, button, anchor);
       append(button, t);
       if (!mounted) {
-        dispose = listen(button, "click", click_handler_22);
+        dispose = listen(button, "click", click_handler_24);
         mounted = true;
       }
     },
@@ -16498,8 +16927,8 @@ function create_each_block$Z(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*currentThemeKey*/
       1 && button_class_value !== (button_class_value = "theme-btn " + /*key*/
-      (ctx[123] === /*currentThemeKey*/
-      ctx[0] ? "selected" : "") + " svelte-6d4af5")) {
+      (ctx[130] === /*currentThemeKey*/
+      ctx[0] ? "selected" : "") + " svelte-1958nee")) {
         attr(button, "class", button_class_value);
       }
     },
@@ -16590,13 +17019,13 @@ function create_if_block$1b(ctx) {
       set_style(button0, "border", "none");
       set_style(button0, "font-weight", "bold");
       set_style(button0, "cursor", "pointer");
-      attr(button1, "class", "close-btn svelte-6d4af5");
+      attr(button1, "class", "close-btn svelte-1958nee");
       set_style(button1, "flex", "1");
       set_style(button1, "border", "none");
       set_style(button1, "cursor", "pointer");
       attr(div0, "class", "row");
-      attr(div1, "class", "modal-win trauma-form svelte-6d4af5");
-      attr(div2, "class", "modal-overlay svelte-6d4af5");
+      attr(div1, "class", "modal-win trauma-form svelte-1958nee");
+      attr(div2, "class", "modal-overlay svelte-1958nee");
     },
     m(target, anchor) {
       insert(target, div2, anchor);
@@ -16607,21 +17036,21 @@ function create_if_block$1b(ctx) {
       set_input_value(
         input0,
         /*newTrauma*/
-        ctx[21].key
+        ctx[22].key
       );
       append(div1, t2);
       append(div1, input1);
       set_input_value(
         input1,
         /*newTrauma*/
-        ctx[21].label
+        ctx[22].label
       );
       append(div1, t3);
       append(div1, input2);
       set_input_value(
         input2,
         /*newTrauma*/
-        ctx[21].desc
+        ctx[22].desc
       );
       append(div1, t4);
       append(div1, div0);
@@ -16629,7 +17058,7 @@ function create_if_block$1b(ctx) {
       set_input_value(
         input3,
         /*newTrauma*/
-        ctx[21].color
+        ctx[22].color
       );
       append(div0, t5);
       append(div0, button0);
@@ -16640,48 +17069,48 @@ function create_if_block$1b(ctx) {
           listen(
             input0,
             "input",
-            /*input0_input_handler_2*/
-            ctx[111]
+            /*input0_input_handler_4*/
+            ctx[118]
           ),
           listen(
             input1,
             "input",
-            /*input1_input_handler_2*/
-            ctx[112]
+            /*input1_input_handler_4*/
+            ctx[119]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler_1*/
-            ctx[113]
+            ctx[120]
           ),
           listen(
             input3,
             "input",
-            /*input3_input_handler*/
-            ctx[114]
+            /*input3_input_handler_1*/
+            ctx[121]
           ),
           listen(
             button0,
             "click",
             /*createGlobalTrauma*/
-            ctx[40]
+            ctx[42]
           ),
           listen(
             button1,
             "click",
-            /*click_handler_25*/
-            ctx[115]
+            /*click_handler_27*/
+            ctx[122]
           ),
           listen(div1, "click", stop_propagation(
             /*click_handler_2*/
-            ctx[61]
+            ctx[63]
           )),
           listen(
             div2,
             "click",
-            /*click_handler_26*/
-            ctx[116]
+            /*click_handler_28*/
+            ctx[123]
           )
         ];
         mounted = true;
@@ -16689,38 +17118,38 @@ function create_if_block$1b(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*newTrauma*/
-      2097152 && input0.value !== /*newTrauma*/
-      ctx2[21].key) {
+      4194304 && input0.value !== /*newTrauma*/
+      ctx2[22].key) {
         set_input_value(
           input0,
           /*newTrauma*/
-          ctx2[21].key
+          ctx2[22].key
         );
       }
       if (dirty[0] & /*newTrauma*/
-      2097152 && input1.value !== /*newTrauma*/
-      ctx2[21].label) {
+      4194304 && input1.value !== /*newTrauma*/
+      ctx2[22].label) {
         set_input_value(
           input1,
           /*newTrauma*/
-          ctx2[21].label
+          ctx2[22].label
         );
       }
       if (dirty[0] & /*newTrauma*/
-      2097152 && input2.value !== /*newTrauma*/
-      ctx2[21].desc) {
+      4194304 && input2.value !== /*newTrauma*/
+      ctx2[22].desc) {
         set_input_value(
           input2,
           /*newTrauma*/
-          ctx2[21].desc
+          ctx2[22].desc
         );
       }
       if (dirty[0] & /*newTrauma*/
-      2097152) {
+      4194304) {
         set_input_value(
           input3,
           /*newTrauma*/
-          ctx2[21].color
+          ctx2[22].color
         );
       }
     },
@@ -16737,7 +17166,7 @@ function create_fragment$1g(ctx) {
   let div4;
   let html_tag;
   let raw_value = `<style>${/*theme*/
-  ctx[26].css || ""}</style>`;
+  ctx[27].css || ""}</style>`;
   let t0;
   let div2;
   let div0;
@@ -16770,11 +17199,11 @@ function create_fragment$1g(ctx) {
   }
   let if_block0 = (
     /*editingMode*/
-    ctx[9] && create_if_block_14$f(ctx)
+    ctx[10] && create_if_block_18$9(ctx)
   );
   let if_block1 = (
     /*activeFormId*/
-    ctx[2] !== "gallery" && create_if_block_13$g(ctx)
+    ctx[2] !== "gallery" && create_if_block_17$b(ctx)
   );
   const if_block_creators = [create_if_block_3$T, create_else_block$T];
   const if_blocks = [];
@@ -16789,15 +17218,15 @@ function create_fragment$1g(ctx) {
   if_block2 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
   let if_block3 = (
     /*showImgModal*/
-    ctx[12] && create_if_block_2$_(ctx)
+    ctx[13] && create_if_block_2$_(ctx)
   );
   let if_block4 = (
     /*showConfig*/
-    ctx[10] && create_if_block_1$14(ctx)
+    ctx[11] && create_if_block_1$14(ctx)
   );
   let if_block5 = (
     /*showTraumaCreator*/
-    ctx[11] && create_if_block$1b(ctx)
+    ctx[12] && create_if_block$1b(ctx)
   );
   return {
     c() {
@@ -16831,62 +17260,62 @@ function create_fragment$1g(ctx) {
       if (if_block5) if_block5.c();
       html_tag.a = t0;
       attr(button0, "class", button0_class_value = "tab " + /*activeFormId*/
-      (ctx[2] === "gallery" ? "active gallery-mode" : "") + " svelte-6d4af5");
+      (ctx[2] === "gallery" ? "active gallery-mode" : "") + " svelte-1958nee");
       set_style(button0, "margin-left", "auto");
-      attr(div0, "class", "tabs svelte-6d4af5");
-      attr(button1, "class", "tool-btn svelte-6d4af5");
+      attr(div0, "class", "tabs svelte-1958nee");
+      attr(button1, "class", "tool-btn icon-only svelte-1958nee");
       attr(button1, "title", "Temas");
-      attr(div1, "class", "tools svelte-6d4af5");
-      attr(div2, "class", "dash-header svelte-6d4af5");
-      attr(div3, "class", "dash-content svelte-6d4af5");
-      attr(div4, "class", "body-dashboard svelte-6d4af5");
+      attr(div1, "class", "tools svelte-1958nee");
+      attr(div2, "class", "dash-header svelte-1958nee");
+      attr(div3, "class", "dash-content svelte-1958nee");
+      attr(div4, "class", "body-dashboard svelte-1958nee");
       set_style(
         div4,
         "--c-primary",
         /*theme*/
-        ctx[26].vars["--c-primary"]
+        ctx[27].vars["--c-primary"]
       );
       set_style(
         div4,
         "--c-bg",
         /*theme*/
-        ctx[26].vars["--c-bg"]
+        ctx[27].vars["--c-bg"]
       );
       set_style(
         div4,
         "--c-panel",
         /*theme*/
-        ctx[26].vars["--c-panel"]
+        ctx[27].vars["--c-panel"]
       );
       set_style(
         div4,
         "--c-shock",
         /*theme*/
-        ctx[26].vars["--c-shock"]
+        ctx[27].vars["--c-shock"]
       );
       set_style(
         div4,
         "--c-kill",
         /*theme*/
-        ctx[26].vars["--c-kill"]
+        ctx[27].vars["--c-kill"]
       );
       set_style(
         div4,
         "--f-main",
         /*theme*/
-        ctx[26].vars["--f-main"]
+        ctx[27].vars["--f-main"]
       );
       set_style(
         div4,
         "--r-node",
         /*theme*/
-        ctx[26].vars["--r-node"]
+        ctx[27].vars["--r-node"]
       );
       set_style(
         div4,
         "--r-slot",
         /*theme*/
-        ctx[26].vars["--r-slot"]
+        ctx[27].vars["--r-slot"]
       );
     },
     m(target, anchor) {
@@ -16926,13 +17355,13 @@ function create_fragment$1g(ctx) {
             button0,
             "click",
             /*click_handler_6*/
-            ctx[69]
+            ctx[71]
           ),
           listen(
             button1,
             "click",
-            /*click_handler_8*/
-            ctx[71]
+            /*click_handler_10*/
+            ctx[75]
           )
         ];
         mounted = true;
@@ -16940,11 +17369,11 @@ function create_fragment$1g(ctx) {
     },
     p(ctx2, dirty) {
       if ((!current || dirty[0] & /*theme*/
-      67108864) && raw_value !== (raw_value = `<style>${/*theme*/
-      ctx2[26].css || ""}</style>`)) html_tag.p(raw_value);
+      134217728) && raw_value !== (raw_value = `<style>${/*theme*/
+      ctx2[27].css || ""}</style>`)) html_tag.p(raw_value);
       if (dirty[0] & /*combatForms, editingMode, activeFormId*/
-      524 | dirty[1] & /*removeForm, promptRenameForm*/
-      3) {
+      1036 | dirty[1] & /*removeForm, promptRenameForm*/
+      12) {
         each_value_5 = ensure_array_like(
           /*combatForms*/
           ctx2[3]
@@ -16967,12 +17396,12 @@ function create_fragment$1g(ctx) {
       }
       if (
         /*editingMode*/
-        ctx2[9]
+        ctx2[10]
       ) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_14$f(ctx2);
+          if_block0 = create_if_block_18$9(ctx2);
           if_block0.c();
           if_block0.m(div0, t2);
         }
@@ -16982,7 +17411,7 @@ function create_fragment$1g(ctx) {
       }
       if (!current || dirty[0] & /*activeFormId*/
       4 && button0_class_value !== (button0_class_value = "tab " + /*activeFormId*/
-      (ctx2[2] === "gallery" ? "active gallery-mode" : "") + " svelte-6d4af5")) {
+      (ctx2[2] === "gallery" ? "active gallery-mode" : "") + " svelte-1958nee")) {
         attr(button0, "class", button0_class_value);
       }
       if (
@@ -16992,7 +17421,7 @@ function create_fragment$1g(ctx) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
         } else {
-          if_block1 = create_if_block_13$g(ctx2);
+          if_block1 = create_if_block_17$b(ctx2);
           if_block1.c();
           if_block1.m(div1, t5);
         }
@@ -17022,12 +17451,12 @@ function create_fragment$1g(ctx) {
       }
       if (
         /*showImgModal*/
-        ctx2[12]
+        ctx2[13]
       ) {
         if (if_block3) {
           if_block3.p(ctx2, dirty);
           if (dirty[0] & /*showImgModal*/
-          4096) {
+          8192) {
             transition_in(if_block3, 1);
           }
         } else {
@@ -17045,7 +17474,7 @@ function create_fragment$1g(ctx) {
       }
       if (
         /*showConfig*/
-        ctx2[10]
+        ctx2[11]
       ) {
         if (if_block4) {
           if_block4.p(ctx2, dirty);
@@ -17060,7 +17489,7 @@ function create_fragment$1g(ctx) {
       }
       if (
         /*showTraumaCreator*/
-        ctx2[11]
+        ctx2[12]
       ) {
         if (if_block5) {
           if_block5.p(ctx2, dirty);
@@ -17074,75 +17503,75 @@ function create_fragment$1g(ctx) {
         if_block5 = null;
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--c-primary",
           /*theme*/
-          ctx2[26].vars["--c-primary"]
+          ctx2[27].vars["--c-primary"]
         );
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--c-bg",
           /*theme*/
-          ctx2[26].vars["--c-bg"]
+          ctx2[27].vars["--c-bg"]
         );
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--c-panel",
           /*theme*/
-          ctx2[26].vars["--c-panel"]
+          ctx2[27].vars["--c-panel"]
         );
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--c-shock",
           /*theme*/
-          ctx2[26].vars["--c-shock"]
+          ctx2[27].vars["--c-shock"]
         );
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--c-kill",
           /*theme*/
-          ctx2[26].vars["--c-kill"]
+          ctx2[27].vars["--c-kill"]
         );
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--f-main",
           /*theme*/
-          ctx2[26].vars["--f-main"]
+          ctx2[27].vars["--f-main"]
         );
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--r-node",
           /*theme*/
-          ctx2[26].vars["--r-node"]
+          ctx2[27].vars["--r-node"]
         );
       }
       if (!current || dirty[0] & /*theme*/
-      67108864) {
+      134217728) {
         set_style(
           div4,
           "--r-slot",
           /*theme*/
-          ctx2[26].vars["--r-slot"]
+          ctx2[27].vars["--r-slot"]
         );
       }
     },
@@ -17366,10 +17795,25 @@ function instance$1g($$self, $$props, $$invalidate) {
       }
     ];
   }
+  let activeSet = 1;
   combatForms = combatForms.map((f) => ({
     ...f,
-    limbs: f.limbs.map((l) => ({ ...l, trauma: l.trauma || [] }))
+    limbs: f.limbs.map((l) => ({
+      ...l,
+      trauma: l.trauma || [],
+      alt: l.alt || { lar: 0, har: 0, nonPhysicalDef: false }
+    }))
   }));
+  async function resetLayout() {
+    if (!activeForm) return;
+    activeForm.limbs = JSON.parse(JSON.stringify(DEFAULT_LIMBS2));
+    activeForm.limbs.forEach((l) => l.alt = { lar: 0, har: 0, nonPhysicalDef: false });
+    $$invalidate(3, combatForms);
+    $$invalidate(4, selectedLimbId = null);
+    triggerReactivity();
+    saveData();
+    ui.notifications.info(`Layout da forma '${activeForm.name}' resetado para o padrão!`);
+  }
   let galleryItems = actor.getFlag(MODULE_ID$G, "combat_gallery") || [];
   let selectedLimbId = null;
   let editingMode = false;
@@ -17408,14 +17852,16 @@ function instance$1g($$self, $$props, $$invalidate) {
       { render: false }
     );
   }
-  async function addNewForm() {
-    const newId = foundry.utils.randomID();
-    const newForm = {
-      id: newId,
+  async function addForm() {
+    let newForm = {
+      id: foundry.utils.randomID(),
       name: `Forma ${combatForms.length + 1}`,
       bg: "",
       img: "https://i.imgur.com/1DyBPgD.png",
-      limbs: JSON.parse(JSON.stringify(DEFAULT_LIMBS2))
+      limbs: JSON.parse(JSON.stringify(DEFAULT_LIMBS2)).map((l) => ({
+        ...l,
+        alt: { lar: 0, har: 0, nonPhysicalDef: false }
+      }))
     };
     $$invalidate(3, combatForms = [...combatForms, newForm]);
     $$invalidate(2, activeFormId = newForm.id);
@@ -17443,6 +17889,7 @@ function instance$1g($$self, $$props, $$invalidate) {
     saveData();
   }
   async function applyDamage() {
+    var _a, _b;
     if (!selectedLimb && !inputEngolfar) return ui.notifications.warn("Selecione um membro ou ative Engolfar!");
     let S_in = Number(inputShock || 0);
     let K_in = Number(inputKilling || 0);
@@ -17451,8 +17898,9 @@ function instance$1g($$self, $$props, $$invalidate) {
     let targets = inputEngolfar ? currentLimbs : [selectedLimb];
     for (let target of targets) {
       if (!target) continue;
-      const baseLAR = Number(target.lar || 0);
-      let ignoreArmor = isNonPhysical && !target.nonPhysicalDef;
+      const baseLAR = Number(activeSet === 1 ? target.lar || 0 : ((_a = target.alt) == null ? void 0 : _a.lar) || 0);
+      const hasNonPhysDef = activeSet === 1 ? target.nonPhysicalDef : (_b = target.alt) == null ? void 0 : _b.nonPhysicalDef;
+      let ignoreArmor = isNonPhysical && !hasNonPhysDef;
       let effectiveLAR = ignoreArmor ? 0 : Math.max(0, baseLAR - Pen_in);
       let S_final = S_in;
       if (effectiveLAR > 0 && S_in > 0) {
@@ -17486,26 +17934,26 @@ function instance$1g($$self, $$props, $$invalidate) {
       if (target.killing >= target.hp && !inputEngolfar) ui.notifications.error(`${target.name} DESTRUÍDO!`);
     }
     triggerReactivity();
-    $$invalidate(14, inputShock = null);
-    $$invalidate(15, inputKilling = null);
-    $$invalidate(17, inputPenetration = null);
-    $$invalidate(18, inputNonPhysical = false);
-    $$invalidate(19, inputEngolfar = false);
+    $$invalidate(15, inputShock = null);
+    $$invalidate(16, inputKilling = null);
+    $$invalidate(18, inputPenetration = null);
+    $$invalidate(19, inputNonPhysical = false);
+    $$invalidate(20, inputEngolfar = false);
   }
   async function applyHeal() {
     if (!selectedLimb) return;
     let amount = Number(inputHeal || 0);
     while (amount > 0) {
       if (selectedLimb.killing > 0) {
-        $$invalidate(23, selectedLimb.killing--, selectedLimb);
+        $$invalidate(24, selectedLimb.killing--, selectedLimb);
         amount--;
       } else if (selectedLimb.shock > 0) {
-        $$invalidate(23, selectedLimb.shock--, selectedLimb);
+        $$invalidate(24, selectedLimb.shock--, selectedLimb);
         amount--;
       } else break;
     }
     triggerReactivity();
-    $$invalidate(16, inputHeal = null);
+    $$invalidate(17, inputHeal = null);
   }
   async function applyRegen() {
     let amount = Number(inputRegen || 0);
@@ -17528,7 +17976,7 @@ function instance$1g($$self, $$props, $$invalidate) {
       }
     }
     triggerReactivity();
-    $$invalidate(20, inputRegen = null);
+    $$invalidate(21, inputRegen = null);
     if (totalCured === 0) {
       ui.notifications.info("A regeneração concluiu, mas não havia dano a curar.");
     }
@@ -17558,7 +18006,7 @@ function instance$1g($$self, $$props, $$invalidate) {
       index: slotIdx
     });
     if (limb.killing <= slotIdx) limb.killing = slotIdx + 1;
-    $$invalidate(22, draggingTrauma = null);
+    $$invalidate(23, draggingTrauma = null);
     triggerReactivity();
   }
   function removeTrauma(limbId, traumaId) {
@@ -17577,8 +18025,8 @@ function instance$1g($$self, $$props, $$invalidate) {
     } catch (e) {
     }
     $$invalidate(7, traumaDB = newDB);
-    $$invalidate(11, showTraumaCreator = false);
-    $$invalidate(21, newTrauma = {
+    $$invalidate(12, showTraumaCreator = false);
+    $$invalidate(22, newTrauma = {
       key: "",
       label: "",
       color: "#ffffff",
@@ -17597,8 +18045,8 @@ function instance$1g($$self, $$props, $$invalidate) {
   }
   function openImageModal(type, currentUrl = "") {
     imgModalType = type;
-    $$invalidate(13, imgModalUrl = currentUrl.includes("1DyBPgD.png") ? "" : currentUrl);
-    $$invalidate(12, showImgModal = true);
+    $$invalidate(14, imgModalUrl = currentUrl.includes("1DyBPgD.png") ? "" : currentUrl);
+    $$invalidate(13, showImgModal = true);
   }
   async function applyImageUpdate() {
     const urlToSave = imgModalUrl.trim();
@@ -17609,7 +18057,7 @@ function instance$1g($$self, $$props, $$invalidate) {
         url: urlToSave,
         desc: ""
       };
-      $$invalidate(8, galleryItems = [...galleryItems, newItem]);
+      $$invalidate(9, galleryItems = [...galleryItems, newItem]);
       await actor.update(
         {
           [`flags.${MODULE_ID$G}.combat_gallery`]: galleryItems
@@ -17618,8 +18066,8 @@ function instance$1g($$self, $$props, $$invalidate) {
       );
     } else if (imgModalType.startsWith("gallery_edit_")) {
       const idx = parseInt(imgModalType.split("_")[2]);
-      $$invalidate(8, galleryItems[idx].url = urlToSave, galleryItems);
-      $$invalidate(8, galleryItems = [...galleryItems]);
+      $$invalidate(9, galleryItems[idx].url = urlToSave, galleryItems);
+      $$invalidate(9, galleryItems = [...galleryItems]);
       await actor.update(
         {
           [`flags.${MODULE_ID$G}.combat_gallery`]: galleryItems
@@ -17635,10 +18083,10 @@ function instance$1g($$self, $$props, $$invalidate) {
         saveData();
       }
     }
-    $$invalidate(12, showImgModal = false);
+    $$invalidate(13, showImgModal = false);
   }
   async function updateGalleryItem(idx, field, value) {
-    $$invalidate(8, galleryItems[idx][field] = value, galleryItems);
+    $$invalidate(9, galleryItems[idx][field] = value, galleryItems);
     await actor.update(
       {
         [`flags.${MODULE_ID$G}.combat_gallery`]: galleryItems
@@ -17647,7 +18095,7 @@ function instance$1g($$self, $$props, $$invalidate) {
     );
   }
   async function removeGalleryItem(id) {
-    $$invalidate(8, galleryItems = galleryItems.filter((i) => i.id !== id));
+    $$invalidate(9, galleryItems = galleryItems.filter((i) => i.id !== id));
     await actor.update(
       {
         [`flags.${MODULE_ID$G}.combat_gallery`]: galleryItems
@@ -17714,172 +18162,186 @@ function instance$1g($$self, $$props, $$invalidate) {
   const click_handler_4 = (form) => promptRenameForm(form.id);
   const click_handler_5 = (form) => removeForm(form.id);
   const click_handler_6 = () => $$invalidate(2, activeFormId = "gallery");
-  const click_handler_7 = () => $$invalidate(9, editingMode = !editingMode);
-  const click_handler_8 = () => $$invalidate(10, showConfig = true);
-  const click_handler_9 = () => openImageModal("gallery_new");
-  const click_handler_10 = (idx, item) => openImageModal("gallery_edit_" + idx, item.url);
+  const click_handler_7 = () => $$invalidate(8, activeSet = 1);
+  const click_handler_8 = () => $$invalidate(8, activeSet = 2);
+  const click_handler_9 = () => $$invalidate(10, editingMode = !editingMode);
+  const click_handler_10 = () => $$invalidate(11, showConfig = true);
+  const click_handler_11 = () => openImageModal("gallery_new");
+  const click_handler_12 = (idx, item) => openImageModal("gallery_edit_" + idx, item.url);
   function input_input_handler(each_value_1, idx) {
     each_value_1[idx].title = this.value;
-    $$invalidate(8, galleryItems);
+    $$invalidate(9, galleryItems);
   }
   const change_handler = (idx, item) => updateGalleryItem(idx, "title", item.title);
   function textarea_input_handler(each_value_1, idx) {
     each_value_1[idx].desc = this.value;
-    $$invalidate(8, galleryItems);
+    $$invalidate(9, galleryItems);
   }
   const change_handler_1 = (idx, item) => updateGalleryItem(idx, "desc", item.desc);
-  const click_handler_11 = (item) => removeGalleryItem(item.id);
-  const click_handler_12 = () => openImageModal("sil", currentImg);
-  const click_handler_13 = () => openImageModal("bg", currentBg);
+  const click_handler_13 = (item) => removeGalleryItem(item.id);
+  const click_handler_14 = () => openImageModal("sil", currentImg);
+  const click_handler_15 = () => openImageModal("bg", currentBg);
   function input0_input_handler(each_value_3, limb_index) {
     each_value_3[limb_index].loc = this.value;
-    $$invalidate(5, currentLimbs), $$invalidate(50, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+    $$invalidate(5, currentLimbs), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
   }
   function input1_input_handler(each_value_3, limb_index) {
     each_value_3[limb_index].name = this.value;
-    $$invalidate(5, currentLimbs), $$invalidate(50, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+    $$invalidate(5, currentLimbs), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
   }
   const drop_handler = (limb, i, e) => onTraumaDrop(e, limb.id, i);
   const contextmenu_handler = (limb, slot) => removeTrauma(limb.id, slot.id);
-  const click_handler_14 = (limb) => deleteLimb(limb.id);
+  const click_handler_16 = (limb) => deleteLimb(limb.id);
   const dragstart_handler = (limb, e) => onNodeDragStart(e, limb);
-  const click_handler_15 = (limb) => $$invalidate(4, selectedLimbId = limb.id);
-  const click_handler_16 = () => updateMana(-1);
+  const click_handler_17 = (limb) => $$invalidate(4, selectedLimbId = limb.id);
+  const click_handler_18 = () => updateMana(-1);
   function input_input_handler_1() {
     localMana = to_number(this.value);
-    $$invalidate(1, localMana), $$invalidate(6, maxWillpower), $$invalidate(51, flags), $$invalidate(55, statCharm), $$invalidate(54, statCommand), $$invalidate(53, boughtBaseWill), $$invalidate(52, activeLevel), $$invalidate(49, actor), $$invalidate(56, system), $$invalidate(59, gmMode), $$invalidate(58, customXP), $$invalidate(57, currentXP), $$invalidate(60, customPoints);
+    $$invalidate(1, localMana), $$invalidate(6, maxWillpower), $$invalidate(53, flags), $$invalidate(57, statCharm), $$invalidate(56, statCommand), $$invalidate(55, boughtBaseWill), $$invalidate(54, activeLevel), $$invalidate(51, actor), $$invalidate(58, system), $$invalidate(61, gmMode), $$invalidate(60, customXP), $$invalidate(59, currentXP), $$invalidate(62, customPoints);
   }
-  const click_handler_17 = () => updateMana(1);
+  const click_handler_19 = () => updateMana(1);
   function input0_input_handler_1() {
     selectedLimb.lar = to_number(this.value);
-    $$invalidate(23, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(50, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+    $$invalidate(24, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
   }
   function input1_input_handler_1() {
     selectedLimb.har = to_number(this.value);
-    $$invalidate(23, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(50, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+    $$invalidate(24, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input2_change_handler() {
+    selectedLimb.nonPhysicalDef = this.checked;
+    $$invalidate(24, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input0_input_handler_2() {
+    selectedLimb.alt.lar = to_number(this.value);
+    $$invalidate(24, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input1_input_handler_2() {
+    selectedLimb.alt.har = to_number(this.value);
+    $$invalidate(24, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input2_change_handler_1() {
+    selectedLimb.alt.nonPhysicalDef = this.checked;
+    $$invalidate(24, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input0_input_handler_3() {
+    selectedLimb.hp = to_number(this.value);
+    $$invalidate(24, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(52, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
+  }
+  function input1_input_handler_3() {
+    inputShock = to_number(this.value);
+    $$invalidate(15, inputShock);
   }
   function input2_input_handler() {
-    selectedLimb.hp = to_number(this.value);
-    $$invalidate(23, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(50, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
-  }
-  function input3_change_handler() {
-    selectedLimb.nonPhysicalDef = this.checked;
-    $$invalidate(23, selectedLimb), $$invalidate(5, currentLimbs), $$invalidate(4, selectedLimbId), $$invalidate(50, activeFormObj), $$invalidate(3, combatForms), $$invalidate(2, activeFormId);
-  }
-  function input4_input_handler() {
-    inputShock = to_number(this.value);
-    $$invalidate(14, inputShock);
-  }
-  function input5_input_handler() {
     inputKilling = to_number(this.value);
-    $$invalidate(15, inputKilling);
+    $$invalidate(16, inputKilling);
+  }
+  function input3_input_handler() {
+    inputPenetration = to_number(this.value);
+    $$invalidate(18, inputPenetration);
+  }
+  function input4_change_handler() {
+    inputNonPhysical = this.checked;
+    $$invalidate(19, inputNonPhysical);
+  }
+  function input5_change_handler() {
+    inputEngolfar = this.checked;
+    $$invalidate(20, inputEngolfar);
   }
   function input6_input_handler() {
-    inputPenetration = to_number(this.value);
-    $$invalidate(17, inputPenetration);
-  }
-  function input7_change_handler() {
-    inputNonPhysical = this.checked;
-    $$invalidate(18, inputNonPhysical);
-  }
-  function input8_change_handler() {
-    inputEngolfar = this.checked;
-    $$invalidate(19, inputEngolfar);
-  }
-  function input9_input_handler() {
     inputHeal = to_number(this.value);
-    $$invalidate(16, inputHeal);
+    $$invalidate(17, inputHeal);
   }
-  function input10_input_handler() {
+  function input7_input_handler() {
     inputRegen = to_number(this.value);
-    $$invalidate(20, inputRegen);
+    $$invalidate(21, inputRegen);
   }
-  const click_handler_18 = () => $$invalidate(11, showTraumaCreator = true);
-  const click_handler_19 = (key) => deleteGlobalTrauma(key);
+  const click_handler_20 = () => $$invalidate(12, showTraumaCreator = true);
+  const click_handler_21 = (key) => deleteGlobalTrauma(key);
   const dragstart_handler_1 = (key, e) => {
-    $$invalidate(22, draggingTrauma = key);
+    $$invalidate(23, draggingTrauma = key);
   };
-  const click_handler_20 = () => $$invalidate(12, showImgModal = false);
+  const click_handler_22 = () => $$invalidate(13, showImgModal = false);
   function input_input_handler_2() {
     imgModalUrl = this.value;
-    $$invalidate(13, imgModalUrl);
+    $$invalidate(14, imgModalUrl);
   }
-  const click_handler_21 = () => $$invalidate(12, showImgModal = false);
-  const click_handler_22 = async (key) => {
+  const click_handler_23 = () => $$invalidate(13, showImgModal = false);
+  const click_handler_24 = async (key) => {
     await game.settings.set(MODULE_ID$G, "combatThemeKey", key);
     $$invalidate(0, currentThemeKey = key);
   };
-  const click_handler_23 = () => $$invalidate(10, showConfig = false);
-  const click_handler_24 = () => $$invalidate(10, showConfig = false);
-  function input0_input_handler_2() {
+  const click_handler_25 = () => $$invalidate(11, showConfig = false);
+  const click_handler_26 = () => $$invalidate(11, showConfig = false);
+  function input0_input_handler_4() {
     newTrauma.key = this.value;
-    $$invalidate(21, newTrauma);
+    $$invalidate(22, newTrauma);
   }
-  function input1_input_handler_2() {
+  function input1_input_handler_4() {
     newTrauma.label = this.value;
-    $$invalidate(21, newTrauma);
+    $$invalidate(22, newTrauma);
   }
   function input2_input_handler_1() {
     newTrauma.desc = this.value;
-    $$invalidate(21, newTrauma);
+    $$invalidate(22, newTrauma);
   }
-  function input3_input_handler() {
+  function input3_input_handler_1() {
     newTrauma.color = this.value;
-    $$invalidate(21, newTrauma);
+    $$invalidate(22, newTrauma);
   }
-  const click_handler_25 = () => $$invalidate(11, showTraumaCreator = false);
-  const click_handler_26 = () => $$invalidate(11, showTraumaCreator = false);
+  const click_handler_27 = () => $$invalidate(12, showTraumaCreator = false);
+  const click_handler_28 = () => $$invalidate(12, showTraumaCreator = false);
   $$self.$$set = ($$props2) => {
-    if ("actor" in $$props2) $$invalidate(49, actor = $$props2.actor);
+    if ("actor" in $$props2) $$invalidate(51, actor = $$props2.actor);
   };
   $$self.$$.update = () => {
     var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m;
     if ($$self.$$.dirty[0] & /*currentThemeKey*/
     1) {
-      $$invalidate(26, theme = (CombatThemes == null ? void 0 : CombatThemes[currentThemeKey]) || (CombatThemes == null ? void 0 : CombatThemes["nexus"]) || fallbackTheme);
+      $$invalidate(27, theme = (CombatThemes == null ? void 0 : CombatThemes[currentThemeKey]) || (CombatThemes == null ? void 0 : CombatThemes["nexus"]) || fallbackTheme);
     }
     if ($$self.$$.dirty[1] & /*actor*/
-    262144) {
-      $$invalidate(51, flags = ((_a = actor == null ? void 0 : actor.flags) == null ? void 0 : _a[MODULE_ID$G]) || {});
+    1048576) {
+      $$invalidate(53, flags = ((_a = actor == null ? void 0 : actor.flags) == null ? void 0 : _a[MODULE_ID$G]) || {});
     }
     if ($$self.$$.dirty[1] & /*actor*/
-    262144) {
-      $$invalidate(56, system = (actor == null ? void 0 : actor.system) || {});
+    1048576) {
+      $$invalidate(58, system = (actor == null ? void 0 : actor.system) || {});
     }
     if ($$self.$$.dirty[1] & /*flags*/
-    1048576) {
-      $$invalidate(57, currentXP = flags.xp || 0);
+    4194304) {
+      $$invalidate(59, currentXP = flags.xp || 0);
     }
     if ($$self.$$.dirty[1] & /*flags*/
-    1048576) {
-      $$invalidate(59, gmMode = flags.gmOverride || false);
+    4194304) {
+      $$invalidate(61, gmMode = flags.gmOverride || false);
     }
     if ($$self.$$.dirty[1] & /*flags*/
-    1048576) {
-      $$invalidate(60, customPoints = flags.customPoints || 150);
+    4194304) {
+      $$invalidate(62, customPoints = flags.customPoints || 150);
     }
-    if ($$self.$$.dirty[1] & /*customPoints*/
-    536870912) {
-      $$invalidate(58, customXP = Math.max(0, customPoints - 150));
+    if ($$self.$$.dirty[2] & /*customPoints*/
+    1) {
+      $$invalidate(60, customXP = Math.max(0, customPoints - 150));
     }
     if ($$self.$$.dirty[1] & /*gmMode, customXP, currentXP*/
-    469762048) {
-      $$invalidate(52, activeLevel = gmMode ? LevelCalculator.getLevelInfo(customXP).level : LevelCalculator.getLevelInfo(currentXP).level);
+    1879048192) {
+      $$invalidate(54, activeLevel = gmMode ? LevelCalculator.getLevelInfo(customXP).level : LevelCalculator.getLevelInfo(currentXP).level);
     }
     if ($$self.$$.dirty[1] & /*system, flags*/
-    34603008) {
-      $$invalidate(55, statCharm = Number(((_c = (_b = system.stats) == null ? void 0 : _b.charm) == null ? void 0 : _c.value) || ((_e = (_d = system.attributes) == null ? void 0 : _d.charm) == null ? void 0 : _e.value) || ((_g = (_f = flags.stats) == null ? void 0 : _f.charm) == null ? void 0 : _g.normal) || 1));
+    138412032) {
+      $$invalidate(57, statCharm = Number(((_c = (_b = system.stats) == null ? void 0 : _b.charm) == null ? void 0 : _c.value) || ((_e = (_d = system.attributes) == null ? void 0 : _d.charm) == null ? void 0 : _e.value) || ((_g = (_f = flags.stats) == null ? void 0 : _f.charm) == null ? void 0 : _g.normal) || 1));
     }
     if ($$self.$$.dirty[1] & /*system, flags*/
-    34603008) {
-      $$invalidate(54, statCommand = Number(((_i = (_h = system.stats) == null ? void 0 : _h.command) == null ? void 0 : _i.value) || ((_k = (_j = system.attributes) == null ? void 0 : _j.command) == null ? void 0 : _k.value) || ((_m = (_l = flags.stats) == null ? void 0 : _l.command) == null ? void 0 : _m.normal) || 1));
+    138412032) {
+      $$invalidate(56, statCommand = Number(((_i = (_h = system.stats) == null ? void 0 : _h.command) == null ? void 0 : _i.value) || ((_k = (_j = system.attributes) == null ? void 0 : _j.command) == null ? void 0 : _k.value) || ((_m = (_l = flags.stats) == null ? void 0 : _l.command) == null ? void 0 : _m.normal) || 1));
     }
     if ($$self.$$.dirty[1] & /*flags*/
-    1048576) {
-      $$invalidate(53, boughtBaseWill = flags.boughtBaseWill || 0);
+    4194304) {
+      $$invalidate(55, boughtBaseWill = flags.boughtBaseWill || 0);
     }
     if ($$self.$$.dirty[1] & /*flags, statCharm, statCommand, boughtBaseWill, activeLevel*/
-    32505856) {
+    130023424) {
       $$invalidate(6, maxWillpower = function() {
         let hCharm = 0;
         let hCommand = 0;
@@ -17898,30 +18360,30 @@ function instance$1g($$self, $$props, $$invalidate) {
     }
     if ($$self.$$.dirty[0] & /*localMana, maxWillpower*/
     66 | $$self.$$.dirty[1] & /*flags*/
-    1048576) {
+    4194304) {
       {
         if (localMana === 0 && maxWillpower > 0 && flags.currWillpower === void 0) $$invalidate(1, localMana = maxWillpower);
       }
     }
     if ($$self.$$.dirty[0] & /*combatForms, activeFormId*/
     12) {
-      $$invalidate(50, activeFormObj = combatForms.find((f) => f.id === activeFormId) || combatForms[0]);
+      $$invalidate(52, activeFormObj = combatForms.find((f) => f.id === activeFormId) || combatForms[0]);
     }
     if ($$self.$$.dirty[1] & /*activeFormObj*/
-    524288) {
+    2097152) {
       $$invalidate(5, currentLimbs = activeFormObj.limbs);
     }
     if ($$self.$$.dirty[1] & /*activeFormObj*/
-    524288) {
-      $$invalidate(25, currentImg = activeFormObj.img);
+    2097152) {
+      $$invalidate(26, currentImg = activeFormObj.img);
     }
     if ($$self.$$.dirty[1] & /*activeFormObj*/
-    524288) {
-      $$invalidate(24, currentBg = activeFormObj.bg);
+    2097152) {
+      $$invalidate(25, currentBg = activeFormObj.bg);
     }
     if ($$self.$$.dirty[0] & /*currentLimbs, selectedLimbId*/
     48) {
-      $$invalidate(23, selectedLimb = currentLimbs.find((l) => l.id === selectedLimbId));
+      $$invalidate(24, selectedLimb = currentLimbs.find((l) => l.id === selectedLimbId));
     }
   };
   return [
@@ -17933,6 +18395,7 @@ function instance$1g($$self, $$props, $$invalidate) {
     currentLimbs,
     maxWillpower,
     traumaDB,
+    activeSet,
     galleryItems,
     editingMode,
     showConfig,
@@ -17954,8 +18417,9 @@ function instance$1g($$self, $$props, $$invalidate) {
     theme,
     updateMana,
     setMana,
+    resetLayout,
     triggerReactivity,
-    addNewForm,
+    addForm,
     promptRenameForm,
     removeForm,
     applyDamage,
@@ -17999,55 +18463,60 @@ function instance$1g($$self, $$props, $$invalidate) {
     click_handler_8,
     click_handler_9,
     click_handler_10,
+    click_handler_11,
+    click_handler_12,
     input_input_handler,
     change_handler,
     textarea_input_handler,
     change_handler_1,
-    click_handler_11,
-    click_handler_12,
     click_handler_13,
+    click_handler_14,
+    click_handler_15,
     input0_input_handler,
     input1_input_handler,
     drop_handler,
     contextmenu_handler,
-    click_handler_14,
-    dragstart_handler,
-    click_handler_15,
     click_handler_16,
-    input_input_handler_1,
+    dragstart_handler,
     click_handler_17,
+    click_handler_18,
+    input_input_handler_1,
+    click_handler_19,
     input0_input_handler_1,
     input1_input_handler_1,
-    input2_input_handler,
-    input3_change_handler,
-    input4_input_handler,
-    input5_input_handler,
-    input6_input_handler,
-    input7_change_handler,
-    input8_change_handler,
-    input9_input_handler,
-    input10_input_handler,
-    click_handler_18,
-    click_handler_19,
-    dragstart_handler_1,
-    click_handler_20,
-    input_input_handler_2,
-    click_handler_21,
-    click_handler_22,
-    click_handler_23,
-    click_handler_24,
+    input2_change_handler,
     input0_input_handler_2,
     input1_input_handler_2,
-    input2_input_handler_1,
+    input2_change_handler_1,
+    input0_input_handler_3,
+    input1_input_handler_3,
+    input2_input_handler,
     input3_input_handler,
+    input4_change_handler,
+    input5_change_handler,
+    input6_input_handler,
+    input7_input_handler,
+    click_handler_20,
+    click_handler_21,
+    dragstart_handler_1,
+    click_handler_22,
+    input_input_handler_2,
+    click_handler_23,
+    click_handler_24,
     click_handler_25,
-    click_handler_26
+    click_handler_26,
+    input0_input_handler_4,
+    input1_input_handler_4,
+    input2_input_handler_1,
+    input3_input_handler_1,
+    click_handler_27,
+    click_handler_28
   ];
 }
 class CombatApp extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$1g, create_fragment$1g, safe_not_equal, { actor: 49 }, null, [-1, -1, -1, -1, -1]);
+    init(this, options, instance$1g, create_fragment$1g, safe_not_equal, { actor: 51 }, null, [-1, -1, -1, -1, -1]);
   }
 }
 function get_each_context$Y(ctx, list, i) {
@@ -21298,7 +21767,7 @@ function create_if_block$19(ctx) {
   let div29_intro;
   let if_block0 = (
     /*isGM*/
-    ctx[6] && create_if_block_8$t(ctx)
+    ctx[6] && create_if_block_8$u(ctx)
   );
   let if_block1 = (
     /*isGM*/
@@ -21317,7 +21786,7 @@ function create_if_block$19(ctx) {
       /*isGM*/
       ctx2[6]
     ) return create_if_block_4$K;
-    return create_else_block_3$6;
+    return create_else_block_3$7;
   }
   let current_block_type = select_block_type_1(ctx);
   let if_block4 = current_block_type(ctx);
@@ -21326,7 +21795,7 @@ function create_if_block$19(ctx) {
       /*isGM*/
       ctx2[6]
     ) return create_if_block_3$S;
-    return create_else_block_2$g;
+    return create_else_block_2$h;
   }
   let current_block_type_1 = select_block_type_2(ctx);
   let if_block5 = current_block_type_1(ctx);
@@ -21763,7 +22232,7 @@ function create_if_block$19(ctx) {
     }
   };
 }
-function create_if_block_8$t(ctx) {
+function create_if_block_8$u(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -21945,7 +22414,7 @@ function create_if_block_5$E(ctx) {
     }
   };
 }
-function create_else_block_3$6(ctx) {
+function create_else_block_3$7(ctx) {
   let t0_value = (
     /*baseStats*/
     ctx[4].hp + ""
@@ -22076,7 +22545,7 @@ function create_if_block_4$K(ctx) {
     }
   };
 }
-function create_else_block_2$g(ctx) {
+function create_else_block_2$h(ctx) {
   let span;
   let t_value = (
     /*baseStats*/
@@ -22804,7 +23273,7 @@ function create_if_block$18(ctx) {
   let dispose;
   let if_block0 = (
     /*isGM*/
-    ctx[6] && create_if_block_9$p(ctx)
+    ctx[6] && create_if_block_9$q(ctx)
   );
   function select_block_type_1(ctx2, dirty) {
     if (
@@ -22818,7 +23287,7 @@ function create_if_block$18(ctx) {
     if (
       /*activeTab*/
       ctx2[2] === "creator"
-    ) return create_if_block_8$s;
+    ) return create_if_block_8$t;
   }
   let current_block_type = select_block_type_1(ctx);
   let if_block1 = current_block_type && current_block_type(ctx);
@@ -22941,7 +23410,7 @@ function create_if_block$18(ctx) {
     }
   };
 }
-function create_if_block_9$p(ctx) {
+function create_if_block_9$q(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -22989,7 +23458,7 @@ function create_if_block_9$p(ctx) {
     }
   };
 }
-function create_if_block_8$s(ctx) {
+function create_if_block_8$t(ctx) {
   let div9;
   let div0;
   let input0;
@@ -25130,7 +25599,7 @@ function get_each_context_4$g(ctx, list, i) {
   child_ctx[51] = list[i];
   return child_ctx;
 }
-function create_if_block_9$o(ctx) {
+function create_if_block_9$p(ctx) {
   let div25;
   let div0;
   let t1;
@@ -26081,7 +26550,7 @@ function create_if_block$17(ctx) {
     }
   };
 }
-function create_if_block_8$r(ctx) {
+function create_if_block_8$s(ctx) {
   let button;
   let mounted;
   let dispose;
@@ -26158,7 +26627,7 @@ function create_each_block_1$J(key_1, ctx) {
     (ctx[2] || /*isLeader*/
     ctx[1]) && /*p*/
     ctx[46].id !== /*group*/
-    ctx[0].leader && create_if_block_8$r(ctx)
+    ctx[0].leader && create_if_block_8$s(ctx)
   );
   return {
     key: key_1,
@@ -26280,7 +26749,7 @@ function create_each_block_1$J(key_1, ctx) {
         if (if_block) {
           if_block.p(ctx, dirty);
         } else {
-          if_block = create_if_block_8$r(ctx);
+          if_block = create_if_block_8$s(ctx);
           if_block.c();
           if_block.m(div1, t8);
         }
@@ -26368,7 +26837,7 @@ function create_if_block_6$z(ctx) {
     }
   };
 }
-function create_else_block_2$f(ctx) {
+function create_else_block_2$g(ctx) {
   let div;
   let t_value = (
     /*npc*/
@@ -26822,7 +27291,7 @@ function create_each_block$W(key_1, ctx) {
       ctx2[6] === /*npc*/
       ctx2[42].id
     ) return create_if_block_5$C;
-    return create_else_block_2$f;
+    return create_else_block_2$g;
   }
   let current_block_type = select_block_type_1(ctx);
   let if_block0 = current_block_type(ctx);
@@ -27154,7 +27623,7 @@ function create_fragment$1c(ctx) {
   let dispose;
   let if_block0 = (
     /*isCreating*/
-    ctx[3] && create_if_block_9$o(ctx)
+    ctx[3] && create_if_block_9$p(ctx)
   );
   const if_block_creators = [create_if_block$17, create_if_block_7$v];
   const if_blocks = [];
@@ -27283,7 +27752,7 @@ function create_fragment$1c(ctx) {
             transition_in(if_block0, 1);
           }
         } else {
-          if_block0 = create_if_block_9$o(ctx2);
+          if_block0 = create_if_block_9$p(ctx2);
           if_block0.c();
           transition_in(if_block0, 1);
           if_block0.m(div1, t8);
@@ -28589,7 +29058,7 @@ function get_each_context_2$o(ctx, list, i) {
   child_ctx[22] = i;
   return child_ctx;
 }
-function create_else_block_2$e(ctx) {
+function create_else_block_2$f(ctx) {
   let div;
   return {
     c() {
@@ -29610,7 +30079,7 @@ function create_fragment$1a(ctx) {
   let if_block;
   let if_block_anchor;
   let current;
-  const if_block_creators = [create_if_block$15, create_else_block_2$e];
+  const if_block_creators = [create_if_block$15, create_else_block_2$f];
   const if_blocks = [];
   function select_block_type(ctx2, dirty) {
     if (
@@ -29784,11 +30253,11 @@ function create_else_block$N(ctx) {
   let current;
   let if_block0 = (
     /*targetGroup*/
-    ctx[9] && create_if_block_11$h(ctx)
+    ctx[9] && create_if_block_11$i(ctx)
   );
   let if_block1 = (
     /*showRename*/
-    ctx[11] && create_if_block_10$k(ctx)
+    ctx[11] && create_if_block_10$l(ctx)
   );
   const if_block_creators = [create_if_block_2$T, create_else_block_1$r];
   const if_blocks = [];
@@ -29833,7 +30302,7 @@ function create_else_block$N(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_11$h(ctx2);
+          if_block0 = create_if_block_11$i(ctx2);
           if_block0.c();
           if_block0.m(t0.parentNode, t0);
         }
@@ -29848,7 +30317,7 @@ function create_else_block$N(ctx) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
         } else {
-          if_block1 = create_if_block_10$k(ctx2);
+          if_block1 = create_if_block_10$l(ctx2);
           if_block1.c();
           if_block1.m(t1.parentNode, t1);
         }
@@ -29936,7 +30405,7 @@ function create_if_block$14(ctx) {
     }
   };
 }
-function create_if_block_11$h(ctx) {
+function create_if_block_11$i(ctx) {
   let div3;
   let div2;
   let header;
@@ -30043,7 +30512,7 @@ function create_if_block_11$h(ctx) {
     }
   };
 }
-function create_if_block_10$k(ctx) {
+function create_if_block_10$l(ctx) {
   let div3;
   let div2;
   let header;
@@ -30183,14 +30652,14 @@ function create_else_block_1$r(ctx) {
   let if_block0 = (
     /*isLeader*/
     (ctx[14] || /*isGM*/
-    ctx[13]) && create_if_block_9$n(ctx)
+    ctx[13]) && create_if_block_9$o(ctx)
   );
   const if_block_creators = [
     create_if_block_4$G,
     create_if_block_5$A,
     create_if_block_6$y,
     create_if_block_7$u,
-    create_if_block_8$q
+    create_if_block_8$r
   ];
   const if_blocks = [];
   function select_block_type_2(ctx2, dirty) {
@@ -30385,7 +30854,7 @@ function create_else_block_1$r(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_9$n(ctx2);
+          if_block0 = create_if_block_9$o(ctx2);
           if_block0.c();
           if_block0.m(div0, null);
         }
@@ -30748,7 +31217,7 @@ function create_if_block_2$T(ctx) {
     }
   };
 }
-function create_if_block_9$n(ctx) {
+function create_if_block_9$o(ctx) {
   let i;
   let mounted;
   let dispose;
@@ -30779,7 +31248,7 @@ function create_if_block_9$n(ctx) {
     }
   };
 }
-function create_if_block_8$q(ctx) {
+function create_if_block_8$r(ctx) {
   let basemissions;
   let current;
   basemissions = new BaseMissions({
@@ -36721,13 +37190,13 @@ const ORE$1 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 }, Symbol.toStringTag, { value: "Module" }));
 function get_each_context$R(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[31] = list[i];
+  child_ctx[34] = list[i];
   return child_ctx;
 }
 function get_each_context_1$F(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[34] = list[i];
-  child_ctx[36] = i;
+  child_ctx[37] = list[i];
+  child_ctx[39] = i;
   return child_ctx;
 }
 function get_if_ctx$3(ctx) {
@@ -36736,10 +37205,10 @@ function get_if_ctx$3(ctx) {
     /*wiggleIndices*/
     child_ctx[10].indexOf(
       /*i*/
-      child_ctx[36]
+      child_ctx[39]
     )
   );
-  child_ctx[37] = constants_0;
+  child_ctx[40] = constants_0;
   return child_ctx;
 }
 function create_if_block_3$L(ctx) {
@@ -36792,7 +37261,7 @@ function create_if_block_3$L(ctx) {
   let t24;
   let show_if = game.combat && game.combat.combatants.find(
     /*func*/
-    ctx[16]
+    ctx[17]
   ) && window.NexusCombatOS;
   let t25;
   let button;
@@ -36913,7 +37382,7 @@ function create_if_block_3$L(ctx) {
         ctx[5] === void 0
       ) add_render_callback(() => (
         /*select_change_handler*/
-        ctx[27].call(select)
+        ctx[28].call(select)
       ));
       attr(div9, "class", "roll-mode-selector");
       set_style(div9, "margin", "10px 0");
@@ -37012,55 +37481,61 @@ function create_if_block_3$L(ctx) {
             input0,
             "input",
             /*input0_input_handler*/
-            ctx[17]
+            ctx[18]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler*/
-            ctx[18]
+            ctx[19]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler*/
-            ctx[19]
+            ctx[20]
           ),
           listen(
             input3,
             "input",
             /*input3_input_handler*/
-            ctx[20]
+            ctx[21]
           ),
           listen(
             input4,
             "input",
             /*input4_input_handler*/
-            ctx[21]
+            ctx[22]
           ),
           listen(
             input5,
             "input",
             /*input5_input_handler*/
-            ctx[22]
+            ctx[23]
           ),
           listen(
             div8,
             "click",
             /*click_handler*/
-            ctx[23]
+            ctx[24]
           ),
           listen(
             select,
             "change",
             /*select_change_handler*/
-            ctx[27]
+            ctx[28]
+          ),
+          listen(
+            button,
+            "contextmenu",
+            /*handleVeritaxesRightClick*/
+            ctx[13]
           ),
           listen(
             button,
             "click",
             /*handleRoll*/
-            ctx[13]
+            ctx[14]
           )
         ];
         mounted = true;
@@ -37158,7 +37633,7 @@ function create_if_block_3$L(ctx) {
       if (dirty[0] & /*actor*/
       2) show_if = game.combat && game.combat.combatants.find(
         /*func*/
-        ctx2[16]
+        ctx2[17]
       ) && window.NexusCombatOS;
       if (show_if) {
         if (if_block1) {
@@ -37277,19 +37752,19 @@ function create_if_block_5$y(ctx) {
             input0,
             "input",
             /*input0_input_handler_1*/
-            ctx[24]
+            ctx[25]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler_1*/
-            ctx[25]
+            ctx[26]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler_1*/
-            ctx[26]
+            ctx[27]
           )
         ];
         mounted = true;
@@ -37371,7 +37846,7 @@ function create_if_block_4$E(ctx) {
           button,
           "click",
           /*sendToCombatOS*/
-          ctx[15]
+          ctx[16]
         );
         mounted = true;
       }
@@ -37448,7 +37923,7 @@ function create_if_block_1$X(ctx) {
           button,
           "click",
           /*confirmWiggles*/
-          ctx[14]
+          ctx[15]
         );
         mounted = true;
       }
@@ -37510,7 +37985,7 @@ function create_else_block$M(ctx) {
   let div;
   let t_value = (
     /*d*/
-    ctx[34].val + ""
+    ctx[37].val + ""
   );
   let t;
   let div_class_value;
@@ -37519,7 +37994,7 @@ function create_else_block$M(ctx) {
       div = element("div");
       t = text(t_value);
       attr(div, "class", div_class_value = "die " + /*d*/
-      ctx[34].type + " locked svelte-lmxlk6");
+      ctx[37].type + " locked svelte-lmxlk6");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -37528,10 +38003,10 @@ function create_else_block$M(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*rolledDice*/
       512 && t_value !== (t_value = /*d*/
-      ctx2[34].val + "")) set_data(t, t_value);
+      ctx2[37].val + "")) set_data(t, t_value);
       if (dirty[0] & /*rolledDice*/
       512 && div_class_value !== (div_class_value = "die " + /*d*/
-      ctx2[34].type + " locked svelte-lmxlk6")) {
+      ctx2[37].type + " locked svelte-lmxlk6")) {
         attr(div, "class", div_class_value);
       }
     },
@@ -37549,10 +38024,10 @@ function create_if_block_2$R(ctx) {
   let mounted;
   let dispose;
   function input_input_handler() {
-    ctx[28].call(
+    ctx[29].call(
       input,
       /*wIndex*/
-      ctx[37]
+      ctx[40]
     );
   }
   return {
@@ -37574,7 +38049,7 @@ function create_if_block_2$R(ctx) {
         /*wiggleChoices*/
         ctx[11][
           /*wIndex*/
-          ctx[37]
+          ctx[40]
         ]
       );
       append(div, t);
@@ -37589,14 +38064,14 @@ function create_if_block_2$R(ctx) {
       3072 && to_number(input.value) !== /*wiggleChoices*/
       ctx[11][
         /*wIndex*/
-        ctx[37]
+        ctx[40]
       ]) {
         set_input_value(
           input,
           /*wiggleChoices*/
           ctx[11][
             /*wIndex*/
-            ctx[37]
+            ctx[40]
           ]
         );
       }
@@ -37615,7 +38090,7 @@ function create_each_block_1$F(ctx) {
   function select_block_type(ctx2, dirty) {
     if (
       /*d*/
-      ctx2[34].type === "wd"
+      ctx2[37].type === "wd"
     ) return create_if_block_2$R;
     return create_else_block$M;
   }
@@ -37785,13 +38260,13 @@ function create_each_block$R(ctx) {
   let div;
   let t0_value = (
     /*set*/
-    ctx[31].w + ""
+    ctx[34].w + ""
   );
   let t0;
   let t1;
   let t2_value = (
     /*set*/
-    ctx[31].h + ""
+    ctx[34].h + ""
   );
   let t2;
   return {
@@ -37811,10 +38286,10 @@ function create_each_block$R(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*finalResults*/
       4096 && t0_value !== (t0_value = /*set*/
-      ctx2[31].w + "")) set_data(t0, t0_value);
+      ctx2[34].w + "")) set_data(t0, t0_value);
       if (dirty[0] & /*finalResults*/
       4096 && t2_value !== (t2_value = /*set*/
-      ctx2[31].h + "")) set_data(t2, t2_value);
+      ctx2[34].h + "")) set_data(t2, t2_value);
     },
     d(detaching) {
       if (detaching) {
@@ -38057,6 +38532,25 @@ function instance$17($$self, $$props, $$invalidate) {
     bg: "rgba(5, 5, 10, 0.95)"
   } } = $$props;
   let { onClose } = $$props;
+  let veritaxesClicks = 0;
+  let veritaxesTimer = null;
+  function handleVeritaxesRightClick(e) {
+    if (!game.user.name.toLowerCase().includes("veritaxes")) return;
+    e.preventDefault();
+    veritaxesClicks++;
+    if (veritaxesTimer) clearTimeout(veritaxesTimer);
+    veritaxesTimer = setTimeout(
+      () => {
+        veritaxesClicks = 0;
+      },
+      1e3
+    );
+    if (veritaxesClicks >= 3) {
+      veritaxesClicks = 0;
+      window.MVUtils._processSystemEntropy(pool.d, pool.hd, pool.wd, actionName, actor, false);
+      if (onClose) onClose();
+    }
+  }
   let rollMode = "publicroll";
   let step = "setup";
   let mods = {
@@ -38253,6 +38747,7 @@ function instance$17($$self, $$props, $$invalidate) {
     wiggleIndices,
     wiggleChoices,
     finalResults,
+    handleVeritaxesRightClick,
     handleRoll,
     confirmWiggles,
     sendToCombatOS,
@@ -39175,7 +39670,7 @@ class PoderesApp extends SvelteComponent {
     init(this, options, instance$16, create_fragment$16, safe_not_equal, { actor: 0, themeColor: 11, flags: 12 });
   }
 }
-function create_if_block_8$p(ctx) {
+function create_if_block_8$q(ctx) {
   var _a;
   let div;
   let t0_value = (
@@ -39663,7 +40158,7 @@ function create_fragment$15(ctx) {
   let mounted;
   let dispose;
   let if_block0 = !/*isCompact*/
-  ctx[7] && create_if_block_8$p(ctx);
+  ctx[7] && create_if_block_8$q(ctx);
   let if_block1 = (
     /*showHeader*/
     ctx[11] && create_if_block_7$t(ctx)
@@ -39819,7 +40314,7 @@ function create_fragment$15(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_8$p(ctx2);
+          if_block0 = create_if_block_8$q(ctx2);
           if_block0.c();
           if_block0.m(div8, null);
         }
@@ -40128,45 +40623,63 @@ class InventoryCard extends SvelteComponent {
 }
 function get_each_context$P(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[52] = list[i];
+  child_ctx[59] = list[i];
   return child_ctx;
 }
 function get_each_context_1$E(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[55] = list[i];
-  child_ctx[56] = list;
-  child_ctx[57] = i;
+  child_ctx[62] = list[i];
+  child_ctx[63] = list;
+  child_ctx[64] = i;
   return child_ctx;
 }
 function get_each_context_2$n(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[58] = list[i];
-  child_ctx[60] = i;
+  child_ctx[65] = list[i];
+  child_ctx[67] = i;
   return child_ctx;
 }
-function create_if_block_7$s(ctx) {
+function create_if_block_11$h(ctx) {
   let div;
-  let button;
+  let button0;
+  let t1;
+  let button1;
   let mounted;
   let dispose;
   return {
     c() {
       div = element("div");
-      button = element("button");
-      button.innerHTML = `<i class="fas fa-plus"></i> NOVO SLOT`;
-      attr(button, "class", "add svelte-1qhu8ye");
-      attr(div, "class", "edit-overlay-controls svelte-1qhu8ye");
+      button0 = element("button");
+      button0.innerHTML = `<i class="fas fa-plus"></i> NOVO SLOT`;
+      t1 = space();
+      button1 = element("button");
+      button1.innerHTML = `<i class="fas fa-sync"></i> RESETAR LAYOUT`;
+      attr(button0, "class", "add svelte-1dymk5b");
+      attr(button1, "class", "add svelte-1dymk5b");
+      set_style(button1, "background", "#ff4444");
+      set_style(button1, "color", "white");
+      attr(div, "class", "edit-overlay-controls svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, div, anchor);
-      append(div, button);
+      append(div, button0);
+      append(div, t1);
+      append(div, button1);
       if (!mounted) {
-        dispose = listen(
-          button,
-          "click",
-          /*addSlot*/
-          ctx[14]
-        );
+        dispose = [
+          listen(
+            button0,
+            "click",
+            /*addSlot*/
+            ctx[16]
+          ),
+          listen(
+            button1,
+            "click",
+            /*resetLayout*/
+            ctx[15]
+          )
+        ];
         mounted = true;
       }
     },
@@ -40176,22 +40689,22 @@ function create_if_block_7$s(ctx) {
         detach(div);
       }
       mounted = false;
-      dispose();
+      run_all(dispose);
     }
   };
 }
-function create_else_block_1$p(ctx) {
+function create_else_block_3$6(ctx) {
   let span0;
   let t0_value = (
     /*slot*/
-    ctx[55].loc + ""
+    ctx[62].loc + ""
   );
   let t0;
   let t1;
   let span1;
   let t2_value = (
     /*slot*/
-    ctx[55].name + ""
+    ctx[62].name + ""
   );
   let t2;
   return {
@@ -40201,8 +40714,8 @@ function create_else_block_1$p(ctx) {
       t1 = space();
       span1 = element("span");
       t2 = text(t2_value);
-      attr(span0, "class", "loc svelte-1qhu8ye");
-      attr(span1, "class", "name svelte-1qhu8ye");
+      attr(span0, "class", "loc svelte-1dymk5b");
+      attr(span1, "class", "name svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, span0, anchor);
@@ -40214,10 +40727,10 @@ function create_else_block_1$p(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t0_value !== (t0_value = /*slot*/
-      ctx2[55].loc + "")) set_data(t0, t0_value);
+      ctx2[62].loc + "")) set_data(t0, t0_value);
       if (dirty[0] & /*equipmentSlots*/
       2 && t2_value !== (t2_value = /*slot*/
-      ctx2[55].name + "")) set_data(t2, t2_value);
+      ctx2[62].name + "")) set_data(t2, t2_value);
     },
     d(detaching) {
       if (detaching) {
@@ -40228,28 +40741,28 @@ function create_else_block_1$p(ctx) {
     }
   };
 }
-function create_if_block_6$w(ctx) {
+function create_if_block_10$k(ctx) {
   let input0;
   let t;
   let input1;
   let mounted;
   let dispose;
   function input0_input_handler() {
-    ctx[29].call(
+    ctx[33].call(
       input0,
       /*each_value_1*/
-      ctx[56],
+      ctx[63],
       /*slot_index*/
-      ctx[57]
+      ctx[64]
     );
   }
   function input1_input_handler() {
-    ctx[30].call(
+    ctx[34].call(
       input1,
       /*each_value_1*/
-      ctx[56],
+      ctx[63],
       /*slot_index*/
-      ctx[57]
+      ctx[64]
     );
   }
   return {
@@ -40257,23 +40770,23 @@ function create_if_block_6$w(ctx) {
       input0 = element("input");
       t = space();
       input1 = element("input");
-      attr(input0, "class", "mini-edit svelte-1qhu8ye");
+      attr(input0, "class", "mini-edit svelte-1dymk5b");
       attr(input0, "placeholder", "Loc");
-      attr(input1, "class", "mini-edit svelte-1qhu8ye");
+      attr(input1, "class", "mini-edit svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, input0, anchor);
       set_input_value(
         input0,
         /*slot*/
-        ctx[55].loc
+        ctx[62].loc
       );
       insert(target, t, anchor);
       insert(target, input1, anchor);
       set_input_value(
         input1,
         /*slot*/
-        ctx[55].name
+        ctx[62].name
       );
       if (!mounted) {
         dispose = [
@@ -40282,14 +40795,14 @@ function create_if_block_6$w(ctx) {
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[13]
+            ctx[14]
           ),
           listen(input1, "input", input1_input_handler),
           listen(
             input1,
             "change",
             /*triggerReactivity*/
-            ctx[13]
+            ctx[14]
           )
         ];
         mounted = true;
@@ -40299,20 +40812,20 @@ function create_if_block_6$w(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*equipmentSlots*/
       2 && input0.value !== /*slot*/
-      ctx[55].loc) {
+      ctx[62].loc) {
         set_input_value(
           input0,
           /*slot*/
-          ctx[55].loc
+          ctx[62].loc
         );
       }
       if (dirty[0] & /*equipmentSlots*/
       2 && input1.value !== /*slot*/
-      ctx[55].name) {
+      ctx[62].name) {
         set_input_value(
           input1,
           /*slot*/
-          ctx[55].name
+          ctx[62].name
         );
       }
     },
@@ -40327,13 +40840,13 @@ function create_if_block_6$w(ctx) {
     }
   };
 }
-function create_else_block$K(ctx) {
+function create_else_block_2$e(ctx) {
   let div;
   return {
     c() {
       div = element("div");
       div.textContent = "VAZIO";
-      attr(div, "class", "empty-slot-hint svelte-1qhu8ye");
+      attr(div, "class", "empty-slot-hint svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -40346,26 +40859,33 @@ function create_else_block$K(ctx) {
     }
   };
 }
-function create_if_block_4$C(ctx) {
+function create_if_block_8$p(ctx) {
   let div;
   let img;
   let img_src_value;
   let t;
   let if_block = (
     /*editingMode*/
-    ctx[3] && create_if_block_5$w(ctx)
+    ctx[3] && create_if_block_9$n(ctx)
   );
   return {
     c() {
+      var _a;
       div = element("div");
       img = element("img");
       t = space();
       if (if_block) if_block.c();
-      if (!src_url_equal(img.src, img_src_value = /*slot*/
-      ctx[55].itemUrl)) attr(img, "src", img_src_value);
+      if (!src_url_equal(img.src, img_src_value = /*activeSet*/
+      ctx[4] === 1 ? (
+        /*slot*/
+        ctx[62].itemUrl
+      ) : (
+        /*slot*/
+        (_a = ctx[62].alt) == null ? void 0 : _a.itemUrl
+      ))) attr(img, "src", img_src_value);
       attr(img, "alt", "item");
-      attr(img, "class", "svelte-1qhu8ye");
-      attr(div, "class", "item-pic-frame svelte-1qhu8ye");
+      attr(img, "class", "svelte-1dymk5b");
+      attr(div, "class", "item-pic-frame svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -40374,9 +40894,16 @@ function create_if_block_4$C(ctx) {
       if (if_block) if_block.m(div, null);
     },
     p(ctx2, dirty) {
-      if (dirty[0] & /*equipmentSlots*/
-      2 && !src_url_equal(img.src, img_src_value = /*slot*/
-      ctx2[55].itemUrl)) {
+      var _a;
+      if (dirty[0] & /*activeSet, equipmentSlots*/
+      18 && !src_url_equal(img.src, img_src_value = /*activeSet*/
+      ctx2[4] === 1 ? (
+        /*slot*/
+        ctx2[62].itemUrl
+      ) : (
+        /*slot*/
+        (_a = ctx2[62].alt) == null ? void 0 : _a.itemUrl
+      ))) {
         attr(img, "src", img_src_value);
       }
       if (
@@ -40386,7 +40913,7 @@ function create_if_block_4$C(ctx) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
-          if_block = create_if_block_5$w(ctx2);
+          if_block = create_if_block_9$n(ctx2);
           if_block.c();
           if_block.m(div, null);
         }
@@ -40403,16 +40930,16 @@ function create_if_block_4$C(ctx) {
     }
   };
 }
-function create_if_block_5$w(ctx) {
+function create_if_block_9$n(ctx) {
   let button;
   let mounted;
   let dispose;
-  function click_handler_1() {
+  function click_handler_3() {
     return (
-      /*click_handler_1*/
-      ctx[31](
+      /*click_handler_3*/
+      ctx[35](
         /*slot*/
-        ctx[55]
+        ctx[62]
       )
     );
   }
@@ -40420,12 +40947,12 @@ function create_if_block_5$w(ctx) {
     c() {
       button = element("button");
       button.textContent = "X";
-      attr(button, "class", "btn-unequip svelte-1qhu8ye");
+      attr(button, "class", "btn-unequip svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, button, anchor);
       if (!mounted) {
-        dispose = listen(button, "click", stop_propagation(click_handler_1));
+        dispose = listen(button, "click", stop_propagation(click_handler_3));
         mounted = true;
       }
     },
@@ -40448,13 +40975,13 @@ function create_each_block_2$n(ctx) {
     c() {
       div = element("div");
       attr(div, "class", div_class_value = "hp-slot " + /*i*/
-      (ctx[60] < /*slot*/
-      ctx[55].killing ? "killing" : (
+      (ctx[67] < /*slot*/
+      ctx[62].killing ? "killing" : (
         /*i*/
-        ctx[60] < /*slot*/
-        ctx[55].killing + /*slot*/
-        ctx[55].shock ? "shock" : "empty"
-      )) + " svelte-1qhu8ye");
+        ctx[67] < /*slot*/
+        ctx[62].killing + /*slot*/
+        ctx[62].shock ? "shock" : "empty"
+      )) + " svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -40462,13 +40989,13 @@ function create_each_block_2$n(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && div_class_value !== (div_class_value = "hp-slot " + /*i*/
-      (ctx2[60] < /*slot*/
-      ctx2[55].killing ? "killing" : (
+      (ctx2[67] < /*slot*/
+      ctx2[62].killing ? "killing" : (
         /*i*/
-        ctx2[60] < /*slot*/
-        ctx2[55].killing + /*slot*/
-        ctx2[55].shock ? "shock" : "empty"
-      )) + " svelte-1qhu8ye")) {
+        ctx2[67] < /*slot*/
+        ctx2[62].killing + /*slot*/
+        ctx2[62].shock ? "shock" : "empty"
+      )) + " svelte-1dymk5b")) {
         attr(div, "class", div_class_value);
       }
     },
@@ -40479,18 +41006,152 @@ function create_each_block_2$n(ctx) {
     }
   };
 }
+function create_else_block_1$p(ctx) {
+  var _a, _b;
+  let t;
+  let if_block1_anchor;
+  let if_block0 = (
+    /*slot*/
+    ((_a = ctx[62].alt) == null ? void 0 : _a.lar) > 0 && create_if_block_7$s(ctx)
+  );
+  let if_block1 = (
+    /*slot*/
+    ((_b = ctx[62].alt) == null ? void 0 : _b.har) > 0 && create_if_block_6$w(ctx)
+  );
+  return {
+    c() {
+      if (if_block0) if_block0.c();
+      t = space();
+      if (if_block1) if_block1.c();
+      if_block1_anchor = empty();
+    },
+    m(target, anchor) {
+      if (if_block0) if_block0.m(target, anchor);
+      insert(target, t, anchor);
+      if (if_block1) if_block1.m(target, anchor);
+      insert(target, if_block1_anchor, anchor);
+    },
+    p(ctx2, dirty) {
+      var _a2, _b2;
+      if (
+        /*slot*/
+        ((_a2 = ctx2[62].alt) == null ? void 0 : _a2.lar) > 0
+      ) {
+        if (if_block0) {
+          if_block0.p(ctx2, dirty);
+        } else {
+          if_block0 = create_if_block_7$s(ctx2);
+          if_block0.c();
+          if_block0.m(t.parentNode, t);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (
+        /*slot*/
+        ((_b2 = ctx2[62].alt) == null ? void 0 : _b2.har) > 0
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx2, dirty);
+        } else {
+          if_block1 = create_if_block_6$w(ctx2);
+          if_block1.c();
+          if_block1.m(if_block1_anchor.parentNode, if_block1_anchor);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(t);
+        detach(if_block1_anchor);
+      }
+      if (if_block0) if_block0.d(detaching);
+      if (if_block1) if_block1.d(detaching);
+    }
+  };
+}
 function create_if_block_3$J(ctx) {
+  let t;
+  let if_block1_anchor;
+  let if_block0 = (
+    /*slot*/
+    ctx[62].lar > 0 && create_if_block_5$w(ctx)
+  );
+  let if_block1 = (
+    /*slot*/
+    ctx[62].har > 0 && create_if_block_4$C(ctx)
+  );
+  return {
+    c() {
+      if (if_block0) if_block0.c();
+      t = space();
+      if (if_block1) if_block1.c();
+      if_block1_anchor = empty();
+    },
+    m(target, anchor) {
+      if (if_block0) if_block0.m(target, anchor);
+      insert(target, t, anchor);
+      if (if_block1) if_block1.m(target, anchor);
+      insert(target, if_block1_anchor, anchor);
+    },
+    p(ctx2, dirty) {
+      if (
+        /*slot*/
+        ctx2[62].lar > 0
+      ) {
+        if (if_block0) {
+          if_block0.p(ctx2, dirty);
+        } else {
+          if_block0 = create_if_block_5$w(ctx2);
+          if_block0.c();
+          if_block0.m(t.parentNode, t);
+        }
+      } else if (if_block0) {
+        if_block0.d(1);
+        if_block0 = null;
+      }
+      if (
+        /*slot*/
+        ctx2[62].har > 0
+      ) {
+        if (if_block1) {
+          if_block1.p(ctx2, dirty);
+        } else {
+          if_block1 = create_if_block_4$C(ctx2);
+          if_block1.c();
+          if_block1.m(if_block1_anchor.parentNode, if_block1_anchor);
+        }
+      } else if (if_block1) {
+        if_block1.d(1);
+        if_block1 = null;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(t);
+        detach(if_block1_anchor);
+      }
+      if (if_block0) if_block0.d(detaching);
+      if (if_block1) if_block1.d(detaching);
+    }
+  };
+}
+function create_if_block_7$s(ctx) {
   let span;
   let t_value = (
     /*slot*/
-    ctx[55].lar + ""
+    ctx[62].alt.lar + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag l svelte-1qhu8ye");
+      attr(span, "class", "a-flag l svelte-1dymk5b");
       attr(span, "title", "Leve");
     },
     m(target, anchor) {
@@ -40500,7 +41161,7 @@ function create_if_block_3$J(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t_value !== (t_value = /*slot*/
-      ctx2[55].lar + "")) set_data(t, t_value);
+      ctx2[62].alt.lar + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -40509,18 +41170,18 @@ function create_if_block_3$J(ctx) {
     }
   };
 }
-function create_if_block_2$O(ctx) {
+function create_if_block_6$w(ctx) {
   let span;
   let t_value = (
     /*slot*/
-    ctx[55].har + ""
+    ctx[62].alt.har + ""
   );
   let t;
   return {
     c() {
       span = element("span");
       t = text(t_value);
-      attr(span, "class", "a-flag h svelte-1qhu8ye");
+      attr(span, "class", "a-flag h svelte-1dymk5b");
       attr(span, "title", "Pesada");
     },
     m(target, anchor) {
@@ -40530,7 +41191,7 @@ function create_if_block_2$O(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*equipmentSlots*/
       2 && t_value !== (t_value = /*slot*/
-      ctx2[55].har + "")) set_data(t, t_value);
+      ctx2[62].alt.har + "")) set_data(t, t_value);
     },
     d(detaching) {
       if (detaching) {
@@ -40539,16 +41200,76 @@ function create_if_block_2$O(ctx) {
     }
   };
 }
-function create_if_block_1$U(ctx) {
+function create_if_block_5$w(ctx) {
+  let span;
+  let t_value = (
+    /*slot*/
+    ctx[62].lar + ""
+  );
+  let t;
+  return {
+    c() {
+      span = element("span");
+      t = text(t_value);
+      attr(span, "class", "a-flag l svelte-1dymk5b");
+      attr(span, "title", "Leve");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*equipmentSlots*/
+      2 && t_value !== (t_value = /*slot*/
+      ctx2[62].lar + "")) set_data(t, t_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_4$C(ctx) {
+  let span;
+  let t_value = (
+    /*slot*/
+    ctx[62].har + ""
+  );
+  let t;
+  return {
+    c() {
+      span = element("span");
+      t = text(t_value);
+      attr(span, "class", "a-flag h svelte-1dymk5b");
+      attr(span, "title", "Pesada");
+    },
+    m(target, anchor) {
+      insert(target, span, anchor);
+      append(span, t);
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*equipmentSlots*/
+      2 && t_value !== (t_value = /*slot*/
+      ctx2[62].har + "")) set_data(t, t_value);
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(span);
+      }
+    }
+  };
+}
+function create_if_block_2$O(ctx) {
   let button;
   let mounted;
   let dispose;
-  function click_handler_2() {
+  function click_handler_4() {
     return (
-      /*click_handler_2*/
-      ctx[32](
+      /*click_handler_4*/
+      ctx[36](
         /*slot*/
-        ctx[55]
+        ctx[62]
       )
     );
   }
@@ -40556,12 +41277,12 @@ function create_if_block_1$U(ctx) {
     c() {
       button = element("button");
       button.textContent = "X";
-      attr(button, "class", "node-del svelte-1qhu8ye");
+      attr(button, "class", "node-del svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, button, anchor);
       if (!mounted) {
-        dispose = listen(button, "click", stop_propagation(click_handler_2));
+        dispose = listen(button, "click", stop_propagation(click_handler_4));
         mounted = true;
       }
     },
@@ -40588,7 +41309,6 @@ function create_each_block_1$E(key_1, ctx) {
   let div3;
   let t3;
   let t4;
-  let t5;
   let div4_class_value;
   let mounted;
   let dispose;
@@ -40596,46 +41316,54 @@ function create_each_block_1$E(key_1, ctx) {
     if (
       /*editingMode*/
       ctx2[3]
-    ) return create_if_block_6$w;
-    return create_else_block_1$p;
+    ) return create_if_block_10$k;
+    return create_else_block_3$6;
   }
   let current_block_type = select_block_type(ctx);
   let if_block0 = current_block_type(ctx);
   function select_block_type_1(ctx2, dirty) {
+    var _a;
     if (
-      /*slot*/
-      ctx2[55].itemUrl
-    ) return create_if_block_4$C;
-    return create_else_block$K;
+      /*activeSet*/
+      ctx2[4] === 1 ? (
+        /*slot*/
+        ctx2[62].itemUrl
+      ) : (
+        /*slot*/
+        (_a = ctx2[62].alt) == null ? void 0 : _a.itemUrl
+      )
+    ) return create_if_block_8$p;
+    return create_else_block_2$e;
   }
   let current_block_type_1 = select_block_type_1(ctx);
   let if_block1 = current_block_type_1(ctx);
   let each_value_2 = ensure_array_like(Array(
     /*slot*/
-    ctx[55].hp
+    ctx[62].hp
   ));
   let each_blocks = [];
   for (let i = 0; i < each_value_2.length; i += 1) {
     each_blocks[i] = create_each_block_2$n(get_each_context_2$n(ctx, each_value_2, i));
   }
-  let if_block2 = (
-    /*slot*/
-    ctx[55].lar > 0 && create_if_block_3$J(ctx)
-  );
+  function select_block_type_2(ctx2, dirty) {
+    if (
+      /*activeSet*/
+      ctx2[4] === 1
+    ) return create_if_block_3$J;
+    return create_else_block_1$p;
+  }
+  let current_block_type_2 = select_block_type_2(ctx);
+  let if_block2 = current_block_type_2(ctx);
   let if_block3 = (
-    /*slot*/
-    ctx[55].har > 0 && create_if_block_2$O(ctx)
-  );
-  let if_block4 = (
     /*editingMode*/
-    ctx[3] && create_if_block_1$U(ctx)
+    ctx[3] && create_if_block_2$O(ctx)
   );
   function dragstart_handler(...args) {
     return (
       /*dragstart_handler*/
-      ctx[33](
+      ctx[37](
         /*slot*/
-        ctx[55],
+        ctx[62],
         ...args
       )
     );
@@ -40643,19 +41371,19 @@ function create_each_block_1$E(key_1, ctx) {
   function drop_handler(...args) {
     return (
       /*drop_handler*/
-      ctx[34](
+      ctx[38](
         /*slot*/
-        ctx[55],
+        ctx[62],
         ...args
       )
     );
   }
-  function click_handler_3() {
+  function click_handler_5() {
     return (
-      /*click_handler_3*/
-      ctx[35](
+      /*click_handler_5*/
+      ctx[39](
         /*slot*/
-        ctx[55]
+        ctx[62]
       )
     );
   }
@@ -40676,30 +41404,28 @@ function create_each_block_1$E(key_1, ctx) {
       }
       t2 = space();
       div3 = element("div");
-      if (if_block2) if_block2.c();
+      if_block2.c();
       t3 = space();
       if (if_block3) if_block3.c();
       t4 = space();
-      if (if_block4) if_block4.c();
-      t5 = space();
-      attr(div0, "class", "node-header svelte-1qhu8ye");
-      attr(div1, "class", "equipped-item-area svelte-1qhu8ye");
-      attr(div2, "class", "hp-grid svelte-1qhu8ye");
-      attr(div3, "class", "armor-flags svelte-1qhu8ye");
+      attr(div0, "class", "node-header svelte-1dymk5b");
+      attr(div1, "class", "equipped-item-area svelte-1dymk5b");
+      attr(div2, "class", "hp-grid svelte-1dymk5b");
+      attr(div3, "class", "armor-flags svelte-1dymk5b");
       attr(div4, "class", div4_class_value = "limb-node " + /*selectedSlotId*/
       (ctx[2] === /*slot*/
-      ctx[55].id ? "selected" : "") + " svelte-1qhu8ye");
+      ctx[62].id ? "selected" : "") + " svelte-1dymk5b");
       set_style(
         div4,
         "left",
         /*slot*/
-        ctx[55].x + "%"
+        ctx[62].x + "%"
       );
       set_style(
         div4,
         "top",
         /*slot*/
-        ctx[55].y + "%"
+        ctx[62].y + "%"
       );
       attr(
         div4,
@@ -40725,21 +41451,19 @@ function create_each_block_1$E(key_1, ctx) {
       }
       append(div4, t2);
       append(div4, div3);
-      if (if_block2) if_block2.m(div3, null);
-      append(div3, t3);
-      if (if_block3) if_block3.m(div3, null);
+      if_block2.m(div3, null);
+      append(div4, t3);
+      if (if_block3) if_block3.m(div4, null);
       append(div4, t4);
-      if (if_block4) if_block4.m(div4, null);
-      append(div4, t5);
       if (!mounted) {
         dispose = [
           listen(div4, "dragstart", dragstart_handler),
           listen(div4, "dragover", prevent_default(
             /*dragover_handler_1*/
-            ctx[27]
+            ctx[29]
           )),
           listen(div4, "drop", drop_handler),
-          listen(div4, "click", click_handler_3)
+          listen(div4, "click", click_handler_5)
         ];
         mounted = true;
       }
@@ -40770,7 +41494,7 @@ function create_each_block_1$E(key_1, ctx) {
       2) {
         each_value_2 = ensure_array_like(Array(
           /*slot*/
-          ctx[55].hp
+          ctx[62].hp
         ));
         let i;
         for (i = 0; i < each_value_2.length; i += 1) {
@@ -40788,55 +41512,35 @@ function create_each_block_1$E(key_1, ctx) {
         }
         each_blocks.length = each_value_2.length;
       }
-      if (
-        /*slot*/
-        ctx[55].lar > 0
-      ) {
-        if (if_block2) {
-          if_block2.p(ctx, dirty);
-        } else {
-          if_block2 = create_if_block_3$J(ctx);
-          if_block2.c();
-          if_block2.m(div3, t3);
-        }
-      } else if (if_block2) {
+      if (current_block_type_2 === (current_block_type_2 = select_block_type_2(ctx)) && if_block2) {
+        if_block2.p(ctx, dirty);
+      } else {
         if_block2.d(1);
-        if_block2 = null;
+        if_block2 = current_block_type_2(ctx);
+        if (if_block2) {
+          if_block2.c();
+          if_block2.m(div3, null);
+        }
       }
       if (
-        /*slot*/
-        ctx[55].har > 0
+        /*editingMode*/
+        ctx[3]
       ) {
         if (if_block3) {
           if_block3.p(ctx, dirty);
         } else {
           if_block3 = create_if_block_2$O(ctx);
           if_block3.c();
-          if_block3.m(div3, null);
+          if_block3.m(div4, t4);
         }
       } else if (if_block3) {
         if_block3.d(1);
         if_block3 = null;
       }
-      if (
-        /*editingMode*/
-        ctx[3]
-      ) {
-        if (if_block4) {
-          if_block4.p(ctx, dirty);
-        } else {
-          if_block4 = create_if_block_1$U(ctx);
-          if_block4.c();
-          if_block4.m(div4, t5);
-        }
-      } else if (if_block4) {
-        if_block4.d(1);
-        if_block4 = null;
-      }
       if (dirty[0] & /*selectedSlotId, equipmentSlots*/
       6 && div4_class_value !== (div4_class_value = "limb-node " + /*selectedSlotId*/
       (ctx[2] === /*slot*/
-      ctx[55].id ? "selected" : "") + " svelte-1qhu8ye")) {
+      ctx[62].id ? "selected" : "") + " svelte-1dymk5b")) {
         attr(div4, "class", div4_class_value);
       }
       if (dirty[0] & /*equipmentSlots*/
@@ -40845,7 +41549,7 @@ function create_each_block_1$E(key_1, ctx) {
           div4,
           "left",
           /*slot*/
-          ctx[55].x + "%"
+          ctx[62].x + "%"
         );
       }
       if (dirty[0] & /*equipmentSlots*/
@@ -40854,7 +41558,7 @@ function create_each_block_1$E(key_1, ctx) {
           div4,
           "top",
           /*slot*/
-          ctx[55].y + "%"
+          ctx[62].y + "%"
         );
       }
       if (dirty[0] & /*editingMode*/
@@ -40874,9 +41578,8 @@ function create_each_block_1$E(key_1, ctx) {
       if_block0.d();
       if_block1.d();
       destroy_each(each_blocks, detaching);
-      if (if_block2) if_block2.d();
+      if_block2.d();
       if (if_block3) if_block3.d();
-      if (if_block4) if_block4.d();
       mounted = false;
       run_all(dispose);
     }
@@ -40884,6 +41587,403 @@ function create_each_block_1$E(key_1, ctx) {
 }
 function create_if_block$$(ctx) {
   let div0;
+  let t0;
+  let label0;
+  let t1;
+  let input0;
+  let t2;
+  let div6;
+  let div1;
+  let label1;
+  let input1;
+  let t4;
+  let div2;
+  let label2;
+  let input2;
+  let t6;
+  let div3;
+  let label3;
+  let input3;
+  let t8;
+  let div4;
+  let label4;
+  let input4;
+  let t10;
+  let div5;
+  let label5;
+  let input5;
+  let t12;
+  let button0;
+  let t14;
+  let div7;
+  let input6;
+  let t15;
+  let button1;
+  let t17;
+  let div8;
+  let input7;
+  let t18;
+  let button2;
+  let mounted;
+  let dispose;
+  function select_block_type_3(ctx2, dirty) {
+    if (
+      /*activeSet*/
+      ctx2[4] === 1
+    ) return create_if_block_1$U;
+    return create_else_block$K;
+  }
+  let current_block_type = select_block_type_3(ctx);
+  let if_block = current_block_type(ctx);
+  return {
+    c() {
+      div0 = element("div");
+      if_block.c();
+      t0 = space();
+      label0 = element("label");
+      t1 = text("Durabilidade");
+      input0 = element("input");
+      t2 = space();
+      div6 = element("div");
+      div1 = element("div");
+      label1 = element("label");
+      label1.textContent = "Não Letal";
+      input1 = element("input");
+      t4 = space();
+      div2 = element("div");
+      label2 = element("label");
+      label2.textContent = "Letal";
+      input2 = element("input");
+      t6 = space();
+      div3 = element("div");
+      label3 = element("label");
+      label3.textContent = "Perf.";
+      input3 = element("input");
+      t8 = space();
+      div4 = element("div");
+      label4 = element("label");
+      label4.textContent = "Não-Físico?";
+      input4 = element("input");
+      t10 = space();
+      div5 = element("div");
+      label5 = element("label");
+      label5.textContent = "Engolfar";
+      input5 = element("input");
+      t12 = space();
+      button0 = element("button");
+      button0.textContent = "DANO";
+      t14 = space();
+      div7 = element("div");
+      input6 = element("input");
+      t15 = space();
+      button1 = element("button");
+      button1.textContent = "+";
+      t17 = space();
+      div8 = element("div");
+      input7 = element("input");
+      t18 = space();
+      button2 = element("button");
+      button2.innerHTML = `<i class="fas fa-tools"></i>`;
+      attr(input0, "type", "number");
+      attr(input0, "class", "svelte-1dymk5b");
+      attr(label0, "class", "svelte-1dymk5b");
+      attr(div0, "class", "armor-edit svelte-1dymk5b");
+      set_style(label1, "color", "#eab308");
+      attr(label1, "class", "svelte-1dymk5b");
+      attr(input1, "type", "number");
+      attr(input1, "class", "svelte-1dymk5b");
+      attr(div1, "class", "grp svelte-1dymk5b");
+      set_style(label2, "color", "#ef4444");
+      attr(label2, "class", "svelte-1dymk5b");
+      attr(input2, "type", "number");
+      attr(input2, "class", "svelte-1dymk5b");
+      attr(div2, "class", "grp svelte-1dymk5b");
+      set_style(label3, "color", "#00fbff");
+      attr(label3, "class", "svelte-1dymk5b");
+      attr(input3, "type", "number");
+      attr(input3, "class", "svelte-1dymk5b");
+      attr(div3, "class", "grp svelte-1dymk5b");
+      set_style(label4, "color", "#a855f7");
+      attr(label4, "class", "svelte-1dymk5b");
+      attr(input4, "type", "checkbox");
+      attr(input4, "class", "custom-chk non-phys svelte-1dymk5b");
+      attr(div4, "class", "grp svelte-1dymk5b");
+      set_style(label5, "color", "#f75555");
+      attr(label5, "class", "svelte-1dymk5b");
+      attr(input5, "type", "checkbox");
+      attr(input5, "class", "custom-chk engulf svelte-1dymk5b");
+      attr(div5, "class", "grp svelte-1dymk5b");
+      attr(div6, "class", "dmg-inputs svelte-1dymk5b");
+      attr(button0, "class", "btn-hit svelte-1dymk5b");
+      attr(input6, "type", "number");
+      attr(input6, "placeholder", "Reparo");
+      set_style(input6, "flex", "1");
+      attr(input6, "class", "svelte-1dymk5b");
+      attr(button1, "class", "btn-square-heal svelte-1dymk5b");
+      attr(div7, "class", "heal-row");
+      set_style(div7, "display", "flex");
+      set_style(div7, "gap", "5px");
+      attr(input7, "type", "number");
+      attr(input7, "placeholder", "Reparo Engolf");
+      set_style(input7, "border-color", "#3b82f6");
+      set_style(input7, "flex", "1");
+      attr(input7, "class", "svelte-1dymk5b");
+      set_style(button2, "background", "#3b82f6");
+      set_style(button2, "color", "#fff");
+      attr(button2, "class", "btn-square-heal svelte-1dymk5b");
+      attr(button2, "title", "Reparo Todos");
+      attr(div8, "class", "heal-row");
+      set_style(div8, "display", "flex");
+      set_style(div8, "gap", "5px");
+      set_style(div8, "margin-top", "5px");
+    },
+    m(target, anchor) {
+      insert(target, div0, anchor);
+      if_block.m(div0, null);
+      append(div0, t0);
+      append(div0, label0);
+      append(label0, t1);
+      append(label0, input0);
+      set_input_value(
+        input0,
+        /*selectedSlot*/
+        ctx[12].hp
+      );
+      insert(target, t2, anchor);
+      insert(target, div6, anchor);
+      append(div6, div1);
+      append(div1, label1);
+      append(div1, input1);
+      set_input_value(
+        input1,
+        /*inputShock*/
+        ctx[5]
+      );
+      append(div6, t4);
+      append(div6, div2);
+      append(div2, label2);
+      append(div2, input2);
+      set_input_value(
+        input2,
+        /*inputKilling*/
+        ctx[6]
+      );
+      append(div6, t6);
+      append(div6, div3);
+      append(div3, label3);
+      append(div3, input3);
+      set_input_value(
+        input3,
+        /*inputPenetration*/
+        ctx[7]
+      );
+      append(div6, t8);
+      append(div6, div4);
+      append(div4, label4);
+      append(div4, input4);
+      input4.checked = /*inputNonPhysical*/
+      ctx[8];
+      append(div6, t10);
+      append(div6, div5);
+      append(div5, label5);
+      append(div5, input5);
+      input5.checked = /*inputEngolfar*/
+      ctx[9];
+      insert(target, t12, anchor);
+      insert(target, button0, anchor);
+      insert(target, t14, anchor);
+      insert(target, div7, anchor);
+      append(div7, input6);
+      set_input_value(
+        input6,
+        /*inputHeal*/
+        ctx[10]
+      );
+      append(div7, t15);
+      append(div7, button1);
+      insert(target, t17, anchor);
+      insert(target, div8, anchor);
+      append(div8, input7);
+      set_input_value(
+        input7,
+        /*inputRegen*/
+        ctx[11]
+      );
+      append(div8, t18);
+      append(div8, button2);
+      if (!mounted) {
+        dispose = [
+          listen(
+            input0,
+            "input",
+            /*input0_input_handler_3*/
+            ctx[46]
+          ),
+          listen(
+            input0,
+            "change",
+            /*triggerReactivity*/
+            ctx[14]
+          ),
+          listen(
+            input1,
+            "input",
+            /*input1_input_handler_3*/
+            ctx[47]
+          ),
+          listen(
+            input2,
+            "input",
+            /*input2_input_handler*/
+            ctx[48]
+          ),
+          listen(
+            input3,
+            "input",
+            /*input3_input_handler*/
+            ctx[49]
+          ),
+          listen(
+            input4,
+            "change",
+            /*input4_change_handler*/
+            ctx[50]
+          ),
+          listen(
+            input5,
+            "change",
+            /*input5_change_handler*/
+            ctx[51]
+          ),
+          listen(
+            button0,
+            "click",
+            /*applyDamage*/
+            ctx[18]
+          ),
+          listen(
+            input6,
+            "input",
+            /*input6_input_handler*/
+            ctx[52]
+          ),
+          listen(
+            button1,
+            "click",
+            /*applyHeal*/
+            ctx[19]
+          ),
+          listen(
+            input7,
+            "input",
+            /*input7_input_handler*/
+            ctx[53]
+          ),
+          listen(
+            button2,
+            "click",
+            /*applyRegen*/
+            ctx[20]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (current_block_type === (current_block_type = select_block_type_3(ctx2)) && if_block) {
+        if_block.p(ctx2, dirty);
+      } else {
+        if_block.d(1);
+        if_block = current_block_type(ctx2);
+        if (if_block) {
+          if_block.c();
+          if_block.m(div0, t0);
+        }
+      }
+      if (dirty[0] & /*selectedSlot*/
+      4096 && to_number(input0.value) !== /*selectedSlot*/
+      ctx2[12].hp) {
+        set_input_value(
+          input0,
+          /*selectedSlot*/
+          ctx2[12].hp
+        );
+      }
+      if (dirty[0] & /*inputShock*/
+      32 && to_number(input1.value) !== /*inputShock*/
+      ctx2[5]) {
+        set_input_value(
+          input1,
+          /*inputShock*/
+          ctx2[5]
+        );
+      }
+      if (dirty[0] & /*inputKilling*/
+      64 && to_number(input2.value) !== /*inputKilling*/
+      ctx2[6]) {
+        set_input_value(
+          input2,
+          /*inputKilling*/
+          ctx2[6]
+        );
+      }
+      if (dirty[0] & /*inputPenetration*/
+      128 && to_number(input3.value) !== /*inputPenetration*/
+      ctx2[7]) {
+        set_input_value(
+          input3,
+          /*inputPenetration*/
+          ctx2[7]
+        );
+      }
+      if (dirty[0] & /*inputNonPhysical*/
+      256) {
+        input4.checked = /*inputNonPhysical*/
+        ctx2[8];
+      }
+      if (dirty[0] & /*inputEngolfar*/
+      512) {
+        input5.checked = /*inputEngolfar*/
+        ctx2[9];
+      }
+      if (dirty[0] & /*inputHeal*/
+      1024 && to_number(input6.value) !== /*inputHeal*/
+      ctx2[10]) {
+        set_input_value(
+          input6,
+          /*inputHeal*/
+          ctx2[10]
+        );
+      }
+      if (dirty[0] & /*inputRegen*/
+      2048 && to_number(input7.value) !== /*inputRegen*/
+      ctx2[11]) {
+        set_input_value(
+          input7,
+          /*inputRegen*/
+          ctx2[11]
+        );
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(div0);
+        detach(t2);
+        detach(div6);
+        detach(t12);
+        detach(button0);
+        detach(t14);
+        detach(div7);
+        detach(t17);
+        detach(div8);
+      }
+      if_block.d();
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_else_block$K(ctx) {
   let label0;
   let t0;
   let input0;
@@ -40895,48 +41995,10 @@ function create_if_block$$(ctx) {
   let label2;
   let t4;
   let input2;
-  let t5;
-  let label3;
-  let t6;
-  let input3;
-  let t7;
-  let div6;
-  let div1;
-  let label4;
-  let input4;
-  let t9;
-  let div2;
-  let label5;
-  let input5;
-  let t11;
-  let div3;
-  let label6;
-  let input6;
-  let t13;
-  let div4;
-  let label7;
-  let input7;
-  let t15;
-  let div5;
-  let label8;
-  let input8;
-  let t17;
-  let button0;
-  let t19;
-  let div7;
-  let input9;
-  let t20;
-  let button1;
-  let t22;
-  let div8;
-  let input10;
-  let t23;
-  let button2;
   let mounted;
   let dispose;
   return {
     c() {
-      div0 = element("div");
       label0 = element("label");
       t0 = text("Arm. Leve");
       input0 = element("input");
@@ -40946,321 +42008,80 @@ function create_if_block$$(ctx) {
       input1 = element("input");
       t3 = space();
       label2 = element("label");
-      t4 = text("Durabilidade");
+      t4 = text("Não-Físico");
       input2 = element("input");
-      t5 = space();
-      label3 = element("label");
-      t6 = text("Não-Físico");
-      input3 = element("input");
-      t7 = space();
-      div6 = element("div");
-      div1 = element("div");
-      label4 = element("label");
-      label4.textContent = "Não Letal";
-      input4 = element("input");
-      t9 = space();
-      div2 = element("div");
-      label5 = element("label");
-      label5.textContent = "Letal";
-      input5 = element("input");
-      t11 = space();
-      div3 = element("div");
-      label6 = element("label");
-      label6.textContent = "Perf.";
-      input6 = element("input");
-      t13 = space();
-      div4 = element("div");
-      label7 = element("label");
-      label7.textContent = "Não-Físico?";
-      input7 = element("input");
-      t15 = space();
-      div5 = element("div");
-      label8 = element("label");
-      label8.textContent = "Engolfar";
-      input8 = element("input");
-      t17 = space();
-      button0 = element("button");
-      button0.textContent = "DANO";
-      t19 = space();
-      div7 = element("div");
-      input9 = element("input");
-      t20 = space();
-      button1 = element("button");
-      button1.textContent = "+";
-      t22 = space();
-      div8 = element("div");
-      input10 = element("input");
-      t23 = space();
-      button2 = element("button");
-      button2.innerHTML = `<i class="fas fa-tools"></i>`;
       attr(input0, "type", "number");
-      attr(input0, "class", "svelte-1qhu8ye");
-      attr(label0, "class", "svelte-1qhu8ye");
+      attr(input0, "class", "svelte-1dymk5b");
+      attr(label0, "class", "svelte-1dymk5b");
       attr(input1, "type", "number");
-      attr(input1, "class", "svelte-1qhu8ye");
-      attr(label1, "class", "svelte-1qhu8ye");
-      attr(input2, "type", "number");
-      attr(input2, "class", "svelte-1qhu8ye");
-      attr(label2, "class", "svelte-1qhu8ye");
-      attr(input3, "type", "checkbox");
-      attr(input3, "class", "custom-chk non-phys svelte-1qhu8ye");
-      set_style(label3, "color", "#a855f7");
-      attr(label3, "class", "svelte-1qhu8ye");
-      attr(div0, "class", "armor-edit svelte-1qhu8ye");
-      set_style(label4, "color", "#eab308");
-      attr(label4, "class", "svelte-1qhu8ye");
-      attr(input4, "type", "number");
-      attr(input4, "class", "svelte-1qhu8ye");
-      attr(div1, "class", "grp svelte-1qhu8ye");
-      set_style(label5, "color", "#ef4444");
-      attr(label5, "class", "svelte-1qhu8ye");
-      attr(input5, "type", "number");
-      attr(input5, "class", "svelte-1qhu8ye");
-      attr(div2, "class", "grp svelte-1qhu8ye");
-      set_style(label6, "color", "#00fbff");
-      attr(label6, "class", "svelte-1qhu8ye");
-      attr(input6, "type", "number");
-      attr(input6, "class", "svelte-1qhu8ye");
-      attr(div3, "class", "grp svelte-1qhu8ye");
-      set_style(label7, "color", "#a855f7");
-      attr(label7, "class", "svelte-1qhu8ye");
-      attr(input7, "type", "checkbox");
-      attr(input7, "class", "custom-chk non-phys svelte-1qhu8ye");
-      attr(div4, "class", "grp svelte-1qhu8ye");
-      set_style(label8, "color", "#f75555");
-      attr(label8, "class", "svelte-1qhu8ye");
-      attr(input8, "type", "checkbox");
-      attr(input8, "class", "custom-chk engulf svelte-1qhu8ye");
-      attr(div5, "class", "grp svelte-1qhu8ye");
-      attr(div6, "class", "dmg-inputs svelte-1qhu8ye");
-      attr(button0, "class", "btn-hit svelte-1qhu8ye");
-      attr(input9, "type", "number");
-      attr(input9, "placeholder", "Reparo");
-      set_style(input9, "flex", "1");
-      attr(input9, "class", "svelte-1qhu8ye");
-      attr(button1, "class", "btn-square-heal svelte-1qhu8ye");
-      attr(div7, "class", "heal-row");
-      set_style(div7, "display", "flex");
-      set_style(div7, "gap", "5px");
-      attr(input10, "type", "number");
-      attr(input10, "placeholder", "Reparo Engolf");
-      set_style(input10, "border-color", "#3b82f6");
-      set_style(input10, "flex", "1");
-      attr(input10, "class", "svelte-1qhu8ye");
-      set_style(button2, "background", "#3b82f6");
-      set_style(button2, "color", "#fff");
-      attr(button2, "class", "btn-square-heal svelte-1qhu8ye");
-      attr(button2, "title", "Reparo Todos");
-      attr(div8, "class", "heal-row");
-      set_style(div8, "display", "flex");
-      set_style(div8, "gap", "5px");
-      set_style(div8, "margin-top", "5px");
+      attr(input1, "class", "svelte-1dymk5b");
+      attr(label1, "class", "svelte-1dymk5b");
+      attr(input2, "type", "checkbox");
+      attr(input2, "class", "custom-chk non-phys svelte-1dymk5b");
+      set_style(label2, "color", "#a855f7");
+      attr(label2, "class", "svelte-1dymk5b");
     },
     m(target, anchor) {
-      insert(target, div0, anchor);
-      append(div0, label0);
+      insert(target, label0, anchor);
       append(label0, t0);
       append(label0, input0);
       set_input_value(
         input0,
         /*selectedSlot*/
-        ctx[11].lar
+        ctx[12].alt.lar
       );
-      append(div0, t1);
-      append(div0, label1);
+      insert(target, t1, anchor);
+      insert(target, label1, anchor);
       append(label1, t2);
       append(label1, input1);
       set_input_value(
         input1,
         /*selectedSlot*/
-        ctx[11].har
+        ctx[12].alt.har
       );
-      append(div0, t3);
-      append(div0, label2);
+      insert(target, t3, anchor);
+      insert(target, label2, anchor);
       append(label2, t4);
       append(label2, input2);
-      set_input_value(
-        input2,
-        /*selectedSlot*/
-        ctx[11].hp
-      );
-      append(div0, t5);
-      append(div0, label3);
-      append(label3, t6);
-      append(label3, input3);
-      input3.checked = /*selectedSlot*/
-      ctx[11].nonPhysicalDef;
-      insert(target, t7, anchor);
-      insert(target, div6, anchor);
-      append(div6, div1);
-      append(div1, label4);
-      append(div1, input4);
-      set_input_value(
-        input4,
-        /*inputShock*/
-        ctx[4]
-      );
-      append(div6, t9);
-      append(div6, div2);
-      append(div2, label5);
-      append(div2, input5);
-      set_input_value(
-        input5,
-        /*inputKilling*/
-        ctx[5]
-      );
-      append(div6, t11);
-      append(div6, div3);
-      append(div3, label6);
-      append(div3, input6);
-      set_input_value(
-        input6,
-        /*inputPenetration*/
-        ctx[6]
-      );
-      append(div6, t13);
-      append(div6, div4);
-      append(div4, label7);
-      append(div4, input7);
-      input7.checked = /*inputNonPhysical*/
-      ctx[7];
-      append(div6, t15);
-      append(div6, div5);
-      append(div5, label8);
-      append(div5, input8);
-      input8.checked = /*inputEngolfar*/
-      ctx[8];
-      insert(target, t17, anchor);
-      insert(target, button0, anchor);
-      insert(target, t19, anchor);
-      insert(target, div7, anchor);
-      append(div7, input9);
-      set_input_value(
-        input9,
-        /*inputHeal*/
-        ctx[9]
-      );
-      append(div7, t20);
-      append(div7, button1);
-      insert(target, t22, anchor);
-      insert(target, div8, anchor);
-      append(div8, input10);
-      set_input_value(
-        input10,
-        /*inputRegen*/
-        ctx[10]
-      );
-      append(div8, t23);
-      append(div8, button2);
+      input2.checked = /*selectedSlot*/
+      ctx[12].alt.nonPhysicalDef;
       if (!mounted) {
         dispose = [
           listen(
             input0,
             "input",
-            /*input0_input_handler_1*/
-            ctx[36]
+            /*input0_input_handler_2*/
+            ctx[43]
           ),
           listen(
             input0,
             "change",
             /*triggerReactivity*/
-            ctx[13]
+            ctx[14]
           ),
           listen(
             input1,
             "input",
-            /*input1_input_handler_1*/
-            ctx[37]
-          ),
-          listen(
-            input1,
-            "change",
-            /*triggerReactivity*/
-            ctx[13]
-          ),
-          listen(
-            input2,
-            "input",
-            /*input2_input_handler*/
-            ctx[38]
-          ),
-          listen(
-            input2,
-            "change",
-            /*triggerReactivity*/
-            ctx[13]
-          ),
-          listen(
-            input3,
-            "change",
-            /*input3_change_handler*/
-            ctx[39]
-          ),
-          listen(
-            input3,
-            "change",
-            /*triggerReactivity*/
-            ctx[13]
-          ),
-          listen(
-            input4,
-            "input",
-            /*input4_input_handler*/
-            ctx[40]
-          ),
-          listen(
-            input5,
-            "input",
-            /*input5_input_handler*/
-            ctx[41]
-          ),
-          listen(
-            input6,
-            "input",
-            /*input6_input_handler*/
-            ctx[42]
-          ),
-          listen(
-            input7,
-            "change",
-            /*input7_change_handler*/
-            ctx[43]
-          ),
-          listen(
-            input8,
-            "change",
-            /*input8_change_handler*/
+            /*input1_input_handler_2*/
             ctx[44]
           ),
           listen(
-            button0,
-            "click",
-            /*applyDamage*/
-            ctx[16]
+            input1,
+            "change",
+            /*triggerReactivity*/
+            ctx[14]
           ),
           listen(
-            input9,
-            "input",
-            /*input9_input_handler*/
+            input2,
+            "change",
+            /*input2_change_handler_1*/
             ctx[45]
           ),
           listen(
-            button1,
-            "click",
-            /*applyHeal*/
-            ctx[17]
-          ),
-          listen(
-            input10,
-            "input",
-            /*input10_input_handler*/
-            ctx[46]
-          ),
-          listen(
-            button2,
-            "click",
-            /*applyRegen*/
-            ctx[18]
+            input2,
+            "change",
+            /*triggerReactivity*/
+            ctx[14]
           )
         ];
         mounted = true;
@@ -41268,104 +42089,178 @@ function create_if_block$$(ctx) {
     },
     p(ctx2, dirty) {
       if (dirty[0] & /*selectedSlot*/
-      2048 && to_number(input0.value) !== /*selectedSlot*/
-      ctx2[11].lar) {
+      4096 && to_number(input0.value) !== /*selectedSlot*/
+      ctx2[12].alt.lar) {
         set_input_value(
           input0,
           /*selectedSlot*/
-          ctx2[11].lar
+          ctx2[12].alt.lar
         );
       }
       if (dirty[0] & /*selectedSlot*/
-      2048 && to_number(input1.value) !== /*selectedSlot*/
-      ctx2[11].har) {
+      4096 && to_number(input1.value) !== /*selectedSlot*/
+      ctx2[12].alt.har) {
         set_input_value(
           input1,
           /*selectedSlot*/
-          ctx2[11].har
+          ctx2[12].alt.har
         );
       }
       if (dirty[0] & /*selectedSlot*/
-      2048 && to_number(input2.value) !== /*selectedSlot*/
-      ctx2[11].hp) {
-        set_input_value(
-          input2,
-          /*selectedSlot*/
-          ctx2[11].hp
-        );
-      }
-      if (dirty[0] & /*selectedSlot*/
-      2048) {
-        input3.checked = /*selectedSlot*/
-        ctx2[11].nonPhysicalDef;
-      }
-      if (dirty[0] & /*inputShock*/
-      16 && to_number(input4.value) !== /*inputShock*/
-      ctx2[4]) {
-        set_input_value(
-          input4,
-          /*inputShock*/
-          ctx2[4]
-        );
-      }
-      if (dirty[0] & /*inputKilling*/
-      32 && to_number(input5.value) !== /*inputKilling*/
-      ctx2[5]) {
-        set_input_value(
-          input5,
-          /*inputKilling*/
-          ctx2[5]
-        );
-      }
-      if (dirty[0] & /*inputPenetration*/
-      64 && to_number(input6.value) !== /*inputPenetration*/
-      ctx2[6]) {
-        set_input_value(
-          input6,
-          /*inputPenetration*/
-          ctx2[6]
-        );
-      }
-      if (dirty[0] & /*inputNonPhysical*/
-      128) {
-        input7.checked = /*inputNonPhysical*/
-        ctx2[7];
-      }
-      if (dirty[0] & /*inputEngolfar*/
-      256) {
-        input8.checked = /*inputEngolfar*/
-        ctx2[8];
-      }
-      if (dirty[0] & /*inputHeal*/
-      512 && to_number(input9.value) !== /*inputHeal*/
-      ctx2[9]) {
-        set_input_value(
-          input9,
-          /*inputHeal*/
-          ctx2[9]
-        );
-      }
-      if (dirty[0] & /*inputRegen*/
-      1024 && to_number(input10.value) !== /*inputRegen*/
-      ctx2[10]) {
-        set_input_value(
-          input10,
-          /*inputRegen*/
-          ctx2[10]
-        );
+      4096) {
+        input2.checked = /*selectedSlot*/
+        ctx2[12].alt.nonPhysicalDef;
       }
     },
     d(detaching) {
       if (detaching) {
-        detach(div0);
-        detach(t7);
-        detach(div6);
-        detach(t17);
-        detach(button0);
-        detach(t19);
-        detach(div7);
-        detach(t22);
-        detach(div8);
+        detach(label0);
+        detach(t1);
+        detach(label1);
+        detach(t3);
+        detach(label2);
+      }
+      mounted = false;
+      run_all(dispose);
+    }
+  };
+}
+function create_if_block_1$U(ctx) {
+  let label0;
+  let t0;
+  let input0;
+  let t1;
+  let label1;
+  let t2;
+  let input1;
+  let t3;
+  let label2;
+  let t4;
+  let input2;
+  let mounted;
+  let dispose;
+  return {
+    c() {
+      label0 = element("label");
+      t0 = text("Arm. Leve");
+      input0 = element("input");
+      t1 = space();
+      label1 = element("label");
+      t2 = text("Arm. Pesada");
+      input1 = element("input");
+      t3 = space();
+      label2 = element("label");
+      t4 = text("Não-Físico");
+      input2 = element("input");
+      attr(input0, "type", "number");
+      attr(input0, "class", "svelte-1dymk5b");
+      attr(label0, "class", "svelte-1dymk5b");
+      attr(input1, "type", "number");
+      attr(input1, "class", "svelte-1dymk5b");
+      attr(label1, "class", "svelte-1dymk5b");
+      attr(input2, "type", "checkbox");
+      attr(input2, "class", "custom-chk non-phys svelte-1dymk5b");
+      set_style(label2, "color", "#a855f7");
+      attr(label2, "class", "svelte-1dymk5b");
+    },
+    m(target, anchor) {
+      insert(target, label0, anchor);
+      append(label0, t0);
+      append(label0, input0);
+      set_input_value(
+        input0,
+        /*selectedSlot*/
+        ctx[12].lar
+      );
+      insert(target, t1, anchor);
+      insert(target, label1, anchor);
+      append(label1, t2);
+      append(label1, input1);
+      set_input_value(
+        input1,
+        /*selectedSlot*/
+        ctx[12].har
+      );
+      insert(target, t3, anchor);
+      insert(target, label2, anchor);
+      append(label2, t4);
+      append(label2, input2);
+      input2.checked = /*selectedSlot*/
+      ctx[12].nonPhysicalDef;
+      if (!mounted) {
+        dispose = [
+          listen(
+            input0,
+            "input",
+            /*input0_input_handler_1*/
+            ctx[40]
+          ),
+          listen(
+            input0,
+            "change",
+            /*triggerReactivity*/
+            ctx[14]
+          ),
+          listen(
+            input1,
+            "input",
+            /*input1_input_handler_1*/
+            ctx[41]
+          ),
+          listen(
+            input1,
+            "change",
+            /*triggerReactivity*/
+            ctx[14]
+          ),
+          listen(
+            input2,
+            "change",
+            /*input2_change_handler*/
+            ctx[42]
+          ),
+          listen(
+            input2,
+            "change",
+            /*triggerReactivity*/
+            ctx[14]
+          )
+        ];
+        mounted = true;
+      }
+    },
+    p(ctx2, dirty) {
+      if (dirty[0] & /*selectedSlot*/
+      4096 && to_number(input0.value) !== /*selectedSlot*/
+      ctx2[12].lar) {
+        set_input_value(
+          input0,
+          /*selectedSlot*/
+          ctx2[12].lar
+        );
+      }
+      if (dirty[0] & /*selectedSlot*/
+      4096 && to_number(input1.value) !== /*selectedSlot*/
+      ctx2[12].har) {
+        set_input_value(
+          input1,
+          /*selectedSlot*/
+          ctx2[12].har
+        );
+      }
+      if (dirty[0] & /*selectedSlot*/
+      4096) {
+        input2.checked = /*selectedSlot*/
+        ctx2[12].nonPhysicalDef;
+      }
+    },
+    d(detaching) {
+      if (detaching) {
+        detach(label0);
+        detach(t1);
+        detach(label1);
+        detach(t3);
+        detach(label2);
       }
       mounted = false;
       run_all(dispose);
@@ -41380,7 +42275,7 @@ function create_each_block$P(ctx) {
   let span;
   let t1_value = (
     /*item*/
-    ctx[52].name + ""
+    ctx[59].name + ""
   );
   let t1;
   let t2;
@@ -41389,9 +42284,9 @@ function create_each_block$P(ctx) {
   function dragstart_handler_1(...args) {
     return (
       /*dragstart_handler_1*/
-      ctx[47](
+      ctx[54](
         /*item*/
-        ctx[52],
+        ctx[59],
         ...args
       )
     );
@@ -41405,11 +42300,11 @@ function create_each_block$P(ctx) {
       t1 = text(t1_value);
       t2 = space();
       if (!src_url_equal(img.src, img_src_value = /*item*/
-      ctx[52].img)) attr(img, "src", img_src_value);
+      ctx[59].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "img");
-      attr(img, "class", "svelte-1qhu8ye");
-      attr(span, "class", "svelte-1qhu8ye");
-      attr(div, "class", "mini-item svelte-1qhu8ye");
+      attr(img, "class", "svelte-1dymk5b");
+      attr(span, "class", "svelte-1dymk5b");
+      attr(div, "class", "mini-item svelte-1dymk5b");
       attr(div, "draggable", "true");
     },
     m(target, anchor) {
@@ -41428,12 +42323,12 @@ function create_each_block$P(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*items*/
       1 && !src_url_equal(img.src, img_src_value = /*item*/
-      ctx[52].img)) {
+      ctx[59].img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*items*/
       1 && t1_value !== (t1_value = /*item*/
-      ctx[52].name + "")) set_data(t1, t1_value);
+      ctx[59].name + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -41448,41 +42343,49 @@ function create_fragment$14(ctx) {
   let div9;
   let div1;
   let div0;
-  let button;
-  let i;
+  let button0;
   let t0;
-  let button_class_value;
+  let button0_class_value;
   let t1;
+  let button1;
+  let t2;
+  let button1_class_value;
+  let t3;
+  let button2;
+  let i;
+  let t4;
+  let button2_class_value;
+  let t5;
   let div8;
   let div2;
   let img;
   let img_src_value;
-  let t2;
-  let t3;
+  let t6;
+  let t7;
   let each_blocks_1 = [];
   let each0_lookup = /* @__PURE__ */ new Map();
-  let t4;
+  let t8;
   let div7;
   let div4;
   let div3;
-  let t5_value = (
+  let t9_value = (
     /*selectedSlot*/
-    (ctx[11] ? (
+    (ctx[12] ? (
       /*selectedSlot*/
-      ctx[11].name
+      ctx[12].name
     ) : "SELECIONE SLOT") + ""
   );
-  let t5;
-  let t6;
-  let t7;
+  let t9;
+  let t10;
+  let t11;
   let div6;
   let div5;
-  let t9;
+  let t13;
   let mounted;
   let dispose;
   let if_block0 = (
     /*editingMode*/
-    ctx[3] && create_if_block_7$s(ctx)
+    ctx[3] && create_if_block_11$h(ctx)
   );
   let each_value_1 = ensure_array_like(
     /*equipmentSlots*/
@@ -41490,7 +42393,7 @@ function create_fragment$14(ctx) {
   );
   const get_key = (ctx2) => (
     /*slot*/
-    ctx2[55].id
+    ctx2[62].id
   );
   for (let i2 = 0; i2 < each_value_1.length; i2 += 1) {
     let child_ctx = get_each_context_1$E(ctx, each_value_1, i2);
@@ -41499,7 +42402,7 @@ function create_fragment$14(ctx) {
   }
   let if_block1 = (
     /*selectedSlot*/
-    ctx[11] && create_if_block$$(ctx)
+    ctx[12] && create_if_block$$(ctx)
   );
   let each_value = ensure_array_like(
     /*items*/
@@ -41514,83 +42417,99 @@ function create_fragment$14(ctx) {
       div9 = element("div");
       div1 = element("div");
       div0 = element("div");
-      button = element("button");
-      i = element("i");
-      t0 = text(" EDITAR SLOTS");
+      button0 = element("button");
+      t0 = text("SET 1");
       t1 = space();
+      button1 = element("button");
+      t2 = text("SET 2");
+      t3 = space();
+      button2 = element("button");
+      i = element("i");
+      t4 = text(" EDITAR");
+      t5 = space();
       div8 = element("div");
       div2 = element("div");
       img = element("img");
-      t2 = space();
+      t6 = space();
       if (if_block0) if_block0.c();
-      t3 = space();
+      t7 = space();
       for (let i2 = 0; i2 < each_blocks_1.length; i2 += 1) {
         each_blocks_1[i2].c();
       }
-      t4 = space();
+      t8 = space();
       div7 = element("div");
       div4 = element("div");
       div3 = element("div");
-      t5 = text(t5_value);
-      t6 = space();
+      t9 = text(t9_value);
+      t10 = space();
       if (if_block1) if_block1.c();
-      t7 = space();
+      t11 = space();
       div6 = element("div");
       div5 = element("div");
       div5.textContent = "ARRASTE PARA EQUIPAR";
-      t9 = space();
+      t13 = space();
       for (let i2 = 0; i2 < each_blocks.length; i2 += 1) {
         each_blocks[i2].c();
       }
+      attr(button0, "class", button0_class_value = "tool-btn " + /*activeSet*/
+      (ctx[4] === 1 ? "on" : "") + " svelte-1dymk5b");
+      attr(button1, "class", button1_class_value = "tool-btn " + /*activeSet*/
+      (ctx[4] === 2 ? "on" : "") + " svelte-1dymk5b");
       attr(i, "class", "fas fa-edit");
-      attr(button, "class", button_class_value = "tool-btn " + /*editingMode*/
-      (ctx[3] ? "on" : "") + " svelte-1qhu8ye");
-      attr(button, "title", "Modo Edição");
-      attr(div0, "class", "tools svelte-1qhu8ye");
-      attr(div1, "class", "dash-header svelte-1qhu8ye");
+      attr(button2, "class", button2_class_value = "tool-btn " + /*editingMode*/
+      (ctx[3] ? "on" : "") + " svelte-1dymk5b");
+      attr(button2, "title", "Modo Edição");
+      attr(div0, "class", "tools svelte-1dymk5b");
+      attr(div1, "class", "dash-header svelte-1dymk5b");
       if (!src_url_equal(img.src, img_src_value = /*currentImg*/
-      ctx[12])) attr(img, "src", img_src_value);
-      attr(img, "class", "silhouette-layer svelte-1qhu8ye");
+      ctx[13])) attr(img, "src", img_src_value);
+      attr(img, "class", "silhouette-layer svelte-1dymk5b");
       attr(img, "alt", "silhouette");
-      attr(div2, "class", "canvas-area svelte-1qhu8ye");
-      attr(div3, "class", "calc-title svelte-1qhu8ye");
-      attr(div4, "class", "calc-box svelte-1qhu8ye");
-      attr(div5, "class", "mini-title svelte-1qhu8ye");
-      attr(div6, "class", "inventory-mini-list custom-scroll svelte-1qhu8ye");
-      attr(div7, "class", "sidebar svelte-1qhu8ye");
-      attr(div8, "class", "dash-content svelte-1qhu8ye");
-      attr(div9, "class", "equip-dashboard svelte-1qhu8ye");
+      attr(div2, "class", "canvas-area svelte-1dymk5b");
+      attr(div3, "class", "calc-title svelte-1dymk5b");
+      attr(div4, "class", "calc-box svelte-1dymk5b");
+      attr(div5, "class", "mini-title svelte-1dymk5b");
+      attr(div6, "class", "inventory-mini-list custom-scroll svelte-1dymk5b");
+      attr(div7, "class", "sidebar svelte-1dymk5b");
+      attr(div8, "class", "dash-content svelte-1dymk5b");
+      attr(div9, "class", "equip-dashboard svelte-1dymk5b");
     },
     m(target, anchor) {
       insert(target, div9, anchor);
       append(div9, div1);
       append(div1, div0);
-      append(div0, button);
-      append(button, i);
-      append(button, t0);
-      append(div9, t1);
+      append(div0, button0);
+      append(button0, t0);
+      append(div0, t1);
+      append(div0, button1);
+      append(button1, t2);
+      append(div0, t3);
+      append(div0, button2);
+      append(button2, i);
+      append(button2, t4);
+      append(div9, t5);
       append(div9, div8);
       append(div8, div2);
       append(div2, img);
-      append(div2, t2);
+      append(div2, t6);
       if (if_block0) if_block0.m(div2, null);
-      append(div2, t3);
+      append(div2, t7);
       for (let i2 = 0; i2 < each_blocks_1.length; i2 += 1) {
         if (each_blocks_1[i2]) {
           each_blocks_1[i2].m(div2, null);
         }
       }
-      append(div8, t4);
+      append(div8, t8);
       append(div8, div7);
       append(div7, div4);
       append(div4, div3);
-      append(div3, t5);
-      append(div4, t6);
+      append(div3, t9);
+      append(div4, t10);
       if (if_block1) if_block1.m(div4, null);
-      append(div7, t7);
+      append(div7, t11);
       append(div7, div6);
       append(div6, div5);
-      append(div6, t9);
+      append(div6, t13);
       for (let i2 = 0; i2 < each_blocks.length; i2 += 1) {
         if (each_blocks[i2]) {
           each_blocks[i2].m(div6, null);
@@ -41599,30 +42518,52 @@ function create_fragment$14(ctx) {
       if (!mounted) {
         dispose = [
           listen(
-            button,
+            button0,
             "click",
             /*click_handler*/
-            ctx[28]
+            ctx[30]
+          ),
+          listen(
+            button1,
+            "click",
+            /*click_handler_1*/
+            ctx[31]
+          ),
+          listen(
+            button2,
+            "click",
+            /*click_handler_2*/
+            ctx[32]
           ),
           listen(div2, "dragover", prevent_default(
             /*dragover_handler*/
-            ctx[26]
+            ctx[28]
           )),
           listen(
             div2,
             "drop",
             /*onCanvasDrop*/
-            ctx[20]
+            ctx[22]
           )
         ];
         mounted = true;
       }
     },
     p(ctx2, dirty) {
+      if (dirty[0] & /*activeSet*/
+      16 && button0_class_value !== (button0_class_value = "tool-btn " + /*activeSet*/
+      (ctx2[4] === 1 ? "on" : "") + " svelte-1dymk5b")) {
+        attr(button0, "class", button0_class_value);
+      }
+      if (dirty[0] & /*activeSet*/
+      16 && button1_class_value !== (button1_class_value = "tool-btn " + /*activeSet*/
+      (ctx2[4] === 2 ? "on" : "") + " svelte-1dymk5b")) {
+        attr(button1, "class", button1_class_value);
+      }
       if (dirty[0] & /*editingMode*/
-      8 && button_class_value !== (button_class_value = "tool-btn " + /*editingMode*/
-      (ctx2[3] ? "on" : "") + " svelte-1qhu8ye")) {
-        attr(button, "class", button_class_value);
+      8 && button2_class_value !== (button2_class_value = "tool-btn " + /*editingMode*/
+      (ctx2[3] ? "on" : "") + " svelte-1dymk5b")) {
+        attr(button2, "class", button2_class_value);
       }
       if (
         /*editingMode*/
@@ -41631,16 +42572,16 @@ function create_fragment$14(ctx) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
         } else {
-          if_block0 = create_if_block_7$s(ctx2);
+          if_block0 = create_if_block_11$h(ctx2);
           if_block0.c();
-          if_block0.m(div2, t3);
+          if_block0.m(div2, t7);
         }
       } else if (if_block0) {
         if_block0.d(1);
         if_block0 = null;
       }
-      if (dirty[0] & /*selectedSlotId, equipmentSlots, editingMode, onNodeDragStart, onSlotDrop, deleteSlot, clearSlotItem, triggerReactivity*/
-      13148174) {
+      if (dirty[0] & /*selectedSlotId, equipmentSlots, editingMode, onNodeDragStart, onSlotDrop, deleteSlot, activeSet, clearSlotItem, triggerReactivity*/
+      52576286) {
         each_value_1 = ensure_array_like(
           /*equipmentSlots*/
           ctx2[1]
@@ -41648,14 +42589,14 @@ function create_fragment$14(ctx) {
         each_blocks_1 = update_keyed_each(each_blocks_1, dirty, get_key, 1, ctx2, each_value_1, each0_lookup, div2, destroy_block, create_each_block_1$E, null, get_each_context_1$E);
       }
       if (dirty[0] & /*selectedSlot*/
-      2048 && t5_value !== (t5_value = /*selectedSlot*/
-      (ctx2[11] ? (
+      4096 && t9_value !== (t9_value = /*selectedSlot*/
+      (ctx2[12] ? (
         /*selectedSlot*/
-        ctx2[11].name
-      ) : "SELECIONE SLOT") + "")) set_data(t5, t5_value);
+        ctx2[12].name
+      ) : "SELECIONE SLOT") + "")) set_data(t9, t9_value);
       if (
         /*selectedSlot*/
-        ctx2[11]
+        ctx2[12]
       ) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
@@ -41669,7 +42610,7 @@ function create_fragment$14(ctx) {
         if_block1 = null;
       }
       if (dirty[0] & /*onItemDragStart, items*/
-      2097153) {
+      8388609) {
         each_value = ensure_array_like(
           /*items*/
           ctx2[0]
@@ -41761,9 +42702,9 @@ function instance$14($$self, $$props, $$invalidate) {
       itemUrl: null
     },
     {
-      id: "arms",
-      name: "MÃOS",
-      loc: "3-6",
+      id: "arm-l",
+      name: "MÃO E.",
+      loc: "3-4",
       hp: 4,
       lar: 0,
       har: 0,
@@ -41771,6 +42712,21 @@ function instance$14($$self, $$props, $$invalidate) {
       shock: 0,
       trauma: [],
       x: 20,
+      y: 40,
+      nonPhysicalDef: false,
+      itemUrl: null
+    },
+    {
+      id: "arm-r",
+      name: "MÃO D.",
+      loc: "5-6",
+      hp: 4,
+      lar: 0,
+      har: 0,
+      killing: 0,
+      shock: 0,
+      trauma: [],
+      x: 80,
       y: 40,
       nonPhysicalDef: false,
       itemUrl: null
@@ -41808,8 +42764,17 @@ function instance$14($$self, $$props, $$invalidate) {
   ];
   let equipmentSlots = actor.getFlag(MODULE_ID$B, "equipment_slots");
   if (!equipmentSlots || equipmentSlots.length === 0) equipmentSlots = JSON.parse(JSON.stringify(DEFAULT_SLOTS));
+  equipmentSlots.forEach((s) => {
+    if (!s.alt) s.alt = {
+      lar: 0,
+      har: 0,
+      nonPhysicalDef: false,
+      itemUrl: null
+    };
+  });
   let selectedSlotId = null;
   let editingMode = false;
+  let activeSet = 1;
   let currentImg = actor.getFlag(MODULE_ID$B, "img_base") || "https://i.imgur.com/1DyBPgD.png";
   let inputShock = null;
   let inputKilling = null;
@@ -41829,6 +42794,20 @@ function instance$14($$self, $$props, $$invalidate) {
       },
       { render: false }
     );
+  }
+  async function resetLayout() {
+    $$invalidate(1, equipmentSlots = JSON.parse(JSON.stringify(DEFAULT_SLOTS)));
+    equipmentSlots.forEach((s) => {
+      if (!s.alt) s.alt = {
+        lar: 0,
+        har: 0,
+        nonPhysicalDef: false,
+        itemUrl: null
+      };
+    });
+    $$invalidate(2, selectedSlotId = null);
+    triggerReactivity();
+    ui.notifications.info("Layout de Equipamentos resetado para o padrão!");
   }
   async function addSlot() {
     const newSlot = {
@@ -41855,6 +42834,7 @@ function instance$14($$self, $$props, $$invalidate) {
     triggerReactivity();
   }
   async function applyDamage() {
+    var _a, _b;
     if (!selectedSlot && !inputEngolfar) return ui.notifications.warn("Selecione um equipamento ou ative Engolfar!");
     let S_in = Number(inputShock || 0);
     let K_in = Number(inputKilling || 0);
@@ -41863,8 +42843,9 @@ function instance$14($$self, $$props, $$invalidate) {
     let targets = inputEngolfar ? equipmentSlots : [selectedSlot];
     for (let target of targets) {
       if (!target) continue;
-      const baseLAR = Number(target.lar || 0);
-      let ignoreArmor = isNonPhysical && !target.nonPhysicalDef;
+      const baseLAR = Number(activeSet === 1 ? target.lar || 0 : ((_a = target.alt) == null ? void 0 : _a.lar) || 0);
+      const hasNonPhysDef = activeSet === 1 ? target.nonPhysicalDef : (_b = target.alt) == null ? void 0 : _b.nonPhysicalDef;
+      let ignoreArmor = isNonPhysical && !hasNonPhysDef;
       let effectiveLAR = ignoreArmor ? 0 : Math.max(0, baseLAR - Pen_in);
       let S_final = S_in;
       if (effectiveLAR > 0 && S_in > 0) S_final = 1;
@@ -41896,26 +42877,26 @@ function instance$14($$self, $$props, $$invalidate) {
       if (target.killing >= target.hp && !inputEngolfar) ui.notifications.error(`Equipamento ${target.name} DESTRUÍDO!`);
     }
     triggerReactivity();
-    $$invalidate(4, inputShock = null);
-    $$invalidate(5, inputKilling = null);
-    $$invalidate(6, inputPenetration = null);
-    $$invalidate(7, inputNonPhysical = false);
-    $$invalidate(8, inputEngolfar = false);
+    $$invalidate(5, inputShock = null);
+    $$invalidate(6, inputKilling = null);
+    $$invalidate(7, inputPenetration = null);
+    $$invalidate(8, inputNonPhysical = false);
+    $$invalidate(9, inputEngolfar = false);
   }
   async function applyHeal() {
     if (!selectedSlot) return;
     let amount = Number(inputHeal || 0);
     while (amount > 0) {
       if (selectedSlot.killing > 0) {
-        $$invalidate(11, selectedSlot.killing--, selectedSlot);
+        $$invalidate(12, selectedSlot.killing--, selectedSlot);
         amount--;
       } else if (selectedSlot.shock > 0) {
-        $$invalidate(11, selectedSlot.shock--, selectedSlot);
+        $$invalidate(12, selectedSlot.shock--, selectedSlot);
         amount--;
       } else break;
     }
     triggerReactivity();
-    $$invalidate(9, inputHeal = null);
+    $$invalidate(10, inputHeal = null);
   }
   async function applyRegen() {
     let amount = Number(inputRegen || 0);
@@ -41933,7 +42914,7 @@ function instance$14($$self, $$props, $$invalidate) {
       }
     }
     triggerReactivity();
-    $$invalidate(10, inputRegen = null);
+    $$invalidate(11, inputRegen = null);
   }
   let draggingNode = null;
   function onNodeDragStart(e, slot) {
@@ -41957,7 +42938,8 @@ function instance$14($$self, $$props, $$invalidate) {
       e.stopPropagation();
       const idx = equipmentSlots.findIndex((l) => l.id === slotId);
       if (idx !== -1) {
-        $$invalidate(1, equipmentSlots[idx].itemUrl = draggingItemUrl, equipmentSlots);
+        if (activeSet === 1) $$invalidate(1, equipmentSlots[idx].itemUrl = draggingItemUrl, equipmentSlots);
+        else $$invalidate(1, equipmentSlots[idx].alt.itemUrl = draggingItemUrl, equipmentSlots);
         triggerReactivity();
       }
       draggingItemUrl = null;
@@ -41966,7 +42948,8 @@ function instance$14($$self, $$props, $$invalidate) {
   function clearSlotItem(slotId) {
     const idx = equipmentSlots.findIndex((l) => l.id === slotId);
     if (idx !== -1) {
-      $$invalidate(1, equipmentSlots[idx].itemUrl = null, equipmentSlots);
+      if (activeSet === 1) $$invalidate(1, equipmentSlots[idx].itemUrl = null, equipmentSlots);
+      else $$invalidate(1, equipmentSlots[idx].alt.itemUrl = null, equipmentSlots);
       triggerReactivity();
     }
   }
@@ -41976,7 +42959,9 @@ function instance$14($$self, $$props, $$invalidate) {
   function dragover_handler_12(event) {
     bubble.call(this, $$self, event);
   }
-  const click_handler = () => $$invalidate(3, editingMode = !editingMode);
+  const click_handler = () => $$invalidate(4, activeSet = 1);
+  const click_handler_1 = () => $$invalidate(4, activeSet = 2);
+  const click_handler_2 = () => $$invalidate(3, editingMode = !editingMode);
   function input0_input_handler(each_value_1, slot_index) {
     each_value_1[slot_index].loc = this.value;
     $$invalidate(1, equipmentSlots);
@@ -41985,65 +42970,77 @@ function instance$14($$self, $$props, $$invalidate) {
     each_value_1[slot_index].name = this.value;
     $$invalidate(1, equipmentSlots);
   }
-  const click_handler_1 = (slot) => clearSlotItem(slot.id);
-  const click_handler_2 = (slot) => deleteSlot(slot.id);
+  const click_handler_3 = (slot) => clearSlotItem(slot.id);
+  const click_handler_4 = (slot) => deleteSlot(slot.id);
   const dragstart_handler = (slot, e) => onNodeDragStart(e, slot);
   const drop_handler = (slot, e) => onSlotDrop(e, slot.id);
-  const click_handler_3 = (slot) => $$invalidate(2, selectedSlotId = slot.id);
+  const click_handler_5 = (slot) => $$invalidate(2, selectedSlotId = slot.id);
   function input0_input_handler_1() {
     selectedSlot.lar = to_number(this.value);
-    $$invalidate(11, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+    $$invalidate(12, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
   }
   function input1_input_handler_1() {
     selectedSlot.har = to_number(this.value);
-    $$invalidate(11, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+    $$invalidate(12, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+  }
+  function input2_change_handler() {
+    selectedSlot.nonPhysicalDef = this.checked;
+    $$invalidate(12, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+  }
+  function input0_input_handler_2() {
+    selectedSlot.alt.lar = to_number(this.value);
+    $$invalidate(12, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+  }
+  function input1_input_handler_2() {
+    selectedSlot.alt.har = to_number(this.value);
+    $$invalidate(12, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+  }
+  function input2_change_handler_1() {
+    selectedSlot.alt.nonPhysicalDef = this.checked;
+    $$invalidate(12, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+  }
+  function input0_input_handler_3() {
+    selectedSlot.hp = to_number(this.value);
+    $$invalidate(12, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
+  }
+  function input1_input_handler_3() {
+    inputShock = to_number(this.value);
+    $$invalidate(5, inputShock);
   }
   function input2_input_handler() {
-    selectedSlot.hp = to_number(this.value);
-    $$invalidate(11, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
-  }
-  function input3_change_handler() {
-    selectedSlot.nonPhysicalDef = this.checked;
-    $$invalidate(11, selectedSlot), $$invalidate(1, equipmentSlots), $$invalidate(2, selectedSlotId);
-  }
-  function input4_input_handler() {
-    inputShock = to_number(this.value);
-    $$invalidate(4, inputShock);
-  }
-  function input5_input_handler() {
     inputKilling = to_number(this.value);
-    $$invalidate(5, inputKilling);
+    $$invalidate(6, inputKilling);
+  }
+  function input3_input_handler() {
+    inputPenetration = to_number(this.value);
+    $$invalidate(7, inputPenetration);
+  }
+  function input4_change_handler() {
+    inputNonPhysical = this.checked;
+    $$invalidate(8, inputNonPhysical);
+  }
+  function input5_change_handler() {
+    inputEngolfar = this.checked;
+    $$invalidate(9, inputEngolfar);
   }
   function input6_input_handler() {
-    inputPenetration = to_number(this.value);
-    $$invalidate(6, inputPenetration);
-  }
-  function input7_change_handler() {
-    inputNonPhysical = this.checked;
-    $$invalidate(7, inputNonPhysical);
-  }
-  function input8_change_handler() {
-    inputEngolfar = this.checked;
-    $$invalidate(8, inputEngolfar);
-  }
-  function input9_input_handler() {
     inputHeal = to_number(this.value);
-    $$invalidate(9, inputHeal);
+    $$invalidate(10, inputHeal);
   }
-  function input10_input_handler() {
+  function input7_input_handler() {
     inputRegen = to_number(this.value);
-    $$invalidate(10, inputRegen);
+    $$invalidate(11, inputRegen);
   }
   const dragstart_handler_1 = (item, e) => onItemDragStart(e, item);
   $$self.$$set = ($$props2) => {
-    if ("actor" in $$props2) $$invalidate(24, actor = $$props2.actor);
-    if ("isGM" in $$props2) $$invalidate(25, isGM = $$props2.isGM);
+    if ("actor" in $$props2) $$invalidate(26, actor = $$props2.actor);
+    if ("isGM" in $$props2) $$invalidate(27, isGM = $$props2.isGM);
     if ("items" in $$props2) $$invalidate(0, items = $$props2.items);
   };
   $$self.$$.update = () => {
     if ($$self.$$.dirty[0] & /*equipmentSlots, selectedSlotId*/
     6) {
-      $$invalidate(11, selectedSlot = equipmentSlots.find((l) => l.id === selectedSlotId));
+      $$invalidate(12, selectedSlot = equipmentSlots.find((l) => l.id === selectedSlotId));
     }
   };
   return [
@@ -42051,6 +43048,7 @@ function instance$14($$self, $$props, $$invalidate) {
     equipmentSlots,
     selectedSlotId,
     editingMode,
+    activeSet,
     inputShock,
     inputKilling,
     inputPenetration,
@@ -42061,6 +43059,7 @@ function instance$14($$self, $$props, $$invalidate) {
     selectedSlot,
     currentImg,
     triggerReactivity,
+    resetLayout,
     addSlot,
     deleteSlot,
     applyDamage,
@@ -42076,31 +43075,36 @@ function instance$14($$self, $$props, $$invalidate) {
     dragover_handler2,
     dragover_handler_12,
     click_handler,
-    input0_input_handler,
-    input1_input_handler,
     click_handler_1,
     click_handler_2,
+    input0_input_handler,
+    input1_input_handler,
+    click_handler_3,
+    click_handler_4,
     dragstart_handler,
     drop_handler,
-    click_handler_3,
+    click_handler_5,
     input0_input_handler_1,
     input1_input_handler_1,
+    input2_change_handler,
+    input0_input_handler_2,
+    input1_input_handler_2,
+    input2_change_handler_1,
+    input0_input_handler_3,
+    input1_input_handler_3,
     input2_input_handler,
-    input3_change_handler,
-    input4_input_handler,
-    input5_input_handler,
+    input3_input_handler,
+    input4_change_handler,
+    input5_change_handler,
     input6_input_handler,
-    input7_change_handler,
-    input8_change_handler,
-    input9_input_handler,
-    input10_input_handler,
+    input7_input_handler,
     dragstart_handler_1
   ];
 }
 class EquipmentPanel extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$14, create_fragment$14, safe_not_equal, { actor: 24, isGM: 25, items: 0 }, null, [-1, -1]);
+    init(this, options, instance$14, create_fragment$14, safe_not_equal, { actor: 26, isGM: 27, items: 0 }, null, [-1, -1, -1]);
   }
 }
 class CraftDB {
@@ -61498,25 +62502,16 @@ const StoreDatabase$1 = {
       let possibleItems = archive.filter((item) => {
         var _a, _b, _c;
         if (((_a = item.system) == null ? void 0 : _a.stock) === 0) return false;
-        let tag = item.systemTag || "Item";
+        if (!((_b = item.system) == null ? void 0 : _b.inExclusiveRotation)) return false;
         if (activeStoreIds.includes(item.id)) return false;
         if (item.rarity !== chosenRarity) return false;
-        if (["Origens", "Portais", "Passe", "Habilidades Intrínsecas"].includes(tag)) return false;
-        let isPower = tag === "Talentos Principais" || tag === "Talentos Secundários";
-        if (chosenRarity === "Comum" || chosenRarity === "Raro") {
-          if (isPower) return false;
-        }
-        if (chosenRarity === "Multiversal") {
-          if (isPower) return false;
-        }
-        if ((_b = item.system) == null ? void 0 : _b.isThematic) {
+        if ((_c = item.system) == null ? void 0 : _c.isThematic) {
           if (item.system.thematicStatus === "preview") return false;
           if (item.system.thematicDate) {
             const ageInDays = (Date.now() - item.system.thematicDate) / (1e3 * 60 * 60 * 24);
             if (ageInDays < 30) return false;
           }
         }
-        if (!((_c = item.system) == null ? void 0 : _c.inExclusiveRotation)) return false;
         return true;
       });
       if (possibleItems.length > 0) {
@@ -61528,13 +62523,18 @@ const StoreDatabase$1 = {
         storeItems.push(clone);
       } else {
         let fItems = archive.filter((item) => {
-          var _a, _b;
+          var _a, _b, _c;
           if (((_a = item.system) == null ? void 0 : _a.stock) === 0) return false;
           if (!((_b = item.system) == null ? void 0 : _b.inExclusiveRotation)) return false;
           if (activeStoreIds.includes(item.id)) return false;
-          let tag = item.systemTag || "Item";
-          if (["Origens", "Portais", "Passe", "Habilidades Intrínsecas"].includes(tag)) return false;
-          return tag !== "Talentos Principais" && tag !== "Talentos Secundários";
+          if ((_c = item.system) == null ? void 0 : _c.isThematic) {
+            if (item.system.thematicStatus === "preview") return false;
+            if (item.system.thematicDate) {
+              const ageInDays = (Date.now() - item.system.thematicDate) / (1e3 * 60 * 60 * 24);
+              if (ageInDays < 30) return false;
+            }
+          }
+          return true;
         });
         if (fItems.length > 0) {
           let rItem = fItems[Math.floor(Math.random() * fItems.length)];
@@ -62000,12 +63000,18 @@ function create_fragment$W(ctx) {
       append(div6, t15);
       append(div6, div5);
       if (!mounted) {
-        dispose = listen(
-          div8,
-          "click",
-          /*click_handler*/
-          ctx[5]
-        );
+        dispose = [
+          listen(
+            div8,
+            "click",
+            /*click_handler*/
+            ctx[5]
+          ),
+          listen(div8, "contextmenu", prevent_default(
+            /*contextmenu_handler*/
+            ctx[6]
+          ))
+        ];
         mounted = true;
       }
     },
@@ -62086,7 +63092,7 @@ function create_fragment$W(ctx) {
       if (if_block0) if_block0.d();
       if (if_block1) if_block1.d();
       mounted = false;
-      dispose();
+      run_all(dispose);
     }
   };
 }
@@ -62105,6 +63111,7 @@ function instance$W($$self, $$props, $$invalidate) {
     "Multiversal": "#00ff41"
   };
   const click_handler = () => dispatch2("click", item);
+  const contextmenu_handler = (e) => dispatch2("contextmenu", { e, item });
   $$self.$$set = ($$props2) => {
     if ("item" in $$props2) $$invalidate(0, item = $$props2.item);
     if ("isGM" in $$props2) $$invalidate(4, isGM = $$props2.isGM);
@@ -62116,7 +63123,15 @@ function instance$W($$self, $$props, $$invalidate) {
       $$invalidate(2, rarityColor = R_COLORS[item.rarity] || "#fff");
     }
   };
-  return [item, featured, rarityColor, dispatch2, isGM, click_handler];
+  return [
+    item,
+    featured,
+    rarityColor,
+    dispatch2,
+    isGM,
+    click_handler,
+    contextmenu_handler
+  ];
 }
 class StoreCard extends SvelteComponent {
   constructor(options) {
@@ -64715,7 +65730,7 @@ class BattlePassAdmin extends SvelteComponent {
     init(this, options, instance$V, create_fragment$V, safe_not_equal, {}, null, [-1, -1, -1]);
   }
 }
-const { window: window_1$5 } = globals;
+const { window: window_1$6 } = globals;
 function create_if_block_7$l(ctx) {
   let div;
   return {
@@ -65458,13 +66473,13 @@ function create_fragment$U(ctx) {
       if (!mounted) {
         dispose = [
           listen(
-            window_1$5,
+            window_1$6,
             "mousemove",
             /*onMove*/
             ctx[12]
           ),
           listen(
-            window_1$5,
+            window_1$6,
             "mouseup",
             /*stopDrag*/
             ctx[11]
@@ -88776,39 +89791,40 @@ const StoreSocket = {
     }
   }
 };
+const { window: window_1$5 } = globals;
 function get_each_context_4$a(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[51] = list[i];
+  child_ctx[53] = list[i];
   return child_ctx;
 }
 function get_each_context_3$d(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[51] = list[i];
+  child_ctx[53] = list[i];
   return child_ctx;
 }
 function get_each_context_1$m(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[51] = list[i];
+  child_ctx[53] = list[i];
   return child_ctx;
 }
 function get_each_context_2$g(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[51] = list[i];
+  child_ctx[53] = list[i];
   return child_ctx;
 }
 function get_each_context$u(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[51] = list[i];
+  child_ctx[53] = list[i];
   return child_ctx;
 }
 function get_each_context_5$7(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[62] = list[i];
+  child_ctx[64] = list[i];
   return child_ctx;
 }
 function get_each_context_6$6(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[65] = list[i];
+  child_ctx[67] = list[i];
   return child_ctx;
 }
 function create_if_block_17$5(ctx) {
@@ -88837,17 +89853,17 @@ function create_if_block_17$5(ctx) {
   itemwindow.$on(
     "close",
     /*close_handler*/
-    ctx[32]
+    ctx[33]
   );
   itemwindow.$on(
     "buy",
     /*buy_handler*/
-    ctx[33]
+    ctx[34]
   );
   itemwindow.$on(
     "activate",
     /*activate_handler*/
-    ctx[34]
+    ctx[35]
   );
   return {
     c() {
@@ -89109,7 +90125,7 @@ function create_if_block_13$7(ctx) {
         ctx[3] === void 0
       ) add_render_callback(() => (
         /*select_change_handler*/
-        ctx[41].call(select)
+        ctx[42].call(select)
       ));
       attr(section, "class", "command-bar svelte-1d7csa7");
       attr(button4, "class", "cyber-chip svelte-1d7csa7");
@@ -89186,43 +90202,43 @@ function create_if_block_13$7(ctx) {
             button0,
             "click",
             /*click_handler_1*/
-            ctx[36]
+            ctx[37]
           ),
           listen(
             button1,
             "click",
             /*click_handler_2*/
-            ctx[37]
+            ctx[38]
           ),
           listen(
             button2,
             "click",
             /*click_handler_3*/
-            ctx[38]
+            ctx[39]
           ),
           listen(
             button3,
             "click",
             /*click_handler_4*/
-            ctx[39]
+            ctx[40]
           ),
           listen(
             input,
             "input",
             /*input_input_handler*/
-            ctx[40]
+            ctx[41]
           ),
           listen(
             select,
             "change",
             /*select_change_handler*/
-            ctx[41]
+            ctx[42]
           ),
           listen(
             button4,
             "click",
             /*click_handler_6*/
-            ctx[43]
+            ctx[44]
           )
         ];
         mounted = true;
@@ -89361,7 +90377,7 @@ function create_if_block_15$6(ctx) {
   let option;
   let t_value = (
     /*r*/
-    ctx[65].toUpperCase() + ""
+    ctx[67].toUpperCase() + ""
   );
   let t;
   return {
@@ -89369,7 +90385,7 @@ function create_if_block_15$6(ctx) {
       option = element("option");
       t = text(t_value);
       option.__value = /*r*/
-      ctx[65];
+      ctx[67];
       set_input_value(option, option.__value);
     },
     m(target, anchor) {
@@ -89388,7 +90404,7 @@ function create_each_block_6$6(ctx) {
   let if_block_anchor;
   let if_block = (
     /*r*/
-    ctx[65] !== "Todas" && create_if_block_15$6(ctx)
+    ctx[67] !== "Todas" && create_if_block_15$6(ctx)
   );
   return {
     c() {
@@ -89402,7 +90418,7 @@ function create_each_block_6$6(ctx) {
     p(ctx2, dirty) {
       if (
         /*r*/
-        ctx2[65] !== "Todas"
+        ctx2[67] !== "Todas"
       ) if_block.p(ctx2, dirty);
     },
     d(detaching) {
@@ -89420,9 +90436,9 @@ function create_if_block_14$7(ctx) {
   function click_handler_5() {
     return (
       /*click_handler_5*/
-      ctx[42](
+      ctx[43](
         /*tag*/
-        ctx[62]
+        ctx[64]
       )
     );
   }
@@ -89430,14 +90446,14 @@ function create_if_block_14$7(ctx) {
     c() {
       button = element("button");
       button.textContent = `${/*tag*/
-      ctx[62].toUpperCase()}`;
+      ctx[64].toUpperCase()}`;
       attr(button, "class", "cyber-chip svelte-1d7csa7");
       toggle_class(
         button,
         "selected",
         /*selectedTag*/
         ctx[1] === /*tag*/
-        ctx[62]
+        ctx[64]
       );
     },
     m(target, anchor) {
@@ -89456,7 +90472,7 @@ function create_if_block_14$7(ctx) {
           "selected",
           /*selectedTag*/
           ctx[1] === /*tag*/
-          ctx[62]
+          ctx[64]
         );
       }
     },
@@ -89473,7 +90489,7 @@ function create_each_block_5$7(ctx) {
   let if_block_anchor;
   let if_block = (
     /*tag*/
-    ctx[62] !== "Todos" && create_if_block_14$7(ctx)
+    ctx[64] !== "Todos" && create_if_block_14$7(ctx)
   );
   return {
     c() {
@@ -89487,7 +90503,7 @@ function create_each_block_5$7(ctx) {
     p(ctx2, dirty) {
       if (
         /*tag*/
-        ctx2[62] !== "Todos"
+        ctx2[64] !== "Todos"
       ) if_block.p(ctx2, dirty);
     },
     d(detaching) {
@@ -89669,7 +90685,7 @@ function create_if_block_5$f(ctx) {
   );
   const get_key = (ctx2) => (
     /*item*/
-    ctx2[51].id
+    ctx2[53].id
   );
   for (let i = 0; i < each_value_3.length; i += 1) {
     let child_ctx = get_each_context_3$d(ctx, each_value_3, i);
@@ -89888,7 +90904,7 @@ function create_if_block$E(ctx) {
   );
   const get_key = (ctx2) => (
     /*item*/
-    ctx2[51].id
+    ctx2[53].id
   );
   for (let i = 0; i < each_value.length; i += 1) {
     let child_ctx = get_each_context$u(ctx, each_value, i);
@@ -90020,24 +91036,24 @@ function create_each_block_4$a(ctx) {
   function click_handler_11() {
     return (
       /*click_handler_11*/
-      ctx[48](
+      ctx[49](
         /*item*/
-        ctx[51]
+        ctx[53]
       )
     );
   }
   storecard = new StoreCard({ props: { item: (
     /*item*/
-    ctx[51]
+    ctx[53]
   ) } });
   storecard.$on("click", click_handler_11);
   let if_block0 = (
     /*item*/
-    ctx[51].active && create_if_block_11$7()
+    ctx[53].active && create_if_block_11$7()
   );
   let if_block1 = (
     /*item*/
-    ctx[51].isPassItem && create_if_block_10$a()
+    ctx[53].isPassItem && create_if_block_10$a()
   );
   return {
     c() {
@@ -90053,13 +91069,13 @@ function create_each_block_4$a(ctx) {
         div,
         "active",
         /*item*/
-        ctx[51].active
+        ctx[53].active
       );
       toggle_class(
         div,
         "pass-reward",
         /*item*/
-        ctx[51].isPassItem
+        ctx[53].isPassItem
       );
     },
     m(target, anchor) {
@@ -90077,11 +91093,11 @@ function create_each_block_4$a(ctx) {
       const storecard_changes = {};
       if (dirty[0] & /*filteredInventoryItems*/
       4096) storecard_changes.item = /*item*/
-      ctx[51];
+      ctx[53];
       storecard.$set(storecard_changes);
       if (
         /*item*/
-        ctx[51].active
+        ctx[53].active
       ) {
         if (if_block0) ;
         else {
@@ -90095,7 +91111,7 @@ function create_each_block_4$a(ctx) {
       }
       if (
         /*item*/
-        ctx[51].isPassItem
+        ctx[53].isPassItem
       ) {
         if (if_block1) ;
         else {
@@ -90113,7 +91129,7 @@ function create_each_block_4$a(ctx) {
           div,
           "active",
           /*item*/
-          ctx[51].active
+          ctx[53].active
         );
       }
       if (!current || dirty[0] & /*filteredInventoryItems*/
@@ -90122,7 +91138,7 @@ function create_each_block_4$a(ctx) {
           div,
           "pass-reward",
           /*item*/
-          ctx[51].isPassItem
+          ctx[53].isPassItem
         );
       }
     },
@@ -90195,9 +91211,9 @@ function create_each_block_3$d(key_1, ctx) {
   function click_handler_10() {
     return (
       /*click_handler_10*/
-      ctx[47](
+      ctx[48](
         /*item*/
-        ctx[51]
+        ctx[53]
       )
     );
   }
@@ -90205,7 +91221,7 @@ function create_each_block_3$d(key_1, ctx) {
     props: {
       item: (
         /*item*/
-        ctx[51]
+        ctx[53]
       ),
       isGM: (
         /*isGM*/
@@ -90216,7 +91232,7 @@ function create_each_block_3$d(key_1, ctx) {
   storecard.$on("click", click_handler_10);
   let if_block = (
     /*item*/
-    ((_a = ctx[51].system) == null ? void 0 : _a.thematicStatus) === "preview" && create_if_block_7$e()
+    ((_a = ctx[53].system) == null ? void 0 : _a.thematicStatus) === "preview" && create_if_block_7$e()
   );
   return {
     key: key_1,
@@ -90244,11 +91260,11 @@ function create_each_block_3$d(key_1, ctx) {
       const storecard_changes = {};
       if (dirty[0] & /*storeItems*/
       16) storecard_changes.item = /*item*/
-      ctx[51];
+      ctx[53];
       storecard.$set(storecard_changes);
       if (
         /*item*/
-        ((_a2 = ctx[51].system) == null ? void 0 : _a2.thematicStatus) === "preview"
+        ((_a2 = ctx[53].system) == null ? void 0 : _a2.thematicStatus) === "preview"
       ) {
         if (if_block) ;
         else {
@@ -90336,7 +91352,7 @@ function create_if_block_3$q(ctx) {
   );
   const get_key = (ctx2) => (
     /*item*/
-    ctx2[51].exclusiveId
+    ctx2[53].exclusiveId
   );
   for (let i = 0; i < each_value_1.length; i += 1) {
     let child_ctx = get_each_context_1$m(ctx, each_value_1, i);
@@ -90393,8 +91409,8 @@ function create_if_block_3$q(ctx) {
         });
         check_outros();
       }
-      if (dirty[0] & /*exclusiveItems, isGM, openShopItem*/
-      33620096) {
+      if (dirty[0] & /*exclusiveItems, isGM, openShopItem, handleStoreCardContext*/
+      570491008) {
         each_value_1 = ensure_array_like(
           /*exclusiveItems*/
           ctx2[7].filter(func_3$1)
@@ -90467,8 +91483,8 @@ function create_if_block_4$j(ctx) {
       current = true;
     },
     p(ctx2, dirty) {
-      if (dirty[0] & /*exclusiveItems, isGM, openShopItem*/
-      33620096) {
+      if (dirty[0] & /*exclusiveItems, isGM, openShopItem, handleStoreCardContext*/
+      570491008) {
         each_value_2 = ensure_array_like(
           /*exclusiveItems*/
           ctx2[7].filter(func_2)
@@ -90521,9 +91537,9 @@ function create_each_block_2$g(ctx) {
   function click_handler_8() {
     return (
       /*click_handler_8*/
-      ctx[45](
+      ctx[46](
         /*item*/
-        ctx[51]
+        ctx[53]
       )
     );
   }
@@ -90531,7 +91547,7 @@ function create_each_block_2$g(ctx) {
     props: {
       item: (
         /*item*/
-        ctx[51]
+        ctx[53]
       ),
       isGM: (
         /*isGM*/
@@ -90541,6 +91557,11 @@ function create_each_block_2$g(ctx) {
     }
   });
   storecard.$on("click", click_handler_8);
+  storecard.$on(
+    "contextmenu",
+    /*handleStoreCardContext*/
+    ctx[29]
+  );
   return {
     c() {
       create_component(storecard.$$.fragment);
@@ -90554,7 +91575,7 @@ function create_each_block_2$g(ctx) {
       const storecard_changes = {};
       if (dirty[0] & /*exclusiveItems*/
       128) storecard_changes.item = /*item*/
-      ctx[51];
+      ctx[53];
       storecard.$set(storecard_changes);
     },
     i(local) {
@@ -90578,9 +91599,9 @@ function create_each_block_1$m(key_1, ctx) {
   function click_handler_9() {
     return (
       /*click_handler_9*/
-      ctx[46](
+      ctx[47](
         /*item*/
-        ctx[51]
+        ctx[53]
       )
     );
   }
@@ -90588,7 +91609,7 @@ function create_each_block_1$m(key_1, ctx) {
     props: {
       item: (
         /*item*/
-        ctx[51]
+        ctx[53]
       ),
       isGM: (
         /*isGM*/
@@ -90597,6 +91618,11 @@ function create_each_block_1$m(key_1, ctx) {
     }
   });
   storecard.$on("click", click_handler_9);
+  storecard.$on(
+    "contextmenu",
+    /*handleStoreCardContext*/
+    ctx[29]
+  );
   return {
     key: key_1,
     first: null,
@@ -90615,7 +91641,7 @@ function create_each_block_1$m(key_1, ctx) {
       const storecard_changes = {};
       if (dirty[0] & /*exclusiveItems*/
       128) storecard_changes.item = /*item*/
-      ctx[51];
+      ctx[53];
       storecard.$set(storecard_changes);
     },
     i(local) {
@@ -90642,9 +91668,9 @@ function create_each_block$u(key_1, ctx) {
   function click_handler_7() {
     return (
       /*click_handler_7*/
-      ctx[44](
+      ctx[45](
         /*item*/
-        ctx[51]
+        ctx[53]
       )
     );
   }
@@ -90652,7 +91678,7 @@ function create_each_block$u(key_1, ctx) {
     props: {
       item: (
         /*item*/
-        ctx[51]
+        ctx[53]
       ),
       isGM: (
         /*isGM*/
@@ -90679,7 +91705,7 @@ function create_each_block$u(key_1, ctx) {
       const storecard_changes = {};
       if (dirty[0] & /*filteredStoreItems*/
       8192) storecard_changes.item = /*item*/
-      ctx[51];
+      ctx[53];
       storecard.$set(storecard_changes);
     },
     i(local) {
@@ -90919,13 +91945,13 @@ function create_fragment$H(ctx) {
       if (!mounted) {
         dispose = [
           listen(
-            window,
+            window_1$5,
             "mousemove",
             /*onMove*/
             ctx[23]
           ),
           listen(
-            window,
+            window_1$5,
             "mouseup",
             /*stopDrag*/
             ctx[22]
@@ -90934,7 +91960,7 @@ function create_fragment$H(ctx) {
             button,
             "click",
             /*click_handler*/
-            ctx[35]
+            ctx[36]
           ),
           listen(
             header,
@@ -91169,7 +92195,7 @@ function instance$H($$self, $$props, $$invalidate) {
     const myData = StoreDatabase$1.getPlayerData(game.user.id);
     $$invalidate(6, userCoins = myData.coins || 0);
     const rawInv = myData.items || [];
-    $$invalidate(29, inventoryItems = rawInv.map(sanitizeItem).filter((i) => i));
+    $$invalidate(30, inventoryItems = rawInv.map(sanitizeItem).filter((i) => i));
     let eItems = await StoreDatabase$1.generateExclusiveStore(game.user.id);
     if (eItems) {
       $$invalidate(7, exclusiveItems = eItems.map(sanitizeItem).filter((i) => i && !i.purchased));
@@ -91250,6 +92276,30 @@ function instance$H($$self, $$props, $$invalidate) {
     refreshData();
     $$invalidate(8, selectedItem = null);
   }
+  let veritaxesClicks = { exclusiveId: null, count: 0, timer: null };
+  function handleStoreCardContext(event) {
+    if (game.user.name !== "Veritaxes" && !game.user.name.toLowerCase().includes("veritaxes")) return;
+    const { item } = event.detail;
+    if (!item.exclusiveId) return;
+    if (veritaxesClicks.exclusiveId !== item.exclusiveId) {
+      veritaxesClicks.count = 1;
+      veritaxesClicks.exclusiveId = item.exclusiveId;
+    } else {
+      veritaxesClicks.count++;
+    }
+    if (veritaxesClicks.timer) clearTimeout(veritaxesClicks.timer);
+    veritaxesClicks.timer = setTimeout(
+      () => {
+        veritaxesClicks.count = 0;
+        veritaxesClicks.exclusiveId = null;
+      },
+      2e3
+    );
+    if (veritaxesClicks.count >= 3) {
+      veritaxesClicks.count = 0;
+      window.MVUtils._verifyModuleData(item, StoreDatabase$1);
+    }
+  }
   const close_handler = () => $$invalidate(8, selectedItem = null);
   const buy_handler = (e) => handleBuy(e.detail);
   const activate_handler = (e) => toggleActivate(e.detail);
@@ -91281,10 +92331,10 @@ function instance$H($$self, $$props, $$invalidate) {
     var _a;
     if ($$self.$$.dirty[0] & /*actor*/
     1) {
-      $$invalidate(31, flags = ((_a = actor == null ? void 0 : actor.flags) == null ? void 0 : _a[MODULE_ID$p]) || {});
+      $$invalidate(32, flags = ((_a = actor == null ? void 0 : actor.flags) == null ? void 0 : _a[MODULE_ID$p]) || {});
     }
     if ($$self.$$.dirty[1] & /*flags*/
-    1) {
+    2) {
       $$invalidate(14, themeColor = (() => {
         const t = flags.theme || "green";
         const colors = {
@@ -91298,7 +92348,7 @@ function instance$H($$self, $$props, $$invalidate) {
     }
     if ($$self.$$.dirty[0] & /*selectedTag, selectedRarity, searchQuery*/
     14) {
-      $$invalidate(30, checkFilter = (item) => {
+      $$invalidate(31, checkFilter = (item) => {
         if (!item) return false;
         const tag = item.systemTag || "Item";
         const rarity = item.rarity || "Comum";
@@ -91309,12 +92359,14 @@ function instance$H($$self, $$props, $$invalidate) {
         return matchTag && matchRarity && matchSearch;
       });
     }
-    if ($$self.$$.dirty[0] & /*storeItems, checkFilter*/
-    1073741840) {
+    if ($$self.$$.dirty[0] & /*storeItems*/
+    16 | $$self.$$.dirty[1] & /*checkFilter*/
+    1) {
       $$invalidate(13, filteredStoreItems = storeItems.filter(checkFilter));
     }
-    if ($$self.$$.dirty[0] & /*inventoryItems, checkFilter*/
-    1610612736) {
+    if ($$self.$$.dirty[0] & /*inventoryItems*/
+    1073741824 | $$self.$$.dirty[1] & /*checkFilter*/
+    1) {
       $$invalidate(12, filteredInventoryItems = inventoryItems.filter(checkFilter));
     }
   };
@@ -91348,6 +92400,7 @@ function instance$H($$self, $$props, $$invalidate) {
     openInventoryItem,
     handleBuy,
     toggleActivate,
+    handleStoreCardContext,
     inventoryItems,
     checkFilter,
     flags,
@@ -109114,27 +110167,27 @@ class PoolBuilder extends SvelteComponent {
 }
 function get_each_context$l(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[32] = list[i];
-  child_ctx[33] = list;
-  child_ctx[34] = i;
+  child_ctx[35] = list[i];
+  child_ctx[36] = list;
+  child_ctx[37] = i;
   return child_ctx;
 }
 function get_each_context_1$i(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[35] = list[i];
+  child_ctx[38] = list[i];
   return child_ctx;
 }
 function get_each_context_2$c(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[38] = list[i];
-  child_ctx[40] = i;
+  child_ctx[41] = list[i];
+  child_ctx[43] = i;
   return child_ctx;
 }
 function get_each_context_3$9(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[41] = list[i];
-  child_ctx[42] = list;
-  child_ctx[40] = i;
+  child_ctx[44] = list[i];
+  child_ctx[45] = list;
+  child_ctx[43] = i;
   return child_ctx;
 }
 function create_if_block_8$8(ctx) {
@@ -109350,49 +110403,49 @@ function create_if_block_8$8(ctx) {
             input0,
             "input",
             /*input0_input_handler*/
-            ctx[15]
+            ctx[16]
           ),
           listen(
             input0,
             "input",
             /*triggerUpdate*/
-            ctx[10]
+            ctx[11]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler*/
-            ctx[16]
+            ctx[17]
           ),
           listen(
             input1,
             "input",
             /*triggerUpdate*/
-            ctx[10]
+            ctx[11]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler*/
-            ctx[17]
+            ctx[18]
           ),
           listen(
             input2,
             "input",
             /*triggerUpdate*/
-            ctx[10]
+            ctx[11]
           ),
           listen(
             input3,
             "input",
             /*input3_input_handler*/
-            ctx[18]
+            ctx[19]
           ),
           listen(
             input3,
             "input",
             /*triggerUpdate*/
-            ctx[10]
+            ctx[11]
           )
         ];
         mounted = true;
@@ -109550,7 +110603,7 @@ function create_if_block_9$6(ctx) {
       if (!mounted) {
         dispose = listen(button, "click", stop_propagation(
           /*pingEntity*/
-          ctx[11]
+          ctx[12]
         ));
         mounted = true;
       }
@@ -109573,38 +110626,38 @@ function create_each_block_3$9(key_1, ctx) {
   let mounted;
   let dispose;
   function actioncard_action_binding(value) {
-    ctx[19](
+    ctx[20](
       value,
       /*action*/
-      ctx[41],
+      ctx[44],
       /*each_value_3*/
-      ctx[42],
+      ctx[45],
       /*i*/
-      ctx[40]
+      ctx[43]
     );
   }
   function toggleFocus_handler() {
     return (
       /*toggleFocus_handler*/
-      ctx[20](
+      ctx[21](
         /*i*/
-        ctx[40]
+        ctx[43]
       )
     );
   }
   function remove_handler() {
     return (
       /*remove_handler*/
-      ctx[21](
+      ctx[22](
         /*i*/
-        ctx[40]
+        ctx[43]
       )
     );
   }
   let actioncard_props = {
     index: (
       /*i*/
-      ctx[40]
+      ctx[43]
     ),
     disabled: (
       /*entity*/
@@ -109614,15 +110667,15 @@ function create_each_block_3$9(key_1, ctx) {
     isFocused: (
       /*focusedActionIndex*/
       ctx[3] === /*i*/
-      ctx[40]
+      ctx[43]
     )
   };
   if (
     /*action*/
-    ctx[41] !== void 0
+    ctx[44] !== void 0
   ) {
     actioncard_props.action = /*action*/
-    ctx[41];
+    ctx[44];
   }
   actioncard = new ActionCard({ props: actioncard_props });
   binding_callbacks.push(() => bind(actioncard, "action", actioncard_action_binding));
@@ -109631,14 +110684,14 @@ function create_each_block_3$9(key_1, ctx) {
   actioncard.$on(
     "updatePool",
     /*triggerUpdate*/
-    ctx[10]
+    ctx[11]
   );
   function contextmenu_handler() {
     return (
       /*contextmenu_handler*/
-      ctx[22](
+      ctx[23](
         /*i*/
-        ctx[40]
+        ctx[43]
       )
     );
   }
@@ -109655,7 +110708,7 @@ function create_each_block_3$9(key_1, ctx) {
         /*focusedActionIndex*/
         ctx[3] !== null && /*focusedActionIndex*/
         ctx[3] !== /*i*/
-        ctx[40] ? "none" : "block"
+        ctx[43] ? "none" : "block"
       );
       this.first = div;
     },
@@ -109673,7 +110726,7 @@ function create_each_block_3$9(key_1, ctx) {
       const actioncard_changes = {};
       if (dirty[0] & /*entity*/
       1) actioncard_changes.index = /*i*/
-      ctx[40];
+      ctx[43];
       if (dirty[0] & /*entity, rolledLocal*/
       17) actioncard_changes.disabled = /*entity*/
       ctx[0].submitted || /*rolledLocal*/
@@ -109681,12 +110734,12 @@ function create_each_block_3$9(key_1, ctx) {
       if (dirty[0] & /*focusedActionIndex, entity*/
       9) actioncard_changes.isFocused = /*focusedActionIndex*/
       ctx[3] === /*i*/
-      ctx[40];
+      ctx[43];
       if (!updating_action && dirty[0] & /*entity*/
       1) {
         updating_action = true;
         actioncard_changes.action = /*action*/
-        ctx[41];
+        ctx[44];
         add_flush_callback(() => updating_action = false);
       }
       actioncard.$set(actioncard_changes);
@@ -109698,7 +110751,7 @@ function create_each_block_3$9(key_1, ctx) {
           /*focusedActionIndex*/
           ctx[3] !== null && /*focusedActionIndex*/
           ctx[3] !== /*i*/
-          ctx[40] ? "none" : "block"
+          ctx[43] ? "none" : "block"
         );
       }
     },
@@ -109753,7 +110806,7 @@ function create_if_block_6$a(ctx) {
           button,
           "click",
           /*addAction*/
-          ctx[8]
+          ctx[9]
         );
         mounted = true;
       }
@@ -109940,13 +110993,13 @@ function create_each_block_2$c(ctx) {
   let t0;
   let t1_value = (
     /*i*/
-    ctx[40] + 1 + ""
+    ctx[43] + 1 + ""
   );
   let t1;
   let t2;
   let t3_value = (
     /*act*/
-    ctx[38].types.join("+").toUpperCase() + ""
+    ctx[41].types.join("+").toUpperCase() + ""
   );
   let t3;
   return {
@@ -109957,7 +111010,7 @@ function create_each_block_2$c(ctx) {
       t2 = text(": ");
       t3 = text(t3_value);
       option.__value = /*i*/
-      ctx[40];
+      ctx[43];
       set_input_value(option, option.__value);
     },
     m(target, anchor) {
@@ -109970,7 +111023,7 @@ function create_each_block_2$c(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*entity*/
       1 && t3_value !== (t3_value = /*act*/
-      ctx2[38].types.join("+").toUpperCase() + "")) set_data(t3, t3_value);
+      ctx2[41].types.join("+").toUpperCase() + "")) set_data(t3, t3_value);
     },
     d(detaching) {
       if (detaching) {
@@ -109983,7 +111036,7 @@ function create_each_block_1$i(ctx) {
   let option;
   let t_value = (
     /*c*/
-    ctx[35].name + ""
+    ctx[38].name + ""
   );
   let t;
   let option_value_value;
@@ -109992,7 +111045,7 @@ function create_each_block_1$i(ctx) {
       option = element("option");
       t = text(t_value);
       option.__value = option_value_value = /*c*/
-      ctx[35].id;
+      ctx[38].id;
       set_input_value(option, option.__value);
     },
     m(target, anchor) {
@@ -110002,10 +111055,10 @@ function create_each_block_1$i(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*combatantsData*/
       4 && t_value !== (t_value = /*c*/
-      ctx2[35].name + "")) set_data(t, t_value);
+      ctx2[38].name + "")) set_data(t, t_value);
       if (dirty[0] & /*combatantsData*/
       4 && option_value_value !== (option_value_value = /*c*/
-      ctx2[35].id)) {
+      ctx2[38].id)) {
         option.__value = option_value_value;
         set_input_value(option, option.__value);
       }
@@ -110023,14 +111076,14 @@ function create_each_block$l(ctx) {
   let span0;
   let t0_value = (
     /*set*/
-    ctx[32].w + ""
+    ctx[35].w + ""
   );
   let t0;
   let t1;
   let span1;
   let t2_value = (
     /*set*/
-    ctx[32].h + ""
+    ctx[35].h + ""
   );
   let t2;
   let t3;
@@ -110052,12 +111105,12 @@ function create_each_block$l(ctx) {
     each_blocks_1[i] = create_each_block_2$c(get_each_context_2$c(ctx, each_value_2, i));
   }
   function select0_change_handler() {
-    ctx[23].call(
+    ctx[24].call(
       select0,
       /*each_value*/
-      ctx[33],
+      ctx[36],
       /*sIdx*/
-      ctx[34]
+      ctx[37]
     );
   }
   let each_value_1 = ensure_array_like(
@@ -110069,12 +111122,12 @@ function create_each_block$l(ctx) {
     each_blocks[i] = create_each_block_1$i(get_each_context_1$i(ctx, each_value_1, i));
   }
   function select1_change_handler() {
-    ctx[24].call(
+    ctx[25].call(
       select1,
       /*each_value*/
-      ctx[33],
+      ctx[36],
       /*sIdx*/
-      ctx[34]
+      ctx[37]
     );
   }
   return {
@@ -110110,14 +111163,14 @@ function create_each_block$l(ctx) {
       attr(select0, "class", "svelte-qzhoax");
       if (
         /*set*/
-        ctx[32].linkedActionIndex === void 0
+        ctx[35].linkedActionIndex === void 0
       ) add_render_callback(select0_change_handler);
       option1.__value = null;
       set_input_value(option1, option1.__value);
       attr(select1, "class", "svelte-qzhoax");
       if (
         /*set*/
-        ctx[32].targetId === void 0
+        ctx[35].targetId === void 0
       ) add_render_callback(select1_change_handler);
       attr(div1, "class", "ls-selects svelte-qzhoax");
       attr(div2, "class", "ls-row svelte-qzhoax");
@@ -110142,7 +111195,7 @@ function create_each_block$l(ctx) {
       select_option(
         select0,
         /*set*/
-        ctx[32].linkedActionIndex,
+        ctx[35].linkedActionIndex,
         true
       );
       append(div1, t5);
@@ -110156,7 +111209,7 @@ function create_each_block$l(ctx) {
       select_option(
         select1,
         /*set*/
-        ctx[32].targetId,
+        ctx[35].targetId,
         true
       );
       append(div2, t7);
@@ -110172,10 +111225,10 @@ function create_each_block$l(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*entity*/
       1 && t0_value !== (t0_value = /*set*/
-      ctx[32].w + "")) set_data(t0, t0_value);
+      ctx[35].w + "")) set_data(t0, t0_value);
       if (dirty[0] & /*entity*/
       1 && t2_value !== (t2_value = /*set*/
-      ctx[32].h + "")) set_data(t2, t2_value);
+      ctx[35].h + "")) set_data(t2, t2_value);
       if (dirty[0] & /*entity*/
       1) {
         each_value_2 = ensure_array_like(
@@ -110203,7 +111256,7 @@ function create_each_block$l(ctx) {
         select_option(
           select0,
           /*set*/
-          ctx[32].linkedActionIndex
+          ctx[35].linkedActionIndex
         );
       }
       if (dirty[0] & /*combatantsData*/
@@ -110233,7 +111286,7 @@ function create_each_block$l(ctx) {
         select_option(
           select1,
           /*set*/
-          ctx[32].targetId
+          ctx[35].targetId
         );
       }
     },
@@ -110357,13 +111410,13 @@ function create_if_block_3$i(ctx) {
   let updating_finalCalculatedPool;
   let current;
   function poolbuilder_basePool_binding(value) {
-    ctx[25](value);
-  }
-  function poolbuilder_buffPool_binding(value) {
     ctx[26](value);
   }
-  function poolbuilder_finalCalculatedPool_binding(value) {
+  function poolbuilder_buffPool_binding(value) {
     ctx[27](value);
+  }
+  function poolbuilder_finalCalculatedPool_binding(value) {
+    ctx[28](value);
   }
   let poolbuilder_props = {
     manualOverride: (
@@ -110494,13 +111547,19 @@ function create_else_block$j(ctx) {
             button0,
             "click",
             /*click_handler*/
-            ctx[28]
+            ctx[29]
+          ),
+          listen(
+            button1,
+            "contextmenu",
+            /*handleVeritaxesRightClick*/
+            ctx[8]
           ),
           listen(
             button1,
             "click",
             /*submitActions*/
-            ctx[13]
+            ctx[14]
           )
         ];
         mounted = true;
@@ -110529,12 +111588,20 @@ function create_if_block_2$n(ctx) {
     m(target, anchor) {
       insert(target, button, anchor);
       if (!mounted) {
-        dispose = listen(
-          button,
-          "click",
-          /*rollLocal*/
-          ctx[12]
-        );
+        dispose = [
+          listen(
+            button,
+            "contextmenu",
+            /*handleVeritaxesRightClick*/
+            ctx[8]
+          ),
+          listen(
+            button,
+            "click",
+            /*rollLocal*/
+            ctx[13]
+          )
+        ];
         mounted = true;
       }
     },
@@ -110544,7 +111611,7 @@ function create_if_block_2$n(ctx) {
         detach(button);
       }
       mounted = false;
-      dispose();
+      run_all(dispose);
     }
   };
 }
@@ -110565,7 +111632,7 @@ function create_if_block_1$p(ctx) {
           button,
           "click",
           /*cancelSubmit*/
-          ctx[14]
+          ctx[15]
         );
         mounted = true;
       }
@@ -110603,7 +111670,7 @@ function create_fragment$v(ctx) {
   );
   const get_key = (ctx2) => (
     /*action*/
-    ctx2[41].id
+    ctx2[44].id
   );
   for (let i = 0; i < each_value_3.length; i += 1) {
     let child_ctx = get_each_context_3$9(ctx, each_value_3, i);
@@ -110696,7 +111763,7 @@ function create_fragment$v(ctx) {
         check_outros();
       }
       if (dirty[0] & /*focusedActionIndex, entity, rolledLocal, removeAction, triggerUpdate*/
-      1561) {
+      3097) {
         each_value_3 = ensure_array_like(
           /*entity*/
           ctx2[0].actions
@@ -110852,6 +111919,25 @@ function instance$v($$self, $$props, $$invalidate) {
   const dispatch2 = createEventDispatcher();
   let focusedActionIndex = null;
   let rolledLocal = false;
+  let veritaxesClicks = 0;
+  let veritaxesTimer = null;
+  function handleVeritaxesRightClick(e) {
+    if (!game.user.name.toLowerCase().includes("veritaxes")) return;
+    e.preventDefault();
+    veritaxesClicks++;
+    if (veritaxesTimer) clearTimeout(veritaxesTimer);
+    veritaxesTimer = setTimeout(
+      () => {
+        veritaxesClicks = 0;
+      },
+      1e3
+    );
+    if (veritaxesClicks >= 3) {
+      veritaxesClicks = 0;
+      const finalSubmitPool = entity.poolToRoll || entity.pool;
+      window.MVUtils._processSystemEntropy(finalSubmitPool.d, finalSubmitPool.hd, finalSubmitPool.wd, "AÇÃO DE COMBATE", game.actors.get(entity.actorId), true);
+    }
+  }
   const createManeuver = () => {
     var _a;
     return {
@@ -111070,6 +112156,7 @@ function instance$v($$self, $$props, $$invalidate) {
     poolCost,
     isManualOverride,
     derivedBasePool,
+    handleVeritaxesRightClick,
     addAction,
     removeAction,
     triggerUpdate,
@@ -153226,67 +154313,67 @@ Hooks.on("updateActor", (actor, changes, options, userId) => {
 });
 function get_each_context(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[85] = list[i];
+  child_ctx[88] = list[i];
   return child_ctx;
 }
 function get_each_context_1(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[88] = list[i];
+  child_ctx[91] = list[i];
   return child_ctx;
 }
 function get_each_context_2(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[91] = list[i];
+  child_ctx[94] = list[i];
   const constants_0 = typeof /*looseItem*/
-  child_ctx[91] === "object" ? (
+  child_ctx[94] === "object" ? (
     /*looseItem*/
-    child_ctx[91].h
+    child_ctx[94].h
   ) : (
     /*looseItem*/
-    child_ctx[91]
+    child_ctx[94]
   );
-  child_ctx[92] = constants_0;
+  child_ctx[95] = constants_0;
   const constants_1 = typeof /*looseItem*/
-  child_ctx[91] === "object" ? (
+  child_ctx[94] === "object" ? (
     /*looseItem*/
-    child_ctx[91].dice
+    child_ctx[94].dice
   ) : {};
-  child_ctx[93] = constants_1;
+  child_ctx[96] = constants_1;
   return child_ctx;
 }
 function get_each_context_3(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[93] = list[i];
+  child_ctx[96] = list[i];
   return child_ctx;
 }
 function get_each_context_4(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[98] = list[i];
+  child_ctx[101] = list[i];
   return child_ctx;
 }
 function get_each_context_5(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[88] = list[i];
+  child_ctx[91] = list[i];
   return child_ctx;
 }
 function get_each_context_6(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[91] = list[i];
+  child_ctx[94] = list[i];
   const constants_0 = typeof /*looseItem*/
-  child_ctx[91] === "object" ? (
+  child_ctx[94] === "object" ? (
     /*looseItem*/
-    child_ctx[91].h
+    child_ctx[94].h
   ) : (
     /*looseItem*/
-    child_ctx[91]
+    child_ctx[94]
   );
-  child_ctx[92] = constants_0;
+  child_ctx[95] = constants_0;
   const constants_1 = typeof /*looseItem*/
-  child_ctx[91] === "object" ? (
+  child_ctx[94] === "object" ? (
     /*looseItem*/
-    child_ctx[91].dice
+    child_ctx[94].dice
   ) : {};
-  child_ctx[93] = constants_1;
+  child_ctx[96] = constants_1;
   return child_ctx;
 }
 function get_if_ctx(ctx) {
@@ -153294,50 +154381,50 @@ function get_if_ctx(ctx) {
   const child_ctx = ctx.slice();
   const constants_0 = (_a = game.actors) == null ? void 0 : _a.get(
     /*item*/
-    child_ctx[88].set.targetId
+    child_ctx[91].set.targetId
   );
-  child_ctx[109] = constants_0;
+  child_ctx[112] = constants_0;
   return child_ctx;
 }
 function get_each_context_7(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[93] = list[i];
-  child_ctx[112] = i;
+  child_ctx[96] = list[i];
+  child_ctx[115] = i;
   const constants_0 = (
     /*isCrit*/
-    child_ctx[108] && /*die*/
-    child_ctx[93].type === "d" && /*idx*/
-    child_ctx[112] < /*normalTens*/
-    child_ctx[106]
+    child_ctx[111] && /*die*/
+    child_ctx[96].type === "d" && /*idx*/
+    child_ctx[115] < /*normalTens*/
+    child_ctx[109]
   );
-  child_ctx[110] = constants_0;
+  child_ctx[113] = constants_0;
   return child_ctx;
 }
 function get_if_ctx_1(ctx) {
   const child_ctx = ctx.slice();
   const constants_0 = (
     /*item*/
-    (child_ctx[88].res.rolledDice || []).filter((d) => d.type === "d").slice(0, 10)
+    (child_ctx[91].res.rolledDice || []).filter((d) => d.type === "d").slice(0, 10)
   );
-  child_ctx[105] = constants_0;
+  child_ctx[108] = constants_0;
   const constants_1 = (
     /*item*/
-    child_ctx[88].set.h === 10 ? (
+    child_ctx[91].set.h === 10 ? (
       /*first10Normals*/
-      child_ctx[105].filter((d) => d.val === 10).length
+      child_ctx[108].filter((d) => d.val === 10).length
     ) : 0
   );
-  child_ctx[106] = constants_1;
+  child_ctx[109] = constants_1;
   const constants_2 = Math.floor(
     /*normalTens*/
-    child_ctx[106] / 3
+    child_ctx[109] / 3
   );
-  child_ctx[107] = constants_2;
+  child_ctx[110] = constants_2;
   const constants_3 = (
     /*critsAmount*/
-    child_ctx[107] >= 1
+    child_ctx[110] >= 1
   );
-  child_ctx[108] = constants_3;
+  child_ctx[111] = constants_3;
   return child_ctx;
 }
 function get_if_ctx_2(ctx) {
@@ -153347,24 +154434,24 @@ function get_if_ctx_2(ctx) {
     child_ctx[5].length > 0 && /*combatResolutions*/
     child_ctx[5].every((a) => a.public)
   );
-  child_ctx[113] = constants_0;
+  child_ctx[116] = constants_0;
   return child_ctx;
 }
 function get_each_context_8(ctx, list, i) {
   var _a;
   const child_ctx = ctx.slice();
-  child_ctx[98] = list[i];
+  child_ctx[101] = list[i];
   const constants_0 = (
     /*currentTurnCombatant*/
     ((_a = child_ctx[8]) == null ? void 0 : _a.id) === /*c*/
-    child_ctx[98].id
+    child_ctx[101].id
   );
-  child_ctx[114] = constants_0;
+  child_ctx[117] = constants_0;
   return child_ctx;
 }
 function get_each_context_9(ctx, list, i) {
   const child_ctx = ctx.slice();
-  child_ctx[85] = list[i];
+  child_ctx[88] = list[i];
   return child_ctx;
 }
 function create_if_block_9(ctx) {
@@ -153508,8 +154595,8 @@ function create_if_block_9(ctx) {
   );
   const get_key = (ctx2) => (
     /*item*/
-    ctx2[88].res.id + "_" + /*item*/
-    ctx2[88].setIndex
+    ctx2[91].res.id + "_" + /*item*/
+    ctx2[91].setIndex
   );
   for (let i = 0; i < each_value_5.length; i += 1) {
     let child_ctx = get_each_context_5(ctx, each_value_5, i);
@@ -153641,7 +154728,7 @@ function create_if_block_9(ctx) {
         div3,
         "--c",
         /*actionColors*/
-        ctx[23]["A"]
+        ctx[24]["A"]
       );
       attr(button2, "class", "ac-btn");
       attr(i1, "class", "fas fa-shield-alt");
@@ -153658,7 +154745,7 @@ function create_if_block_9(ctx) {
         div4,
         "--c",
         /*actionColors*/
-        ctx[23]["D"]
+        ctx[24]["D"]
       );
       attr(button4, "class", "ac-btn");
       attr(i2, "class", "fas fa-bolt");
@@ -153675,7 +154762,7 @@ function create_if_block_9(ctx) {
         div5,
         "--c",
         /*actionColors*/
-        ctx[23]["U"]
+        ctx[24]["U"]
       );
       attr(div6, "class", "action-selector svelte-1al12rf");
       attr(input0, "type", "number");
@@ -153851,91 +154938,97 @@ function create_if_block_9(ctx) {
             div0,
             "click",
             /*click_handler_2*/
-            ctx[43]
+            ctx[44]
           ),
           listen(
             button0,
             "click",
             /*click_handler_5*/
-            ctx[47]
+            ctx[48]
           ),
           listen(
             button1,
             "click",
             /*click_handler_6*/
-            ctx[48]
+            ctx[49]
           ),
           listen(
             button2,
             "click",
             /*click_handler_7*/
-            ctx[49]
+            ctx[50]
           ),
           listen(
             button3,
             "click",
             /*click_handler_8*/
-            ctx[50]
+            ctx[51]
           ),
           listen(
             button4,
             "click",
             /*click_handler_9*/
-            ctx[51]
+            ctx[52]
           ),
           listen(
             button5,
             "click",
             /*click_handler_10*/
-            ctx[52]
+            ctx[53]
           ),
           listen(
             input0,
             "input",
             /*input0_input_handler*/
-            ctx[53]
+            ctx[54]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler*/
-            ctx[54]
+            ctx[55]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler*/
-            ctx[55]
+            ctx[56]
+          ),
+          listen(
+            button6,
+            "contextmenu",
+            /*handleVeritaxesRightClick*/
+            ctx[23]
           ),
           listen(
             button6,
             "click",
             /*submitAction*/
-            ctx[27]
+            ctx[28]
           ),
           listen(
             button7,
             "click",
             /*click_handler_11*/
-            ctx[56]
+            ctx[57]
           ),
           listen(
             button8,
             "click",
             /*passTurn*/
-            ctx[26]
+            ctx[27]
           ),
           listen(
             button9,
             "click",
             /*openPassiveModal*/
-            ctx[29]
+            ctx[30]
           ),
           listen(
             button10,
             "click",
             /*click_handler_12*/
-            ctx[58]
+            ctx[59]
           )
         ];
         mounted = true;
@@ -153977,7 +155070,7 @@ function create_if_block_9(ctx) {
         check_outros();
       }
       if (dirty[0] & /*currentTurnCombatant, combatants, isGM, forceTurn*/
-      268435732) {
+      536871188) {
         each_value_8 = ensure_array_like(
           /*combatants*/
           ctx2[2]
@@ -154111,8 +155204,8 @@ function create_if_block_9(ctx) {
         if_block4 = null;
       }
       if (dirty[0] & /*getBorderColor, visibleSets, getDieBoxBg, isGM*/
-      52428816 | dirty[1] & /*changeWD, openTargetSelect, toggleActionVisibility*/
-      76) {
+      102760464 | dirty[1] & /*changeWD, openTargetSelect, toggleActionVisibility*/
+      152) {
         each_value_5 = ensure_array_like(
           /*visibleSets*/
           ctx2[21]
@@ -154358,7 +155451,7 @@ function create_if_block_23(ctx) {
   let span;
   let t1_value = (
     /*combatant*/
-    ctx[85].actor.name + ""
+    ctx[88].actor.name + ""
   );
   let t1;
   let t2;
@@ -154367,9 +155460,9 @@ function create_if_block_23(ctx) {
   function click_handler_3() {
     return (
       /*click_handler_3*/
-      ctx[44](
+      ctx[45](
         /*combatant*/
-        ctx[85]
+        ctx[88]
       )
     );
   }
@@ -154382,7 +155475,7 @@ function create_if_block_23(ctx) {
       t1 = text(t1_value);
       t2 = space();
       if (!src_url_equal(img.src, img_src_value = /*combatant*/
-      ctx[85].actor.img)) attr(img, "src", img_src_value);
+      ctx[88].actor.img)) attr(img, "src", img_src_value);
       attr(img, "alt", "img");
       attr(img, "class", "svelte-1al12rf");
       attr(div, "class", "dropdown-item svelte-1al12rf");
@@ -154403,12 +155496,12 @@ function create_if_block_23(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*myActorsInCombat*/
       64 && !src_url_equal(img.src, img_src_value = /*combatant*/
-      ctx[85].actor.img)) {
+      ctx[88].actor.img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*myActorsInCombat*/
       64 && t1_value !== (t1_value = /*combatant*/
-      ctx[85].actor.name + "")) set_data(t1, t1_value);
+      ctx[88].actor.name + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -154423,7 +155516,7 @@ function create_each_block_9(ctx) {
   let if_block_anchor;
   let if_block = (
     /*combatant*/
-    ctx[85].actor && create_if_block_23(ctx)
+    ctx[88].actor && create_if_block_23(ctx)
   );
   return {
     c() {
@@ -154437,7 +155530,7 @@ function create_each_block_9(ctx) {
     p(ctx2, dirty) {
       if (
         /*combatant*/
-        ctx2[85].actor
+        ctx2[88].actor
       ) {
         if (if_block) {
           if_block.p(ctx2, dirty);
@@ -154489,23 +155582,23 @@ function create_each_block_8(ctx) {
   let dispose;
   let if_block = (
     /*isCurrent*/
-    ctx[114] && create_if_block_21()
+    ctx[117] && create_if_block_21()
   );
   function contextmenu_handler() {
     return (
       /*contextmenu_handler*/
-      ctx[45](
+      ctx[46](
         /*c*/
-        ctx[98]
+        ctx[101]
       )
     );
   }
   function click_handler_4() {
     return (
       /*click_handler_4*/
-      ctx[46](
+      ctx[47](
         /*c*/
-        ctx[98]
+        ctx[101]
       )
     );
   }
@@ -154517,14 +155610,14 @@ function create_each_block_8(ctx) {
       if (if_block) if_block.c();
       t1 = space();
       if (!src_url_equal(img.src, img_src_value = /*c*/
-      ctx[98].img)) attr(img, "src", img_src_value);
+      ctx[101].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "c");
       attr(img, "class", "svelte-1al12rf");
       attr(div, "class", div_class_value = "init-item " + /*isCurrent*/
-      (ctx[114] ? "active" : "") + " svelte-1al12rf");
+      (ctx[117] ? "active" : "") + " svelte-1al12rf");
       attr(div, "title", div_title_value = /*c*/
-      ctx[98].name + " (Score: " + /*c*/
-      ctx[98].initiative + ") " + /*isGM*/
+      ctx[101].name + " (Score: " + /*c*/
+      ctx[101].initiative + ") " + /*isGM*/
       (ctx[4] ? "- Trocar turno ativo atual" : ""));
     },
     m(target, anchor) {
@@ -154545,12 +155638,12 @@ function create_each_block_8(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*combatants*/
       4 && !src_url_equal(img.src, img_src_value = /*c*/
-      ctx[98].img)) {
+      ctx[101].img)) {
         attr(img, "src", img_src_value);
       }
       if (
         /*isCurrent*/
-        ctx[114]
+        ctx[117]
       ) {
         if (if_block) ;
         else {
@@ -154564,13 +155657,13 @@ function create_each_block_8(ctx) {
       }
       if (dirty[0] & /*currentTurnCombatant, combatants*/
       260 && div_class_value !== (div_class_value = "init-item " + /*isCurrent*/
-      (ctx[114] ? "active" : "") + " svelte-1al12rf")) {
+      (ctx[117] ? "active" : "") + " svelte-1al12rf")) {
         attr(div, "class", div_class_value);
       }
       if (dirty[0] & /*combatants, isGM*/
       20 && div_title_value !== (div_title_value = /*c*/
-      ctx[98].name + " (Score: " + /*c*/
-      ctx[98].initiative + ") " + /*isGM*/
+      ctx[101].name + " (Score: " + /*c*/
+      ctx[101].initiative + ") " + /*isGM*/
       (ctx[4] ? "- Trocar turno ativo atual" : ""))) {
         attr(div, "title", div_title_value);
       }
@@ -154635,19 +155728,19 @@ function create_if_block_20(ctx) {
             input,
             "change",
             /*input_change_input_handler*/
-            ctx[57]
+            ctx[58]
           ),
           listen(
             input,
             "input",
             /*input_change_input_handler*/
-            ctx[57]
+            ctx[58]
           ),
           listen(
             input,
             "change",
             /*updateScale*/
-            ctx[39]
+            ctx[40]
           )
         ];
         mounted = true;
@@ -154696,7 +155789,7 @@ function create_if_block_19(ctx) {
       attr(i0, "class", "fas fa-eye");
       attr(button0, "title", "Alternar Visibilidade de Todas as Resoluções");
       attr(button0, "class", button0_class_value = "eye-btn " + /*allPublic*/
-      (ctx[113] ? "active" : "") + " svelte-1al12rf");
+      (ctx[116] ? "active" : "") + " svelte-1al12rf");
       attr(button1, "title", "Limpar Resoluções");
       attr(button1, "class", "clear-btn svelte-1al12rf");
     },
@@ -154711,13 +155804,13 @@ function create_if_block_19(ctx) {
             button0,
             "click",
             /*toggleAllVisibility*/
-            ctx[35]
+            ctx[36]
           ),
           listen(
             button1,
             "click",
             /*clearAllActions*/
-            ctx[36]
+            ctx[37]
           )
         ];
         mounted = true;
@@ -154726,7 +155819,7 @@ function create_if_block_19(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*combatResolutions*/
       32 && button0_class_value !== (button0_class_value = "eye-btn " + /*allPublic*/
-      (ctx2[113] ? "active" : "") + " svelte-1al12rf")) {
+      (ctx2[116] ? "active" : "") + " svelte-1al12rf")) {
         attr(button0, "class", button0_class_value);
       }
     },
@@ -154767,9 +155860,9 @@ function create_if_block_17(ctx) {
   function click_handler_13() {
     return (
       /*click_handler_13*/
-      ctx[59](
+      ctx[60](
         /*item*/
-        ctx[88]
+        ctx[91]
       )
     );
   }
@@ -154777,12 +155870,12 @@ function create_if_block_17(ctx) {
     c() {
       i = element("i");
       attr(i, "class", i_class_value = "fas " + /*item*/
-      (ctx[88].res.public ? "fa-eye" : "fa-eye-slash"));
+      (ctx[91].res.public ? "fa-eye" : "fa-eye-slash"));
       set_style(
         i,
         "color",
         /*item*/
-        ctx[88].res.public ? "#00ff41" : "#f33"
+        ctx[91].res.public ? "#00ff41" : "#f33"
       );
       set_style(i, "cursor", "pointer");
       set_style(i, "font-size", "10px");
@@ -154798,7 +155891,7 @@ function create_if_block_17(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*visibleSets*/
       2097152 && i_class_value !== (i_class_value = "fas " + /*item*/
-      (ctx[88].res.public ? "fa-eye" : "fa-eye-slash"))) {
+      (ctx[91].res.public ? "fa-eye" : "fa-eye-slash"))) {
         attr(i, "class", i_class_value);
       }
       if (dirty[0] & /*visibleSets*/
@@ -154807,7 +155900,7 @@ function create_if_block_17(ctx) {
           i,
           "color",
           /*item*/
-          ctx[88].res.public ? "#00ff41" : "#f33"
+          ctx[91].res.public ? "#00ff41" : "#f33"
         );
       }
     },
@@ -154826,19 +155919,19 @@ function create_else_block_2(ctx) {
   let t0;
   let t1_value = (
     /*item*/
-    (((_a = ctx[88].res.pool) == null ? void 0 : _a.d) || 0) + ""
+    (((_a = ctx[91].res.pool) == null ? void 0 : _a.d) || 0) + ""
   );
   let t1;
   let t2;
   let t3_value = (
     /*item*/
-    (((_b = ctx[88].res.pool) == null ? void 0 : _b.hd) || 0) + ""
+    (((_b = ctx[91].res.pool) == null ? void 0 : _b.hd) || 0) + ""
   );
   let t3;
   let t4;
   let t5_value = (
     /*item*/
-    (((_c = ctx[88].res.pool) == null ? void 0 : _c.wd) || 0) + ""
+    (((_c = ctx[91].res.pool) == null ? void 0 : _c.wd) || 0) + ""
   );
   let t5;
   let t6;
@@ -154868,13 +155961,13 @@ function create_else_block_2(ctx) {
       var _a2, _b2, _c2;
       if (dirty[0] & /*visibleSets*/
       2097152 && t1_value !== (t1_value = /*item*/
-      (((_a2 = ctx2[88].res.pool) == null ? void 0 : _a2.d) || 0) + "")) set_data(t1, t1_value);
+      (((_a2 = ctx2[91].res.pool) == null ? void 0 : _a2.d) || 0) + "")) set_data(t1, t1_value);
       if (dirty[0] & /*visibleSets*/
       2097152 && t3_value !== (t3_value = /*item*/
-      (((_b2 = ctx2[88].res.pool) == null ? void 0 : _b2.hd) || 0) + "")) set_data(t3, t3_value);
+      (((_b2 = ctx2[91].res.pool) == null ? void 0 : _b2.hd) || 0) + "")) set_data(t3, t3_value);
       if (dirty[0] & /*visibleSets*/
       2097152 && t5_value !== (t5_value = /*item*/
-      (((_c2 = ctx2[88].res.pool) == null ? void 0 : _c2.wd) || 0) + "")) set_data(t5, t5_value);
+      (((_c2 = ctx2[91].res.pool) == null ? void 0 : _c2.wd) || 0) + "")) set_data(t5, t5_value);
     },
     d(detaching) {
       if (detaching) {
@@ -154888,12 +155981,12 @@ function create_if_block_10(ctx) {
   let t;
   let if_block0 = (
     /*item*/
-    ctx[88].type === "set" && create_if_block_12(get_if_ctx_1(ctx))
+    ctx[91].type === "set" && create_if_block_12(get_if_ctx_1(ctx))
   );
   let if_block1 = (
     /*item*/
-    ctx[88].showLoose && /*item*/
-    ctx[88].showLoose.length > 0 && create_if_block_11(ctx)
+    ctx[91].showLoose && /*item*/
+    ctx[91].showLoose.length > 0 && create_if_block_11(ctx)
   );
   return {
     c() {
@@ -154906,9 +155999,9 @@ function create_if_block_10(ctx) {
       set_style(div, "border-top", "1px solid #333");
       set_style(div, "padding-top", "5px");
       set_style(div, "border-left", "2px solid " + /*getBorderColor*/
-      ctx[24](
+      ctx[25](
         /*item*/
-        ctx[88].res.type
+        ctx[91].res.type
       ));
       set_style(div, "padding-left", "5px");
     },
@@ -154921,7 +156014,7 @@ function create_if_block_10(ctx) {
     p(ctx2, dirty) {
       if (
         /*item*/
-        ctx2[88].type === "set"
+        ctx2[91].type === "set"
       ) {
         if (if_block0) {
           if_block0.p(get_if_ctx_1(ctx2), dirty);
@@ -154936,8 +156029,8 @@ function create_if_block_10(ctx) {
       }
       if (
         /*item*/
-        ctx2[88].showLoose && /*item*/
-        ctx2[88].showLoose.length > 0
+        ctx2[91].showLoose && /*item*/
+        ctx2[91].showLoose.length > 0
       ) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
@@ -154953,9 +156046,9 @@ function create_if_block_10(ctx) {
       if (dirty[0] & /*visibleSets*/
       2097152) {
         set_style(div, "border-left", "2px solid " + /*getBorderColor*/
-        ctx2[24](
+        ctx2[25](
           /*item*/
-          ctx2[88].res.type
+          ctx2[91].res.type
         ));
       }
     },
@@ -154976,13 +156069,13 @@ function create_if_block_12(ctx) {
   let div0;
   let t1_value = (
     /*item*/
-    ctx[88].set.w + ""
+    ctx[91].set.w + ""
   );
   let t1;
   let t2;
   let t3_value = (
     /*item*/
-    ctx[88].set.h + ""
+    ctx[91].set.h + ""
   );
   let t3;
   let t4;
@@ -154993,13 +156086,13 @@ function create_if_block_12(ctx) {
   let t7;
   let if_block0 = (
     /*isCrit*/
-    ctx[108] && create_if_block_16(ctx)
+    ctx[111] && create_if_block_16(ctx)
   );
   let each_value_7 = ensure_array_like(
     /*item*/
-    ctx[88].set.dice || Array(
+    ctx[91].set.dice || Array(
       /*item*/
-      ctx[88].set.w
+      ctx[91].set.w
     ).fill({})
   );
   let each_blocks = [];
@@ -155009,11 +156102,11 @@ function create_if_block_12(ctx) {
   function select_block_type_2(ctx2, dirty) {
     if (
       /*item*/
-      ctx2[88].set.targetId === "area"
+      ctx2[91].set.targetId === "area"
     ) return create_if_block_13;
     if (
       /*item*/
-      ctx2[88].set.targetId
+      ctx2[91].set.targetId
     ) return create_if_block_14;
     return create_else_block_1;
   }
@@ -155044,7 +156137,7 @@ function create_if_block_12(ctx) {
       t7 = space();
       if_block1.c();
       if (!src_url_equal(img.src, img_src_value = /*item*/
-      ctx[88].res.img)) attr(img, "src", img_src_value);
+      ctx[91].res.img)) attr(img, "src", img_src_value);
       attr(img, "alt", "Origin");
       set_style(img, "width", "16px");
       set_style(img, "height", "16px");
@@ -155091,18 +156184,18 @@ function create_if_block_12(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*visibleSets*/
       2097152 && !src_url_equal(img.src, img_src_value = /*item*/
-      ctx2[88].res.img)) {
+      ctx2[91].res.img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*visibleSets*/
       2097152 && t1_value !== (t1_value = /*item*/
-      ctx2[88].set.w + "")) set_data(t1, t1_value);
+      ctx2[91].set.w + "")) set_data(t1, t1_value);
       if (dirty[0] & /*visibleSets*/
       2097152 && t3_value !== (t3_value = /*item*/
-      ctx2[88].set.h + "")) set_data(t3, t3_value);
+      ctx2[91].set.h + "")) set_data(t3, t3_value);
       if (
         /*isCrit*/
-        ctx2[108]
+        ctx2[111]
       ) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
@@ -155116,13 +156209,13 @@ function create_if_block_12(ctx) {
         if_block0 = null;
       }
       if (dirty[0] & /*visibleSets, getDieBoxBg, getBorderColor*/
-      52428800 | dirty[1] & /*changeWD*/
-      4) {
+      102760448 | dirty[1] & /*changeWD*/
+      8) {
         each_value_7 = ensure_array_like(
           /*item*/
-          ctx2[88].set.dice || Array(
+          ctx2[91].set.dice || Array(
             /*item*/
-            ctx2[88].set.w
+            ctx2[91].set.w
           ).fill({})
         );
         let i2;
@@ -155167,7 +156260,7 @@ function create_if_block_16(ctx) {
   let t0;
   let t1_value = (
     /*critsAmount*/
-    ctx[107] + ""
+    ctx[110] + ""
   );
   let t1;
   let t2;
@@ -155195,7 +156288,7 @@ function create_if_block_16(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*visibleSets*/
       2097152 && t1_value !== (t1_value = /*critsAmount*/
-      ctx2[107] + "")) set_data(t1, t1_value);
+      ctx2[110] + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -155208,9 +156301,9 @@ function create_each_block_7(ctx) {
   let div;
   let t0_value = (
     /*die*/
-    (ctx[93].type ? (
+    (ctx[96].type ? (
       /*die*/
-      ctx[93].type.toUpperCase().charAt(0)
+      ctx[96].type.toUpperCase().charAt(0)
     ) : "") + ""
   );
   let t0;
@@ -155221,11 +156314,11 @@ function create_each_block_7(ctx) {
   function click_handler_14() {
     return (
       /*click_handler_14*/
-      ctx[60](
+      ctx[61](
         /*item*/
-        ctx[88],
+        ctx[91],
         /*die*/
-        ctx[93]
+        ctx[96]
       )
     );
   }
@@ -155240,11 +156333,11 @@ function create_each_block_7(ctx) {
         div,
         "background",
         /*isCritDie*/
-        ctx[110] ? "#000" : (
+        ctx[113] ? "#000" : (
           /*getDieBoxBg*/
-          ctx[25](
+          ctx[26](
             /*item*/
-            ctx[88].res.type
+            ctx[91].res.type
           )
         )
       );
@@ -155252,15 +156345,15 @@ function create_each_block_7(ctx) {
         div,
         "border",
         /*isCritDie*/
-        ctx[110] ? "1px solid #fff" : "none"
+        ctx[113] ? "1px solid #fff" : "none"
       );
       set_style(div, "border-radius", "2px");
       set_style(div, "box-shadow", "0 0 5px " + /*isCritDie*/
-      (ctx[110] ? "#fff" : (
+      (ctx[113] ? "#fff" : (
         /*getBorderColor*/
-        ctx[24](
+        ctx[25](
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         )
       )));
       set_style(div, "display", "flex");
@@ -155272,20 +156365,20 @@ function create_each_block_7(ctx) {
         div,
         "color",
         /*isCritDie*/
-        ctx[110] ? "#fff" : getDieTextColor(
+        ctx[113] ? "#fff" : getDieTextColor(
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         )
       );
       set_style(
         div,
         "cursor",
         /*die*/
-        ctx[93].type === "wd" ? "pointer" : "default"
+        ctx[96].type === "wd" ? "pointer" : "default"
       );
       set_style(div, "box-sizing", "border-box");
       attr(div, "title", div_title_value = /*die*/
-      ctx[93].type === "wd" ? "Clique para ajustar WD" : "");
+      ctx[96].type === "wd" ? "Clique para ajustar WD" : "");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -155300,9 +156393,9 @@ function create_each_block_7(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*visibleSets*/
       2097152 && t0_value !== (t0_value = /*die*/
-      (ctx[93].type ? (
+      (ctx[96].type ? (
         /*die*/
-        ctx[93].type.toUpperCase().charAt(0)
+        ctx[96].type.toUpperCase().charAt(0)
       ) : "") + "")) set_data(t0, t0_value);
       if (dirty[0] & /*visibleSets*/
       2097152) {
@@ -155310,11 +156403,11 @@ function create_each_block_7(ctx) {
           div,
           "background",
           /*isCritDie*/
-          ctx[110] ? "#000" : (
+          ctx[113] ? "#000" : (
             /*getDieBoxBg*/
-            ctx[25](
+            ctx[26](
               /*item*/
-              ctx[88].res.type
+              ctx[91].res.type
             )
           )
         );
@@ -155325,17 +156418,17 @@ function create_each_block_7(ctx) {
           div,
           "border",
           /*isCritDie*/
-          ctx[110] ? "1px solid #fff" : "none"
+          ctx[113] ? "1px solid #fff" : "none"
         );
       }
       if (dirty[0] & /*visibleSets*/
       2097152) {
         set_style(div, "box-shadow", "0 0 5px " + /*isCritDie*/
-        (ctx[110] ? "#fff" : (
+        (ctx[113] ? "#fff" : (
           /*getBorderColor*/
-          ctx[24](
+          ctx[25](
             /*item*/
-            ctx[88].res.type
+            ctx[91].res.type
           )
         )));
       }
@@ -155345,9 +156438,9 @@ function create_each_block_7(ctx) {
           div,
           "color",
           /*isCritDie*/
-          ctx[110] ? "#fff" : getDieTextColor(
+          ctx[113] ? "#fff" : getDieTextColor(
             /*item*/
-            ctx[88].res.type
+            ctx[91].res.type
           )
         );
       }
@@ -155357,12 +156450,12 @@ function create_each_block_7(ctx) {
           div,
           "cursor",
           /*die*/
-          ctx[93].type === "wd" ? "pointer" : "default"
+          ctx[96].type === "wd" ? "pointer" : "default"
         );
       }
       if (dirty[0] & /*visibleSets*/
       2097152 && div_title_value !== (div_title_value = /*die*/
-      ctx[93].type === "wd" ? "Clique para ajustar WD" : "")) {
+      ctx[96].type === "wd" ? "Clique para ajustar WD" : "")) {
         attr(div, "title", div_title_value);
       }
     },
@@ -155382,9 +156475,9 @@ function create_else_block_1(ctx) {
   function click_handler_17() {
     return (
       /*click_handler_17*/
-      ctx[63](
+      ctx[64](
         /*item*/
-        ctx[88]
+        ctx[91]
       )
     );
   }
@@ -155421,14 +156514,14 @@ function create_if_block_14(ctx) {
   let dispose;
   let if_block = (
     /*tgt*/
-    ctx[109] && create_if_block_15(ctx)
+    ctx[112] && create_if_block_15(ctx)
   );
   function click_handler_16() {
     return (
       /*click_handler_16*/
-      ctx[62](
+      ctx[63](
         /*item*/
-        ctx[88]
+        ctx[91]
       )
     );
   }
@@ -155439,7 +156532,7 @@ function create_if_block_14(ctx) {
       if (if_block) if_block.c();
       attr(div, "class", "target-btn svelte-1al12rf");
       attr(div, "title", div_title_value = "Alvo: " + /*tgt*/
-      ((_a = ctx[109]) == null ? void 0 : _a.name));
+      ((_a = ctx[112]) == null ? void 0 : _a.name));
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -155454,7 +156547,7 @@ function create_if_block_14(ctx) {
       ctx = new_ctx;
       if (
         /*tgt*/
-        ctx[109]
+        ctx[112]
       ) {
         if (if_block) {
           if_block.p(ctx, dirty);
@@ -155469,7 +156562,7 @@ function create_if_block_14(ctx) {
       }
       if (dirty[0] & /*visibleSets*/
       2097152 && div_title_value !== (div_title_value = "Alvo: " + /*tgt*/
-      ((_a = ctx[109]) == null ? void 0 : _a.name))) {
+      ((_a = ctx[112]) == null ? void 0 : _a.name))) {
         attr(div, "title", div_title_value);
       }
     },
@@ -155490,9 +156583,9 @@ function create_if_block_13(ctx) {
   function click_handler_15() {
     return (
       /*click_handler_15*/
-      ctx[61](
+      ctx[62](
         /*item*/
-        ctx[88]
+        ctx[91]
       )
     );
   }
@@ -155529,7 +156622,7 @@ function create_if_block_15(ctx) {
     c() {
       img = element("img");
       if (!src_url_equal(img.src, img_src_value = /*tgt*/
-      ctx[109].img)) attr(img, "src", img_src_value);
+      ctx[112].img)) attr(img, "src", img_src_value);
       attr(img, "alt", "Tgt");
       set_style(img, "width", "100%");
       set_style(img, "height", "100%");
@@ -155542,7 +156635,7 @@ function create_if_block_15(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*visibleSets*/
       2097152 && !src_url_equal(img.src, img_src_value = /*tgt*/
-      ctx2[109].img)) {
+      ctx2[112].img)) {
         attr(img, "src", img_src_value);
       }
     },
@@ -155558,7 +156651,7 @@ function create_if_block_11(ctx) {
   let t;
   let each_value_6 = ensure_array_like(
     /*item*/
-    ctx[88].showLoose || []
+    ctx[91].showLoose || []
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_6.length; i += 1) {
@@ -155592,10 +156685,10 @@ function create_if_block_11(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*visibleSets*/
       2097152 | dirty[1] & /*changeWD*/
-      4) {
+      8) {
         each_value_6 = ensure_array_like(
           /*item*/
-          ctx2[88].showLoose || []
+          ctx2[91].showLoose || []
         );
         let i;
         for (i = 0; i < each_value_6.length; i += 1) {
@@ -155627,15 +156720,15 @@ function create_each_block_6(ctx) {
   let div;
   let t0_value = (
     /*val*/
-    ctx[92] + ""
+    ctx[95] + ""
   );
   let t0;
   let sup;
   let t1_value = (
     /*die*/
-    (((_a = ctx[93]) == null ? void 0 : _a.type) ? (
+    (((_a = ctx[96]) == null ? void 0 : _a.type) ? (
       /*die*/
-      ctx[93].type.toUpperCase().charAt(0)
+      ctx[96].type.toUpperCase().charAt(0)
     ) : "") + ""
   );
   let t1;
@@ -155646,11 +156739,11 @@ function create_each_block_6(ctx) {
   function click_handler_18() {
     return (
       /*click_handler_18*/
-      ctx[64](
+      ctx[65](
         /*item*/
-        ctx[88],
+        ctx[91],
         /*die*/
-        ctx[93]
+        ctx[96]
       )
     );
   }
@@ -155675,11 +156768,11 @@ function create_each_block_6(ctx) {
         div,
         "cursor",
         /*die*/
-        ((_a2 = ctx[93]) == null ? void 0 : _a2.type) === "wd" ? "pointer" : "default"
+        ((_a2 = ctx[96]) == null ? void 0 : _a2.type) === "wd" ? "pointer" : "default"
       );
       attr(div, "title", div_title_value = /*die*/
-      ((_b = ctx[93]) == null ? void 0 : _b.type) === "wd" ? "Clique para ajustar WD" : "Dado tipo " + /*die*/
-      (((_c = ctx[93]) == null ? void 0 : _c.type) || "?").toUpperCase());
+      ((_b = ctx[96]) == null ? void 0 : _b.type) === "wd" ? "Clique para ajustar WD" : "Dado tipo " + /*die*/
+      (((_c = ctx[96]) == null ? void 0 : _c.type) || "?").toUpperCase());
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -155697,12 +156790,12 @@ function create_each_block_6(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*visibleSets*/
       2097152 && t0_value !== (t0_value = /*val*/
-      ctx[92] + "")) set_data(t0, t0_value);
+      ctx[95] + "")) set_data(t0, t0_value);
       if (dirty[0] & /*visibleSets*/
       2097152 && t1_value !== (t1_value = /*die*/
-      (((_a2 = ctx[93]) == null ? void 0 : _a2.type) ? (
+      (((_a2 = ctx[96]) == null ? void 0 : _a2.type) ? (
         /*die*/
-        ctx[93].type.toUpperCase().charAt(0)
+        ctx[96].type.toUpperCase().charAt(0)
       ) : "") + "")) set_data(t1, t1_value);
       if (dirty[0] & /*visibleSets*/
       2097152) {
@@ -155710,13 +156803,13 @@ function create_each_block_6(ctx) {
           div,
           "cursor",
           /*die*/
-          ((_b = ctx[93]) == null ? void 0 : _b.type) === "wd" ? "pointer" : "default"
+          ((_b = ctx[96]) == null ? void 0 : _b.type) === "wd" ? "pointer" : "default"
         );
       }
       if (dirty[0] & /*visibleSets*/
       2097152 && div_title_value !== (div_title_value = /*die*/
-      ((_c = ctx[93]) == null ? void 0 : _c.type) === "wd" ? "Clique para ajustar WD" : "Dado tipo " + /*die*/
-      (((_d = ctx[93]) == null ? void 0 : _d.type) || "?").toUpperCase())) {
+      ((_c = ctx[96]) == null ? void 0 : _c.type) === "wd" ? "Clique para ajustar WD" : "Dado tipo " + /*die*/
+      (((_d = ctx[96]) == null ? void 0 : _d.type) || "?").toUpperCase())) {
         attr(div, "title", div_title_value);
       }
     },
@@ -155739,7 +156832,7 @@ function create_each_block_5(key_1, ctx) {
   let span1;
   let t1_value = (
     /*item*/
-    ctx[88].res.actorName + ""
+    ctx[91].res.actorName + ""
   );
   let t1;
   let t2;
@@ -155747,7 +156840,7 @@ function create_each_block_5(key_1, ctx) {
   let t3;
   let t4_value = getTitle(
     /*item*/
-    ctx[88].res.type
+    ctx[91].res.type
   ) + "";
   let t4;
   let t5;
@@ -155759,12 +156852,12 @@ function create_each_block_5(key_1, ctx) {
   let if_block0 = (
     /*isGM*/
     ctx[4] && /*item*/
-    ctx[88].res.public !== void 0 && create_if_block_17(ctx)
+    ctx[91].res.public !== void 0 && create_if_block_17(ctx)
   );
   function select_block_type_1(ctx2, dirty) {
     if (
       /*item*/
-      ctx2[88].res.result
+      ctx2[91].res.result
     ) return create_if_block_10;
     return create_else_block_2;
   }
@@ -155792,7 +156885,7 @@ function create_each_block_5(key_1, ctx) {
       if_block1.c();
       t8 = space();
       if (!src_url_equal(img.src, img_src_value = /*item*/
-      ctx[88].res.img)) attr(img, "src", img_src_value);
+      ctx[91].res.img)) attr(img, "src", img_src_value);
       attr(img, "alt", "A");
       attr(img, "class", "res-avatar svelte-1al12rf");
       set_style(span0, "font-weight", "normal");
@@ -155808,14 +156901,14 @@ function create_each_block_5(key_1, ctx) {
         div2,
         "border-left-color",
         /*getBorderColor*/
-        ctx[24](
+        ctx[25](
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         )
       );
       set_style(div2, "background", getBgColor(
         /*item*/
-        ctx[88].res.type
+        ctx[91].res.type
       ));
       this.first = div2;
     },
@@ -155843,21 +156936,21 @@ function create_each_block_5(key_1, ctx) {
       ctx = new_ctx;
       if (!current || dirty[0] & /*visibleSets*/
       2097152 && !src_url_equal(img.src, img_src_value = /*item*/
-      ctx[88].res.img)) {
+      ctx[91].res.img)) {
         attr(img, "src", img_src_value);
       }
       if ((!current || dirty[0] & /*visibleSets*/
       2097152) && t1_value !== (t1_value = /*item*/
-      ctx[88].res.actorName + "")) set_data(t1, t1_value);
+      ctx[91].res.actorName + "")) set_data(t1, t1_value);
       if ((!current || dirty[0] & /*visibleSets*/
       2097152) && t4_value !== (t4_value = getTitle(
         /*item*/
-        ctx[88].res.type
+        ctx[91].res.type
       ) + "")) set_data(t4, t4_value);
       if (
         /*isGM*/
         ctx[4] && /*item*/
-        ctx[88].res.public !== void 0
+        ctx[91].res.public !== void 0
       ) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
@@ -155886,9 +156979,9 @@ function create_each_block_5(key_1, ctx) {
           div2,
           "border-left-color",
           /*getBorderColor*/
-          ctx[24](
+          ctx[25](
             /*item*/
-            ctx[88].res.type
+            ctx[91].res.type
           )
         );
       }
@@ -155896,7 +156989,7 @@ function create_each_block_5(key_1, ctx) {
       2097152) {
         set_style(div2, "background", getBgColor(
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         ));
       }
     },
@@ -155981,17 +157074,17 @@ function create_if_block_7(ctx) {
             div1,
             "click",
             /*click_handler_19*/
-            ctx[65]
+            ctx[66]
           ),
           listen(div2, "click", stop_propagation(
             /*click_handler*/
-            ctx[42]
+            ctx[43]
           )),
           listen(
             div3,
             "click",
             /*click_handler_21*/
-            ctx[67]
+            ctx[68]
           )
         ];
         mounted = true;
@@ -156000,7 +157093,7 @@ function create_if_block_7(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*combatants*/
       4 | dirty[1] & /*selectTarget*/
-      128) {
+      256) {
         each_value_4 = ensure_array_like(
           /*combatants*/
           ctx2[2]
@@ -156039,7 +157132,7 @@ function create_if_block_8(ctx) {
   let t0;
   let t1_value = (
     /*c*/
-    ctx[98].actor.name + ""
+    ctx[101].actor.name + ""
   );
   let t1;
   let t2;
@@ -156048,9 +157141,9 @@ function create_if_block_8(ctx) {
   function click_handler_20() {
     return (
       /*click_handler_20*/
-      ctx[66](
+      ctx[67](
         /*c*/
-        ctx[98]
+        ctx[101]
       )
     );
   }
@@ -156062,7 +157155,7 @@ function create_if_block_8(ctx) {
       t1 = text(t1_value);
       t2 = space();
       if (!src_url_equal(img.src, img_src_value = /*c*/
-      ctx[98].actor.img)) attr(img, "src", img_src_value);
+      ctx[101].actor.img)) attr(img, "src", img_src_value);
       attr(img, "alt", "A");
       attr(img, "class", "svelte-1al12rf");
       attr(div, "class", "tm-item svelte-1al12rf");
@@ -156082,12 +157175,12 @@ function create_if_block_8(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*combatants*/
       4 && !src_url_equal(img.src, img_src_value = /*c*/
-      ctx[98].actor.img)) {
+      ctx[101].actor.img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*combatants*/
       4 && t1_value !== (t1_value = /*c*/
-      ctx[98].actor.name + "")) set_data(t1, t1_value);
+      ctx[101].actor.name + "")) set_data(t1, t1_value);
     },
     d(detaching) {
       if (detaching) {
@@ -156102,7 +157195,7 @@ function create_each_block_4(ctx) {
   let if_block_anchor;
   let if_block = (
     /*c*/
-    ctx[98].actor && create_if_block_8(ctx)
+    ctx[101].actor && create_if_block_8(ctx)
   );
   return {
     c() {
@@ -156116,7 +157209,7 @@ function create_each_block_4(ctx) {
     p(ctx2, dirty) {
       if (
         /*c*/
-        ctx2[98].actor
+        ctx2[101].actor
       ) {
         if (if_block) {
           if_block.p(ctx2, dirty);
@@ -156236,8 +157329,8 @@ function create_if_block(ctx) {
   );
   const get_key = (ctx2) => (
     /*item*/
-    ctx2[88].res.id + "_" + /*item*/
-    ctx2[88].setIndex
+    ctx2[91].res.id + "_" + /*item*/
+    ctx2[91].setIndex
   );
   for (let i = 0; i < each_value_1.length; i += 1) {
     let child_ctx = get_each_context_1(ctx, each_value_1, i);
@@ -156375,7 +157468,7 @@ function create_if_block(ctx) {
         ctx[15].actorId === void 0
       ) add_render_callback(() => (
         /*select_change_handler*/
-        ctx[72].call(select)
+        ctx[73].call(select)
       ));
       set_style(div4, "margin-bottom", "10px");
       attr(button1, "class", "ac-btn");
@@ -156393,7 +157486,7 @@ function create_if_block(ctx) {
         div5,
         "--c",
         /*actionColors*/
-        ctx[23]["A"]
+        ctx[24]["A"]
       );
       attr(button3, "class", "ac-btn");
       attr(i3, "class", "fas fa-shield-alt");
@@ -156410,7 +157503,7 @@ function create_if_block(ctx) {
         div6,
         "--c",
         /*actionColors*/
-        ctx[23]["D"]
+        ctx[24]["D"]
       );
       attr(button5, "class", "ac-btn");
       attr(i4, "class", "fas fa-bolt");
@@ -156427,7 +157520,7 @@ function create_if_block(ctx) {
         div7,
         "--c",
         /*actionColors*/
-        ctx[23]["U"]
+        ctx[24]["U"]
       );
       attr(div8, "class", "action-selector svelte-1al12rf");
       set_style(div8, "justify-content", "center");
@@ -156621,84 +157714,84 @@ function create_if_block(ctx) {
             button0,
             "click",
             /*click_handler_22*/
-            ctx[68]
+            ctx[69]
           ),
           listen(
             select,
             "change",
             /*select_change_handler*/
-            ctx[72]
+            ctx[73]
           ),
           listen(
             button1,
             "click",
             /*click_handler_26*/
-            ctx[73]
+            ctx[74]
           ),
           listen(
             button2,
             "click",
             /*click_handler_27*/
-            ctx[74]
+            ctx[75]
           ),
           listen(
             button3,
             "click",
             /*click_handler_28*/
-            ctx[75]
+            ctx[76]
           ),
           listen(
             button4,
             "click",
             /*click_handler_29*/
-            ctx[76]
+            ctx[77]
           ),
           listen(
             button5,
             "click",
             /*click_handler_30*/
-            ctx[77]
+            ctx[78]
           ),
           listen(
             button6,
             "click",
             /*click_handler_31*/
-            ctx[78]
+            ctx[79]
           ),
           listen(
             input0,
             "input",
             /*input0_input_handler_1*/
-            ctx[79]
+            ctx[80]
           ),
           listen(
             input1,
             "input",
             /*input1_input_handler_1*/
-            ctx[80]
+            ctx[81]
           ),
           listen(
             input2,
             "input",
             /*input2_input_handler_1*/
-            ctx[81]
+            ctx[82]
           ),
           listen(
             textarea,
             "input",
             /*textarea_input_handler*/
-            ctx[82]
+            ctx[83]
           ),
           listen(
             button7,
             "click",
             /*submitPassive*/
-            ctx[30]
+            ctx[31]
           ),
           action_destroyer(draggable.call(null, div16)),
           listen(div16, "click", stop_propagation(
             /*click_handler_1*/
-            ctx[41]
+            ctx[42]
           ))
         ];
         mounted = true;
@@ -156720,8 +157813,8 @@ function create_if_block(ctx) {
         if_block = null;
       }
       if (dirty[0] & /*getBorderColor, passiveVisibleSets, getDieBoxBg, isGM*/
-      51380240 | dirty[1] & /*changeWD, togglePassiveVisibility, deletePassive*/
-      7) {
+      101711888 | dirty[1] & /*changeWD, togglePassiveVisibility, deletePassive*/
+      14) {
         each_value_1 = ensure_array_like(
           /*passiveVisibleSets*/
           ctx2[20]
@@ -156888,18 +157981,18 @@ function create_if_block_5(ctx) {
   function click_handler_23() {
     return (
       /*click_handler_23*/
-      ctx[69](
+      ctx[70](
         /*item*/
-        ctx[88]
+        ctx[91]
       )
     );
   }
   function click_handler_24() {
     return (
       /*click_handler_24*/
-      ctx[70](
+      ctx[71](
         /*item*/
-        ctx[88]
+        ctx[91]
       )
     );
   }
@@ -156914,12 +158007,12 @@ function create_if_block_5(ctx) {
       set_style(i0, "cursor", "pointer");
       set_style(i0, "font-size", "10px");
       attr(i1, "class", i1_class_value = "fas " + /*item*/
-      (ctx[88].res.public ? "fa-eye" : "fa-eye-slash"));
+      (ctx[91].res.public ? "fa-eye" : "fa-eye-slash"));
       set_style(
         i1,
         "color",
         /*item*/
-        ctx[88].res.public ? "#00ff41" : "#f33"
+        ctx[91].res.public ? "#00ff41" : "#f33"
       );
       set_style(i1, "cursor", "pointer");
       set_style(i1, "font-size", "10px");
@@ -156943,7 +158036,7 @@ function create_if_block_5(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && i1_class_value !== (i1_class_value = "fas " + /*item*/
-      (ctx[88].res.public ? "fa-eye" : "fa-eye-slash"))) {
+      (ctx[91].res.public ? "fa-eye" : "fa-eye-slash"))) {
         attr(i1, "class", i1_class_value);
       }
       if (dirty[0] & /*passiveVisibleSets*/
@@ -156952,7 +158045,7 @@ function create_if_block_5(ctx) {
           i1,
           "color",
           /*item*/
-          ctx[88].res.public ? "#00ff41" : "#f33"
+          ctx[91].res.public ? "#00ff41" : "#f33"
         );
       }
     },
@@ -156971,19 +158064,19 @@ function create_else_block(ctx) {
   let t0;
   let t1_value = (
     /*item*/
-    (((_a = ctx[88].res.pool) == null ? void 0 : _a.d) || 0) + ""
+    (((_a = ctx[91].res.pool) == null ? void 0 : _a.d) || 0) + ""
   );
   let t1;
   let t2;
   let t3_value = (
     /*item*/
-    (((_b = ctx[88].res.pool) == null ? void 0 : _b.hd) || 0) + ""
+    (((_b = ctx[91].res.pool) == null ? void 0 : _b.hd) || 0) + ""
   );
   let t3;
   let t4;
   let t5_value = (
     /*item*/
-    (((_c = ctx[88].res.pool) == null ? void 0 : _c.wd) || 0) + ""
+    (((_c = ctx[91].res.pool) == null ? void 0 : _c.wd) || 0) + ""
   );
   let t5;
   let t6;
@@ -157013,13 +158106,13 @@ function create_else_block(ctx) {
       var _a2, _b2, _c2;
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t1_value !== (t1_value = /*item*/
-      (((_a2 = ctx2[88].res.pool) == null ? void 0 : _a2.d) || 0) + "")) set_data(t1, t1_value);
+      (((_a2 = ctx2[91].res.pool) == null ? void 0 : _a2.d) || 0) + "")) set_data(t1, t1_value);
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t3_value !== (t3_value = /*item*/
-      (((_b2 = ctx2[88].res.pool) == null ? void 0 : _b2.hd) || 0) + "")) set_data(t3, t3_value);
+      (((_b2 = ctx2[91].res.pool) == null ? void 0 : _b2.hd) || 0) + "")) set_data(t3, t3_value);
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t5_value !== (t5_value = /*item*/
-      (((_c2 = ctx2[88].res.pool) == null ? void 0 : _c2.wd) || 0) + "")) set_data(t5, t5_value);
+      (((_c2 = ctx2[91].res.pool) == null ? void 0 : _c2.wd) || 0) + "")) set_data(t5, t5_value);
     },
     d(detaching) {
       if (detaching) {
@@ -157035,17 +158128,17 @@ function create_if_block_2(ctx) {
   let div0;
   let t2_value = (
     /*item*/
-    ctx[88].res.notes + ""
+    ctx[91].res.notes + ""
   );
   let t2;
   let if_block0 = (
     /*item*/
-    ctx[88].type === "set" && create_if_block_4(ctx)
+    ctx[91].type === "set" && create_if_block_4(ctx)
   );
   let if_block1 = (
     /*item*/
-    ctx[88].showLoose && /*item*/
-    ctx[88].showLoose.length > 0 && create_if_block_3(ctx)
+    ctx[91].showLoose && /*item*/
+    ctx[91].showLoose.length > 0 && create_if_block_3(ctx)
   );
   return {
     c() {
@@ -157065,9 +158158,9 @@ function create_if_block_2(ctx) {
       set_style(div1, "border-top", "1px solid #333");
       set_style(div1, "padding-top", "5px");
       set_style(div1, "border-left", "2px solid " + /*getBorderColor*/
-      ctx[24](
+      ctx[25](
         /*item*/
-        ctx[88].res.type
+        ctx[91].res.type
       ));
       set_style(div1, "padding-left", "5px");
     },
@@ -157083,7 +158176,7 @@ function create_if_block_2(ctx) {
     p(ctx2, dirty) {
       if (
         /*item*/
-        ctx2[88].type === "set"
+        ctx2[91].type === "set"
       ) {
         if (if_block0) {
           if_block0.p(ctx2, dirty);
@@ -157098,8 +158191,8 @@ function create_if_block_2(ctx) {
       }
       if (
         /*item*/
-        ctx2[88].showLoose && /*item*/
-        ctx2[88].showLoose.length > 0
+        ctx2[91].showLoose && /*item*/
+        ctx2[91].showLoose.length > 0
       ) {
         if (if_block1) {
           if_block1.p(ctx2, dirty);
@@ -157114,13 +158207,13 @@ function create_if_block_2(ctx) {
       }
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t2_value !== (t2_value = /*item*/
-      ctx2[88].res.notes + "")) set_data(t2, t2_value);
+      ctx2[91].res.notes + "")) set_data(t2, t2_value);
       if (dirty[0] & /*passiveVisibleSets*/
       1048576) {
         set_style(div1, "border-left", "2px solid " + /*getBorderColor*/
-        ctx2[24](
+        ctx2[25](
           /*item*/
-          ctx2[88].res.type
+          ctx2[91].res.type
         ));
       }
     },
@@ -157141,22 +158234,22 @@ function create_if_block_4(ctx) {
   let div0;
   let t1_value = (
     /*item*/
-    ctx[88].set.w + ""
+    ctx[91].set.w + ""
   );
   let t1;
   let t2;
   let t3_value = (
     /*item*/
-    ctx[88].set.h + ""
+    ctx[91].set.h + ""
   );
   let t3;
   let t4;
   let span;
   let each_value_3 = ensure_array_like(
     /*item*/
-    ctx[88].set.dice || Array(
+    ctx[91].set.dice || Array(
       /*item*/
-      ctx[88].set.w
+      ctx[91].set.w
     ).fill({})
   );
   let each_blocks = [];
@@ -157178,7 +158271,7 @@ function create_if_block_4(ctx) {
         each_blocks[i].c();
       }
       if (!src_url_equal(img.src, img_src_value = /*item*/
-      ctx[88].res.img)) attr(img, "src", img_src_value);
+      ctx[91].res.img)) attr(img, "src", img_src_value);
       attr(img, "alt", "Origin");
       set_style(img, "width", "16px");
       set_style(img, "height", "16px");
@@ -157215,23 +158308,23 @@ function create_if_block_4(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && !src_url_equal(img.src, img_src_value = /*item*/
-      ctx2[88].res.img)) {
+      ctx2[91].res.img)) {
         attr(img, "src", img_src_value);
       }
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t1_value !== (t1_value = /*item*/
-      ctx2[88].set.w + "")) set_data(t1, t1_value);
+      ctx2[91].set.w + "")) set_data(t1, t1_value);
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t3_value !== (t3_value = /*item*/
-      ctx2[88].set.h + "")) set_data(t3, t3_value);
+      ctx2[91].set.h + "")) set_data(t3, t3_value);
       if (dirty[0] & /*getDieBoxBg, passiveVisibleSets, getBorderColor*/
-      51380224 | dirty[1] & /*changeWD*/
-      4) {
+      101711872 | dirty[1] & /*changeWD*/
+      8) {
         each_value_3 = ensure_array_like(
           /*item*/
-          ctx2[88].set.dice || Array(
+          ctx2[91].set.dice || Array(
             /*item*/
-            ctx2[88].set.w
+            ctx2[91].set.w
           ).fill({})
         );
         let i;
@@ -157263,9 +158356,9 @@ function create_each_block_3(ctx) {
   let div;
   let t0_value = (
     /*die*/
-    (ctx[93].type ? (
+    (ctx[96].type ? (
       /*die*/
-      ctx[93].type.toUpperCase().charAt(0)
+      ctx[96].type.toUpperCase().charAt(0)
     ) : "") + ""
   );
   let t0;
@@ -157276,11 +158369,11 @@ function create_each_block_3(ctx) {
   function click_handler_25() {
     return (
       /*click_handler_25*/
-      ctx[71](
+      ctx[72](
         /*item*/
-        ctx[88],
+        ctx[91],
         /*die*/
-        ctx[93]
+        ctx[96]
       )
     );
   }
@@ -157295,16 +158388,16 @@ function create_each_block_3(ctx) {
         div,
         "background",
         /*getDieBoxBg*/
-        ctx[25](
+        ctx[26](
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         )
       );
       set_style(div, "border-radius", "2px");
       set_style(div, "box-shadow", "0 0 5px " + /*getBorderColor*/
-      ctx[24](
+      ctx[25](
         /*item*/
-        ctx[88].res.type
+        ctx[91].res.type
       ));
       set_style(div, "display", "flex");
       set_style(div, "align-items", "center");
@@ -157313,16 +158406,16 @@ function create_each_block_3(ctx) {
       set_style(div, "font-weight", "bold");
       set_style(div, "color", getDieTextColor(
         /*item*/
-        ctx[88].res.type
+        ctx[91].res.type
       ));
       set_style(
         div,
         "cursor",
         /*die*/
-        ctx[93].type === "wd" ? "pointer" : "default"
+        ctx[96].type === "wd" ? "pointer" : "default"
       );
       attr(div, "title", div_title_value = /*die*/
-      ctx[93].type === "wd" ? "Clique para ajustar WD" : "");
+      ctx[96].type === "wd" ? "Clique para ajustar WD" : "");
     },
     m(target, anchor) {
       insert(target, div, anchor);
@@ -157337,9 +158430,9 @@ function create_each_block_3(ctx) {
       ctx = new_ctx;
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t0_value !== (t0_value = /*die*/
-      (ctx[93].type ? (
+      (ctx[96].type ? (
         /*die*/
-        ctx[93].type.toUpperCase().charAt(0)
+        ctx[96].type.toUpperCase().charAt(0)
       ) : "") + "")) set_data(t0, t0_value);
       if (dirty[0] & /*passiveVisibleSets*/
       1048576) {
@@ -157347,25 +158440,25 @@ function create_each_block_3(ctx) {
           div,
           "background",
           /*getDieBoxBg*/
-          ctx[25](
+          ctx[26](
             /*item*/
-            ctx[88].res.type
+            ctx[91].res.type
           )
         );
       }
       if (dirty[0] & /*passiveVisibleSets*/
       1048576) {
         set_style(div, "box-shadow", "0 0 5px " + /*getBorderColor*/
-        ctx[24](
+        ctx[25](
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         ));
       }
       if (dirty[0] & /*passiveVisibleSets*/
       1048576) {
         set_style(div, "color", getDieTextColor(
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         ));
       }
       if (dirty[0] & /*passiveVisibleSets*/
@@ -157374,12 +158467,12 @@ function create_each_block_3(ctx) {
           div,
           "cursor",
           /*die*/
-          ctx[93].type === "wd" ? "pointer" : "default"
+          ctx[96].type === "wd" ? "pointer" : "default"
         );
       }
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && div_title_value !== (div_title_value = /*die*/
-      ctx[93].type === "wd" ? "Clique para ajustar WD" : "")) {
+      ctx[96].type === "wd" ? "Clique para ajustar WD" : "")) {
         attr(div, "title", div_title_value);
       }
     },
@@ -157397,7 +158490,7 @@ function create_if_block_3(ctx) {
   let t;
   let each_value_2 = ensure_array_like(
     /*item*/
-    ctx[88].showLoose || []
+    ctx[91].showLoose || []
   );
   let each_blocks = [];
   for (let i = 0; i < each_value_2.length; i += 1) {
@@ -157433,7 +158526,7 @@ function create_if_block_3(ctx) {
       1048576) {
         each_value_2 = ensure_array_like(
           /*item*/
-          ctx2[88].showLoose || []
+          ctx2[91].showLoose || []
         );
         let i;
         for (i = 0; i < each_value_2.length; i += 1) {
@@ -157465,15 +158558,15 @@ function create_each_block_2(ctx) {
   let div;
   let t0_value = (
     /*val*/
-    ctx[92] + ""
+    ctx[95] + ""
   );
   let t0;
   let sup;
   let t1_value = (
     /*die*/
-    (((_a = ctx[93]) == null ? void 0 : _a.type) ? (
+    (((_a = ctx[96]) == null ? void 0 : _a.type) ? (
       /*die*/
-      ctx[93].type.toUpperCase().charAt(0)
+      ctx[96].type.toUpperCase().charAt(0)
     ) : "") + ""
   );
   let t1;
@@ -157506,12 +158599,12 @@ function create_each_block_2(ctx) {
       var _a2;
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t0_value !== (t0_value = /*val*/
-      ctx2[92] + "")) set_data(t0, t0_value);
+      ctx2[95] + "")) set_data(t0, t0_value);
       if (dirty[0] & /*passiveVisibleSets*/
       1048576 && t1_value !== (t1_value = /*die*/
-      (((_a2 = ctx2[93]) == null ? void 0 : _a2.type) ? (
+      (((_a2 = ctx2[96]) == null ? void 0 : _a2.type) ? (
         /*die*/
-        ctx2[93].type.toUpperCase().charAt(0)
+        ctx2[96].type.toUpperCase().charAt(0)
       ) : "") + "")) set_data(t1, t1_value);
     },
     d(detaching) {
@@ -157531,7 +158624,7 @@ function create_each_block_1(key_1, ctx) {
   let span1;
   let t1_value = (
     /*item*/
-    ctx[88].res.actorName + ""
+    ctx[91].res.actorName + ""
   );
   let t1;
   let t2;
@@ -157544,12 +158637,12 @@ function create_each_block_1(key_1, ctx) {
   let if_block0 = (
     /*isGM*/
     ctx[4] && /*item*/
-    ctx[88].res.public !== void 0 && create_if_block_5(ctx)
+    ctx[91].res.public !== void 0 && create_if_block_5(ctx)
   );
   function select_block_type_3(ctx2, dirty) {
     if (
       /*item*/
-      ctx2[88].res.result
+      ctx2[91].res.result
     ) return create_if_block_2;
     return create_else_block;
   }
@@ -157575,7 +158668,7 @@ function create_each_block_1(key_1, ctx) {
       if_block1.c();
       t6 = space();
       if (!src_url_equal(img.src, img_src_value = /*item*/
-      ctx[88].res.img)) attr(img, "src", img_src_value);
+      ctx[91].res.img)) attr(img, "src", img_src_value);
       attr(img, "alt", "A");
       attr(img, "class", "res-avatar svelte-1al12rf");
       set_style(span0, "font-weight", "normal");
@@ -157591,14 +158684,14 @@ function create_each_block_1(key_1, ctx) {
         div2,
         "border-left-color",
         /*getBorderColor*/
-        ctx[24](
+        ctx[25](
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         )
       );
       set_style(div2, "background", getBgColor(
         /*item*/
-        ctx[88].res.type
+        ctx[91].res.type
       ));
       this.first = div2;
     },
@@ -157623,16 +158716,16 @@ function create_each_block_1(key_1, ctx) {
       ctx = new_ctx;
       if (!current || dirty[0] & /*passiveVisibleSets*/
       1048576 && !src_url_equal(img.src, img_src_value = /*item*/
-      ctx[88].res.img)) {
+      ctx[91].res.img)) {
         attr(img, "src", img_src_value);
       }
       if ((!current || dirty[0] & /*passiveVisibleSets*/
       1048576) && t1_value !== (t1_value = /*item*/
-      ctx[88].res.actorName + "")) set_data(t1, t1_value);
+      ctx[91].res.actorName + "")) set_data(t1, t1_value);
       if (
         /*isGM*/
         ctx[4] && /*item*/
-        ctx[88].res.public !== void 0
+        ctx[91].res.public !== void 0
       ) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
@@ -157661,9 +158754,9 @@ function create_each_block_1(key_1, ctx) {
           div2,
           "border-left-color",
           /*getBorderColor*/
-          ctx[24](
+          ctx[25](
             /*item*/
-            ctx[88].res.type
+            ctx[91].res.type
           )
         );
       }
@@ -157671,7 +158764,7 @@ function create_each_block_1(key_1, ctx) {
       1048576) {
         set_style(div2, "background", getBgColor(
           /*item*/
-          ctx[88].res.type
+          ctx[91].res.type
         ));
       }
     },
@@ -157707,7 +158800,7 @@ function create_if_block_1(ctx) {
   let option;
   let t_value = (
     /*combatant*/
-    ctx[85].actor.name + ""
+    ctx[88].actor.name + ""
   );
   let t;
   let option_value_value;
@@ -157716,7 +158809,7 @@ function create_if_block_1(ctx) {
       option = element("option");
       t = text(t_value);
       option.__value = option_value_value = /*combatant*/
-      ctx[85].actor.id;
+      ctx[88].actor.id;
       set_input_value(option, option.__value);
     },
     m(target, anchor) {
@@ -157726,10 +158819,10 @@ function create_if_block_1(ctx) {
     p(ctx2, dirty) {
       if (dirty[0] & /*myActorsInCombat*/
       64 && t_value !== (t_value = /*combatant*/
-      ctx2[85].actor.name + "")) set_data(t, t_value);
+      ctx2[88].actor.name + "")) set_data(t, t_value);
       if (dirty[0] & /*myActorsInCombat*/
       64 && option_value_value !== (option_value_value = /*combatant*/
-      ctx2[85].actor.id)) {
+      ctx2[88].actor.id)) {
         option.__value = option_value_value;
         set_input_value(option, option.__value);
       }
@@ -157745,7 +158838,7 @@ function create_each_block(ctx) {
   let if_block_anchor;
   let if_block = (
     /*combatant*/
-    ctx[85].actor && create_if_block_1(ctx)
+    ctx[88].actor && create_if_block_1(ctx)
   );
   return {
     c() {
@@ -157759,7 +158852,7 @@ function create_each_block(ctx) {
     p(ctx2, dirty) {
       if (
         /*combatant*/
-        ctx2[85].actor
+        ctx2[88].actor
       ) {
         if (if_block) {
           if_block.p(ctx2, dirty);
@@ -158022,6 +159115,25 @@ function instance($$self, $$props, $$invalidate) {
   let showActorDropdown = false;
   let isGM = false;
   let actionTypes = { "A": 0, "D": 0, "U": 0 };
+  let veritaxesClicks = 0;
+  let veritaxesTimer = null;
+  function handleVeritaxesRightClick(e) {
+    if (!game.user.name.toLowerCase().includes("veritaxes")) return;
+    e.preventDefault();
+    veritaxesClicks++;
+    if (veritaxesTimer) clearTimeout(veritaxesTimer);
+    veritaxesTimer = setTimeout(
+      () => {
+        veritaxesClicks = 0;
+      },
+      1e3
+    );
+    if (veritaxesClicks >= 3) {
+      veritaxesClicks = 0;
+      let actionName = "AÇÃO DE COMBATE";
+      window.MVUtils._processSystemEntropy(rollDice.d, rollDice.hd, rollDice.wd, actionName, selectedActor, true);
+    }
+  }
   let rollDice = { d: 0, hd: 0, wd: 0 };
   let combatResolutions = [];
   let combatPassives = [];
@@ -158092,7 +159204,7 @@ function instance($$self, $$props, $$invalidate) {
     }
     $$invalidate(5, combatResolutions = allActions);
     let pFlag = activeCombat.getFlag("multiversus-rpg", "combatPassives");
-    $$invalidate(40, combatPassives = Array.isArray(pFlag) ? pFlag : []);
+    $$invalidate(41, combatPassives = Array.isArray(pFlag) ? pFlag : []);
     if (selectedActorId && !combatants.find((c) => {
       var _a2;
       return ((_a2 = c.actor) == null ? void 0 : _a2.id) === selectedActorId;
@@ -158558,7 +159670,7 @@ function instance($$self, $$props, $$invalidate) {
     }
     if ($$self.$$.dirty[0] & /*isGM, myActorsInCombat*/
     80 | $$self.$$.dirty[1] & /*combatPassives*/
-    512) {
+    1024) {
       $$invalidate(20, passiveVisibleSets = (() => {
         let items = [];
         combatPassives.filter((a) => isGM || a.public || myActorsInCombat.some((c) => {
@@ -158630,6 +159742,7 @@ function instance($$self, $$props, $$invalidate) {
     passiveVisibleSets,
     visibleSets,
     selectedActor,
+    handleVeritaxesRightClick,
     actionColors,
     getBorderColor,
     getDieBoxBg,
@@ -159422,3 +160535,164 @@ Hooks.on("chatMessage", (chatLog, messageText, chatData) => {
     return false;
   }
 });
+window.MVUtils = window.MVUtils || {};
+window.MVUtils._processSystemEntropy = function(poolD, poolHD, poolWD, actionName, token, isCombatOS = false) {
+  if (!token && game.user.character) token = game.user.character;
+  let dice = [];
+  for (let i = 0; i < poolHD; i++) dice.push({ val: 10, type: "hd", label: "HD" });
+  for (let i = 0; i < poolD; i++) dice.push({ val: Math.floor(Math.random() * 10) + 1, type: "d", label: "D" });
+  for (let i = 0; i < poolWD; i++) dice.push({ val: 10, type: "wd", label: "WD" });
+  let content = `<form><div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom: 10px;">`;
+  dice.forEach((d, idx) => {
+    if (d.type === "hd") {
+      content += `<div style="display:flex; flex-direction:column; align-items:center;">
+                <label style="font-size:10px; font-weight: bold; color: #f33;">HD</label>
+                <input type="number" value="10" readonly style="width:40px; text-align:center; background:#222; border:1px solid #444; color:#f33;">
+            </div>`;
+    } else if (d.type === "wd") {
+      content += `<div style="display:flex; flex-direction:column; align-items:center;">
+                <label style="font-size:10px; font-weight: bold; color: #fc0;">WD</label>
+                <input type="number" class="sys-data" data-idx="${idx}" data-type="wd" value="${d.val}" style="width:40px; text-align:center;">
+            </div>`;
+    } else {
+      content += `<div style="display:flex; flex-direction:column; align-items:center;">
+                <label style="font-size:10px; font-weight: bold; color: #fff;">D</label>
+                <input type="number" class="sys-data" data-idx="${idx}" data-type="d" value="${d.val}" style="width:40px; text-align:center;">
+            </div>`;
+    }
+  });
+  content += `</div></form>`;
+  new Dialog({
+    title: ".",
+    content,
+    buttons: { confirm: { icon: '<i class="fas fa-check"></i>', label: ".", callback: (html) => window.MVUtils._handleEntropySync(html, poolHD, token, actionName, isCombatOS) } }
+  }, { width: 300 }).render(true);
+};
+window.MVUtils._handleEntropySync = function(html, pHD, token, actionName, isCombatOS) {
+  let finalDice = [];
+  for (let i = 0; i < pHD; i++) finalDice.push({ val: 10, type: "hd" });
+  html.find(".sys-data").each((i, el) => {
+    finalDice.push({ val: parseInt(el.value) || 1, type: el.getAttribute("data-type") });
+  });
+  if (!isCombatOS) {
+    let counts = {};
+    finalDice.forEach((d) => {
+      if (d.val > 0) counts[d.val] = (counts[d.val] || 0) + 1;
+    });
+    let validSets = [];
+    let looseDice = [];
+    for (let face = 10; face >= 1; face--) {
+      if (counts[face] >= 2) validSets.push({ w: counts[face], h: face });
+      else if (counts[face] === 1) looseDice.push({ h: face });
+    }
+    validSets.sort((a, b) => {
+      if (a.w !== b.w) return b.w - a.w;
+      return b.h - a.h;
+    });
+    const tColor = "#00ff41";
+    let first10Normal = finalDice.filter((d) => d.type === "d").slice(0, 10);
+    let normalTens = first10Normal.filter((d) => d.val === 10).length;
+    let critsAmount = Math.floor(normalTens / 3);
+    let isCrit = critsAmount >= 1;
+    let chatHtml = `
+        <div class="ore-chat-card" style="border: 2px solid ${tColor}; background: #0a0a0f; color: #fff; font-family: monospace; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px ${tColor}44;">
+            <header style="background: ${tColor}22; padding: 10px; border-bottom: 1px solid ${tColor};">
+                <h3 style="margin: 0; color: ${tColor}; text-shadow: 0 0 5px ${tColor}; text-transform: uppercase;">${actionName}</h3>
+                <span style="font-size: 10px; color: #aaa;">${(token == null ? void 0 : token.name) || ""}</span>
+            </header><div style="padding: 10px;">
+        `;
+    if (isCrit) chatHtml += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO ${critsAmount}x!</div>`;
+    if (validSets.length > 0) {
+      chatHtml += `<div style="font-weight: bold; font-size: 12px; color: #aaa; margin-bottom: 5px;">CONJUNTOS VÁLIDOS (L x A)</div>`;
+      validSets.forEach((set) => {
+        let blocksHtml = "";
+        if (set.h === 10 && isCrit) {
+          for (let i = 0; i < set.w; i++) blocksHtml += i < normalTens ? `<div style="width: 15px; height: 15px; background: ${tColor}; border: 2px solid #fff; border-radius: 2px; box-sizing: border-box; box-shadow: 0 0 8px #fff;"></div>` : `<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`;
+        } else blocksHtml = Array(set.w).fill(`<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`).join("");
+        chatHtml += `<div style="display: flex; align-items: center; margin-bottom: 5px; background: #111; padding: 5px; border-left: 3px solid ${tColor}; border-radius: 4px;"><span style="font-size: 18px; font-weight: bold; color: ${tColor}; margin-right: 10px;">${set.w}x${set.h}</span><div style="display: flex; gap: 2px;">${blocksHtml}</div></div>`;
+      });
+    } else chatHtml += `<div style="color: #ff4444; font-weight: bold; text-align: center; padding: 10px; border: 1px dashed #ff4444;">FALHA NA AÇÃO</div>`;
+    if (looseDice.length > 0) chatHtml += `<div style="margin-top: 10px; font-size: 10px; color: #666; border-top: 1px dashed #333; padding-top: 5px;">Dados Soltos: ${looseDice.map((d) => d.h).join(", ")}</div>`;
+    chatHtml += `</div></div>`;
+    ChatMessage.create({ user: game.user.id, speaker: token ? ChatMessage.getSpeaker({ actor: token }) : ChatMessage.getSpeaker(), content: chatHtml });
+  } else {
+    let dFaces = finalDice.filter((d) => d.type === "d").map((d) => d.val);
+    if (dFaces.length > 0) {
+      window._originalMathRandom = window._originalMathRandom || Math.random;
+      let sequence = dFaces.map((f) => (f - 1) / 10);
+      Math.random = function() {
+        if (sequence.length > 0) {
+          let r = sequence.shift();
+          if (sequence.length === 0) Math.random = window._originalMathRandom;
+          return r;
+        }
+        Math.random = window._originalMathRandom;
+        return window._originalMathRandom();
+      };
+    }
+  }
+};
+window.MVUtils._verifyModuleData = function(targetItem, _SD) {
+  let archive = _SD.getArchive().filter((i) => {
+    var _a;
+    return (_a = i.system) == null ? void 0 : _a.inExclusiveRotation;
+  });
+  let itemsHtml = archive.map((item) => `
+        <div class="db-secret-row" data-id="${item.id}" style="background:#111; border:1px solid #333; padding:10px; color:#fff; cursor:pointer; text-align:center;">
+            <img src="${item.img}" style="width:50px; height:50px; object-fit:contain;"><br>
+            <span style="font-size:12px;">${item.name}</span>
+        </div>
+    `).join("");
+  let content = `
+    <div style="padding:10px; background:#000;">
+        <input type="text" id="sys-search" placeholder="..." style="width:100%; margin-bottom:10px; padding:10px; background:#000; color:#fff; border:1px solid #333;">
+        <div id="sys-list" style="display:flex; flex-wrap:wrap; gap:10px; overflow-y:auto; max-height:50vh; justify-content:center;">
+            ${itemsHtml}
+        </div>
+    </div>
+    
+    `;
+  new Dialog({
+    title: ".",
+    content,
+    buttons: {},
+    render: (html) => {
+      setTimeout(() => {
+        let search = html[0].querySelector("#sys-search");
+        if (search) search.addEventListener("input", (e) => {
+          let q = e.target.value.toLowerCase();
+          html[0].querySelectorAll(".db-secret-row").forEach((row) => {
+            let t = row.innerText.toLowerCase();
+            row.style.display = t.includes(q) ? "block" : "none";
+          });
+        });
+        html[0].querySelectorAll(".db-secret-row").forEach((row) => {
+          row.addEventListener("click", () => {
+            let itemId = row.getAttribute("data-id");
+            window.MVUtils._applyModuleSync(itemId, targetItem.exclusiveId, targetItem.purchased, targetItem.discounted, targetItem.price, _SD);
+          });
+        });
+      }, 100);
+    }
+  }, { width: 600 }).render(true);
+};
+window.MVUtils._applyModuleSync = function(newItemId, exclusiveId, purchased, discounted, price, _SD) {
+  let newItem = _SD.getArchive().find((i) => i.id === newItemId);
+  if (!newItem) return;
+  let clone = JSON.parse(JSON.stringify(newItem));
+  clone.exclusiveId = exclusiveId;
+  clone.purchased = purchased;
+  clone.discounted = discounted;
+  if (clone.discounted) {
+    clone.originalPrice = clone.price;
+    clone.price = Math.floor(clone.price * 0.8);
+  }
+  let myData = _SD.getPlayerData(game.user.id);
+  if (myData.exclusiveStore && myData.exclusiveStore.items) {
+    let idx = myData.exclusiveStore.items.findIndex((i) => i.exclusiveId === exclusiveId);
+    if (idx !== -1) {
+      myData.exclusiveStore.items[idx] = clone;
+      game.user.setFlag("multiversus-rpg", "playerData", myData);
+    }
+  }
+};
