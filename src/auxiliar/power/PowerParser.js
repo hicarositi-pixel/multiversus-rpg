@@ -1,8 +1,8 @@
 import { EXTRAS_DB } from '../../data/extras-data.js';
 import { FLAWS_DB } from '../../data/flaws-data.js';
+import { getBasePowerXP, normalizePowerCategoryAndRarity } from '../../utils/PowerRules.js';
 
 const MODULE_ID = "multiversus-rpg";
-const XP_RULES = { "origem": 0, "principal": 8, "secundario": 4, "habilidade": 2 };
 
 export const PowerParser = {
     // ========================================================================
@@ -13,9 +13,9 @@ export const PowerParser = {
         const sys = rawItem.system || {};
         const dice = flags.dice || { normal: 0, hard: 0, wiggle: 0 };
         const qualities = flags.qualities || [];
-        const cat = (flags.category || 'principal').toLowerCase();
+        const norm = normalizePowerCategoryAndRarity(flags.category || 'principal', flags.rarity || 'Comum');
         
-        let baseCost = XP_RULES[cat] || 0;
+        let baseCost = getBasePowerXP(norm.category, norm.rarity);
         let xpCost = (dice.normal * baseCost) + (dice.hard * baseCost * 2) + (dice.wiggle * baseCost * 4);
         
         let usedPB = qualities.reduce((total, q) => {
@@ -81,6 +81,10 @@ export const PowerParser = {
         
         const rarMatch = rawText.match(/Raridade:\s*([a-zA-ZÀ-ÿ]+)/i);
         if (rarMatch) flags.rarity = rarMatch[1];
+
+        const norm = normalizePowerCategoryAndRarity(flags.category, flags.rarity);
+        flags.category = norm.category;
+        flags.rarity = norm.rarity;
 
         // 3. DADOS DA MATRIZ
         const diceMatch = rawText.match(/Dados:\s*(\d+)d\s*\+\s*(\d+)hd\s*\+\s*(\d+)wd/i);

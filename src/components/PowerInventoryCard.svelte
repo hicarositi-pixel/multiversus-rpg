@@ -3,6 +3,7 @@
   import { slide } from 'svelte/transition';
   import { THEME_DB } from '../data/ThemeDB.js';
   import { loadPowerThemes } from '../utils/ThemeLoader.js';
+  import { getBasePowerXP, normalizePowerCategoryAndRarity } from '../utils/PowerRules.js';
 
   export let item;
   export let actor;
@@ -30,8 +31,7 @@
   $: rarity = flags.rarity || "Comum";
   $: isInitial = flags.isInitial || false;
 
-  const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
-  $: baseCost = XP_RULES[category] || 8;
+  $: baseCost = getBasePowerXP(category, rarity);
 
   $: rawCost = (dNormal * baseCost) + (dHard * baseCost * 2) + (dWiggle * baseCost * 4);
   $: discount = isInitial ? (4 * baseCost) : 0;
@@ -131,7 +131,11 @@
   async function handleDropOnCard(event) {
       event.preventDefault();
       event.stopPropagation();
-      if (category === "habilidade") return; // Nao aninha habilidade em habilidade
+      if (category === "habilidade" || category === "item" || category === "intrinseca") return;
+      if (category === "secundario") {
+          ui.notifications.warn("Talentos Secundários não podem receber Habilidades Especiais.");
+          return;
+      }
 
       const dataText = event.dataTransfer.getData('text/plain');
       if (!dataText) return;
@@ -146,11 +150,21 @@
               if (itemData.type !== "power") return;
               if (itemData.flags?.[MODULE_ID]?.category !== "habilidade") return;
 
+              const habRar = itemData.flags?.[MODULE_ID]?.rarity || "Comum";
+              const isRareHab = habRar === "Raro" || habRar === "Comum";
+
+              if (category === "memoria" && !isRareHab) {
+                  ui.notifications.warn("Memórias só podem ter Habilidades Especiais de categoria Raro vinculadas!");
+                  return;
+              }
+
               if (dropData.uuid && dropData.uuid.includes(actor.id)) {
                   const existingItem = actor.items.get(itemData._id);
                   if (existingItem) {
-                      await existingItem.update({ [`flags.${MODULE_ID}.parentId`]: item.id });
-                      ui.notifications.info(`Habilidade anexada ao Talento.`);
+                      const upd = { [`flags.${MODULE_ID}.parentId`]: item.id };
+                      if (isRareHab) upd[`flags.${MODULE_ID}.rarity`] = "Raro";
+                      await existingItem.update(upd);
+                      ui.notifications.info(`Habilidade anexada a [${realName}].`);
                   }
                   return;
               }
@@ -159,12 +173,34 @@
               if (!itemData.flags) itemData.flags = {};
               if (!itemData.flags[MODULE_ID]) itemData.flags[MODULE_ID] = {};
               itemData.flags[MODULE_ID].parentId = item.id;
+              if (isRareHab) itemData.flags[MODULE_ID].rarity = "Raro";
 
               await actor.createEmbeddedDocuments("Item", [itemData]);
               ui.notifications.info(`[${itemData.name}] anexada a [${realName}].`);
           }
       } catch (e) {
           console.error("Falha ao receber habilidade na carta:", e);
+      }
+  }
+
+  $: availableParents = (category === "habilidade" && actor?.items)
+      ? actor.items.filter(i => {
+          if (i.type !== "power" || i.id === item.id) return false;
+          const pCat = i.flags?.[MODULE_ID]?.category || "principal";
+          if (pCat === "principal" || pCat === "origem") return true;
+          if (pCat === "memoria" && (rarity === "Raro" || rarity === "Comum")) return true;
+          return false;
+      })
+      : [];
+
+  async function changeParentLink(newParentId) {
+      if (!item) return;
+      if (!newParentId) {
+          await item.unsetFlag(MODULE_ID, "parentId");
+          ui.notifications.info(`[${realName}] desvinculada.`);
+      } else {
+          await item.update({ [`flags.${MODULE_ID}.parentId`]: newParentId });
+          ui.notifications.info(`[${realName}] vinculada com sucesso.`);
       }
   }
 
@@ -179,7 +215,7 @@
   draggable="true" 
   on:dragstart={handleDragStart}
   on:drop={handleDropOnCard}
-  on:dragover={(e) => { if (category !== 'habilidade') e.preventDefault(); }}
+  on:dragover={(e) => { if (category === 'principal' || category === 'origem' || category === 'memoria') e.preventDefault(); }}
 >
   <div class="card-front">
     <div class="icon-box" on:click={openSheet} title="Abrir Ficha Técnica">
@@ -193,8 +229,12 @@
         <span class="xp-badge">{currentCost} XP</span>
       </div>
       <div class="meta-row">
-        <span class="meta-tag">{category.toUpperCase()}</span>
+        <span class="meta-tag">{category === 'memoria' ? 'MEMÓRIA' : category.toUpperCase()}</span>
+        <span class="meta-tag rar-tag">{rarity.toUpperCase()}</span>
         <span class="dice-count">TOTAL: <strong>{totalDice}</strong></span>
+        <button type="button" class="viz-open-btn" on:click|stopPropagation={() => dispatch('visualize', item)} title="Abrir Visualização HTML/CSS">
+          <i class="fas fa-eye"></i> Abrir Visualização
+        </button>
         {#if childHabilidades.length > 0}
            <button class="hab-count" on:click|stopPropagation={() => showHabilidades = !showHabilidades}>
                <i class="fas {showHabilidades ? 'fa-chevron-down' : 'fa-link'}"></i> {childHabilidades.length} Habilidades
@@ -298,6 +338,18 @@
         </div>
       </div>
 
+      {#if category === 'habilidade'}
+        <div class="link-parent-row" on:click|stopPropagation>
+          <label><i class="fas fa-link"></i> VINCULAR HABILIDADE A:</label>
+          <select value={flags.parentId || ""} on:change={(e) => changeParentLink(e.target.value)}>
+            <option value="">Sem vínculo (Solta em Principais)</option>
+            {#each availableParents as p}
+              <option value={p.id}>{p.name} ({(p.flags?.[MODULE_ID]?.category || 'principal') === 'memoria' ? 'Memória' : 'Principal'})</option>
+            {/each}
+          </select>
+        </div>
+      {/if}
+
       {#if isGM}
         <button class="gm-delete" on:click={deletePower}><i class="fas fa-trash"></i> DELETAR {category.toUpperCase()} (GM)</button>
       {/if}
@@ -307,7 +359,7 @@
   {#if childHabilidades.length > 0 && showHabilidades}
      <div class="habilidades-container">
         {#each childHabilidades as hab (hab.id)}
-           <svelte:self item={hab} actor={actor} isGM={isGM} />
+           <svelte:self item={hab} actor={actor} isGM={isGM} on:roll on:visualize />
         {/each}
      </div>
   {/if}
@@ -316,6 +368,12 @@
 
 <style>
 /* CSS do seu código original MANTIDO */
+.viz-open-btn { background: rgba(0, 255, 65, 0.08); color: var(--glow, #00ff41); padding: 2px 8px; border-radius: 4px; border: 1px solid var(--glow, #00ff41); font-size: 0.9em; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px; font-family: inherit; }
+.viz-open-btn:hover { background: var(--glow, #00ff41); color: #000; box-shadow: 0 0 8px var(--glow, #00ff41); }
+.rar-tag { color: var(--glow, #aaa); border-color: rgba(255,255,255,0.18); }
+.link-parent-row { margin-top: 12px; display: flex; align-items: center; gap: 8px; background: #141414; border: 1px dashed #333; padding: 6px 10px; border-radius: 4px; }
+.link-parent-row label { font-size: 0.7em; color: #aaa; font-weight: bold; white-space: nowrap; }
+.link-parent-row select { flex: 1; background: #080808; border: 1px solid #444; color: #fff; padding: 4px 6px; border-radius: 4px; font-size: 0.8em; }
 .power-card { background: #050505; border: 1px solid #333; border-left: 4px solid var(--glow); border-radius: 6px; margin-bottom: 10px; font-family: 'Segoe UI', sans-serif; position: relative; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.5); transition: 0.3s; cursor: grab;}
 .power-card.is-habilidade { margin-left: 20px; border-left-width: 2px; opacity: 0.95; transform: scale(0.98); margin-bottom: 5px; box-shadow: none; border: 1px dashed #444; }
 .power-card:active { cursor: grabbing; }

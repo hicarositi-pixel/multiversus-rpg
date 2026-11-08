@@ -8,6 +8,14 @@ Hooks.once("init", () => {
     game.settings.register(DISCORD_MODULE, "webhookBank", { name: "Discord: Canal do Caixa", scope: "world", config: true, type: String, default: "" });
     game.settings.register(DISCORD_MODULE, "webhookStatus", { name: "Discord: Canal de Status", scope: "world", config: true, type: String, default: "" });
     game.settings.register(DISCORD_MODULE, "webhookSecurity", { name: "Discord: Logs de Segurança", scope: "world", config: true, type: String, default: "" });
+    game.settings.register(DISCORD_MODULE, "webhookCustomTalent", {
+        name: "Discord: Talentos Personalizáveis (Novo Agente)",
+        hint: "Webhook do canal do Discord para onde serão enviadas as descrições de Talentos Personalizáveis solicitados na criação de Novo Agente (se vazio, usa Logs de Segurança).",
+        scope: "world",
+        config: true,
+        type: String,
+        default: ""
+    });
 });
 
 // ==================================================================
@@ -19,6 +27,7 @@ async function sendToDiscord(channelType, title, description, color, fields = []
     if (channelType === "bank") url = game.settings.get(DISCORD_MODULE, "webhookBank");
     if (channelType === "status") url = game.settings.get(DISCORD_MODULE, "webhookStatus");
     if (channelType === "security") url = game.settings.get(DISCORD_MODULE, "webhookSecurity");
+    if (channelType === "customTalent") url = game.settings.get(DISCORD_MODULE, "webhookCustomTalent") || game.settings.get(DISCORD_MODULE, "webhookSecurity");
 
     if (!url) return;
 
@@ -128,4 +137,58 @@ Hooks.on("updateActor", (actor, changes, options, userId) => {
             );
         }
     }
+});
+
+// ==================================================================
+// 6. SORTEIO DE ORIGEM E CRIAÇÃO DE FICHA ("NOVO AGENTE")
+// ==================================================================
+Hooks.on("nexusOriginRoll", (data) => {
+    if (!data) return;
+    sendToDiscord("security", "🧬 Sorteio de Origem (Novo Agente)",
+        `Rolagem de raridade de Origem registrada no Criador de Identidade.`, 3447003,
+        [
+            { name: "Usuário", value: data.rollerName || game.user?.name || "Desconhecido", inline: true },
+            { name: "Dono da Ficha", value: data.ownerName || "Não definido no momento", inline: true },
+            { name: "Tipo", value: data.rollType || "Rolagem de Origem", inline: true },
+            { name: "Resultado (1d100)", value: `**${data.result}** — ${data.rarity}`, inline: false }
+        ]
+    );
+});
+
+Hooks.on("nexusAgentCreated", (data) => {
+    if (!data) return;
+    sendToDiscord("security", "🪪 Novo Agente Registrado",
+        `Ficha **${data.charName}** finalizada no Criador de Identidade.`, 3066993,
+        [
+            { name: "Criado por", value: data.creatorName || game.user?.name || "Desconhecido", inline: true },
+            { name: "Dono da Ficha", value: data.ownerName || "Sem vínculo", inline: true },
+            { name: "Origem Escolhida", value: data.originName || "N/A", inline: true },
+            { name: "Última Rolagem de Origem", value: data.rollCategory || "Nenhuma rolagem realizada", inline: false }
+        ]
+    );
+});
+
+Hooks.on("nexusCustomTalentRequest", (data) => {
+    if (!data) return;
+    const rawDesc = (data.talentDescription || "").trim();
+    const safeDesc = rawDesc.length > 3800 ? rawDesc.slice(0, 3800) + "...\n*(Texto truncado pelo limite do Discord)*" : rawDesc;
+    const descBlock = safeDesc
+        ? `**Descrição enviada pelo jogador:**\n>>> ${safeDesc}`
+        : "*Nenhuma descrição detalhada informada.*";
+
+    const kitTalentsStr = Array.isArray(data.selectedKitTalents) && data.selectedKitTalents.length > 0
+        ? data.selectedKitTalents.join(", ")
+        : "Nenhum talento de kit selecionado";
+
+    sendToDiscord("customTalent", "✨ Talento Personalizável Solicitado (Novo Agente)",
+        descBlock, 10181046,
+        [
+            { name: "Agente (Ficha)", value: data.charName || "Sem nome", inline: true },
+            { name: "Solicitante", value: data.creatorName || game.user?.name || "Desconhecido", inline: true },
+            { name: "Dono da Ficha", value: data.ownerName || "Sem vínculo", inline: true },
+            { name: "Origem", value: data.originName || "N/A", inline: true },
+            { name: "Conceito / Título", value: (data.talentName || "Talento Personalizado").slice(0, 250), inline: true },
+            { name: "Kits Escolhidos", value: kitTalentsStr.slice(0, 1000), inline: false }
+        ]
+    );
 });

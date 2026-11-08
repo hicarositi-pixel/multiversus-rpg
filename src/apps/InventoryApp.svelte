@@ -35,6 +35,13 @@
   let showCreator = false;
   let selectedItem = null;
   let isEditing = false; 
+  let isMaximizedModal = false;
+  let hideModalSidebar = false;
+
+  function openItemViewer(item) {
+    selectedItem = item;
+    isEditing = false;
+  }
 
   // Limpeza de HTML
   function cleanDesc(text) {
@@ -185,7 +192,7 @@
   let newItem = { name: "", type: "Recurso", rarity: "Comum", img: "", desc: "", qty: 1, w: 1, h: 1 };
 
   async function createItem() {
-    if (!newItem.name) return;
+    if (!isGM || !newItem.name) return;
     const itemData = { id: foundry.utils.randomID(), ...newItem, img: newItem.img || "icons/svg/item-bag.svg", stored: false };
     localItems = [...localItems, itemData];
     await actor.update({ "flags.multiversus-rpg.inventory": localItems }, { render: false });
@@ -194,7 +201,7 @@
   }
 
   async function deleteItem(id) {
-    if (!id) return;
+    if (!isGM || !id) return;
     selectedItem = null;
     isEditing = false;
     localItems = localItems.filter(i => i.id !== id);
@@ -320,11 +327,11 @@
                     "
                     draggable="true" 
                     on:dragstart={(e) => handleDragStart(e, item, 'grid')} 
-                    on:click|stopPropagation={() => { selectedItem = item; isEditing = false; }}
+                    on:click|stopPropagation={() => openItemViewer(item)}
                   >
                     <InventoryCard 
                         item={item} index={item.id} isGM={isGM} inGrid={true} 
-                        onSelect={() => { selectedItem = item; isEditing = false; }} 
+                        onSelect={() => openItemViewer(item)} 
                         onUpdateQty={updateItemLocal} 
                         onDelete={() => deleteItem(item.id)}
                     />
@@ -339,8 +346,8 @@
           <div class="stash-header"><span>ITENS FORA DO INVENTÁRIO</span> <span class="count-badge">{stashItems.length}</span></div>
           <div class="stash-grid custom-scroll">
             {#each stashItems as item (item.id)}
-              <div class="stash-slot" draggable="true" on:dragstart={(e) => handleDragStart(e, item, 'stash')} on:click|stopPropagation>
-                  <InventoryCard item={item} index={item.id} isGM={isGM} inGrid={false} onSelect={() => { selectedItem = item; isEditing = false; }} onUpdateQty={updateItemLocal} onDelete={() => deleteItem(item.id)}/>
+              <div class="stash-slot" draggable="true" on:dragstart={(e) => handleDragStart(e, item, 'stash')} on:click|stopPropagation={() => openItemViewer(item)}>
+                  <InventoryCard item={item} index={item.id} isGM={isGM} inGrid={false} onSelect={() => openItemViewer(item)} onUpdateQty={updateItemLocal} onDelete={() => deleteItem(item.id)}/>
               </div>
             {/each}
           </div>
@@ -352,10 +359,11 @@
 
   {#if selectedItem}
     <div class="modal-backdrop" 
-         on:click|self={() => { selectedItem = null; isEditing = false; }} 
+         on:click|self={() => { selectedItem = null; isEditing = false; isMaximizedModal = false; }} 
          transition:fade={{duration:150}}>
          
         <div class="data-window" 
+             class:maximized={isMaximizedModal}
              on:click|stopPropagation 
              on:mousedown|stopPropagation
              in:scale={{start: 0.95, duration: 200}} 
@@ -365,30 +373,40 @@
               <div class="win-title">
                   <i class="fas fa-cube"></i> {selectedItem.name.toUpperCase()}
               </div>
-              <button class="win-close" on:click={() => { selectedItem = null; isEditing = false; }}>✕</button>
+              <div class="win-actions">
+                  <button type="button" class="win-action-btn" on:click={() => hideModalSidebar = !hideModalSidebar} title={hideModalSidebar ? "Mostrar Painel Lateral" : "Expandir Área de Leitura"}>
+                      <i class="fas fa-columns"></i>
+                  </button>
+                  <button type="button" class="win-action-btn" on:click={() => isMaximizedModal = !isMaximizedModal} title={isMaximizedModal ? "Restaurar Tamanho" : "Tela Cheia"}>
+                      <i class="fas {isMaximizedModal ? 'fa-compress' : 'fa-expand'}"></i>
+                  </button>
+                  <button type="button" class="win-close" on:click={() => { selectedItem = null; isEditing = false; isMaximizedModal = false; }}>✕</button>
+              </div>
             </div>
 
             <div class="win-content">
-                <div class="win-preview">
-                    <div class="preview-box">
-                        <img src={selectedItem.img} alt="preview">
-                        <div class="scan-line"></div>
+                {#if !hideModalSidebar}
+                    <div class="win-preview">
+                        <div class="preview-box">
+                            <img src={selectedItem.img} alt="preview">
+                            <div class="scan-line"></div>
+                        </div>
+                        <div class="meta-tags">
+                            <span class="tag type">{selectedItem.type || 'ITEM'}</span>
+                            <span class="tag rarity" style="color:var(--theme); border-color:var(--theme)">
+                                {selectedItem.rarity}
+                            </span>
+                        </div>
                     </div>
-                    <div class="meta-tags">
-                        <span class="tag type">{selectedItem.type || 'ITEM'}</span>
-                        <span class="tag rarity" style="color:var(--theme); border-color:var(--theme)">
-                            {selectedItem.rarity}
-                        </span>
-                    </div>
-                </div>
+                {/if}
 
                 <div class="win-info">
                    <div class="desc-box custom-scroll">
                      {#if isGM && isEditing}
                         <textarea class="code-editor" 
                             value={selectedItem.desc} 
-                            on:change={(e) => updateItemLocal(selectedItem.id, {desc: e.target.value})}
-                            placeholder="HTML / Texto..."></textarea>
+                            on:change={(e) => { if (isGM) updateItemLocal(selectedItem.id, {desc: e.target.value}); }}
+                            placeholder="HTML / CSS / Texto..."></textarea>
                      {:else}
                         <div class="html-renderer">
                             {@html cleanDesc(selectedItem.desc) || "<span style='opacity:0.3'>Sem dados.</span>"}
@@ -399,18 +417,22 @@
                    <div class="ctrl-bar">
                        {#if isGM}
                            <div class="gm-tools">
+                               <span class="resize-hint"><i class="fas fa-arrows-alt"></i> Arraste o canto inferior direito para esticar</span>
                                <label>QTD <input type="number" value={selectedItem.qty} on:change={(e) => updateItemLocal(selectedItem.id, {qty: parseInt(e.target.value)}) }></label>
                                
-                               <button class="btn-toggle" on:click={() => isEditing = !isEditing} title={isEditing ? "Ver Visual" : "Editar Código"}>
+                               <button type="button" class="btn-toggle" on:click={() => isEditing = !isEditing} title={isEditing ? "Ver Visual" : "Editar Código"}>
                                    <i class="fas {isEditing ? 'fa-eye' : 'fa-pencil-alt'}"></i>
                                </button>
 
-                               <button class="btn-del" on:click={() => deleteItem(selectedItem.id)} title="Deletar">
+                               <button type="button" class="btn-del" on:click={() => deleteItem(selectedItem.id)} title="Deletar">
                                    <i class="fas fa-trash"></i>
                                </button>
                            </div>
                        {:else}
-                           <div class="qty-show">QUANTIDADE: <strong>{selectedItem.qty}</strong></div>
+                           <div class="player-footer-bar">
+                               <div class="qty-show">QUANTIDADE: <strong>{selectedItem.qty}</strong> <span class="readonly-badge"><i class="fas fa-lock"></i> MODO LEITURA</span></div>
+                               <span class="resize-hint"><i class="fas fa-arrows-alt"></i> Arraste a borda para esticar</span>
+                           </div>
                        {/if}
                    </div>
                 </div>
@@ -507,17 +529,20 @@
   .stash-slot { height: 100%; width: 100%; }
 
   /* --- MODAL DE DADOS --- */
-  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(2px); z-index: 2000; display: flex; align-items: center; justify-content: center; }
-  .data-window { width: 600px; height: 400px; background: #080808; border: 1px solid var(--theme); box-shadow: 0 0 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; border-top: 2px solid var(--theme); position: relative; z-index: 2001; pointer-events: auto; }
-  .data-window.creator { width: 400px; height: auto; border-top-color: #00ff41; }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(2px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 15px; }
+  .data-window { width: 820px; height: 560px; min-width: 440px; min-height: 320px; max-width: 96vw; max-height: 92vh; resize: both; overflow: hidden; background: #080808; border: 1px solid var(--theme); box-shadow: 0 0 50px rgba(0,0,0,0.9); display: flex; flex-direction: column; border-top: 2px solid var(--theme); position: relative; z-index: 2001; pointer-events: auto; }
+  .data-window.maximized { width: 95vw !important; height: 90vh !important; }
+  .data-window.creator { width: 400px; height: auto; min-width: 360px; min-height: 0; resize: none; border-top-color: #00ff41; }
 
-  .win-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255,255,255,0.03); border-bottom: 1px solid #222; position: relative; z-index: 10; }
+  .win-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255,255,255,0.03); border-bottom: 1px solid #222; position: relative; z-index: 10; flex-shrink: 0; }
   .win-title { color: var(--theme); font-family: 'Share Tech Mono'; letter-spacing: 1px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
-  .win-close { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #ccc; cursor: pointer; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; z-index: 20; }
+  .win-actions { display: flex; align-items: center; gap: 6px; }
+  .win-action-btn, .win-close { background: rgba(255,255,255,0.05); border: 1px solid #444; color: #ccc; cursor: pointer; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; z-index: 20; font-size: 11px; }
+  .win-action-btn:hover { background: var(--theme); color: #000; border-color: var(--theme); }
   .win-close:hover { background: #f00; color: #fff; border-color: #f00; }
 
-  .win-content { flex: 1; display: flex; padding: 20px; gap: 20px; overflow: hidden; background: #0b0b0b; }
-  .win-preview { width: 140px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+  .win-content { flex: 1; display: flex; padding: 16px; gap: 16px; overflow: hidden; background: #0b0b0b; min-height: 0; }
+  .win-preview { width: 140px; flex-shrink: 0; display: flex; flex-direction: column; gap: 15px; align-items: center; }
   .preview-box { width: 120px; height: 120px; border: 1px solid #333; background: #000; position: relative; overflow: hidden; display:flex; align-items:center; justify-content:center; }
   .preview-box img { width: 90%; height: 90%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(255,255,255,0.1)); }
   .scan-line { position: absolute; top:0; left:0; width:100%; height:2px; background:rgba(255,255,255,0.3); animation: scan 3s infinite linear; }
@@ -526,19 +551,24 @@
   .tag { font-size: 9px; background: #151515; border: 1px solid #444; padding: 3px 6px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
   .tag.rarity { color: var(--theme); border-color: var(--theme); }
 
-  .win-info { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-  .desc-box { flex: 1; background: #080808; border: 1px solid #222; padding: 15px; overflow-y: auto; color: #ccc; font-size: 13px; line-height: 1.5; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+  .win-info { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; min-height: 0; }
+  .desc-box { flex: 1; min-height: 0; background: #080808; border: 1px solid #222; padding: 15px; overflow: auto; color: #ccc; font-size: 13px; line-height: 1.5; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
   .code-editor { width: 100%; height: 100%; background: transparent; border: none; color: #00ff41; font-family: 'Courier New', monospace; font-size: 12px; resize: none; outline: none; }
+  .html-renderer { width: 100%; min-height: 100%; }
   .html-renderer p { margin-bottom: 10px; }
   .html-renderer strong { color: #fff; }
 
-  .ctrl-bar { height: 40px; background: #111; border-top: 1px solid #333; display: flex; align-items: center; padding: 0 10px; position: relative; z-index: 10; }
-  .gm-tools { display: flex; gap: 10px; align-items: center; width: 100%; justify-content: flex-end; }
+  .ctrl-bar { height: 40px; flex-shrink: 0; background: #111; border-top: 1px solid #333; display: flex; align-items: center; padding: 0 12px; position: relative; z-index: 10; }
+  .gm-tools { display: flex; gap: 10px; align-items: center; width: 100%; }
+  .gm-tools .resize-hint { margin-right: auto; }
+  .player-footer-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; }
+  .readonly-badge { font-size: 9px; color: #00ff41; border: 1px solid rgba(0, 255, 65, 0.35); background: rgba(0, 255, 65, 0.08); padding: 2px 6px; border-radius: 3px; margin-left: 8px; font-family: 'Share Tech Mono', monospace; }
+  .resize-hint { font-size: 10px; color: #666; font-family: 'Share Tech Mono', monospace; display: flex; align-items: center; gap: 5px; }
   .gm-tools label { font-size: 10px; color: #888; display: flex; align-items: center; gap: 5px; }
   .gm-tools input { width: 50px; background: #000; border: 1px solid #444; color: #fff; padding: 4px; text-align: center; }
   .btn-toggle { background: #222; color: #ccc; border: 1px solid #555; width: 30px; height: 30px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
   .btn-toggle:hover { background: #fff; color: #000; }
-  .btn-del { background: #300; color: #f55; border: 1px solid #f00; width: 30px; height: 30px; cursor: pointer; margin-left: auto; display: flex; align-items: center; justify-content: center; }
+  .btn-del { background: #300; color: #f55; border: 1px solid #f00; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .btn-del:hover { background: #f00; color: #fff; }
 
   /* FORMS CREATOR */

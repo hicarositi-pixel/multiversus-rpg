@@ -297,6 +297,68 @@ $: strokeDashoffset = 283 - (283 * activeLvlInfo.progress / 100);
     let allOriginsList = {}; // Para o Dropdown do GM
     let originData = { name: "Desconhecido", icon: "❓", mechanic: {name: "N/A", desc: ""}, traits: [], enhancements: [], initialKit: "", desc: "", powers: "" };
     let expandTraits = false;
+    let showOriginAbilitiesManager = false;
+
+    $: activeOriginId = flags.origin || "humano";
+    $: if (Object.keys(allOriginsList).length > 0) {
+        originData = allOriginsList[activeOriginId] || allOriginsList["humano"] || originData;
+    }
+
+    $: activeOriginCustom = (flags.originCustom && flags.originCustom.originId === activeOriginId)
+        ? {
+            originId: activeOriginId,
+            removedTraits: Array.isArray(flags.originCustom.removedTraits) ? flags.originCustom.removedTraits : [],
+            removedEnhancements: Array.isArray(flags.originCustom.removedEnhancements) ? flags.originCustom.removedEnhancements : [],
+            forcedEnhancements: Array.isArray(flags.originCustom.forcedEnhancements) ? flags.originCustom.forcedEnhancements : []
+        }
+        : { originId: activeOriginId, removedTraits: [], removedEnhancements: [], forcedEnhancements: [] };
+
+    $: displayedTraits = (originData.traits || []).filter(t => !activeOriginCustom.removedTraits.includes(t.name));
+    $: displayedEnhancements = (originData.enhancements || []).filter(e =>
+        (activeLevel >= e.level || activeOriginCustom.forcedEnhancements.includes(e.name)) &&
+        !activeOriginCustom.removedEnhancements.includes(e.name)
+    );
+
+    async function toggleOriginTraitGM(traitName) {
+        if (!isGM) return;
+        const next = foundry.utils.deepClone(activeOriginCustom);
+        if (next.removedTraits.includes(traitName)) {
+            next.removedTraits = next.removedTraits.filter(n => n !== traitName);
+        } else {
+            next.removedTraits = [...next.removedTraits, traitName];
+        }
+        await actor.update({ [`flags.${MODULE_ID}.originCustom`]: next }, { render: false });
+    }
+
+    async function toggleOriginEnhancementGM(enh) {
+        if (!isGM) return;
+        const next = foundry.utils.deepClone(activeOriginCustom);
+        const currentlyActive = (activeLevel >= enh.level || next.forcedEnhancements.includes(enh.name)) && !next.removedEnhancements.includes(enh.name);
+
+        if (currentlyActive) {
+            if (!next.removedEnhancements.includes(enh.name)) next.removedEnhancements = [...next.removedEnhancements, enh.name];
+            next.forcedEnhancements = next.forcedEnhancements.filter(n => n !== enh.name);
+        } else {
+            next.removedEnhancements = next.removedEnhancements.filter(n => n !== enh.name);
+            if (activeLevel < enh.level && !next.forcedEnhancements.includes(enh.name)) {
+                next.forcedEnhancements = [...next.forcedEnhancements, enh.name];
+            }
+        }
+        await actor.update({ [`flags.${MODULE_ID}.originCustom`]: next }, { render: false });
+    }
+
+    async function resetOriginAbilitiesGM() {
+        if (!isGM) return;
+        await actor.update({
+            [`flags.${MODULE_ID}.originCustom`]: {
+                originId: activeOriginId,
+                removedTraits: [],
+                removedEnhancements: [],
+                forcedEnhancements: []
+            }
+        }, { render: false });
+        ui.notifications.info("Habilidades de Origem restauradas para o padrão.");
+    }
     
     // === 10. EDITOR FULLSCREEN, VIEWER & GLOSSÁRIO ===
     let activeViewer = null; 
@@ -370,7 +432,15 @@ $: strokeDashoffset = 283 - (283 * activeLvlInfo.progress / 100);
     }
     function changeOriginGM(e) {
         const newOrigin = e.target.value;
-        actor.update({ [`flags.${MODULE_ID}.origin`]: newOrigin }, { render: false });
+        actor.update({
+            [`flags.${MODULE_ID}.origin`]: newOrigin,
+            [`flags.${MODULE_ID}.originCustom`]: {
+                originId: newOrigin,
+                removedTraits: [],
+                removedEnhancements: [],
+                forcedEnhancements: []
+            }
+        }, { render: false });
         loadOriginData(newOrigin);
         ui.notifications.info(`Origem alterada.`);
     }
@@ -576,6 +646,90 @@ async function importPlayerXP() {
                             </button>
                         {/each}
                     {/each}
+                </div>
+            </div>
+        </div>
+    {/if}
+
+    {#if showOriginAbilitiesManager && isGM}
+        <div class="modal-backdrop" on:click={() => showOriginAbilitiesManager = false} transition:fade style="z-index: 10002;">
+            <div class="modal-window" style="width: 680px; max-width: 94vw;" transition:scale on:click|stopPropagation role="dialog">
+                <div class="modal-header">
+                    <span><i class="fas fa-dna"></i> HABILIDADES DE ORIGEM // {originData.name.toUpperCase()}</span>
+                    <button class="close-btn" type="button" on:click={() => showOriginAbilitiesManager = false}><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body custom-scroll" style="display: flex; flex-direction: column; gap: 15px; max-height: 75vh;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; background: rgba(255, 255, 255, 0.03); border: 1px dashed #333; padding: 10px 12px; border-radius: 4px;">
+                        <span style="font-size: 11px; color: #aaa; line-height: 1.4;">
+                            Adicione ou remova Habilidades Fixas e Aprimoramentos pertencentes exclusivamente à origem <strong style="color: var(--c-primary);">{originData.name}</strong>.
+                        </span>
+                        <button type="button" class="expand-traits-btn" style="white-space: nowrap; border-color: #ffaa00; color: #ffaa00;" on:click={resetOriginAbilitiesGM}>
+                            <i class="fas fa-undo"></i> RESTAURAR PADRÃO
+                        </button>
+                    </div>
+
+                    <div>
+                        <div style="font-size: 11px; font-weight: bold; color: var(--c-primary); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                            <span>HABILIDADES DE ORIGEM (FIXAS)</span>
+                            <span>{displayedTraits.length} / {(originData.traits || []).length} ATIVAS</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            {#each (originData.traits || []) as t}
+                                {@const isActive = !activeOriginCustom.removedTraits.includes(t.name)}
+                                <div style="display: flex; gap: 12px; align-items: center; background: {isActive ? 'rgba(0,0,0,0.6)' : 'rgba(255, 50, 50, 0.05)'}; border: 1px solid {isActive ? '#333' : 'rgba(255, 68, 68, 0.35)'}; padding: 10px 12px; border-radius: 4px; opacity: {isActive ? 1 : 0.65};">
+                                    <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;">
+                                        <strong style="color: {isActive ? 'var(--c-primary)' : '#888'}; font-size: 12px;">{t.name}</strong>
+                                        <span style="font-size: 11px; color: #999; line-height: 1.35;">{t.effect}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        on:click={() => toggleOriginTraitGM(t.name)}
+                                        style="flex-shrink: 0; min-width: 96px; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 10px; font-weight: bold; border: 1px solid {isActive ? '#ff4444' : '#00ff41'}; background: {isActive ? 'rgba(255, 68, 68, 0.12)' : 'rgba(0, 255, 65, 0.12)'}; color: {isActive ? '#ff4444' : '#00ff41'};"
+                                    >
+                                        {#if isActive}
+                                            <i class="fas fa-minus-circle"></i> REMOVER
+                                        {:else}
+                                            <i class="fas fa-plus-circle"></i> ADICIONAR
+                                        {/if}
+                                    </button>
+                                </div>
+                            {/each}
+                            {#if !originData.traits || originData.traits.length === 0}
+                                <div style="font-size: 11px; color: #666; font-style: italic;">Esta origem não possui habilidades fixas cadastradas.</div>
+                            {/if}
+                        </div>
+                    </div>
+
+                    {#if originData.enhancements && originData.enhancements.length > 0}
+                        <div>
+                            <div style="font-size: 11px; font-weight: bold; color: #ffaa00; border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                                <span>APRIMORAMENTOS DE ORIGEM</span>
+                                <span>{displayedEnhancements.length} / {originData.enhancements.length} ATIVOS</span>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                {#each originData.enhancements as e}
+                                    {@const isEnhActive = (activeLevel >= e.level || activeOriginCustom.forcedEnhancements.includes(e.name)) && !activeOriginCustom.removedEnhancements.includes(e.name)}
+                                    <div style="display: flex; gap: 12px; align-items: center; background: {isEnhActive ? 'rgba(255, 170, 0, 0.06)' : 'rgba(0,0,0,0.4)'}; border: 1px solid {isEnhActive ? 'rgba(255, 170, 0, 0.4)' : '#222'}; padding: 10px 12px; border-radius: 4px; opacity: {isEnhActive ? 1 : 0.65};">
+                                        <div style="flex: 1; display: flex; flex-direction: column; gap: 3px;">
+                                            <strong style="color: {isEnhActive ? '#ffaa00' : '#888'}; font-size: 12px;">[Nv {e.level}] {e.name}</strong>
+                                            <span style="font-size: 11px; color: #999; line-height: 1.35;">{e.desc}</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            on:click={() => toggleOriginEnhancementGM(e)}
+                                            style="flex-shrink: 0; min-width: 96px; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 10px; font-weight: bold; border: 1px solid {isEnhActive ? '#ff4444' : '#00ff41'}; background: {isEnhActive ? 'rgba(255, 68, 68, 0.12)' : 'rgba(0, 255, 65, 0.12)'}; color: {isEnhActive ? '#ff4444' : '#00ff41'};"
+                                        >
+                                            {#if isEnhActive}
+                                                <i class="fas fa-minus-circle"></i> REMOVER
+                                            {:else}
+                                                <i class="fas fa-plus-circle"></i> ADICIONAR
+                                            {/if}
+                                        </button>
+                                    </div>
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
                 </div>
             </div>
         </div>
@@ -853,41 +1007,58 @@ async function importPlayerXP() {
                     <span class="val">{originData.mechanic.name}</span>
                 </div>
                 <div class="detail-box traits" style="flex: 2;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 6px;">
                         <span class="lbl" style="margin-bottom: 0;">HABILIDADES DE ORIGEM</span>
-                        <button class="expand-traits-btn" on:click={() => expandTraits = !expandTraits}>
-                            <i class="fas {expandTraits ? 'fa-chevron-up' : 'fa-chevron-down'}"></i> {expandTraits ? 'OCULTAR' : 'EXPANDIR'}
-                        </button>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            {#if isGM}
+                                <button type="button" class="expand-traits-btn" style="border-color: #ffaa00; color: #ffaa00;" on:click={() => showOriginAbilitiesManager = true} title="Adicionar ou remover habilidades desta Origem">
+                                    <i class="fas fa-sliders-h"></i> GERENCIAR
+                                </button>
+                            {/if}
+                            <button type="button" class="expand-traits-btn" on:click={() => expandTraits = !expandTraits}>
+                                <i class="fas {expandTraits ? 'fa-chevron-up' : 'fa-chevron-down'}"></i> {expandTraits ? 'OCULTAR' : 'EXPANDIR'}
+                            </button>
+                        </div>
                     </div>
                     
                     {#if expandTraits}
                         <div class="traits-list expanded" transition:slide|local>
-                            {#each originData.traits as t}
+                            {#each displayedTraits as t}
                                 <div class="trait-card" on:click={() => activePopup = {title: t.name, desc: t.effect}}>
-                                    <strong>{t.name}</strong>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                        <strong>{t.name}</strong>
+                                        {#if isGM}
+                                            <button type="button" title="Remover da ficha" on:click|stopPropagation={() => toggleOriginTraitGM(t.name)} style="background: transparent; border: 1px solid #ff4444; color: #ff4444; border-radius: 3px; width: 20px; height: 20px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">×</button>
+                                        {/if}
+                                    </div>
                                     <p>{t.effect}</p>
                                 </div>
                             {/each}
                             {#if originData.enhancements && originData.enhancements.length > 0}
                                 <div class="enhancements-separator">APRIMORAMENTOS DESBLOQUEADOS</div>
-                                {#each originData.enhancements.filter(e => activeLevel >= e.level) as e}
+                                {#each displayedEnhancements as e}
                                     <div class="trait-card enhancement" on:click={() => activePopup = {title: e.name, desc: e.desc}}>
-                                        <strong>[Nv {e.level}] {e.name}</strong>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                                            <strong>[Nv {e.level}] {e.name}</strong>
+                                            {#if isGM}
+                                                <button type="button" title="Remover da ficha" on:click|stopPropagation={() => toggleOriginEnhancementGM(e)} style="background: transparent; border: 1px solid #ff4444; color: #ff4444; border-radius: 3px; width: 20px; height: 20px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;">×</button>
+                                            {/if}
+                                        </div>
                                         <p>{e.desc}</p>
                                     </div>
                                 {/each}
-                                {#if originData.enhancements.filter(e => activeLevel >= e.level).length === 0}
-                                    <p style="font-size: 10px; color: #555; font-style: italic; margin-top: 5px;">Nenhum aprimoramento desbloqueado pelo nível atual.</p>
+                                {#if displayedEnhancements.length === 0}
+                                    <p style="font-size: 10px; color: #555; font-style: italic; margin-top: 5px;">Nenhum aprimoramento ativo na ficha.</p>
                                 {/if}
                             {/if}
                         </div>
                     {:else}
                         <div class="traits-list">
-                            {#each originData.traits as t}
+                            {#each displayedTraits as t}
                                 <span class="trait-tag" on:click={() => activePopup = {title: t.name, desc: t.effect}}>{t.name}</span>
                             {/each}
-                            {#if originData.enhancements && originData.enhancements.length > 0}
-                                {#each originData.enhancements.filter(e => activeLevel >= e.level) as e}
+                            {#if displayedEnhancements.length > 0}
+                                {#each displayedEnhancements as e}
                                     <span class="trait-tag enhancement" on:click={() => activePopup = {title: e.name, desc: e.desc}}><i class="fas fa-star" style="font-size: 8px;"></i> {e.name}</span>
                                 {/each}
                             {/if}

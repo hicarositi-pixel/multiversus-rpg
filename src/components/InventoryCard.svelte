@@ -29,12 +29,29 @@
   $: isCompact = inGrid && (width === 1 && height === 1); 
   $: showFooter = !inGrid || height > 1; // Footer exige altura > 1 no grid
   $: showHeader = !inGrid || !isCompact; // Header visível se não for compacto
+
+  let pointerStart = null;
+  function handlePointerDown(e) {
+    if (e.button !== 0) return;
+    pointerStart = { x: e.clientX, y: e.clientY };
+  }
+  function handlePointerUp(e) {
+    if (e.button !== 0 || !pointerStart) return;
+    const dx = Math.abs(e.clientX - pointerStart.x);
+    const dy = Math.abs(e.clientY - pointerStart.y);
+    pointerStart = null;
+    if (dx < 6 && dy < 6) {
+      if (e.target.closest('.gm-terminal') || e.target.closest('.player-inspect-btn')) return;
+      onSelect && onSelect(item);
+    }
+  }
 </script>
 
 <div 
   class="matrix-card {inGrid ? 'mode-grid' : 'mode-stash'} {isCompact ? 'compact' : ''} rar-{config.fx}" 
   style="--neon: {neon}; --w: {width}; --h: {height}" 
-  on:click={() => onSelect(item)}
+  on:pointerdown={handlePointerDown}
+  on:pointerup={handlePointerUp}
   title="{item.name} | {item.rarity}"
 >
   <div class="card-base"></div>
@@ -97,16 +114,26 @@
       {/if}
       
       <div class="cmd-group">
-        <button on:click={() => onUpdateQty(index, -1)} class="cmd-btn">-</button>
+        <button type="button" on:click|stopPropagation={() => onUpdateQty(index, { qty: Math.max(0, (item.qty || 1) - 1) })} class="cmd-btn">-</button>
         <span class="qty-display">{item.qty}</span>
-        <button on:click={() => onUpdateQty(index, 1)} class="cmd-btn">+</button>
+        <button type="button" on:click|stopPropagation={() => onUpdateQty(index, { qty: (item.qty || 1) + 1 })} class="cmd-btn">+</button>
       </div>
       
       <div class="cmd-footer">
-        <button on:click={() => onSelect(item)} title="Editar"><i class="fas fa-edit"></i></button>
-        <button on:click={() => onDelete(item.id || index)} title="Remover" class="del"><i class="fas fa-trash"></i></button>
+        <button type="button" on:click|stopPropagation={() => onSelect(item)} title="Visualizar / Editar"><i class="fas fa-edit"></i></button>
+        <button type="button" on:click|stopPropagation={() => onDelete(item.id || index)} title="Remover" class="del"><i class="fas fa-trash"></i></button>
       </div>
     </div>
+  {:else}
+    <button
+      type="button"
+      class="player-inspect-btn {isCompact ? 'compact' : ''}"
+      on:pointerdown|stopPropagation
+      on:click|stopPropagation={() => onSelect && onSelect(item)}
+      title="Abrir e Ler Item"
+    >
+      <i class="fas fa-eye"></i> {#if !isCompact}LER{/if}
+    </button>
   {/if}
 </div>
 
@@ -122,7 +149,46 @@
     transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s, border-color 0.2s;
     user-select: none;
     box-sizing: border-box;
+    cursor: pointer;
     will-change: transform; /* Otimização de GPU */
+  }
+
+  .player-inspect-btn {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    z-index: 60;
+    background: rgba(0, 0, 0, 0.9);
+    border: 1px solid var(--neon);
+    color: var(--neon);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 3px 7px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s, color 0.2s;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
+  }
+  .player-inspect-btn.compact {
+    inset: 0;
+    bottom: 0;
+    right: 0;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    border: none;
+    font-size: 12px;
+  }
+  .matrix-card:hover .player-inspect-btn {
+    opacity: 1;
+  }
+  .player-inspect-btn:hover {
+    background: var(--neon);
+    color: #000;
   }
 
   /* --- MODOS DE EXIBIÇÃO --- */

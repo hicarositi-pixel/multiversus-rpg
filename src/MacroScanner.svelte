@@ -9,6 +9,7 @@ import CombatHub from './apps/combat/CombatHub.svelte';
     import RollEngine from './apps/components/RollEngine.svelte'; 
     import MiroHub from './MiroHub.svelte'; 
     import ArchetypeManager from './apps/ArchetypeManager.svelte';
+    import CreatorApp from './auxiliar/CreatorApp.svelte';
 
     const MODULE_ID = "multiversus-rpg";
     const user = game.user;
@@ -87,27 +88,14 @@ import CombatHub from './apps/combat/CombatHub.svelte';
             else ui.notifications.warn("Nenhum alvo selecionado. Clique em um token primeiro.");
             isOpen = false; return;
         }
-        
-        // 2. Ficha Móvel Tática (Svelte App Independente)
-        if (appId === 'mobileHud') {
-            const api = game.modules.get(MODULE_ID)?.api;
-            if (api && api.MobileHudApp) {
-                const existing = Object.values(ui.windows).find(w => w.id === "nexus-mobile-hud-app");
-                if (existing) existing.close();
-                else new api.MobileHudApp().render(true);
-            } else {
-                ui.notifications.error("SISTEMA TÁTICO OFFLINE. A API não foi carregada.");
-            }
-            isOpen = false; return;
-        }
 
-        // 3. Seletor do Detetive (Miro)
+        // 2. Seletor do Detetive (Miro)
         if (appId === 'detetive') {
             showBoardSelector = !showBoardSelector;
             return;
         }
         
-        // 4. Os outros apps que abrem direto em cima da tela (CombatHub, Loja, Dados)
+        // 3. Os outros apps que abrem direto em cima da tela (Novo Agente, CombatHub, Loja, Dados)
         activeApp = (activeApp === appId) ? null : appId;
         isOpen = false;
         showBoardSelector = false;
@@ -140,6 +128,10 @@ import CombatHub from './apps/combat/CombatHub.svelte';
 <div class="apps-overlay">
     {#if activeApp === 'combate'}
         <CombatHub actor={currentActor} />
+    {/if}
+
+    {#if activeApp === 'creator'}
+        <CreatorApp on:close={() => activeApp = null} />
     {/if}
 
     {#if activeApp === 'loja'}
@@ -196,16 +188,16 @@ import CombatHub from './apps/combat/CombatHub.svelte';
                     <i class="fas {currentActor ? 'fa-id-card' : 'fa-lock'}"></i>
                 </button>
                 
-                <button class="m-btn star-pt n2" on:click={(e) => openApp('combate', e)} title="NEXUS COMBAT OS">
+                <button class="m-btn star-pt n2" on:click={(e) => openApp('creator', e)} title="NOVO AGENTE">
+                    <i class="fas fa-user-plus"></i>
+                </button>
+
+                <button class="m-btn star-pt n3" on:click={(e) => openApp('combate', e)} title="NEXUS COMBAT OS">
                     <i class="fas fa-crosshairs"></i>
                 </button>
 
-                <button class="m-btn star-pt n3" on:click={(e) => openApp('loja', e)} title="DATABASE DE ITENS">
+                <button class="m-btn star-pt n4" on:click={(e) => openApp('loja', e)} title="DATABASE DE ITENS">
                     <i class="fas fa-shopping-cart"></i>
-                </button>
-
-                <button class="m-btn star-pt n4" on:click={(e) => openApp('mobileHud', e)} title="FICHA MÓVEL TÁTICA">
-                    <i class="fas fa-tablet-alt"></i>
                 </button>
 
                 <button class="m-btn star-pt n5" on:click={(e) => openApp('dados', e)} title="ROLAGEM RÁPIDA">

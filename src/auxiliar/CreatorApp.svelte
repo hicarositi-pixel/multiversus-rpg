@@ -5,12 +5,17 @@
     import { AuxiliarSystem } from './AuxiliarSystem.js';
     import { OriginDatabase } from '../OriginDatabase.js';
     import { ArchetypeDatabase } from '../database/ArchetypeDatabase.js';
+    import { StoreDatabase } from '../StoreDatabase.js';
+    import { PowerDatabase } from './PowerDatabase.js';
+    import { calculateCapacity, CAPACITY_TYPES } from '../data/capacities-data.js';
+    import { getBasePowerXP, getMaxPowerPB, normalizePowerCategoryAndRarity } from '../utils/PowerRules.js';
 
     const dispatch = createEventDispatcher();
     const MODULE_ID = "multiversus-rpg";
     
     // --- DADOS GERAIS ---
     let playerList = game.users ? game.users.filter(u => !u.isGM).map(u => ({ id: u.id, name: u.name })) : [];
+    const isPrivilegedCreator = game.user.isGM || AuxiliarSystem.isAuxiliar(game.user);
     
     let origins = [];
     let archetypes = [];
@@ -18,9 +23,30 @@
     // --- ESTADOS DO CRIADOR ---
     let currentStep = 1; // 1: Origem, 2: Arquétipos, 3: Atributos, 4: Finalizar
     let newCharName = "";
-    let selectedPlayerId = "";
+    let selectedPlayerId = game.user.isGM ? "" : game.user.id;
     let isProcessing = false;
     let progress = 0;
+
+    // Controle de Rolagem e Re-roll de Origem para Jogadores
+    let freeOriginRollUsed = Boolean(game.user.getFlag(MODULE_ID, "originFreeRollUsed"));
+    let availableOriginRerolls = 0;
+    let configuredOriginRerollName = "Re-roll de Origem";
+
+    function refreshOriginRerollStatus() {
+        try {
+            configuredOriginRerollName = (game.settings.get(MODULE_ID, "originRerollItemName") || "Re-roll de Origem").trim();
+        } catch (e) {
+            configuredOriginRerollName = "Re-roll de Origem";
+        }
+        freeOriginRollUsed = Boolean(game.user.getFlag(MODULE_ID, "originFreeRollUsed"));
+        const credits = Number(game.user.getFlag(MODULE_ID, "originRerollCredits")) || 0;
+        const pData = StoreDatabase.getPlayerData(game.user.id);
+        const targetLower = configuredOriginRerollName.toLowerCase();
+        const unactivatedMatching = (pData.items || []).filter(
+            i => !i.active && (i.name || "").trim().toLowerCase() === targetLower
+        ).length;
+        availableOriginRerolls = credits + unactivatedMatching;
+    }
 
     // Background & Avatar Config (Lido do game.settings)
     let bgUrl = game.settings.get(MODULE_ID, "creatorBgUrl") || "";
@@ -32,67 +58,140 @@
     let rollCategory = "";
     $: filteredOrigins = origins.filter(o => o.name.toLowerCase().includes(originSearch.toLowerCase()));
 
-    // --- PASSO 2: ARQUÉTIPOS (Talentos) ---
-    let selectedTalents = [];
-    let expandedTalentsIds = new Set();
-    let selectedArchetypes = new Set();
-    $: canProceedArchetypes = selectedTalents.length === 3; // Regra: Escolher 3 talentos
+    // --- PASSO 2: TALENTO PERSONALIZÁVEL & ARQUÉTIPOS (Talentos) ---
+    let customTalentName = "";
+    let customTalentDesc = "";
+    let expandCustomTalentModal = false;
 
-    function toggleTalentExpand(id) {
-        if (expandedTalentsIds.has(id)) expandedTalentsIds.delete(id);
-        else expandedTalentsIds.add(id);
-        expandedTalentsIds = expandedTalentsIds;
+    let selectedTalents = [];
+    let selectedArchetypes = new Set();
+    let powersArchiveCache = [];
+    let viewedKitTalent = null;
+    let viewedTalentTab = "ficha";
+    let viewedTalentMaximized = false;
+    $: canProceedArchetypes = selectedTalents.length === 3;
+
+    const CATEGORY_LABELS = {
+        principal: "Talento Principal",
+        secundario: "Talento Secundário",
+        memoria: "Memória",
+        habilidade: "Habilidade Especial",
+        origem: "Kit de Origem",
+        item: "Item",
+        estrutura: "Estrutura",
+        intrinseca: "Habilidade Intrínseca"
+    };
+
+    function getQualityMeta(qType) {
+        const up = (qType || "").toString().toUpperCase();
+        if (up === "ATK" || up === "A" || up === "ATAQUE") return { code: "A", label: "ATAQUE", color: "#ff4444" };
+        if (up === "DEF" || up === "D" || up === "DEFESA") return { code: "D", label: "DEFESA", color: "#44aaff" };
+        return { code: "U", label: "UTILIDADE", color: "#ffaa00" };
     }
 
-    function formatPowerStructure(item) {
-        if (!item || item.type !== 'power') {
-            return item?.system?.description || 'Sem descrição.';
-        }
-        const flags = item.flags?.["multiversus-rpg"] || {};
-        const qualities = flags.qualities || [];
-        
-        const getQ = (types) => qualities.filter(q => types.includes(q.type?.toUpperCase()) || types.includes(q.name?.toUpperCase()));
-        const attackQ = getQ(['A', 'ATAQUE']);
-        const defenseQ = getQ(['D', 'DEFESA']);
-        const utilityQ = getQ(['U', 'UTILIDADE']);
+    function resolveAssociatedTalentData(t) {
+        const targetId = t?.foundryItemId || "";
+        const targetName = (t?.name || "").trim().toLowerCase();
 
-        let detailsHTML = "";
-        const formatCat = (list, label, color, icon) => {
-            if (!list.length) return "";
-            let h = `<div style="margin-top: 10px; border-left: 2px solid ${color}; padding-left: 8px;">
-                        <h4 style="margin: 0 0 5px 0; color: ${color}; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
-                            <span style="background: ${color}; color: #000; padding: 1px 4px; border-radius: 2px;">${icon}</span> ${label}
-                        </h4>`;
-            list.forEach(q => {
-                h += `<div style="font-size: 11px; margin-bottom: 4px; color: #ddd; font-family: sans-serif;">
-                        <strong>${q.name || 'Sub-rotina'}:</strong> ${q.description || 'Sem descrição específica.'}
-                      </div>`;
-            });
-            h += `</div>`;
-            return h;
+        // 1. Procura nos Itens do Mundo (Foundry World Items)
+        let worldItem = null;
+        if (game.items) {
+            if (targetId) worldItem = game.items.get(targetId) || null;
+            if (!worldItem && targetName) {
+                worldItem = game.items.find(i => i.type === "power" && (i.name || "").trim().toLowerCase() === targetName) || null;
+            }
+        }
+
+        // 2. Procura no Data Core (Forja de Poder / PowerDatabase)
+        let dbEntry = null;
+        if (Array.isArray(powersArchiveCache) && powersArchiveCache.length > 0) {
+            if (targetId) {
+                dbEntry = powersArchiveCache.find(p => p.id === targetId || p.rawItem?.id === targetId) || null;
+            }
+            if (!dbEntry && targetName) {
+                dbEntry = powersArchiveCache.find(p => (p.name || "").trim().toLowerCase() === targetName) || null;
+            }
+        }
+
+        // 3. Procura no Arquivo da Loja (StoreDatabase - DB GERAL) para descrições/visualizações HTML associadas
+        let storeEntry = null;
+        try {
+            const sArchive = StoreDatabase.getArchive() || [];
+            if (targetId) storeEntry = sArchive.find(s => s.id === targetId) || null;
+            if (!storeEntry && targetName) {
+                storeEntry = sArchive.find(s => (s.name || "").trim().toLowerCase() === targetName) || null;
+            }
+        } catch (e) {}
+
+        let itemObj;
+        if (worldItem) {
+            itemObj = worldItem.toObject();
+        } else if (dbEntry?.rawItem) {
+            itemObj = foundry.utils.deepClone(dbEntry.rawItem);
+            if (!itemObj.name) itemObj.name = dbEntry.name || t.name;
+            if (!itemObj.img) itemObj.img = dbEntry.img || t.img;
+        } else {
+            itemObj = foundry.utils.deepClone(t);
+        }
+
+        return { itemObj, storeEntry };
+    }
+
+    async function openTalentViewer(t, arch) {
+        try {
+            powersArchiveCache = await PowerDatabase.getArchive();
+        } catch (e) {}
+
+        const { itemObj, storeEntry } = resolveAssociatedTalentData(t);
+        const flags = itemObj.flags?.[MODULE_ID] || {};
+        const sys = itemObj.system || {};
+        const norm = normalizePowerCategoryAndRarity(flags.category || "principal", flags.rarity || "Comum");
+        const qualities = Array.isArray(flags.qualities) ? flags.qualities : [];
+
+        const usedPB = qualities.reduce((sum, q) => {
+            const extrasCost = (q.extras || []).reduce((acc, e) => acc + ((Number(e.cost) || 0) * (Number(e.qty) || 1)), 0);
+            return sum + Math.max(1, 2 + (Number(q.level) || 0) + extrasCost);
+        }, 0);
+        const maxPB = getMaxPowerPB(norm.category, norm.rarity);
+        const xpPerDie = getBasePowerXP(norm.category, norm.rarity) || t.cost || 0;
+
+        const dice = flags.dice || { normal: 0, hard: 0, wiggle: 0 };
+        const totalDice = (Number(dice.normal) || 0) + (Number(dice.hard) || 0) + (Number(dice.wiggle) || 0);
+        const effectiveDiceForCap = Math.max(1, totalDice);
+
+        const rawNotes = sys.notes ?? flags.notes ?? flags.systemNotes ?? flags.effect ?? sys.description ?? "";
+        const notesStr = typeof rawNotes === "string" ? rawNotes : (rawNotes?.value || "");
+
+        const storeHtml = (storeEntry?.system?.description && typeof storeEntry.system.description === "string" && storeEntry.system.description.includes("<"))
+            ? storeEntry.system.description
+            : "";
+        const visualizationHtml = (flags.visualizationHtml || "").trim() || storeHtml;
+
+        viewedTalentTab = "ficha";
+        viewedKitTalent = {
+            kitRef: t,
+            archId: arch?.id || t.archId,
+            archName: arch?.name || "Arquétipo",
+            name: itemObj.name || t.name,
+            img: flags.customUrl || itemObj.img || t.img || "icons/svg/lightning.svg",
+            category: norm.category,
+            categoryLabel: CATEGORY_LABELS[norm.category] || norm.category.toUpperCase(),
+            rarity: norm.rarity,
+            xpPerDie,
+            usedPB,
+            maxPB,
+            dice: {
+                normal: Number(dice.normal) || 0,
+                hard: Number(dice.hard) || 0,
+                wiggle: Number(dice.wiggle) || 0
+            },
+            totalDice,
+            effectiveDiceForCap,
+            tags: Array.isArray(flags.tags) ? flags.tags : [],
+            qualities,
+            notesStr: notesStr.trim(),
+            visualizationHtml
         };
-
-        detailsHTML += formatCat(attackQ, "ATAQUE", "#ff4444", "A");
-        detailsHTML += formatCat(defenseQ, "DEFESA", "#44aaff", "D");
-        detailsHTML += formatCat(utilityQ, "UTILIDADE", "#ffaa00", "U");
-
-        const sysNotes = flags.notes || flags.systemNotes || item.system?.notes || item.system?.description;
-        const notesText = typeof sysNotes === 'string' ? sysNotes : sysNotes?.value;
-        if (notesText && notesText.trim() !== '' && notesText.trim() !== '<p></p>') {
-            detailsHTML += `<div style="margin-top: 10px; border-top: 1px dashed #00ff41; padding-top: 8px;">
-                                <h4 style="margin: 0 0 5px 0; color: #00ff41; font-size: 13px; font-weight: bold; font-family: monospace; letter-spacing: 1px;">
-                                    NOTAS DE SISTEMA
-                                </h4>
-                                <div style="font-size: 11px; color: #ccc; font-family: sans-serif;">
-                                    ${notesText}
-                                </div>
-                            </div>`;
-        }
-
-        if (!detailsHTML) {
-            detailsHTML = `<div style="margin-top: 10px; font-style: italic; color: #888; font-size: 11px; font-family: monospace;">Nenhuma sub-rotina ou nota registrada.</div>`;
-        }
-        return detailsHTML;
     }
 
     // --- PASSO 3: ATRIBUTOS E PERÍCIAS ---
@@ -153,10 +252,25 @@
     $: pointsLeft = totalPoints - usedPoints;
     $: canProceedPoints = pointsLeft === 0 && newCharName.trim() !== "";
 
-    onMount(async () => {
-        const oDict = await OriginDatabase.load();
-        origins = Object.values(oDict);
-        archetypes = ArchetypeDatabase.getArchetypes();
+    onMount(() => {
+        rollCategory = game.user.getFlag(MODULE_ID, "lastOriginRollCategory") || "";
+        refreshOriginRerollStatus();
+        const storeHookId = Hooks.on("storeUpdate", refreshOriginRerollStatus);
+
+        (async () => {
+            const oDict = await OriginDatabase.load();
+            origins = Object.values(oDict);
+            archetypes = ArchetypeDatabase.getArchetypes();
+            try {
+                powersArchiveCache = await PowerDatabase.getArchive();
+            } catch (e) {
+                powersArchiveCache = [];
+            }
+        })();
+
+        return () => {
+            Hooks.off("storeUpdate", storeHookId);
+        };
     });
 
     // --- FUNÇÕES DE LÓGICA ---
@@ -172,6 +286,37 @@
     }
 
     async function rollOrigin() {
+        refreshOriginRerollStatus();
+        let rollType = "Mestre / Auxiliar (Livre)";
+
+        if (!isPrivilegedCreator) {
+            if (!freeOriginRollUsed) {
+                await game.user.setFlag(MODULE_ID, "originFreeRollUsed", true);
+                rollType = "1ª Rolagem (Gratuita)";
+            } else {
+                const credits = Number(game.user.getFlag(MODULE_ID, "originRerollCredits")) || 0;
+                if (credits > 0) {
+                    await game.user.setFlag(MODULE_ID, "originRerollCredits", Math.max(0, credits - 1));
+                    rollType = `Re-roll (Crédito: ${configuredOriginRerollName})`;
+                } else {
+                    const pData = StoreDatabase.getPlayerData(game.user.id);
+                    const targetLower = configuredOriginRerollName.toLowerCase();
+                    const idx = (pData.items || []).findIndex(
+                        i => !i.active && (i.name || "").trim().toLowerCase() === targetLower
+                    );
+                    if (idx === -1) {
+                        ui.notifications.warn(`Você já realizou sua rolagem gratuita de Origem! Para rolar novamente, obtenha ou ative o item "${configuredOriginRerollName}" na Loja.`);
+                        return;
+                    }
+                    const consumedName = pData.items[idx].name || configuredOriginRerollName;
+                    pData.items[idx].active = true;
+                    await game.user.setFlag(MODULE_ID, "playerData", pData);
+                    Hooks.callAll("storeUpdate");
+                    rollType = `Re-roll (Estoque: ${consumedName})`;
+                }
+            }
+        }
+
         const roll = new Roll("1d100");
         await roll.evaluate();
         const result = roll.total;
@@ -185,8 +330,19 @@
         if (result === 66 || result === 69) rarity = "Pactado (66 ou 69)";
         
         rollCategory = `${result} - ${rarity}`;
+        await game.user.setFlag(MODULE_ID, "lastOriginRollCategory", rollCategory);
+        refreshOriginRerollStatus();
+
+        const ownerUser = selectedPlayerId ? game.users.get(selectedPlayerId) : (!game.user.isGM ? game.user : null);
+        Hooks.callAll("nexusOriginRoll", {
+            rollerName: game.user.name,
+            ownerName: ownerUser ? ownerUser.name : "Não vinculado",
+            rollType,
+            result,
+            rarity
+        });
+
         ui.notifications.info(`Rolagem: ${result} - Categoria Permitida: ${rarity}`);
-        // Isso não restringe mecanicamente ainda, apenas dá a informação ao jogador
     }
 
     function toggleTalent(talent, archId) {
@@ -245,19 +401,19 @@
             });
             if (selectedPlayerId) ownership[selectedPlayerId] = 3;
 
-            // Formatação do sistema de atributos para a ficha
             const sysData = {
                 origin: selectedOrigin.name
             };
 
             const actorData = {
-                name: newCharName,
+                name: newCharName.trim(),
                 type: "character", 
                 img: avatarUrl,
                 ownership: ownership,
                 system: sysData,
                 flags: {
                     [MODULE_ID]: {
+                        origin: selectedOrigin.id,
                         stats: {
                             body: { normal: attributes.body.val, h_normal: 0, h_hard: 0, h_wiggle: 0 },
                             coordination: { normal: attributes.coordination.val, h_normal: 0, h_hard: 0, h_wiggle: 0 },
@@ -278,25 +434,103 @@
                 }
             };
 
-            const cls = getDocumentClass("Actor");
-            const newActor = await cls.create(actorData);
+            try {
+                powersArchiveCache = await PowerDatabase.getArchive();
+            } catch (e) {}
 
-            // Adiciona a Origin como um Item (se for suportado na ficha)
-            if (selectedOrigin) {
-                // Se a origem fosse um Item real, adicionaríamos. Aqui registramos no sysData.origin acima.
+            const hasCustomTalent = Boolean(customTalentName.trim() || customTalentDesc.trim());
+            if (hasCustomTalent) {
+                actorData.flags[MODULE_ID].customTalentRequest = {
+                    name: customTalentName.trim(),
+                    description: customTalentDesc.trim(),
+                    createdAt: Date.now()
+                };
             }
 
-            // Adiciona Talentos selecionados
             const itemsToCreate = selectedTalents.map(t => {
-                let itemData = foundry.utils.duplicate(t);
-                delete itemData.id; delete itemData.archId; delete itemData.foundryItemId;
+                const { itemObj } = resolveAssociatedTalentData(t);
+                let itemData = foundry.utils.duplicate(itemObj);
+                delete itemData.id; delete itemData._id; delete itemData.archId; delete itemData.foundryItemId;
+                itemData.type = itemData.type || "power";
                 itemData.system = itemData.system || {};
                 itemData.system.equipped = true;
+                if (itemData.flags?.[MODULE_ID]) {
+                    const norm = normalizePowerCategoryAndRarity(
+                        itemData.flags[MODULE_ID].category,
+                        itemData.flags[MODULE_ID].rarity
+                    );
+                    itemData.flags[MODULE_ID].category = norm.category;
+                    itemData.flags[MODULE_ID].rarity = norm.rarity;
+                }
                 return itemData;
             });
 
-            if (itemsToCreate.length > 0) {
-                await newActor.createEmbeddedDocuments("Item", itemsToCreate);
+            const targetOwnerId = selectedPlayerId || (!game.user.isGM ? game.user.id : "");
+            const ownerUser = targetOwnerId ? game.users.get(targetOwnerId) : null;
+            let newActor = null;
+
+            if (game.user.can("ACTOR_CREATE")) {
+                const cls = getDocumentClass("Actor");
+                newActor = await cls.create(actorData);
+                if (newActor && itemsToCreate.length > 0) {
+                    await newActor.createEmbeddedDocuments("Item", itemsToCreate);
+                }
+                if (newActor && ownerUser && !ownerUser.isGM && !ownerUser.character && (game.user.isGM || ownerUser.id === game.user.id)) {
+                    await ownerUser.update({ character: newActor.id });
+                }
+            } else {
+                const activeGM = game.users.find(u => u.isGM && u.active);
+                if (!activeGM) {
+                    throw new Error("Um Mestre precisa estar online para registrar um Novo Agente.");
+                }
+                const requestId = foundry.utils.randomID();
+                const createdActorId = await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => {
+                        Hooks.off("creatorActorCreated", hookId);
+                        reject(new Error("Tempo esgotado aguardando confirmação do Mestre."));
+                    }, 15000);
+
+                    const hookId = Hooks.on("creatorActorCreated", (res) => {
+                        if (res?.requestId !== requestId) return;
+                        clearTimeout(timeout);
+                        Hooks.off("creatorActorCreated", hookId);
+                        if (res.error || !res.actorId) {
+                            reject(new Error(res.error || "Não foi possível criar a ficha."));
+                        } else {
+                            resolve(res.actorId);
+                        }
+                    });
+
+                    game.socket.emit(`module.${MODULE_ID}`, {
+                        type: "CREATOR_CREATE_ACTOR",
+                        requestId,
+                        userId: game.user.id,
+                        selectedPlayerId: targetOwnerId,
+                        actorData,
+                        itemsToCreate
+                    });
+                });
+                newActor = game.actors.get(createdActorId) || null;
+            }
+
+            Hooks.callAll("nexusAgentCreated", {
+                charName: newCharName.trim(),
+                creatorName: game.user.name,
+                ownerName: ownerUser ? ownerUser.name : "Sem vínculo",
+                originName: selectedOrigin.name,
+                rollCategory: rollCategory || "Nenhuma rolagem realizada"
+            });
+
+            if (hasCustomTalent) {
+                Hooks.callAll("nexusCustomTalentRequest", {
+                    charName: newCharName.trim(),
+                    creatorName: game.user.name,
+                    ownerName: ownerUser ? ownerUser.name : "Sem vínculo",
+                    originName: selectedOrigin.name,
+                    talentName: customTalentName.trim() || "Talento Personalizado",
+                    talentDescription: customTalentDesc.trim(),
+                    selectedKitTalents: selectedTalents.map(t => t.name)
+                });
             }
 
             clearInterval(interval);
@@ -306,11 +540,14 @@
                 if (newActor) {
                     ui.notifications.info(`>> PROTOCOLO: [${newActor.name}] REGISTRADO COM SUCESSO.`);
                     await newActor.sheet.render(true);
-                    dispatch('close');
+                } else {
+                    ui.notifications.info(`>> PROTOCOLO: [${newCharName.trim()}] REGISTRADO COM SUCESSO.`);
                 }
+                dispatch('close');
             }, 600);
 
         } catch (err) {
+            clearInterval(interval);
             console.error(err);
             ui.notifications.error(`FALHA CRÍTICA: ${err.message}`);
             isProcessing = false; progress = 0;
@@ -373,6 +610,32 @@
                 <div class="step-content" in:fly={{x: 20, duration: 300}}>
                     <h2>SELECIONE SUA ORIGEM</h2>
                     <p class="desc">A origem define seu passado no Multiverso.</p>
+
+                    <div class="owner-bar">
+                        <span class="owner-lbl"><i class="fas fa-user-shield"></i> DONO DA FICHA:</span>
+                        {#if isPrivilegedCreator}
+                            <select class="owner-select" bind:value={selectedPlayerId}>
+                                <option value="">Sem vínculo (Definir depois)</option>
+                                {#each playerList as p}
+                                    <option value={p.id}>{p.name}</option>
+                                {/each}
+                            </select>
+                        {:else}
+                            <span class="owner-fixed">{game.user.name}</span>
+                        {/if}
+                    </div>
+
+                    {#if !isPrivilegedCreator}
+                        <div class="reroll-status-bar" class:has-roll={!freeOriginRollUsed || availableOriginRerolls > 0}>
+                            {#if !freeOriginRollUsed}
+                                <i class="fas fa-check-circle"></i> 1ª Rolagem Gratuita Disponível
+                            {:else if availableOriginRerolls > 0}
+                                <i class="fas fa-sync-alt"></i> Re-rolls ({configuredOriginRerollName}): <b>{availableOriginRerolls}</b>
+                            {:else}
+                                <i class="fas fa-lock"></i> Rolagem realizada — Requer <b>{configuredOriginRerollName}</b> para re-rolar
+                            {/if}
+                        </div>
+                    {/if}
                     
                     <div class="search-box">
                         <input type="text" bind:value={originSearch} placeholder="Buscar origens..." />
@@ -411,11 +674,40 @@
                 </div>
             {/if}
 
-            <!-- PASSO 2: ARQUÉTIPOS E TALENTOS -->
+            <!-- PASSO 2: TALENTO PERSONALIZÁVEL, ARQUÉTIPOS E TALENTOS -->
             {#if currentStep === 2}
                 <div class="step-content" in:fly={{x: 20, duration: 300}}>
+                    <div class="custom-talent-box">
+                        <div class="ct-header">
+                            <div>
+                                <h2><i class="fas fa-sparkles"></i> TALENTO PERSONALIZÁVEL</h2>
+                                <p class="desc">Descreva o talento personalizado desejado para o personagem (opcional).</p>
+                            </div>
+                            <button class="btn-expand-ct" type="button" on:click={() => expandCustomTalentModal = true} title="Expandir campo de escrita">
+                                <i class="fas fa-expand-alt"></i>
+                            </button>
+                        </div>
+                        <input
+                            type="text"
+                            class="ct-input"
+                            bind:value={customTalentName}
+                            placeholder="Nome ou conceito do Talento Personalizado..."
+                        />
+                        <textarea
+                            class="ct-textarea custom-scroll"
+                            bind:value={customTalentDesc}
+                            rows="3"
+                            placeholder="Descreva efeitos, funcionamento, limites e ideia do talento para o personagem..."
+                        ></textarea>
+                        <div class="ct-hint">
+                            <i class="fab fa-discord"></i> Encaminhado automaticamente ao Discord ao finalizar a criação.
+                        </div>
+                    </div>
+
+                    <div class="ct-divider"></div>
+
                     <h2>KITS DE PODER</h2>
-                    <p class="desc">Escolha até 3 talentos iniciais dos arquétipos disponíveis.</p>
+                    <p class="desc">Escolha até 3 talentos iniciais. Clique em qualquer talento para ler seus dados completos.</p>
                     <div class="progress-info" style="color: {selectedTalents.length === 3 ? '#00ff41' : '#fff'};">
                         Selecionados: {selectedTalents.length} / 3
                     </div>
@@ -429,32 +721,21 @@
                                 <div class="arch-talents">
                                     {#each arch.talents as t}
                                         {@const isSelected = selectedTalents.find(st => st.id === t.id)}
-                                        {@const isExpanded = expandedTalentsIds.has(t.id)}
                                         <!-- svelte-ignore a11y-click-events-have-key-events -->
                                         <!-- svelte-ignore a11y-no-static-element-interactions -->
-                                        <div class="talent-card {isSelected ? 'selected' : ''}" 
-                                             on:click={() => toggleTalentExpand(t.id)}
-                                             style="align-items: {isExpanded ? 'flex-start' : 'center'}; flex-direction: {isExpanded ? 'column' : 'row'};">
-                                            
+                                        <div class="talent-card {isSelected ? 'selected' : ''}"
+                                             on:click={() => openTalentViewer(t, arch)}
+                                             title="Clique para visualizar os dados deste talento">
                                             <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
                                                 <img src={t.img} alt=""/>
                                                 <div class="t-info">
                                                     <b>{t.name}</b>
-                                                    {#if !isExpanded}
-                                                    <span>Custo por Dado: {t.cost}</span>
-                                                    {/if}
+                                                    <span>Custo por Dado: {t.cost} • <em class="read-hint"><i class="fas fa-book-open"></i> Ler</em></span>
                                                 </div>
-                                                <button class="select-btn" on:click|stopPropagation={() => toggleTalent(t, arch.id)} style="background: {isSelected ? '#00ff41' : 'transparent'}; color: {isSelected ? '#000' : '#00ff41'}; border: 1px solid #00ff41; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 10px; font-weight: bold; margin-left: auto;">
+                                                <button class="select-btn" type="button" on:click|stopPropagation={() => toggleTalent(t, arch.id)} style="background: {isSelected ? '#00ff41' : 'transparent'}; color: {isSelected ? '#000' : '#00ff41'}; border: 1px solid #00ff41; border-radius: 4px; padding: 5px 10px; cursor: pointer; font-size: 10px; font-weight: bold; margin-left: auto;">
                                                     {isSelected ? 'SELECIONADO' : 'SELECIONAR'}
                                                 </button>
                                             </div>
-
-                                            {#if isExpanded}
-                                                <div style="margin-top: 10px; color: #ccc; font-size: 12px; width: 100%;">
-                                                    <div style="color: #00ff41; margin-bottom: 5px; font-weight: bold;">Custo por Dado: {t.cost}</div>
-                                                    {@html formatPowerStructure(t)}
-                                                </div>
-                                            {/if}
                                         </div>
                                     {/each}
                                 </div>
@@ -507,8 +788,10 @@
 
                     <div class="finish-zone">
                         <input type="text" class="m-input" bind:value={newCharName} placeholder="Nome do Personagem (Obrigatório)" disabled={isProcessing}/>
-                        <select class="m-input" bind:value={selectedPlayerId} disabled={isProcessing}>
-                            <option value="">Vincular a Jogador (Opcional)</option>
+                        <select class="m-input" bind:value={selectedPlayerId} disabled={!isPrivilegedCreator || isProcessing}>
+                            {#if isPrivilegedCreator}
+                                <option value="">Vincular a Jogador (Opcional)</option>
+                            {/if}
                             {#each playerList as p}
                                 <option value={p.id}>{p.name}</option>
                             {/each}
@@ -526,6 +809,197 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL: EDITOR EXPANDIDO DE TALENTO PERSONALIZÁVEL -->
+{#if expandCustomTalentModal}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="submodal-backdrop" transition:fade={{duration: 150}} on:click|self={() => expandCustomTalentModal = false}>
+        <div class="ct-expanded-modal" in:scale={{duration: 200, start: 0.95}}>
+            <header class="submodal-hdr">
+                <div class="sm-title">
+                    <i class="fas fa-sparkles"></i>
+                    <span>TALENTO PERSONALIZÁVEL // DESCRIÇÃO DETALHADA</span>
+                </div>
+                <button class="sm-close" type="button" on:click={() => expandCustomTalentModal = false}><i class="fas fa-times"></i></button>
+            </header>
+            <div class="ct-expanded-body">
+                <label>NOME OU CONCEITO DO TALENTO</label>
+                <input type="text" class="ct-input" bind:value={customTalentName} placeholder="Ex: Manipulação Gravitacional Tática..." />
+                <label style="margin-top: 10px;">DESCRIÇÃO DO TALENTO DESEJADO</label>
+                <textarea
+                    class="ct-textarea expanded custom-scroll"
+                    bind:value={customTalentDesc}
+                    placeholder="Descreva com detalhes a ideia do talento, sub-rotinas desejadas (ataque, defesa, utilidade), limites narrativos e funcionamento..."
+                ></textarea>
+            </div>
+            <footer class="submodal-ftr">
+                <span class="ct-hint"><i class="fab fa-discord"></i> Será enviado ao Discord automaticamente ao finalizar o agente.</span>
+                <button class="sm-btn-primary" type="button" on:click={() => expandCustomTalentModal = false}>CONCLUIR ESCRITA</button>
+            </footer>
+        </div>
+    </div>
+{/if}
+
+<!-- MODAL: VISUALIZADOR SOMENTE LEITURA DE TALENTO DO KIT -->
+{#if viewedKitTalent}
+    {@const isKitSelected = Boolean(selectedTalents.find(st => st.id === viewedKitTalent.kitRef.id))}
+    <!-- svelte-ignore a11y-click-events-have-key-events -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="submodal-backdrop" transition:fade={{duration: 150}} on:click|self={() => viewedKitTalent = null}>
+        <div class="talent-viewer-modal" class:maximized={viewedTalentMaximized} in:scale={{duration: 200, start: 0.95}}>
+            <header class="submodal-hdr">
+                <div class="tv-hdr-left">
+                    <img src={viewedKitTalent.img} alt={viewedKitTalent.name} class="tv-icon" />
+                    <div>
+                        <div class="tv-title-row">
+                            <h3>{viewedKitTalent.name}</h3>
+                            <span class="tv-badge-ro"><i class="fas fa-lock"></i> SOMENTE LEITURA</span>
+                        </div>
+                        <div class="tv-meta-row">
+                            <span class="tv-pill arch">{viewedKitTalent.archName}</span>
+                            <span class="tv-pill cat">{viewedKitTalent.categoryLabel}</span>
+                            <span class="tv-pill rar">{viewedKitTalent.rarity}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tv-hdr-actions">
+                    {#if viewedKitTalent.visualizationHtml}
+                        <div class="tv-tabs">
+                            <button type="button" class:active={viewedTalentTab === 'ficha'} on:click={() => viewedTalentTab = 'ficha'}>ESTRUTURA</button>
+                            <button type="button" class:active={viewedTalentTab === 'visual'} on:click={() => viewedTalentTab = 'visual'}>VISUALIZAÇÃO</button>
+                        </div>
+                    {/if}
+                    <button class="sm-icon-btn" type="button" on:click={() => viewedTalentMaximized = !viewedTalentMaximized} title={viewedTalentMaximized ? "Restaurar tamanho" : "Maximizar"}>
+                        <i class="fas {viewedTalentMaximized ? 'fa-compress' : 'fa-expand'}"></i>
+                    </button>
+                    <button class="sm-close" type="button" on:click={() => viewedKitTalent = null}><i class="fas fa-times"></i></button>
+                </div>
+            </header>
+
+            <div class="tv-body custom-scroll">
+                {#if viewedTalentTab === 'visual' && viewedKitTalent.visualizationHtml}
+                    <div class="tv-visual-render custom-scroll">
+                        {@html viewedKitTalent.visualizationHtml}
+                    </div>
+                {:else}
+                    <!-- MÉTRICAS PRINCIPAIS -->
+                    <div class="tv-metrics">
+                        <div class="tv-metric-card">
+                            <span class="m-lbl">CUSTO POR DADO</span>
+                            <span class="m-val">{viewedKitTalent.xpPerDie} XP</span>
+                        </div>
+                        <div class="tv-metric-card">
+                            <span class="m-lbl">BALANCEAMENTO (PB)</span>
+                            <span class="m-val">{viewedKitTalent.usedPB} <small>/ {viewedKitTalent.maxPB} PB</small></span>
+                        </div>
+                        <div class="tv-metric-card">
+                            <span class="m-lbl">MATRIZ DE DADOS BASE</span>
+                            <span class="m-val dice">
+                                {viewedKitTalent.dice.normal}N • {viewedKitTalent.dice.hard}HD • {viewedKitTalent.dice.wiggle}WD
+                            </span>
+                        </div>
+                    </div>
+
+                    {#if viewedKitTalent.tags && viewedKitTalent.tags.length > 0}
+                        <div class="tv-tags-bar">
+                            {#each viewedKitTalent.tags as tg}
+                                <span class="tv-tag">#{tg}</span>
+                            {/each}
+                        </div>
+                    {/if}
+
+                    <!-- SUB-ROTINAS / QUALIDADES -->
+                    <div class="tv-section-title"><i class="fas fa-microchip"></i> SUB-ROTINAS & MECÂNICAS DO TALENTO</div>
+                    {#if viewedKitTalent.qualities.length > 0}
+                        <div class="tv-qualities-list">
+                            {#each viewedKitTalent.qualities as q, idx}
+                                {@const qMeta = getQualityMeta(q.type)}
+                                {@const qPB = Math.max(1, 2 + (Number(q.level) || 0) + (q.extras || []).reduce((acc, e) => acc + ((Number(e.cost) || 0) * (Number(e.qty) || 1)), 0))}
+                                <div class="tv-q-card" style="border-left-color: {qMeta.color};">
+                                    <div class="tv-q-hdr">
+                                        <span class="tv-q-badge" style="background: {qMeta.color};">{qMeta.code}</span>
+                                        <span class="tv-q-type" style="color: {qMeta.color};">{qMeta.label}</span>
+                                        <strong class="tv-q-name">{q.name || `Sub-rotina #${idx + 1}`}</strong>
+                                        <span class="tv-q-lvl">Nível {q.level || 0} ({qPB} PB)</span>
+                                    </div>
+
+                                    {#if q.imgUrl}
+                                        <div class="tv-q-banner">
+                                            <img src={q.imgUrl} alt={q.name} />
+                                        </div>
+                                    {/if}
+
+                                    {#if q.description}
+                                        <div class="tv-q-desc">{q.description}</div>
+                                    {/if}
+
+                                    {#if q.capacities && q.capacities.length > 0}
+                                        <div class="tv-q-sub">
+                                            <span class="sub-lbl">CAPACIDADES (Ref. {viewedKitTalent.effectiveDiceForCap}d):</span>
+                                            <div class="tv-caps-row">
+                                                {#each q.capacities as cap}
+                                                    {@const capType = typeof cap === 'string' ? cap : cap.type}
+                                                    {@const capName = CAPACITY_TYPES.find(ct => ct.id === capType)?.name || capType}
+                                                    {@const capVal = calculateCapacity(
+                                                        (typeof cap === 'object' && cap.invested !== undefined && cap.invested > 0) ? cap.invested : viewedKitTalent.effectiveDiceForCap,
+                                                        capType,
+                                                        typeof cap === 'object' ? (cap.nul || 0) : 0,
+                                                        typeof cap === 'object' ? (cap.booster || 0) : 0
+                                                    )}
+                                                    <div class="tv-cap-chip">
+                                                        <small>{capName}:</small> <b>{capVal}</b>
+                                                    </div>
+                                                {/each}
+                                            </div>
+                                        </div>
+                                    {/if}
+
+                                    {#if q.extras && q.extras.length > 0}
+                                        <div class="tv-q-sub">
+                                            <span class="sub-lbl">EXTRAS & FALHAS:</span>
+                                            <div class="tv-mods-row">
+                                                {#each q.extras as mod}
+                                                    {@const totalModCost = (Number(mod.cost) || 0) * (Number(mod.qty) || 1)}
+                                                    <span class="tv-mod-pill {totalModCost >= 0 ? 'extra' : 'flaw'}">
+                                                        {mod.name}{mod.qty > 1 ? ` (x${mod.qty})` : ''}
+                                                        <b>{totalModCost >= 0 ? `+${totalModCost}` : totalModCost}</b>
+                                                    </span>
+                                                {/each}
+                                            </div>
+                                        </div>
+                                    {/if}
+                                </div>
+                            {/each}
+                        </div>
+                    {:else}
+                        <div class="tv-empty-box">Nenhuma sub-rotina estruturada cadastrada neste talento.</div>
+                    {/if}
+
+                    <!-- NOTAS DE SISTEMA / EFEITO GERAL -->
+                    {#if viewedKitTalent.notesStr && viewedKitTalent.notesStr !== '<p></p>'}
+                        <div class="tv-section-title" style="margin-top: 16px;"><i class="fas fa-terminal"></i> EFEITO GERAL & NOTAS DE SISTEMA</div>
+                        <div class="tv-notes-box">
+                            {@html viewedKitTalent.notesStr.replace(/\n/g, '<br>')}
+                        </div>
+                    {/if}
+                {/if}
+            </div>
+
+            <footer class="submodal-ftr">
+                <button
+                    class="sm-btn-toggle {isKitSelected ? 'active' : ''}"
+                    type="button"
+                    on:click={() => toggleTalent(viewedKitTalent.kitRef, viewedKitTalent.archId)}
+                >
+                    <i class="fas {isKitSelected ? 'fa-check-square' : 'fa-plus-square'}"></i>
+                    {isKitSelected ? 'SELECIONADO NO KIT (CLIQUE P/ REMOVER)' : 'SELECIONAR ESTE TALENTO NO KIT'}
+                </button>
+                <button class="sm-btn-ghost" type="button" on:click={() => viewedKitTalent = null}>FECHAR LEITURA</button>
+            </footer>
+        </div>
+    </div>
+{/if}
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
@@ -664,4 +1138,165 @@
     .custom-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
     .custom-scroll::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
     .custom-scroll::-webkit-scrollbar-thumb:hover { background: #00ff41; }
+
+    .owner-bar {
+        display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        background: rgba(0, 255, 65, 0.05); border: 1px solid rgba(0, 255, 65, 0.25);
+        padding: 6px 10px; border-radius: 4px; font-size: 11px;
+    }
+    .owner-lbl { color: #00ff41; font-weight: bold; white-space: nowrap; }
+    .owner-select {
+        flex: 1; background: #08080c; border: 1px solid #333; color: #fff;
+        padding: 4px 8px; border-radius: 3px; font-family: inherit; font-size: 11px;
+    }
+    .owner-select option { background: #111; color: #fff; }
+    .owner-fixed { color: #fff; font-weight: bold; }
+
+    .reroll-status-bar {
+        font-size: 11px; padding: 6px 10px; border-radius: 4px;
+        background: rgba(255, 170, 0, 0.08); border: 1px dashed rgba(255, 170, 0, 0.4);
+        color: #ffaa00;
+    }
+    .reroll-status-bar.has-roll {
+        background: rgba(0, 255, 65, 0.08); border-color: rgba(0, 255, 65, 0.4);
+        color: #00ff41;
+    }
+
+    /* TALENTO PERSONALIZÁVEL */
+    .custom-talent-box {
+        display: flex; flex-direction: column; gap: 8px;
+        background: rgba(0, 255, 65, 0.04); border: 1px solid rgba(0, 255, 65, 0.3);
+        padding: 12px; border-radius: 6px;
+    }
+    .ct-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .ct-header h2 { font-size: 14px !important; color: #00ff41 !important; display: flex; align-items: center; gap: 6px; }
+    .ct-header .desc { font-size: 11px; margin-top: 2px; }
+    .btn-expand-ct {
+        background: rgba(0, 255, 65, 0.1); border: 1px solid rgba(0, 255, 65, 0.4); color: #00ff41;
+        width: 28px; height: 28px; border-radius: 4px; cursor: pointer; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; transition: 0.2s;
+    }
+    .btn-expand-ct:hover { background: #00ff41; color: #000; }
+    .ct-input {
+        width: 100%; box-sizing: border-box; background: #050508; border: 1px solid #333;
+        color: #fff; padding: 7px 10px; border-radius: 4px; font-family: inherit; font-size: 12px;
+    }
+    .ct-input:focus, .ct-textarea:focus { border-color: #00ff41; outline: none; }
+    .ct-textarea {
+        width: 100%; box-sizing: border-box; background: #050508; border: 1px solid #333;
+        color: #ddd; padding: 8px 10px; border-radius: 4px; font-family: sans-serif; font-size: 12px;
+        resize: vertical; min-height: 62px; line-height: 1.4;
+    }
+    .ct-textarea.expanded { flex: 1; min-height: 260px; resize: none; font-size: 13px; }
+    .ct-hint { font-size: 10px; color: #88aa88; display: flex; align-items: center; gap: 6px; }
+    .ct-divider { border-bottom: 1px dashed rgba(0, 255, 65, 0.25); margin: 2px 0; }
+    .read-hint { color: #00d4ff; font-style: normal; font-weight: bold; }
+
+    /* SUBMODAIS (EDITOR EXPANDIDO & VISUALIZADOR DE TALENTO SOMENTE LEITURA) */
+    .submodal-backdrop {
+        position: fixed; inset: 0; z-index: 40050; background: rgba(0, 0, 0, 0.82);
+        backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
+        font-family: 'Share Tech Mono', monospace; color: #fff;
+    }
+    .ct-expanded-modal {
+        width: min(680px, 90vw); height: min(540px, 85vh);
+        background: #0b0d13; border: 1px solid #00ff41; border-radius: 8px;
+        box-shadow: 0 0 40px rgba(0, 255, 65, 0.25); display: flex; flex-direction: column; overflow: hidden;
+    }
+    .talent-viewer-modal {
+        width: 780px; height: 600px; min-width: 460px; min-height: 380px; max-width: 95vw; max-height: 92vh;
+        resize: both; overflow: hidden;
+        background: #0b0d13; border: 1px solid #00ff41; border-radius: 8px;
+        box-shadow: 0 0 50px rgba(0, 255, 65, 0.25); display: flex; flex-direction: column;
+    }
+    .talent-viewer-modal.maximized {
+        width: 94vw !important; height: 90vh !important; resize: none;
+    }
+    .submodal-hdr {
+        display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        padding: 14px 18px; background: linear-gradient(90deg, rgba(0, 255, 65, 0.12), rgba(0, 0, 0, 0.6));
+        border-bottom: 1px solid rgba(0, 255, 65, 0.3); flex-shrink: 0;
+    }
+    .sm-title { display: flex; align-items: center; gap: 8px; color: #00ff41; font-weight: bold; font-size: 14px; letter-spacing: 1px; }
+    .sm-close, .sm-icon-btn {
+        background: rgba(255, 255, 255, 0.05); border: 1px solid #333; color: #aaa;
+        width: 30px; height: 30px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .sm-close:hover { border-color: #ff4444; color: #ff4444; }
+    .sm-icon-btn:hover { border-color: #00ff41; color: #00ff41; }
+
+    .ct-expanded-body { flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+    .ct-expanded-body label { font-size: 11px; color: #00ff41; letter-spacing: 1px; }
+
+    .submodal-ftr {
+        padding: 12px 18px; background: #07080c; border-top: 1px solid #222;
+        display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-shrink: 0;
+    }
+    .sm-btn-primary {
+        background: #00ff41; color: #000; border: none; padding: 8px 16px; border-radius: 4px;
+        font-family: 'Orbitron', sans-serif; font-weight: bold; font-size: 12px; cursor: pointer;
+    }
+    .sm-btn-ghost {
+        background: #1a1d24; color: #ccc; border: 1px solid #444; padding: 8px 16px; border-radius: 4px;
+        font-family: inherit; font-weight: bold; font-size: 12px; cursor: pointer;
+    }
+    .sm-btn-ghost:hover { border-color: #fff; color: #fff; }
+    .sm-btn-toggle {
+        background: rgba(0, 255, 65, 0.1); color: #00ff41; border: 1px solid #00ff41;
+        padding: 8px 14px; border-radius: 4px; font-family: inherit; font-weight: bold; font-size: 12px;
+        cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+    }
+    .sm-btn-toggle.active { background: #00ff41; color: #000; }
+
+    /* TALENT VIEWER CONTENT */
+    .tv-hdr-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .tv-icon { width: 46px; height: 46px; border-radius: 6px; border: 1px solid #00ff41; object-fit: cover; background: #000; }
+    .tv-title-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .tv-title-row h3 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 17px; color: #fff; }
+    .tv-badge-ro { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: rgba(0, 212, 255, 0.12); border: 1px solid rgba(0, 212, 255, 0.4); color: #00d4ff; }
+    .tv-meta-row { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+    .tv-pill { font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: bold; text-transform: uppercase; }
+    .tv-pill.arch { background: #1c222d; color: #aaa; border: 1px solid #333; }
+    .tv-pill.cat { background: rgba(0, 255, 65, 0.12); color: #00ff41; border: 1px solid rgba(0, 255, 65, 0.4); }
+    .tv-pill.rar { background: rgba(255, 170, 0, 0.12); color: #ffaa00; border: 1px solid rgba(255, 170, 0, 0.4); }
+
+    .tv-hdr-actions { display: flex; align-items: center; gap: 8px; }
+    .tv-tabs { display: flex; border: 1px solid #333; border-radius: 4px; overflow: hidden; margin-right: 4px; }
+    .tv-tabs button { background: #111; border: none; color: #888; padding: 5px 10px; font-family: inherit; font-size: 11px; font-weight: bold; cursor: pointer; }
+    .tv-tabs button.active { background: #00ff41; color: #000; }
+
+    .tv-body { flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .tv-visual-render { flex: 1; overflow-y: auto; background: #050508; border: 1px solid #222; border-radius: 6px; padding: 10px; }
+
+    .tv-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .tv-metric-card { background: rgba(255, 255, 255, 0.03); border: 1px solid #252a34; border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+    .tv-metric-card .m-lbl { font-size: 10px; color: #888; }
+    .tv-metric-card .m-val { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: bold; color: #00ff41; }
+    .tv-metric-card .m-val small { font-size: 11px; color: #777; }
+    .tv-metric-card .m-val.dice { font-size: 13px; color: #00d4ff; }
+
+    .tv-tags-bar { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tv-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #161b22; border: 1px solid #30363d; color: #8b949e; }
+
+    .tv-section-title { font-size: 12px; font-weight: bold; color: #00ff41; letter-spacing: 1px; border-bottom: 1px dashed #333; padding-bottom: 5px; display: flex; align-items: center; gap: 6px; }
+    .tv-qualities-list { display: flex; flex-direction: column; gap: 10px; }
+    .tv-q-card { background: #12151e; border: 1px solid #252a36; border-left: 3px solid #00ff41; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .tv-q-hdr { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .tv-q-badge { color: #000; font-weight: bold; font-size: 11px; padding: 1px 6px; border-radius: 3px; }
+    .tv-q-type { font-size: 11px; font-weight: bold; letter-spacing: 1px; }
+    .tv-q-name { font-size: 14px; color: #fff; }
+    .tv-q-lvl { margin-left: auto; font-size: 11px; color: #aaa; background: #090b10; padding: 2px 8px; border-radius: 4px; border: 1px solid #222; }
+    .tv-q-banner img { width: 100%; max-height: 180px; object-fit: cover; border-radius: 4px; border: 1px solid #333; }
+    .tv-q-desc { font-family: sans-serif; font-size: 12.5px; line-height: 1.5; color: #ddd; background: rgba(0, 0, 0, 0.35); padding: 8px 10px; border-radius: 4px; white-space: pre-wrap; }
+    .tv-q-sub { display: flex; flex-direction: column; gap: 5px; }
+    .tv-q-sub .sub-lbl { font-size: 10px; color: #888; font-weight: bold; letter-spacing: 0.5px; }
+    .tv-caps-row, .tv-mods-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tv-cap-chip { background: #090b10; border: 1px solid #2c3545; padding: 3px 8px; border-radius: 4px; font-size: 11px; color: #cde; }
+    .tv-cap-chip small { color: #8899aa; }
+    .tv-mod-pill { font-size: 11px; padding: 3px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 5px; }
+    .tv-mod-pill.extra { background: rgba(0, 255, 65, 0.1); border: 1px solid rgba(0, 255, 65, 0.35); color: #7fff9f; }
+    .tv-mod-pill.flaw { background: rgba(255, 68, 68, 0.1); border: 1px solid rgba(255, 68, 68, 0.35); color: #ff8888; }
+
+    .tv-empty-box { padding: 16px; text-align: center; color: #666; font-style: italic; background: rgba(0, 0, 0, 0.3); border: 1px dashed #333; border-radius: 4px; font-size: 12px; }
+    .tv-notes-box { font-family: sans-serif; font-size: 13px; line-height: 1.55; color: #ddd; background: rgba(0, 255, 65, 0.04); border: 1px solid rgba(0, 255, 65, 0.2); padding: 12px; border-radius: 6px; }
 </style>

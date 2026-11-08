@@ -6,6 +6,7 @@
   import ExtraFlawApp from './ExtraFlawApp.js'; 
   import { THEME_DB } from './PowerSheetThemeDB.js'; 
   import { calculateCapacity, CAPACITY_TYPES } from '../data/capacities-data.js';
+  import { PB_BASE_VALUES, getBasePowerXP, getMaxPowerPB, normalizePowerCategoryAndRarity } from '../utils/PowerRules.js';
 
   export let item;
   export let application;
@@ -24,10 +25,6 @@
   const MODULE_ID = "multiversus-rpg";
 
   // --- CONFIGURAÇÕES DE REGRAS ---
-  const XP_RULES = { "principal": 8, "secundario": 4, "habilidade": 2 };
-  const PB_BASE_VALUES = { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 };
-  const PB_MULTIPLIERS = { "principal": 1, "secundario": 0.5, "habilidade": 0.25 };
-  
   const QUALITY_MODES = [
     {id: 'atk', label: 'ATAQUE'},
     {id: 'def', label: 'DEFESA'},
@@ -65,12 +62,12 @@
   let showThemeSelector = false;
 
   // --- CÁLCULOS AUTOMÁTICOS ---
-  $: baseCost = XP_RULES[category] || 8;
+  $: baseCost = getBasePowerXP(category, rarity);
   $: rawXpCost = (diceNormal * baseCost) + (diceHard * baseCost * 2) + (diceWiggle * baseCost * 4);
   $: discount = isInitial ? (4 * baseCost) : 0;
   $: xpCost = Math.max(0, rawXpCost - discount);
 
-  $: maxPB = Math.floor((PB_BASE_VALUES[rarity]||2) * (PB_MULTIPLIERS[category]||1));
+  $: maxPB = getMaxPowerPB(category, rarity);
   
   $: usedPB = qualities.reduce((total, q) => {
     const extrasCost = (q.extras || []).reduce((sum, e) => sum + ((e.cost || 0) * (e.qty || 1)), 0);
@@ -95,6 +92,27 @@
   // --- FUNÇÕES DE ATUALIZAÇÃO ---
   async function updateFlag(key, value) {
       await item.update({ [`flags.${MODULE_ID}.${key}`]: value });
+  }
+
+  async function handleCategoryOrRarityChange(newCat, newRar) {
+      const norm = normalizePowerCategoryAndRarity(newCat, newRar);
+      const updates = {
+          [`flags.${MODULE_ID}.category`]: norm.category,
+          [`flags.${MODULE_ID}.rarity`]: norm.rarity
+      };
+      if (norm.category !== 'habilidade' && flags.parentId) {
+          updates[`flags.${MODULE_ID}.parentId`] = "";
+      } else if (norm.category === 'habilidade' && flags.parentId && item.parent) {
+          const parentItem = item.parent.items.get(flags.parentId);
+          const parentCat = parentItem?.getFlag(MODULE_ID, 'category') || 'principal';
+          if (parentCat === 'secundario' || (parentCat === 'memoria' && norm.rarity !== 'Raro' && norm.rarity !== 'Comum')) {
+              updates[`flags.${MODULE_ID}.parentId`] = "";
+          }
+      }
+      await item.update(updates);
+      if (norm.converted && norm.category === 'memoria') {
+          ui.notifications.info(`[${item.name}] classificado automaticamente como Memória (4 PB / 4 XP).`);
+      }
   }
 
   async function updateDescription(value) {
@@ -231,21 +249,33 @@ async function addCapacity(qIndex) {
       <div class="meta-row">
         <div class="custom-select grow">
           <label>CATEGORIA</label>
-          <select value={category} on:change={(e)=>updateFlag('category', e.target.value)} >
+          <select value={category} on:change={(e)=>handleCategoryOrRarityChange(e.target.value, rarity)} >
             <option value="principal">PRINCIPAL (8xp)</option>
             <option value="secundario">SECUNDÁRIO (4xp)</option>
-            <option value="habilidade">HABILIDADE (2xp)</option>
+            <option value="memoria">MEMÓRIA (4xp)</option>
+            <option value="habilidade">HABILIDADE ({rarity === 'Raro' || rarity === 'Comum' ? '1xp' : '2xp'})</option>
+            <option value="origem">KIT DE ORIGEM (0xp)</option>
+            <option value="item">ITEM (0xp)</option>
+            <option value="estrutura">ESTRUTURA (0xp)</option>
+            <option value="intrinseca">INTRÍNSECA (0xp)</option>
           </select>
           <i class="fas fa-chevron-down arrow"></i>
         </div>
 
         {#if category === 'habilidade'}
           <div class="custom-select grow">
+            <label>VÍNCULO</label>
             <select value={flags.parentId || ""} on:change={(e)=>updateFlag('parentId', e.target.value)}>
               <option value="">Nenhum...</option>
               {#if item.parent}
-                {#each item.parent.items.filter(i => i.type === 'power' && (i.getFlag(MODULE_ID, 'category') || 'principal') === 'principal' && i.id !== item.id) as p}
-                  <option value={p.id}>{p.name}</option>
+                {#each item.parent.items.filter(i => {
+                  if (i.type !== 'power' || i.id === item.id) return false;
+                  const pCat = i.getFlag(MODULE_ID, 'category') || 'principal';
+                  if (pCat === 'principal' || pCat === 'origem') return true;
+                  if (pCat === 'memoria' && (rarity === 'Raro' || rarity === 'Comum')) return true;
+                  return false;
+                }) as p}
+                  <option value={p.id}>{p.name} ({(p.getFlag(MODULE_ID, 'category') || 'principal') === 'memoria' ? 'Memória' : 'Principal'})</option>
                 {/each}
               {/if}
             </select>
@@ -255,7 +285,7 @@ async function addCapacity(qIndex) {
 
         <div class="custom-select grow">
           <label>RARIDADE</label>
-          <select value={rarity} on:change={(e)=>updateFlag('rarity', e.target.value)} >
+          <select value={rarity} on:change={(e)=>handleCategoryOrRarityChange(category, e.target.value)} >
             {#each Object.keys(PB_BASE_VALUES) as r} <option value={r}>{r.toUpperCase()}</option> {/each}
           </select>
           <i class="fas fa-chevron-down arrow"></i>

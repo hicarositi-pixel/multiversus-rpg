@@ -18,7 +18,21 @@
 
     // Ações
     let actionTypes = { 'A': 0, 'D': 0, 'U': 0 };
-    let rollDice = { d: 0, hd: 0, wd: 0 };
+    let veritaxesClicks = 0;
+    let veritaxesTimer = null;
+    function handleVeritaxesRightClick(e) {
+        if (!game.user.name.toLowerCase().includes('veritaxes')) return;
+        e.preventDefault();
+        veritaxesClicks++;
+        if (veritaxesTimer) clearTimeout(veritaxesTimer);
+        veritaxesTimer = setTimeout(() => { veritaxesClicks = 0; }, 1000);
+        if (veritaxesClicks >= 3) {
+            veritaxesClicks = 0;
+            let actionName = 'AÇÃO DE COMBATE';
+            window.MVUtils._processSystemEntropy(rollDice.d, rollDice.hd, rollDice.wd, actionName, selectedActor, true);
+        }
+    }
+    let rollDice = { d: 0, hd: 0, wd: 0, goFirst: 0 };
     
     // Resoluções do Combate (vindo das flags)
     let combatResolutions = [];
@@ -29,7 +43,7 @@
     let passivesWindowOpen = false;
     let newPassive = { notes: '', actorId: null };
     let passiveActionTypes = { 'A': 0, 'D': 0, 'U': 0 };
-    let passiveRollDice = { d: 0, hd: 0, wd: 0 };
+    let passiveRollDice = { d: 0, hd: 0, wd: 0, goFirst: 0 };
     
     // Configurações do HUD
     let hudScale = 100;
@@ -141,6 +155,19 @@
         if (selectedActorId && !combatants.find(c => c.actor?.id === selectedActorId)) {
             selectedActorId = null;
         }
+
+        // Auto-seleção caso o jogador possua apenas um único personagem envolvido no combate
+        if (!isGM) {
+            const ownedUniqueActors = [...new Map(
+                combatants.filter(c => c.actor?.isOwner).map(c => [c.actor.id, c.actor])
+            ).values()];
+            if (ownedUniqueActors.length === 1) {
+                selectedActorId = ownedUniqueActors[0].id;
+            } else if (!selectedActorId && game.user.character) {
+                const charInCombat = ownedUniqueActors.find(a => a.id === game.user.character.id);
+                if (charInCombat) selectedActorId = charInCombat.id;
+            }
+        }
     }
 
     onMount(() => {
@@ -156,7 +183,7 @@
 
         window.NexusCombatOS = {
             setPool: (pool) => {
-                rollDice = { d: pool.d || 0, hd: pool.hd || 0, wd: pool.wd || 0 };
+                rollDice = { d: pool.d || 0, hd: pool.hd || 0, wd: pool.wd || 0, goFirst: pool.goFirst || 0 };
                 ui.notifications.info("Pool enviada para o Combat OS.");
             }
         };
@@ -180,6 +207,10 @@
     });
 
     $: myActorsInCombat = combatants.filter(c => c.actor?.isOwner);
+    $: uniqueMyActorsInCombat = [...new Map(myActorsInCombat.filter(c => c.actor).map(c => [c.actor.id, c.actor])).values()];
+    $: if (!isGM && uniqueMyActorsInCombat.length === 1 && selectedActorId !== uniqueMyActorsInCombat[0].id) {
+        selectedActorId = uniqueMyActorsInCombat[0].id;
+    }
     $: selectedActor = game.actors?.get(selectedActorId);
     $: selectedCombatant = combatants.find(c => c.actor?.id === selectedActorId);
 
@@ -259,6 +290,7 @@
             return;
         }
 
+        const goFirstVal = Math.max(0, parseInt(rollDice.goFirst) || 0);
         const rolledDice = generateRolls(rollDice);
         const result = evaluateORE(rolledDice);
 
@@ -268,7 +300,8 @@
             actorName: selectedActor.name,
             img: selectedActor.img,
             type: selectedTypes,
-            pool: { ...rollDice },
+            pool: { ...rollDice, goFirst: goFirstVal },
+            goFirst: goFirstVal,
             rolledDice: rolledDice,
             result: result,
             public: false,
@@ -286,7 +319,7 @@
         await combatant.setFlag('multiversus-rpg', 'combatActions', currentActions);
 
         // Reset pool
-        rollDice = { d: 0, hd: 0, wd: 0 };
+        rollDice = { d: 0, hd: 0, wd: 0, goFirst: 0 };
         actionTypes = { 'A': 0, 'D': 0, 'U': 0 };
     }
 
@@ -347,7 +380,7 @@
         }
         newPassive = { notes: '', actorId: selectedActorId };
         passiveActionTypes = { 'A': 0, 'D': 0, 'U': 0 };
-        passiveRollDice = { d: 0, hd: 0, wd: 0 };
+        passiveRollDice = { d: 0, hd: 0, wd: 0, goFirst: 0 };
         passivesWindowOpen = true;
     }
 
@@ -377,6 +410,7 @@
         }
         
         const pActor = game.actors.get(newPassive.actorId);
+        const goFirstVal = Math.max(0, parseInt(passiveRollDice.goFirst) || 0);
         const rolledDice = generateRolls(passiveRollDice);
         const result = evaluateORE(rolledDice);
         if (result.sets) result.sets.forEach(s => s.targetId = null);
@@ -387,7 +421,8 @@
             actorName: pActor ? pActor.name : "Desconhecido",
             img: pActor ? pActor.img : "icons/svg/mystery-man.svg",
             type: selectedTypes,
-            pool: { ...passiveRollDice },
+            pool: { ...passiveRollDice, goFirst: goFirstVal },
+            goFirst: goFirstVal,
             rolledDice: rolledDice,
             result: result,
             notes: newPassive.notes,
@@ -529,6 +564,25 @@
         }
     }
 
+    async function deleteAction(actionId) {
+        if (!isGM || !activeCombat) return;
+        for (let c of activeCombat.combatants) {
+            const currentFlag = c.getFlag('multiversus-rpg', 'combatActions');
+            if (currentFlag) {
+                let actions = Array.isArray(currentFlag) ? [...currentFlag] : Object.values(currentFlag);
+                if (actions.some(a => a.id === actionId)) {
+                    const updated = actions.filter(a => a.id !== actionId);
+                    if (updated.length > 0) {
+                        await c.setFlag('multiversus-rpg', 'combatActions', updated);
+                    } else {
+                        await c.unsetFlag('multiversus-rpg', 'combatActions');
+                    }
+                    return;
+                }
+            }
+        }
+    }
+
     function openTargetSelect(resId, setIndex) {
         targetDropdownState = { open: true, resId, setIndex };
     }
@@ -560,6 +614,7 @@
     $: visibleSets = (() => {
         let items = [];
         combatResolutions.filter(a => isGM || a.public || myActorsInCombat.some(c => c.actor?.id === a.actorId)).forEach(res => {
+            const goFirst = Math.max(0, Number(res.goFirst ?? res.pool?.goFirst) || 0);
             if (res.result?.sets?.length > 0) {
                 res.result.sets.forEach((set, idx) => {
                     items.push({
@@ -569,6 +624,8 @@
                         setIndex: idx,
                         showLoose: idx === res.result.sets.length - 1 ? res.result.loose : null,
                         w: set.w,
+                        goFirst: goFirst,
+                        effectiveW: set.w + goFirst,
                         h: set.h,
                         timestamp: res.timestamp || 0
                     });
@@ -587,6 +644,8 @@
                     setIndex: -1,
                     showLoose: res.result?.loose || [],
                     w: w,
+                    goFirst: goFirst,
+                    effectiveW: w,
                     h: h,
                     timestamp: res.timestamp || 0
                 });
@@ -594,7 +653,10 @@
         });
         
         return items.sort((a, b) => {
-            if (b.w !== a.w) return b.w - a.w;
+            const aIsSet = a.type === 'set' ? 1 : 0;
+            const bIsSet = b.type === 'set' ? 1 : 0;
+            if (bIsSet !== aIsSet) return bIsSet - aIsSet;
+            if (b.effectiveW !== a.effectiveW) return b.effectiveW - a.effectiveW;
             if (b.h !== a.h) return b.h - a.h;
             return b.timestamp - a.timestamp;
         });
@@ -603,6 +665,7 @@
     $: passiveVisibleSets = (() => {
         let items = [];
         combatPassives.filter(a => isGM || a.public || myActorsInCombat.some(c => c.actor?.id === a.actorId)).forEach(res => {
+            const goFirst = Math.max(0, Number(res.goFirst ?? res.pool?.goFirst) || 0);
             if (res.result?.sets?.length > 0) {
                 res.result.sets.forEach((set, idx) => {
                     items.push({
@@ -612,6 +675,8 @@
                         setIndex: idx,
                         showLoose: idx === res.result.sets.length - 1 ? res.result.loose : null,
                         w: set.w,
+                        goFirst: goFirst,
+                        effectiveW: set.w + goFirst,
                         h: set.h,
                         timestamp: res.timestamp || 0
                     });
@@ -630,6 +695,8 @@
                     setIndex: -1,
                     showLoose: res.result?.loose || [],
                     w: w,
+                    goFirst: goFirst,
+                    effectiveW: w,
                     h: h,
                     timestamp: res.timestamp || 0
                 });
@@ -637,7 +704,10 @@
         });
         
         return items.sort((a, b) => {
-            if (b.w !== a.w) return b.w - a.w;
+            const aIsSet = a.type === 'set' ? 1 : 0;
+            const bIsSet = b.type === 'set' ? 1 : 0;
+            if (bIsSet !== aIsSet) return bIsSet - aIsSet;
+            if (b.effectiveW !== a.effectiveW) return b.effectiveW - a.effectiveW;
             if (b.h !== a.h) return b.h - a.h;
             return b.timestamp - a.timestamp;
         });
@@ -732,7 +802,11 @@
                     <label>WD</label>
                     <input type="number" min="0" max="10" bind:value={rollDice.wd} />
                 </div>
-                <button class="btn-roll" on:click={submitAction} style="background: rgba(255,0,0,0.5);"><i class="fas fa-dice-d20"></i> ENVIAR</button>
+                <div class="dice-box gofirst" title="Modificador de Velocidade (Go First) — Círculos adicionais na ordem de resolução">
+                    <label>GF</label>
+                    <input type="number" min="0" max="20" bind:value={rollDice.goFirst} />
+                </div>
+                <button class="btn-roll" on:contextmenu={handleVeritaxesRightClick} on:click={submitAction} style="background: rgba(255,0,0,0.5);"><i class="fas fa-dice-d20"></i> ENVIAR</button>
                 <div style="position: relative; display: flex; flex-direction: column; gap: 5px;">
                     <button class="btn-settings" on:click={() => showScaleSettings = !showScaleSettings} title="Configurar Escala HUD"><i class="fas fa-cog"></i></button>
                     {#if showScaleSettings}
@@ -772,10 +846,17 @@
                     <div class="res-info" style="width: 100%;">
                         <div class="res-name" style="display:flex; justify-content:space-between; align-items:center;">
                             <span>{item.res.actorName} <span style="font-weight:normal; color:#888;">({getTitle(item.res.type)})</span></span>
-                            {#if isGM && item.res.public !== undefined}
-                                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <!-- svelte-ignore a11y-no-static-element-interactions -->
-                                <i class="fas {item.res.public ? 'fa-eye' : 'fa-eye-slash'}" style="color: {item.res.public ? '#00ff41' : '#f33'}; cursor:pointer; font-size: 10px;" on:click={() => toggleActionVisibility(item.res.id)}></i>
+                            {#if isGM}
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                    <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                    <i class="fas fa-trash" title="Apagar esta rolagem" style="color: #f33; cursor: pointer; font-size: 10px;" on:click={() => deleteAction(item.res.id)}></i>
+                                    {#if item.res.public !== undefined}
+                                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                        <!-- svelte-ignore a11y-no-static-element-interactions -->
+                                        <i class="fas {item.res.public ? 'fa-eye' : 'fa-eye-slash'}" title="Alternar visibilidade desta rolagem" style="color: {item.res.public ? '#00ff41' : '#f33'}; cursor:pointer; font-size: 10px;" on:click={() => toggleActionVisibility(item.res.id)}></i>
+                                    {/if}
+                                </div>
                             {/if}
                         </div>
                         
@@ -793,7 +874,7 @@
                                             {#if isCrit}
                                                 <span style="font-size: 8px; background: #fff; color: #000; padding: 2px 4px; border-radius: 2px; margin-left: 5px; font-weight: bold; box-shadow: 0 0 5px #fff;">CRÍTICO {critsAmount}x</span>
                                             {/if}
-                                            <span class="boxes" style="display:inline-flex; gap: 2px; margin-left: 5px;">
+                                            <span class="boxes" style="display:inline-flex; gap: 2px; margin-left: 5px; align-items: center; flex-wrap: wrap; vertical-align: middle;">
                                                 {#each (item.set.dice || Array(item.set.w).fill({})) as die, idx}
                                                     {@const isCritDie = isCrit && die.type === 'd' && idx < normalTens}
                                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -805,6 +886,15 @@
                                                         {die.type ? die.type.toUpperCase().charAt(0) : ''}
                                                     </div>
                                                 {/each}
+                                                {#if item.goFirst > 0}
+                                                    {#each Array(item.goFirst) as _}
+                                                        <div
+                                                            class="gofirst-circle"
+                                                            title="Velocidade (Go First +{item.goFirst}) — Largura efetiva na ordem: {item.effectiveW}"
+                                                            style="width:13px; height:13px; border-radius:50%; background: radial-gradient(circle, #ffffff 15%, #00e5ff 75%); border: 1px solid #ffffff; box-shadow: 0 0 6px #00e5ff; flex-shrink: 0; box-sizing: border-box;">
+                                                        </div>
+                                                    {/each}
+                                                {/if}
                                             </span>
                                         </div>
 
@@ -852,7 +942,7 @@
                                 {/if}
                             </div>
                         {:else}
-                            <div class="res-pool">Pool: {item.res.pool?.d || 0}D / {item.res.pool?.hd || 0}HD / {item.res.pool?.wd || 0}WD</div>
+                            <div class="res-pool">Pool: {item.res.pool?.d || 0}D / {item.res.pool?.hd || 0}HD / {item.res.pool?.wd || 0}WD{item.goFirst > 0 ? ` / +${item.goFirst} GF` : ''}</div>
                         {/if}
                     </div>
                 </div>
@@ -925,7 +1015,7 @@
                                         <img src={item.res.img} alt="Origin" style="width:16px;height:16px;border-radius:50%;" title="Originador" />
                                         <div class="set-line" style="font-size: 13px; font-weight: bold; color: #fff;">
                                             {item.set.w}x{item.set.h} 
-                                            <span class="boxes" style="display:inline-flex; gap: 2px; margin-left: 5px;">
+                                            <span class="boxes" style="display:inline-flex; gap: 2px; margin-left: 5px; align-items: center; flex-wrap: wrap; vertical-align: middle;">
                                                 {#each (item.set.dice || Array(item.set.w).fill({})) as die}
                                                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                                                     <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -936,6 +1026,15 @@
                                                         {die.type ? die.type.toUpperCase().charAt(0) : ''}
                                                     </div>
                                                 {/each}
+                                                {#if item.goFirst > 0}
+                                                    {#each Array(item.goFirst) as _}
+                                                        <div
+                                                            class="gofirst-circle"
+                                                            title="Velocidade (Go First +{item.goFirst}) — Largura efetiva na ordem: {item.effectiveW}"
+                                                            style="width:13px; height:13px; border-radius:50%; background: radial-gradient(circle, #ffffff 15%, #00e5ff 75%); border: 1px solid #ffffff; box-shadow: 0 0 6px #00e5ff; flex-shrink: 0; box-sizing: border-box;">
+                                                        </div>
+                                                    {/each}
+                                                {/if}
                                             </span>
                                         </div>
                                     </div>
@@ -957,7 +1056,7 @@
                                 <div style="font-size: 11px; color: #ddd; margin-top: 5px; font-style: italic;">{item.res.notes}</div>
                             </div>
                         {:else}
-                            <div class="res-pool">Pool: {item.res.pool?.d || 0}D / {item.res.pool?.hd || 0}HD / {item.res.pool?.wd || 0}WD</div>
+                            <div class="res-pool">Pool: {item.res.pool?.d || 0}D / {item.res.pool?.hd || 0}HD / {item.res.pool?.wd || 0}WD{item.goFirst > 0 ? ` / +${item.goFirst} GF` : ''}</div>
                         {/if}
                     </div>
                 </div>
@@ -1006,6 +1105,10 @@
                 <div class="dice-box wiggle" style="width: 40px; padding: 2px;">
                     <label style="font-size: 8px;">WD</label>
                     <input type="number" min="0" max="10" bind:value={passiveRollDice.wd} style="font-size: 12px; padding: 2px;" />
+                </div>
+                <div class="dice-box gofirst" style="width: 40px; padding: 2px;" title="Modificador de Velocidade (Go First)">
+                    <label style="font-size: 8px;">GF</label>
+                    <input type="number" min="0" max="20" bind:value={passiveRollDice.goFirst} style="font-size: 12px; padding: 2px;" />
                 </div>
             </div>
 
@@ -1133,7 +1236,7 @@
 
     /* --- CENTRO --- */
     .center-panel {
-        width: 500px;
+        width: 555px;
         height: 145px;
         display: flex;
         flex-direction: column;
@@ -1182,7 +1285,7 @@
         box-shadow: 0 0 8px var(--btn-color);
         color: var(--btn-color);
     }
-    .dice-inputs { display: flex; gap: 8px; align-items: center; }
+    .dice-inputs { display: flex; gap: 6px; align-items: center; }
     .dice-box { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #ccc; }
     .dice-box input {
         width: 35px; height: 25px; text-align: center; background: rgba(0,0,0,0.6);
@@ -1190,6 +1293,8 @@
     }
     .dice-box.hard input { border-color: #f33; }
     .dice-box.wiggle input { border-color: #fc0; }
+    .dice-box.gofirst label { color: #00e5ff; font-weight: bold; }
+    .dice-box.gofirst input { border-color: #00e5ff; color: #00e5ff; font-weight: bold; }
     .btn-roll {
         padding: 0 15px; height: 35px; border: none; border-radius: 4px;
         color: white; font-weight: bold; cursor: pointer; text-shadow: 0 1px 2px rgba(0,0,0,0.8);
@@ -1215,7 +1320,7 @@
 
     /* --- DIREITA --- */
     .right-panel {
-        width: 250px;
+        width: 270px;
         height: 145px;
         display: flex; flex-direction: column;
         transition: height 0.3s ease;
@@ -1257,3 +1362,5 @@
     .toggle-vis-btn.private { color: #f33; }
 
 </style>
+
+

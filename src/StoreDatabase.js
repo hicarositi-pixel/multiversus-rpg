@@ -1,3 +1,5 @@
+import { normalizeStoreItem } from './utils/PowerRules.js';
+
 const MODULE_ID = "multiversus-rpg";
 const KEYS = { 
     ARCHIVE: "masterArchive", 
@@ -133,20 +135,10 @@ export const StoreDatabase = {
             
             
 let possibleItems = archive.filter(item => {
-                if (item.system?.stock === 0) return false; // <--- NOVA TRAVA DE ESTOQUE
-                
-                let tag = item.systemTag || "Item";
+                if (item.system?.stock === 0) return false;
+                if (!item.system?.inExclusiveRotation) return false;
                 if (activeStoreIds.includes(item.id)) return false;
                 if (item.rarity !== chosenRarity) return false;
-                if (["Origens", "Portais", "Passe", "Habilidades Intrínsecas"].includes(tag)) return false;
-                let isPower = tag === "Talentos Principais" || tag === "Talentos Secundários";
-                
-                if (chosenRarity === "Comum" || chosenRarity === "Raro") {
-                    if (isPower) return false;
-                }
-                if (chosenRarity === "Multiversal") {
-                    if (isPower) return false;
-                }
 
                 // --- REGRA DE 30 DIAS DA LOJA TEMÁTICA ---
                 if (item.system?.isThematic) {
@@ -157,8 +149,6 @@ let possibleItems = archive.filter(item => {
                     }
                 }
                 
-                if (!item.system?.inExclusiveRotation) return false; // ITEM DEVE ESTAR ATIVADO PARA EXCLUSIVA
-
                 return true;
             });
             
@@ -170,14 +160,21 @@ let possibleItems = archive.filter(item => {
                 clone.discounted = false;
                 storeItems.push(clone);
             } else {
-                // Fallback: pega qualquer item que não seja poder
-let fItems = archive.filter(item => {
-                    if (item.system?.stock === 0) return false; // <--- NOVA TRAVA NO FALLBACK TAMBÉM
-                    if (!item.system?.inExclusiveRotation) return false; // ITEM DEVE ESTAR ATIVADO PARA EXCLUSIVA
+                // Fallback: pega qualquer item da rotação
+                let fItems = archive.filter(item => {
+                    if (item.system?.stock === 0) return false;
+                    if (!item.system?.inExclusiveRotation) return false;
                     if (activeStoreIds.includes(item.id)) return false;
-                    let tag = item.systemTag || "Item";
-                    if (["Origens", "Portais", "Passe", "Habilidades Intrínsecas"].includes(tag)) return false;
-                    return tag !== "Talentos Principais" && tag !== "Talentos Secundários";
+                    
+                    if (item.system?.isThematic) {
+                        if (item.system.thematicStatus === 'preview') return false;
+                        if (item.system.thematicDate) {
+                            const ageInDays = (Date.now() - item.system.thematicDate) / (1000 * 60 * 60 * 24);
+                            if (ageInDays < 30) return false;
+                        }
+                    }
+                    
+                    return true;
                 });
                 if (fItems.length > 0) {
                     let rItem = fItems[Math.floor(Math.random() * fItems.length)];
@@ -279,6 +276,7 @@ let fItems = archive.filter(item => {
         if (!game.user.isGM) return;
         
         let cleanItem = JSON.parse(JSON.stringify(item));
+        normalizeStoreItem(cleanItem);
         
         // 1. Arquivo Geral
         let archive = StoreDatabase.getArchive();
@@ -466,10 +464,22 @@ buyItemLocal: async (itemToBuy) => {
                 Hooks.callAll("nexusItemActivated", item, user);
                 ui.notifications.info("Renderização Iniciada...");
                 
-                // Lógica de Vale Re-roll
-                if (item.name === "Vale Re-roll" && item.systemTag === "Passe") {
+                const itemNameNorm = (item.name || "").trim().toLowerCase();
+                const exclRerollCfg = (game.settings.get(MODULE_ID, "exclusiveRerollItemName") || "Vale Re-roll").trim().toLowerCase();
+                const origRerollCfg = (game.settings.get(MODULE_ID, "originRerollItemName") || "Re-roll de Origem").trim().toLowerCase();
+
+                // Lógica de Re-roll da Loja Exclusiva (configurável nas Configurações do Módulo)
+                if (exclRerollCfg && itemNameNorm === exclRerollCfg) {
                     await StoreDatabase.generateExclusiveStore(user.id, true);
-                    ui.notifications.info("Vale Re-roll utilizado! Loja Exclusiva renovada gratuitamente.");
+                    ui.notifications.info(`${item.name} utilizado! Loja Exclusiva renovada gratuitamente.`);
+                }
+
+                // Lógica de Re-roll de Origem (configurável nas Configurações do Módulo)
+                if (origRerollCfg && itemNameNorm === origRerollCfg) {
+                    const currentCredits = Number(user.getFlag(MODULE_ID, "originRerollCredits") || 0);
+                    const nextCredits = currentCredits + 1;
+                    await user.setFlag(MODULE_ID, "originRerollCredits", nextCredits);
+                    ui.notifications.info(`${item.name} ativado! +1 Re-roll de Origem liberado no Novo Agente (Disponíveis: ${nextCredits}).`);
                 }
 
                 // Lógica de XP

@@ -6,14 +6,12 @@
     // Importando as suas bases de dados originais
     import { EXTRAS_DB } from '../../data/extras-data.js';
     import { FLAWS_DB } from '../../data/flaws-data.js';
+    import { PB_BASE_VALUES, getBasePowerXP, getMaxPowerPB, normalizePowerCategoryAndRarity } from '../../utils/PowerRules.js';
 
     const dispatch = createEventDispatcher();
     const MODULE_ID = "multiversus-rpg";
 
     // --- REGRAS DO SISTEMA ---
-    const XP_RULES = { "origem": 0, "principal": 8, "secundario": 4, "habilidade": 2 };
-    const PB_BASE_VALUES = { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 };
-    const PB_MULTIPLIERS = { "origem": 1, "principal": 1, "secundario": 0.5, "habilidade": 0.25 };
     const CAP_TYPES = ['mass', 'range', 'speed', 'self', 'touch'];
 
     // ========================================================================
@@ -78,10 +76,10 @@
     let activeQIndex = -1;
 
     // --- CÁLCULOS EM TEMPO REAL ---
-    $: baseCost = XP_RULES[draft.category] || 0;
+    $: baseCost = getBasePowerXP(draft.category, draft.rarity);
     $: xpCost = (draft.dice.normal * baseCost) + (draft.dice.hard * baseCost * 2) + (draft.dice.wiggle * baseCost * 4);
     
-    $: maxPB = Math.floor((PB_BASE_VALUES[draft.rarity] || 2) * (PB_MULTIPLIERS[draft.category] || 1));
+    $: maxPB = getMaxPowerPB(draft.category, draft.rarity);
     
     function getQualityCost(q) {
         const extrasCost = q.extras.reduce((sum, e) => sum + (e.cost * (e.qty || 1)), 0);
@@ -264,6 +262,10 @@ async function compilePower() {
         const safeDice = JSON.parse(JSON.stringify(draft.dice));
         const safeQualities = JSON.parse(JSON.stringify(draft.qualities));
 
+        const norm = normalizePowerCategoryAndRarity(draft.category, draft.rarity);
+        draft.category = norm.category;
+        draft.rarity = norm.rarity;
+
         // Objeto formatado exatamente como o Foundry e o Parser exigem:
         const rawObj = {
             id: draft.id, 
@@ -272,8 +274,8 @@ async function compilePower() {
             img: "icons/svg/lightning.svg",
             flags: {
                 [MODULE_ID]: {
-                    category: draft.category,
-                    rarity: draft.rarity,
+                    category: norm.category,
+                    rarity: norm.rarity,
                     dice: safeDice,
                     qualities: safeQualities,
                     isInitial: false,
@@ -289,8 +291,8 @@ async function compilePower() {
         const itemToSave = {
             id: draft.id, // Manter o ID no topo pro PowerDatabase atualizar o certo
             name: draft.name,
-            category: draft.category,
-            rarity: draft.rarity,
+            category: norm.category,
+            rarity: norm.rarity,
             img: rawObj.img,
             isFicha: false,
             source: "Estúdio (Nexus_OS)",
@@ -301,7 +303,11 @@ async function compilePower() {
 const result = await PowerDatabase.savePower(itemToSave);
 
         if (result.success) {
-            ui.notifications.info(`Poder [${draft.name}] salvo com sucesso!`);
+            if (norm.converted && norm.category === 'memoria') {
+                ui.notifications.info(`Poder [${draft.name}] salvo e classificado automaticamente como Memória (4 PB / 4 XP)!`);
+            } else {
+                ui.notifications.info(`Poder [${draft.name}] salvo com sucesso!`);
+            }
             
             // Força o ID para null para que o próximo "Salvar" não seja um overwrite
             draft.id = null; 
@@ -332,7 +338,10 @@ const result = await PowerDatabase.savePower(itemToSave);
                     <option value="origem">KIT DE ORIGEM</option>
                     <option value="principal">PRINCIPAL</option>
                     <option value="secundario">SECUNDÁRIO</option>
+                    <option value="memoria">MEMÓRIA</option>
                     <option value="habilidade">HABILIDADE ESPECIAL</option>
+                    <option value="item">ITEM</option>
+                    <option value="estrutura">ESTRUTURA</option>
                 </select>
             </div>
             <div class="field">

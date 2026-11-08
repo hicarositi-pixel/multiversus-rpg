@@ -45,9 +45,9 @@
         const qualities = flags.qualities || [];
         
         const getQ = (types) => qualities.filter(q => types.includes(q.type?.toUpperCase()) || types.includes(q.name?.toUpperCase()));
-        const attackQ = getQ(['A', 'ATAQUE']);
-        const defenseQ = getQ(['D', 'DEFESA']);
-        const utilityQ = getQ(['U', 'UTILIDADE']);
+        const attackQ = getQ(['ATK', 'A', 'ATAQUE']);
+        const defenseQ = getQ(['DEF', 'D', 'DEFESA']);
+        const utilityQ = getQ(['UTIL', 'U', 'UTILIDADE', 'ÚTIL']);
 
         let detailsHTML = "";
         const formatCat = (list, label, color, icon) => {

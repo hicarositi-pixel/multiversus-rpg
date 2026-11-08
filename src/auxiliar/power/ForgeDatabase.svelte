@@ -15,7 +15,7 @@
     let selectedRarity = "Todas";
     let searchTag = ""; 
 
-    const CATEGORIES = ["Todas", "origem", "principal", "secundario", "habilidade"];
+    const CATEGORIES = ["Todas", "origem", "principal", "secundario", "memoria", "habilidade", "item", "estrutura"];
     const RARITIES = ["Todas", "Comum", "Raro", "Lendário", "Mítico", "Universal", "Multiversal"];
 
     const isPowerFicha = (p) => p.isFicha || p.source === "Ficha (Foundry)" || p.source === "Terminal" || p.rawItem?.flags?.[MODULE_ID]?.isFicha;

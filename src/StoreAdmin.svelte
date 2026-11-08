@@ -3,30 +3,32 @@
     import { fade, slide } from 'svelte/transition';
     import StoreCard from './StoreCard.svelte'; 
     import { StoreDatabase } from './StoreDatabase.js';
+    import { normalizeStoreItem } from './utils/PowerRules.js';
 
     export let storeItems = []; 
     const dispatch = createEventDispatcher();
 
     // CONFIGURAÇÃO
-    const TAGS = ["Talentos Principais", "Talentos Secundários", "Habilidades Especiais", "Habilidades Intrínsecas", "Itens", "Veículos", "Portais", "Bases", "Contatos", "Criaturas", "Origens", "Passe"];
+    const TAGS = ["Talentos Principais", "Talentos Secundários", "Memórias", "Habilidades Especiais", "Habilidades Intrínsecas", "Itens", "Veículos", "Portais", "Bases", "Contatos", "Criaturas", "Origens", "Passe"];
     const RARITIES = ["Comum", "Raro", "Lendário", "Mítico", "Universal", "Multiversal"];
 
     // REGRAS
     const PB_RULES = {
-        "Talentos Principais": { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 },
-        "Talentos Secundários": { "Comum": 1, "Raro": 2, "Lendário": 4, "Mítico": 6, "Universal": 8, "Multiversal": 16 },
+        "Talentos Principais": { "Comum": 4, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 },
+        "Talentos Secundários": { "Comum": 4, "Raro": 4, "Lendário": 4, "Mítico": 6, "Universal": 8, "Multiversal": 16 },
+        "Memórias": { "Comum": 4, "Raro": 4, "Lendário": 4, "Mítico": 4, "Universal": 4, "Multiversal": 4 },
         "Habilidades Intrínsecas": { "Comum": 0.5, "Raro": 1, "Lendário": 2, "Mítico": 3, "Universal": 4, "Multiversal": 8 },
         "Itens": { "Comum": 1, "Raro": 2, "Lendário": 4, "Mítico": 6, "Universal": 8, "Multiversal": 16 },
         "Veículos": { "Comum": 2, "Raro": 4, "Lendário": 8, "Mítico": 12, "Universal": 16, "Multiversal": 32 },
-        "Habilidades Especiais": { "Comum": 0, "Raro": 1, "Lendário": 2, "Mítico": 3, "Universal": 4, "Multiversal": 8 }
+        "Habilidades Especiais": { "Comum": 1, "Raro": 1, "Lendário": 2, "Mítico": 3, "Universal": 4, "Multiversal": 8 }
     };
-    const XP_RULES = { "Talentos Principais": 8, "Talentos Secundários": 4, "Habilidades Intrínsecas": 8, "Habilidades Especiais": 2, "Itens": 0 };
+    const XP_RULES = { "Talentos Principais": 8, "Talentos Secundários": 4, "Memórias": 4, "Habilidades Intrínsecas": 8, "Habilidades Especiais": 2, "Itens": 0 };
 
     // ESTADO
     const emptyItem = {
         id: null, name: "", systemTag: "Talentos Principais", rarity: "Comum", price: 0,
         img: "icons/svg/mystery-man.svg",
-        system: { description: "", costPerDie: 0, xpCost: 0, stock: -1 }
+        system: { description: "", costPerDie: 0, xpCost: 0, stock: -1, isThematic: false, thematicStatus: "preview" }
     };
 
     let draft = JSON.parse(JSON.stringify(emptyItem));
@@ -46,6 +48,7 @@
     
     // NOVO: Estado de Inspeção
     let inspectedPlayer = null;
+    let playerSearchQuery = "";
     let activeTab = 'list';
     // --- ESTADOS DA LOJA TEMÁTICA E EDIÇÃO RÁPIDA ---
     let thematicSettings = { isActive: false, closeDate: null };
@@ -71,6 +74,11 @@
     $: filteredStore = processList(storeItems, searchQuery, selectedFilterTag, sortOption);
     
     $: filteredAddItems = archiveItems.filter(i => i.name.toLowerCase().includes(addSearchQuery.toLowerCase()));
+    $: filteredPlayerList = playerList.filter(p => {
+        const q = playerSearchQuery.trim().toLowerCase();
+        if (!q) return true;
+        return p.name.toLowerCase().includes(q) || (p.charName && p.charName.toLowerCase().includes(q));
+    });
 
     function processList(list, query, tag, sortType) {
         let result = [...list]; // Faz uma cópia segura para não alterar a DB original
@@ -104,7 +112,7 @@ function refreshAllData() {
         playerList = game.users.filter(u => !u.isGM).map(u => {
             const data = u.getFlag("multiversus-rpg", "playerData") || { coins: 0, items: [] };
             if (transactionValues[u.id] === undefined) transactionValues[u.id] = 0;
-            return { id: u.id, name: u.name, color: u.color, coins: data.coins, inventory: data.items || [] };
+            return { id: u.id, name: u.name, charName: u.character?.name || "", color: u.color, coins: data.coins, inventory: data.items || [] };
         });
 
         // Se estiver inspecionando alguém, atualiza os dados dele em tempo real
@@ -173,12 +181,28 @@ function refreshAllData() {
 
     // --- CÁLCULOS VISUAIS ---
     $: suggPB = (() => {
+        const isLowRarity = draft.rarity === 'Raro' || draft.rarity === 'Comum';
+        if (draft.systemTag === 'Memórias' || ((draft.systemTag === 'Talentos Principais' || draft.systemTag === 'Talentos Secundários') && isLowRarity)) {
+            return 4;
+        }
+        if (draft.systemTag === 'Habilidades Especiais' && isLowRarity) {
+            return 1;
+        }
         let base = 0;
         if (PB_RULES[draft.systemTag]) base = PB_RULES[draft.systemTag][draft.rarity] || 0;
         if (draft.systemTag === 'Habilidades Especiais') base += 2;
         return base;
     })();
-    $: suggXP = XP_RULES[draft.systemTag] || 0;
+    $: suggXP = (() => {
+        const isLowRarity = draft.rarity === 'Raro' || draft.rarity === 'Comum';
+        if (draft.systemTag === 'Memórias' || ((draft.systemTag === 'Talentos Principais' || draft.systemTag === 'Talentos Secundários') && isLowRarity)) {
+            return 4;
+        }
+        if (draft.systemTag === 'Habilidades Especiais' && isLowRarity) {
+            return 1;
+        }
+        return XP_RULES[draft.systemTag] ?? 0;
+    })();
     $: suggPrice = (() => {
         if (draft.systemTag === "Habilidades Intrínsecas") {
             return (PB_RULES["Talentos Principais"][draft.rarity] || 0) * 100;
@@ -201,6 +225,8 @@ function refreshAllData() {
             if (itemToSave.system.xpCost === 0) itemToSave.system.xpCost = suggXP;
             if (itemToSave.price === 0) itemToSave.price = suggPrice;
 
+            const normRes = normalizeStoreItem(itemToSave);
+
             if (isManualMode) {
                 itemToSave.system.isManual = true; 
             } else {
@@ -217,8 +243,13 @@ function refreshAllData() {
             }
 
             await StoreDatabase.createItem(itemToSave);
-            ui.notifications.info(`Item salvo com sucesso!`);
+            if (normRes.changed && itemToSave.systemTag === "Memórias") {
+                ui.notifications.info(`Item salvo e classificado automaticamente como Memória (4 PB / 4 XP)!`);
+            } else {
+                ui.notifications.info(`Item salvo com sucesso!`);
+            }
             resetForm();
+            refreshAllData();
             dispatch('refresh');
 
         } catch (e) {
@@ -254,6 +285,32 @@ function refreshAllData() {
         if (!item.system) item.system = {};
         item.system.inExclusiveRotation = !item.system.inExclusiveRotation;
         await StoreDatabase.createItem(item); // Update
+        refreshAllData();
+        dispatch('refresh');
+    }
+
+    async function toggleThematicItem(item) {
+        let updated = JSON.parse(JSON.stringify(item));
+        if (!updated.system) updated.system = {};
+        updated.system.isThematic = !updated.system.isThematic;
+        if (updated.system.isThematic) {
+            if (!updated.system.thematicStatus) updated.system.thematicStatus = 'preview';
+            if (!updated.system.thematicDate) updated.system.thematicDate = Date.now();
+        }
+        await StoreDatabase.createItem(updated);
+        refreshAllData();
+        dispatch('refresh');
+    }
+
+    async function toggleThematicStatus(item) {
+        let updated = JSON.parse(JSON.stringify(item));
+        if (!updated.system) updated.system = {};
+        updated.system.isThematic = true;
+        updated.system.thematicStatus = updated.system.thematicStatus === 'active' ? 'preview' : 'active';
+        if (updated.system.thematicStatus === 'active' && !updated.system.thematicDate) {
+            updated.system.thematicDate = Date.now();
+        }
+        await StoreDatabase.createItem(updated);
         refreshAllData();
         dispatch('refresh');
     }
@@ -543,8 +600,31 @@ function refreshAllData() {
                             <button class="icon-btn" style="color: #ffcc00;" on:click={() => quickEditItem = JSON.parse(JSON.stringify(item))} title="Estoque / Limites / Preço">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
+
+                            {#if activeSection === 'archive' || activeSection === 'thematic'}
+                                <button
+                                    class="toggle-btn"
+                                    style="width: auto; min-width: 96px; white-space: nowrap; border-color: {item.system?.isThematic ? '#ff3333' : '#555'}; background: {item.system?.isThematic ? 'rgba(255, 51, 51, 0.2)' : '#1a1a1a'}; color: {item.system?.isThematic ? '#ff5555' : '#888'};"
+                                    on:click={() => toggleThematicItem(item)}
+                                    title="Alternar Item Temático? (Sim / Não)"
+                                >
+                                    <i class="fas fa-fire"></i> {item.system?.isThematic ? "TEMÁTICO: SIM" : "TEMÁTICO: NÃO"}
+                                </button>
+
+                                {#if item.system?.isThematic}
+                                    <button
+                                        class="toggle-btn"
+                                        style="width: auto; min-width: 96px; white-space: nowrap; border-color: {item.system?.thematicStatus === 'active' ? '#00ff41' : '#ffcc00'}; background: {item.system?.thematicStatus === 'active' ? 'rgba(0, 255, 65, 0.15)' : 'rgba(255, 204, 0, 0.15)'}; color: {item.system?.thematicStatus === 'active' ? '#00ff41' : '#ffcc00'};"
+                                        on:click={() => toggleThematicStatus(item)}
+                                        title="Alternar Status Temático (Preview / Lançamento)"
+                                    >
+                                        <i class="fas {item.system?.thematicStatus === 'active' ? 'fa-rocket' : 'fa-eye'}"></i>
+                                        {item.system?.thematicStatus === 'active' ? "LANÇAMENTO" : "PREVIEW"}
+                                    </button>
+                                {/if}
+                            {/if}
                             
-                            <button class="toggle-btn {item.system?.inExclusiveRotation ? 'active' : ''}" style="margin-right: 5px; background: {item.system?.inExclusiveRotation ? '#00ff41' : '#333'}; color: {item.system?.inExclusiveRotation ? '#000' : '#fff'};" on:click={() => toggleExclusive(item)} title="Rotação Exclusiva">
+                            <button class="toggle-btn {item.system?.inExclusiveRotation ? 'active' : ''}" style="width: auto; min-width: 90px; white-space: nowrap; margin-right: 5px; background: {item.system?.inExclusiveRotation ? '#00ff41' : '#333'}; color: {item.system?.inExclusiveRotation ? '#000' : '#fff'};" on:click={() => toggleExclusive(item)} title="Rotação Exclusiva">
                                 <i class="fas fa-star"></i> {item.system?.inExclusiveRotation ? "NA ROTAÇÃO" : "FORA (ROT)"}
                             </button>
                             
@@ -571,13 +651,30 @@ function refreshAllData() {
     {:else if activeSection === 'players'}
         <div class="players-layout">
             <div class="players-sidebar">
-                {#each playerList as p}
-                    <div class="player-tab" class:active={inspectedPlayer?.id === p.id} on:click={() => openInspector(p)}>
-                        <div class="tab-indicator" style="background: {p.color}"></div>
-                        <span class="p-name">{p.name}</span>
-                        <span class="p-coins">{p.coins} NX</span>
-                    </div>
-                {/each}
+                <div class="player-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" bind:value={playerSearchQuery} placeholder="Buscar jogador..." />
+                    {#if playerSearchQuery}
+                        <button class="clear-p-search" on:click={() => playerSearchQuery = ""} title="Limpar busca"><i class="fas fa-times"></i></button>
+                    {/if}
+                </div>
+                <div class="players-list-scroll">
+                    {#each filteredPlayerList as p (p.id)}
+                        <div class="player-tab" class:active={inspectedPlayer?.id === p.id} on:click={() => openInspector(p)}>
+                            <div class="tab-indicator" style="background: {p.color}"></div>
+                            <div class="p-ident">
+                                <span class="p-name">{p.name}</span>
+                                {#if p.charName}
+                                    <span class="p-char-sub">{p.charName}</span>
+                                {/if}
+                            </div>
+                            <span class="p-coins">{p.coins} NX</span>
+                        </div>
+                    {/each}
+                    {#if filteredPlayerList.length === 0}
+                        <div class="empty-p-search">Nenhum jogador encontrado.</div>
+                    {/if}
+                </div>
             </div>
 
             <div class="inspection-panel">
@@ -679,13 +776,22 @@ function refreshAllData() {
 
     /* PLAYERS LAYOUT (NOVO) */
     .players-layout { display: flex; height: 100%; overflow: hidden; }
-    .players-sidebar { width: 220px; background: #080808; border-right: 1px solid #333; overflow-y: auto; display: flex; flex-direction: column; }
-    .player-tab { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #222; cursor: pointer; position: relative; transition: 0.2s; }
+    .players-sidebar { width: 250px; background: #080808; border-right: 1px solid #333; overflow: hidden; display: flex; flex-direction: column; }
+    .player-search-wrap { display: flex; align-items: center; gap: 6px; padding: 10px; background: #050505; border-bottom: 1px solid #333; color: #00ff41; flex-shrink: 0; }
+    .player-search-wrap input { flex: 1; border: 1px solid #333; background: #111; padding: 6px 8px; color: #fff; font-size: 11px; border-radius: 4px; }
+    .player-search-wrap input:focus { border-color: #00ff41; }
+    .clear-p-search { background: none; border: none; color: #888; cursor: pointer; padding: 2px 5px; font-size: 12px; }
+    .clear-p-search:hover { color: #ff3333; }
+    .players-list-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .empty-p-search { padding: 20px 12px; text-align: center; font-size: 11px; color: #555; font-style: italic; }
+    .player-tab { display: flex; align-items: center; gap: 8px; padding: 12px 15px; border-bottom: 1px solid #222; cursor: pointer; position: relative; transition: 0.2s; }
     .player-tab:hover { background: #111; }
     .player-tab.active { background: #1a1a1a; }
     .tab-indicator { position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-    .p-name { font-weight: bold; color: #eee; flex: 1; font-size: 14px; }
-    .p-coins { font-size: 11px; color: #ffcc00; font-weight: bold; }
+    .p-ident { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .p-name { font-weight: bold; color: #eee; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .p-char-sub { font-size: 10px; color: #777; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .p-coins { font-size: 11px; color: #ffcc00; font-weight: bold; white-space: nowrap; }
 
     .inspection-panel { flex: 1; background: #111; padding: 20px; display: flex; flex-direction: column; overflow: hidden; }
     .no-select-msg { height: 100%; display: flex; align-items: center; justify-content: center; color: #444; font-weight: bold; letter-spacing: 1px; border: 2px dashed #222; }

@@ -1,3 +1,5 @@
+import { normalizePowerCategoryAndRarity } from '../utils/PowerRules.js';
+
 const MODULE_ID = "multiversus-rpg";
 const SETTING_NAME = "powersArchive"; // O nome do "cofre" no banco de dados
 
@@ -39,6 +41,20 @@ export const PowerDatabase = {
     // ========================================================================
     savePower: async (powerData) => {
         try {
+            const rawFlags = powerData.rawItem?.flags?.[MODULE_ID] || {};
+            const norm = normalizePowerCategoryAndRarity(
+                powerData.category || rawFlags.category || "principal",
+                powerData.rarity || rawFlags.rarity || "Comum"
+            );
+            powerData.category = norm.category;
+            powerData.rarity = norm.rarity;
+            if (powerData.rawItem) {
+                powerData.rawItem.flags = powerData.rawItem.flags || {};
+                powerData.rawItem.flags[MODULE_ID] = powerData.rawItem.flags[MODULE_ID] || {};
+                powerData.rawItem.flags[MODULE_ID].category = norm.category;
+                powerData.rawItem.flags[MODULE_ID].rarity = norm.rarity;
+            }
+
             let archive = await PowerDatabase.getArchive();
 
             // Se o poder já tiver um ID, significa que estamos EDITANDO ele
