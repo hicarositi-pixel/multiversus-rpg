@@ -12,6 +12,7 @@
     import NexusApp from './database/NexusApp.svelte';
     import CalendarApp from './apps/CalendarApp.svelte'; // Adicione isto
     import ArchetypeManager from './apps/ArchetypeManager.svelte';
+    import ThemeStudioApp from './apps/ThemeStudioApp.svelte';
     
     const dispatch = createEventDispatcher();
 
@@ -235,6 +236,14 @@
                                 <span class="desc">Gerenciador de Kits e Talentos</span>
                             </div>
                         </button>
+
+                        <button class="modern-app studio-theme" on:click={() => openApp('themes')}>
+                            <div class="icon-box"><i class="fas fa-palette"></i></div>
+                            <div class="app-meta">
+                                <span class="name">THEME_STUDIO</span>
+                                <span class="desc">Criador & Editor de Temas (Ficha & Talentos)</span>
+                            </div>
+                        </button>
                     </div>
 
                 {:else if currentApp === 'config'}
@@ -274,6 +283,8 @@
                     <div class="full-app-wrapper"><PassManager /></div>
                 {:else if currentApp === 'archetype'}
                     <div class="full-app-wrapper"><ArchetypeManager /></div>
+                {:else if currentApp === 'themes'}
+                    <div class="full-app-wrapper"><ThemeStudioApp /></div>
                 {/if}
             </main>
 
@@ -371,6 +382,7 @@
     .config-theme { --app-color: var(--c-primary); }
     .ai-theme { --app-color: #ffffff; }
     .arche-theme { --app-color: #00ff41; }
+    .studio-theme { --app-color: #00e5ff; }
 
     .modern-app:hover { 
         border-color: var(--app-color);

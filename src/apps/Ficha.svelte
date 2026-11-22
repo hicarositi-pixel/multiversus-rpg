@@ -21,11 +21,13 @@
     // --- IMPORTAÇÃO DO BANCO DE TEMAS ---
     import { SHEET_THEMES } from '../data/SheetThemeDB.js';
     import { ThemeEngine } from '../database/ThemeEngine.js';
+    import { CustomThemeDB } from '../database/CustomThemeDB.js';
 
     export let actor;
     
     const MODULE_ID = "multiversus-rpg";
     const isGM = game.user.isGM; // Variável global de GM
+    let themeRevision = 0;
 
     // --- 1. DADOS REATIVOS (FLAGS) ---
     $: flags = actor?.flags?.[MODULE_ID] || {};
@@ -38,23 +40,27 @@
 
     // --- 2. SISTEMA DE TEMAS ---
     $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
-    $: currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal'];
+    $: currentThemeData = (themeRevision >= 0)
+        ? (SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal'] || { label: 'TERMINAL_OS', class: 'theme-terminal', vars: { '--c-primary': '#00ff41' } })
+        : SHEET_THEMES['terminal'];
     
-    $: cssString = Object.entries(currentThemeData.vars)
+    $: cssString = Object.entries(currentThemeData?.vars || {})
         .map(([key, value]) => `${key}: ${value};`)
         .join(' ');
 
-    $: themeColor = currentThemeData.vars['--c-primary'];
+    $: themeColor = currentThemeData?.vars?.['--c-primary'] || '#00ff41';
     $: wallpaperURL = flags.sheetConfig?.wallpaper || "https://mir-s3-cdn-cf.behance.net/project_modules/hd/e4316a93890387.5e70ade47b737.gif";
 
     $: {
-        if (typeof ThemeEngine !== 'undefined' && SHEET_THEMES[activeThemeKey]) {
-            setTimeout(() => ThemeEngine.apply(activeThemeKey, SHEET_THEMES[activeThemeKey]), 10);
+        if (themeRevision >= 0 && typeof ThemeEngine !== 'undefined' && SHEET_THEMES[activeThemeKey]) {
+            setTimeout(() => ThemeEngine.apply(activeThemeKey, SHEET_THEMES[activeThemeKey], true), 10);
         }
     }
 
     // --- 3. REATIVIDADE MANUAL DO FOUNDRY ---
     onMount(() => {
+        CustomThemeDB.syncAll();
+        themeRevision++;
         const hookId = Hooks.on("updateActor", (doc, changes) => {
             if (doc.id === actor.id) {
                 if (doc.flags[MODULE_ID]) {
@@ -62,7 +68,13 @@
                 }
             }
         });
-        return () => Hooks.off("updateActor", hookId);
+        const themeHookId = Hooks.on("nexusThemesUpdated", () => {
+            themeRevision++;
+        });
+        return () => {
+            Hooks.off("updateActor", hookId);
+            Hooks.off("nexusThemesUpdated", themeHookId);
+        };
     });
 
     // --- 4. LÓGICA DE LOGIN / BOOT (CORRIGIDA) ---

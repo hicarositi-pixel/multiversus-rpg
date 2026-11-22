@@ -1,8 +1,9 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
+    import { createEventDispatcher, onMount, onDestroy } from 'svelte';
     import { fade, slide } from 'svelte/transition';
     import { SHEET_THEMES } from '../data/SheetThemeDB.js'; 
     import { PassSystem } from '../PassSystem.js';
+    import { CustomThemeDB } from '../database/CustomThemeDB.js';
 
     export let actor;
     export let flags; // Recebe as flags atualizadas e reativas da Ficha Pai
@@ -11,10 +12,30 @@
     const MODULE_ID = "multiversus-rpg";
     const isGM = game.user.isGM;
 
-    // --- REGRAS DO PASSE ---
-    $: playerTier = PassSystem.getPlayerTier(game.user.id);
-    const FREE_THEMES = ['terminal', 'chamas', 'blue_magic', 'lobby'];
-    $: isRestricted = (key) => !FREE_THEMES.includes(key) && playerTier.id === 'cobre';
+    let themeRevision = 0;
+    let hookThemesId;
+    let hookPassId;
+
+    onMount(() => {
+        CustomThemeDB.syncAll();
+        themeRevision++;
+        hookThemesId = Hooks.on("nexusThemesUpdated", () => { themeRevision++; });
+        hookPassId = Hooks.on("passSystemUpdate", () => { themeRevision++; });
+    });
+
+    onDestroy(() => {
+        if (hookThemesId) Hooks.off("nexusThemesUpdated", hookThemesId);
+        if (hookPassId) Hooks.off("passSystemUpdate", hookPassId);
+    });
+
+    // --- REGRAS DO PASSE & DISPONIBILIDADE POR JOGADOR ---
+    $: sheetThemesMap = (themeRevision >= 0) ? { ...SHEET_THEMES } : SHEET_THEMES;
+    $: visibleSheetThemes = Object.entries(sheetThemesMap).filter(([key, data]) => {
+        if (isGM) return true;
+        if (data?.hideWhenLocked && !CustomThemeDB.canUserUseTheme(data, game.user)) return false;
+        return true;
+    });
+    $: isRestricted = (data) => (themeRevision >= 0) && !CustomThemeDB.canUserUseTheme(data, game.user);
 
     // --- SINCRONIA REATIVA (Lê direto das flags) ---
     $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
@@ -32,8 +53,8 @@
     let tempUrl = ""; 
 
     // --- TEMA ---
-    $: currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal'];
-    $: cssVariables = Object.entries(currentThemeData.vars)
+    $: currentThemeData = sheetThemesMap[activeThemeKey] || sheetThemesMap['terminal'] || SHEET_THEMES['terminal'];
+    $: cssVariables = Object.entries(currentThemeData?.vars || {})
         .map(([key, val]) => `${key}: ${val};`)
         .join(' ');
 
@@ -171,21 +192,26 @@
             <section class="group">
                 <h2 class="group-title">:: TEMA VISUAL ::</h2>
                 <div class="theme-grid">
-                    {#each Object.entries(SHEET_THEMES) as [key, data]}
+                    {#each visibleSheetThemes as [key, data] (key)}
+                        {@const locked = isRestricted(data)}
                         <button 
                             class="theme-card" 
                             class:active={activeThemeKey === key}
-                            class:locked={isRestricted(key)}
-                            disabled={isRestricted(key)}
-                            on:click={() => !isRestricted(key) && selectTheme(key)}
-                            style="--preview-primary: {data.vars['--c-primary']}; --preview-bg: {data.vars['--c-bg']}"
+                            class:locked={locked}
+                            disabled={locked}
+                            on:click={() => !locked && selectTheme(key)}
+                            style="--preview-primary: {data.vars?.['--c-primary'] || '#00ff41'}; --preview-bg: {data.vars?.['--c-bg'] || '#050505'}"
                         >
-                            <div class="theme-preview"></div>
+                            <div class="theme-preview" style="display:flex; align-items:center; justify-content:center; color: var(--preview-primary); font-size: 13px;">
+                                {#if data.icon}<i class="fas {data.icon}"></i>{/if}
+                            </div>
                             <div class="theme-info">
                                 <span class="theme-name">{data.label}</span>
-                                <span class="theme-desc">{data.desc}</span>
-                                {#if isRestricted(key)}
-                                    <span class="lock-tag"><i class="fas fa-lock"></i> REQUER PASSE PRATA+</span>
+                                <span class="theme-desc">{data.desc || ''}</span>
+                                {#if locked}
+                                    <span class="lock-tag"><i class="fas fa-lock"></i> {CustomThemeDB.getAccessRequirementLabel(data)}</span>
+                                {:else if isGM && ((data.minPassTier && data.minPassTier !== 'cobre') || (data.allowedUsers && data.allowedUsers.length > 0))}
+                                    <span class="lock-tag" style="color: #00e5ff; border-color: rgba(0,229,255,0.3);"><i class="fas fa-key"></i> {CustomThemeDB.getAccessRequirementLabel(data)}{data.allowedUsers?.length ? ` (${data.allowedUsers.length} VIP)` : ''}</span>
                                 {/if}
                             </div>
                             {#if activeThemeKey === key}

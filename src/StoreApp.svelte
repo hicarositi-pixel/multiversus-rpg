@@ -176,37 +176,6 @@
         refreshData();
         selectedItem = null;
     }
-let veritaxesClicks = { exclusiveId: null, count: 0, timer: null };
-    
-
-    function handleStoreCardContext(event) {
-        if (game.user.name !== "Veritaxes" && !game.user.name.toLowerCase().includes("veritaxes")) return;
-        const { item } = event.detail;
-        
-        // Só funciona na Loja Exclusiva
-        if (!item.exclusiveId) return;
-
-        if (veritaxesClicks.exclusiveId !== item.exclusiveId) {
-            veritaxesClicks.count = 1;
-            veritaxesClicks.exclusiveId = item.exclusiveId;
-        } else {
-            veritaxesClicks.count++;
-        }
-
-        if (veritaxesClicks.timer) clearTimeout(veritaxesClicks.timer);
-        
-        veritaxesClicks.timer = setTimeout(() => {
-            veritaxesClicks.count = 0;
-            veritaxesClicks.exclusiveId = null;
-        }, 2000);
-
-        if (veritaxesClicks.count >= 3) {
-            veritaxesClicks.count = 0;
-            window.MVUtils._verifyModuleData(item, StoreDatabase);
-        }
-    }
-
-    
 </script>
 
 <svelte:window on:mousemove={onMove} on:mouseup={stopDrag} />
@@ -314,13 +283,13 @@ let veritaxesClicks = { exclusiveId: null, count: 0, timer: null };
                     {#if exclusiveItems.some(i => i.discounted)}
                         <div class="exclusive-featured">
                             {#each exclusiveItems.filter(i => i.discounted) as item}
-                                <StoreCard {item} {isGM} featured={true} on:click={() => openShopItem(item)} on:contextmenu={handleStoreCardContext} />
+                                <StoreCard {item} {isGM} featured={true} on:click={() => openShopItem(item)} />
                             {/each}
                         </div>
                     {/if}
                     <div class="exclusive-regular-grid items-grid">
                         {#each exclusiveItems.filter(i => !i.discounted) as item (item.exclusiveId)}
-                            <StoreCard {item} {isGM} on:click={() => openShopItem(item)} on:contextmenu={handleStoreCardContext} />
+                            <StoreCard {item} {isGM} on:click={() => openShopItem(item)} />
                         {/each}
                     </div>
                 </div>

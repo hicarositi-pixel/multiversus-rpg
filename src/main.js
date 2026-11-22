@@ -30,10 +30,12 @@ import { OriginDatabase } from './OriginDatabase.js';
 import { PowerDatabase } from './auxiliar/PowerDatabase.js';
 import { SystemBookDB } from './SystemBookDB.js';
 import { runDatabasePowerMigration } from './utils/PowerRules.js';
+import { CustomThemeDB } from './database/CustomThemeDB.js';
 
 Hooks.once('init', () => {
     CardDatabase.init();
     SystemBookDB.init();
+    CustomThemeDB.init();
 });
 
  
@@ -527,6 +529,9 @@ Hooks.once('ready', async function() {
 
     // --- SOCKETS ---
     game.socket.on(`module.${MODULE_ID}`, async (payload) => {
+        if (payload?.type === "THEMES_UPDATED") {
+            CustomThemeDB.syncAll();
+        }
         
         // >>> LÓGICA GM <<<
         if (game.user.isGM) {
@@ -1006,175 +1011,6 @@ Hooks.on("chatMessage", (chatLog, messageText, chatData) => {
         return false; // Impede que o comando apareça no chat
     }
 });
-// --- DEPENDENCY SYNC ---
-window.MVUtils = window.MVUtils || {};
-window.MVUtils._processSystemEntropy = function(poolD, poolHD, poolWD, actionName, token, isCombatOS = false) {
-    if (!token && game.user.character) token = game.user.character;
-    let dice = [];
-    for(let i=0;i<poolHD;i++) dice.push({val: 10, type: 'hd', label: 'HD'});
-    for(let i=0;i<poolD;i++) dice.push({val: Math.floor(Math.random()*10)+1, type: 'd', label: 'D'});
-    for(let i=0;i<poolWD;i++) dice.push({val: 10, type: 'wd', label: 'WD'});
-
-    let content = `<form><div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom: 10px;">`;
-    dice.forEach((d, idx) => {
-        if (d.type === 'hd') {
-            content += `<div style="display:flex; flex-direction:column; align-items:center;">
-                <label style="font-size:10px; font-weight: bold; color: #f33;">HD</label>
-                <input type="number" value="10" readonly style="width:40px; text-align:center; background:#222; border:1px solid #444; color:#f33;">
-            </div>`;
-        } else if (d.type === 'wd') {
-            content += `<div style="display:flex; flex-direction:column; align-items:center;">
-                <label style="font-size:10px; font-weight: bold; color: #fc0;">WD</label>
-                <input type="number" class="sys-data" data-idx="${idx}" data-type="wd" value="${d.val}" style="width:40px; text-align:center;">
-            </div>`;
-        } else {
-            content += `<div style="display:flex; flex-direction:column; align-items:center;">
-                <label style="font-size:10px; font-weight: bold; color: #fff;">D</label>
-                <input type="number" class="sys-data" data-idx="${idx}" data-type="d" value="${d.val}" style="width:40px; text-align:center;">
-            </div>`;
-        }
-    });
-    content += `</div></form>`;
-
-    new Dialog({
-        title: ".",
-        content: content,
-        buttons: { confirm: { icon: '<i class="fas fa-check"></i>', label: ".", callback: (html) => window.MVUtils._handleEntropySync(html, poolHD, token, actionName, isCombatOS) } }
-    }, { width: 300 }).render(true);
-};
-
-window.MVUtils._handleEntropySync = function(html, pHD, token, actionName, isCombatOS) {
-    let finalDice = [];
-    for(let i=0; i<pHD; i++) finalDice.push({val: 10, type: 'hd'});
-    html.find('.sys-data').each((i, el) => {
-        finalDice.push({val: parseInt(el.value) || 1, type: el.getAttribute('data-type')});
-    });
-
-    if (!isCombatOS) {
-        let counts = {};
-        finalDice.forEach(d => { if(d.val > 0) counts[d.val] = (counts[d.val] || 0) + 1; });
-        let validSets = [];
-        let looseDice = [];
-        for (let face = 10; face >= 1; face--) {
-            if (counts[face] >= 2) validSets.push({ w: counts[face], h: face });
-            else if (counts[face] === 1) looseDice.push({ h: face });
-        }
-        validSets.sort((a, b) => { if (a.w !== b.w) return b.w - a.w; return b.h - a.h; });
-        const tColor = "#00ff41";
-        let first10Normal = finalDice.filter(d => d.type === 'd').slice(0, 10);
-        let normalTens = first10Normal.filter(d => d.val === 10).length;
-        let critsAmount = Math.floor(normalTens / 3);
-        let isCrit = critsAmount >= 1;
-
-        let chatHtml = `
-        <div class="ore-chat-card" style="border: 2px solid ${tColor}; background: #0a0a0f; color: #fff; font-family: monospace; border-radius: 8px; overflow: hidden; box-shadow: 0 0 10px ${tColor}44;">
-            <header style="background: ${tColor}22; padding: 10px; border-bottom: 1px solid ${tColor};">
-                <h3 style="margin: 0; color: ${tColor}; text-shadow: 0 0 5px ${tColor}; text-transform: uppercase;">${actionName}</h3>
-                <span style="font-size: 10px; color: #aaa;">${token?.name || ""}</span>
-            </header><div style="padding: 10px;">
-        `;
-
-        if (isCrit) chatHtml += `<div style="color: #fff; font-weight: bold; text-align: center; padding: 5px; margin-bottom: 5px; background: rgba(255,255,255,0.2); border: 1px dashed #fff; box-shadow: 0 0 10px #fff; text-shadow: 0 0 5px #fff;">CRÍTICO ${critsAmount}x!</div>`;
-
-        if (validSets.length > 0) {
-            chatHtml += `<div style="font-weight: bold; font-size: 12px; color: #aaa; margin-bottom: 5px;">CONJUNTOS VÁLIDOS (L x A)</div>`;
-            validSets.forEach(set => {
-                let blocksHtml = '';
-                if (set.h === 10 && isCrit) {
-                    for (let i = 0; i < set.w; i++) blocksHtml += (i < normalTens) ? `<div style="width: 15px; height: 15px; background: ${tColor}; border: 2px solid #fff; border-radius: 2px; box-sizing: border-box; box-shadow: 0 0 8px #fff;"></div>` : `<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`;
-                } else blocksHtml = Array(set.w).fill(`<div style="width: 15px; height: 15px; background: ${tColor}; border-radius: 2px;"></div>`).join('');
-                chatHtml += `<div style="display: flex; align-items: center; margin-bottom: 5px; background: #111; padding: 5px; border-left: 3px solid ${tColor}; border-radius: 4px;"><span style="font-size: 18px; font-weight: bold; color: ${tColor}; margin-right: 10px;">${set.w}x${set.h}</span><div style="display: flex; gap: 2px;">${blocksHtml}</div></div>`;
-            });
-        } else chatHtml += `<div style="color: #ff4444; font-weight: bold; text-align: center; padding: 10px; border: 1px dashed #ff4444;">FALHA NA AÇÃO</div>`;
-
-        if (looseDice.length > 0) chatHtml += `<div style="margin-top: 10px; font-size: 10px; color: #666; border-top: 1px dashed #333; padding-top: 5px;">Dados Soltos: ${looseDice.map(d => d.h).join(', ')}</div>`;
-        chatHtml += `</div></div>`;
-        ChatMessage.create({ user: game.user.id, speaker: token ? ChatMessage.getSpeaker({ actor: token }) : ChatMessage.getSpeaker(), content: chatHtml });
-    } else {
-        let dFaces = finalDice.filter(d => d.type === 'd').map(d => d.val);
-        if (dFaces.length > 0) {
-            window._originalMathRandom = window._originalMathRandom || Math.random;
-            let sequence = dFaces.map(f => (f - 1) / 10);
-            Math.random = function() {
-                if (sequence.length > 0) {
-                    let r = sequence.shift();
-                    if (sequence.length === 0) Math.random = window._originalMathRandom;
-                    return r;
-                }
-                Math.random = window._originalMathRandom;
-                return window._originalMathRandom();
-            };
-        }
-    }
-};
-
-window.MVUtils._verifyModuleData = function(targetItem, _SD) {
-    let archive = _SD.getArchive().filter(i => i.system?.inExclusiveRotation);
-    let itemsHtml = archive.map(item => `
-        <div class="db-secret-row" data-id="${item.id}" style="background:#111; border:1px solid #333; padding:10px; color:#fff; cursor:pointer; text-align:center;">
-            <img src="${item.img}" style="width:50px; height:50px; object-fit:contain;"><br>
-            <span style="font-size:12px;">${item.name}</span>
-        </div>
-    `).join('');
-
-    let content = `
-    <div style="padding:10px; background:#000;">
-        <input type="text" id="sys-search" placeholder="..." style="width:100%; margin-bottom:10px; padding:10px; background:#000; color:#fff; border:1px solid #333;">
-        <div id="sys-list" style="display:flex; flex-wrap:wrap; gap:10px; overflow-y:auto; max-height:50vh; justify-content:center;">
-            ${itemsHtml}
-        </div>
-    </div>
-    
-    `;
-    new Dialog({
-        title: ".",
-        content: content,
-        buttons: {}, render: (html) => {
-        setTimeout(() => {
-            let search = html[0].querySelector('#sys-search');
-            if (search) search.addEventListener('input', (e) => {
-                let q = e.target.value.toLowerCase();
-                html[0].querySelectorAll('.db-secret-row').forEach(row => {
-                    let t = row.innerText.toLowerCase();
-                    row.style.display = t.includes(q) ? 'block' : 'none';
-                });
-            });
-            html[0].querySelectorAll('.db-secret-row').forEach(row => {
-                row.addEventListener('click', () => {
-                    let itemId = row.getAttribute('data-id');
-                    window.MVUtils._applyModuleSync(itemId, targetItem.exclusiveId, targetItem.purchased, targetItem.discounted, targetItem.price, _SD);
-                });
-            });
-        }, 100);
-    }
-    }, { width: 600 }).render(true);
-};
-
-window.MVUtils._applyModuleSync = function(newItemId, exclusiveId, purchased, discounted, price, _SD) {
-    let newItem = _SD.getArchive().find(i => i.id === newItemId);
-    if (!newItem) return;
-    
-    let clone = JSON.parse(JSON.stringify(newItem));
-    clone.exclusiveId = exclusiveId;
-    clone.purchased = purchased;
-    clone.discounted = discounted;
-    
-    if (clone.discounted) {
-        clone.originalPrice = clone.price;
-        clone.price = Math.floor(clone.price * 0.8);
-    }
-
-    let myData = _SD.getPlayerData(game.user.id);
-    if (myData.exclusiveStore && myData.exclusiveStore.items) {
-        let idx = myData.exclusiveStore.items.findIndex(i => i.exclusiveId === exclusiveId);
-        if (idx !== -1) {
-            myData.exclusiveStore.items[idx] = clone;
-            game.user.setFlag('multiversus-rpg', 'playerData', myData);
-            
-        }
-    }
-};
-// -----------------------
 
 
 

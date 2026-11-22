@@ -2,8 +2,9 @@
     import { slide, fade } from 'svelte/transition';
     import { createEventDispatcher } from 'svelte';
     import { CombatEffect } from '../../../Logic/CombatEffect.js';
-import { CombatManager } from '../../../Logic/CombatManager.js';
+    import { CombatManager } from '../../../Logic/CombatManager.js';
     import { OnlineCombat } from '../../../Logic/OnlineCombat.js'; 
+    
     
     import ActionCard from './ActionCard.svelte';
     import PoolBuilder from './PoolBuilder.svelte';

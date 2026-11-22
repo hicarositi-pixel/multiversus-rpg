@@ -1,6 +1,7 @@
 <script>
     import { fade, slide, scale } from 'svelte/transition';
     import { ORE } from '../../../Logic/ORE.js';
+    
 
     // Props que este componente recebe do MobileHUD
     export let actor;

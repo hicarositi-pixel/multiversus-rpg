@@ -1,9 +1,10 @@
 let lastThemeApplied = null;
 
 export const ThemeEngine = {
-    apply: (themeKey, themeData) => {
-        // Se o tema for o mesmo que já está aplicado, aborta para não dar LAG
-        if (themeKey === lastThemeApplied) return;
+    getLastAppliedKey: () => lastThemeApplied,
+    apply: (themeKey, themeData, force = false) => {
+        // Se o tema for o mesmo que já está aplicado, aborta para não dar LAG (a menos que force=true)
+        if (!force && themeKey === lastThemeApplied) return;
 
         const styleId = "multiversus-theme-injector";
         const oldStyle = document.getElementById(styleId);

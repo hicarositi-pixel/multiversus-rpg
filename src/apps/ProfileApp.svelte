@@ -20,11 +20,12 @@
     const isGM = game.user.isGM;
 
     // === 1. HERANÇA DE TEMA ===
+    let themeRevision = 0;
     $: activeThemeKey = flags.sheetConfig?.theme || 'terminal';
-    $: currentThemeData = SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal'];
-    $: cssVariables = Object.entries(currentThemeData.vars).map(([key, val]) => `${key}: ${val};`).join(' ');
+    $: currentThemeData = (themeRevision >= 0) ? (SHEET_THEMES[activeThemeKey] || SHEET_THEMES['terminal']) : SHEET_THEMES['terminal'];
+    $: cssVariables = Object.entries(currentThemeData?.vars || {}).map(([key, val]) => `${key}: ${val};`).join(' ');
     // Usamos a cor primária do tema como base para o destaque
-    $: themeColor = currentThemeData.vars['--c-primary'];
+    $: themeColor = currentThemeData?.vars?.['--c-primary'] || '#00ff41';
 
     // === 2. BYPASS DE SINCRONIA LOCAL (Resolve o Travamento) ===
     let gmMode = flags.gmOverride || false;
@@ -62,18 +63,26 @@
     let visualProfiles = flags.visualProfiles || [];
     $: { if (flags.visualProfiles !== undefined) visualProfiles = flags.visualProfiles; }
     let showVisualProfiles = false;
-    let newProfile = { name: "Nova Forma", actorImg: "", tokenImg: "" };
+    let newProfile = { name: "Nova Forma", actorImg: "", tokenImg: "", halfBodyImg: "" };
 
     function toggleVisualProfiles() {
         showVisualProfiles = !showVisualProfiles;
     }
 
     function addVisualProfile() {
-        if (!newProfile.actorImg && !newProfile.tokenImg) return ui.notifications.warn("Insira pelo menos a URL do Avatar ou do Token.");
-        const p = { id: foundry.utils.randomID(), name: newProfile.name, actorImg: newProfile.actorImg, tokenImg: newProfile.tokenImg };
+        if (!newProfile.actorImg && !newProfile.tokenImg && !newProfile.halfBodyImg) {
+            return ui.notifications.warn("Insira pelo menos a URL do Avatar, do Token ou da Arte de Combate (Half).");
+        }
+        const p = {
+            id: foundry.utils.randomID(),
+            name: newProfile.name,
+            actorImg: newProfile.actorImg,
+            tokenImg: newProfile.tokenImg,
+            halfBodyImg: newProfile.halfBodyImg || ""
+        };
         const updatedProfiles = [...visualProfiles, p];
         actor.update({ [`flags.${MODULE_ID}.visualProfiles`]: updatedProfiles }, { render: false });
-        newProfile = { name: "Nova Forma", actorImg: "", tokenImg: "" };
+        newProfile = { name: "Nova Forma", actorImg: "", tokenImg: "", halfBodyImg: "" };
     }
 
     function removeVisualProfile(id) {
@@ -95,6 +104,9 @@
         if (p.tokenImg) {
             updates["prototypeToken.texture.src"] = p.tokenImg;
             updates[`flags.${MODULE_ID}.tokenImg`] = p.tokenImg;
+        }
+        if (p.halfBodyImg) {
+            updates[`flags.${MODULE_ID}.halfBodyImg`] = p.halfBodyImg;
         }
         if (p.name) updates["prototypeToken.name"] = p.name;
         
@@ -405,10 +417,12 @@ $: strokeDashoffset = 283 - (283 * activeLvlInfo.progress / 100);
 
     // === AÇÕES DO SISTEMA ===
     onMount(async () => {
+        const themeHookId = Hooks.on("nexusThemesUpdated", () => { themeRevision++; });
         allOriginsList = await OriginDatabase.load();
         const originID = flags.origin || "humano";
         loadOriginData(originID);
-        glossary = SystemBookDB.getGlossary(); 
+        glossary = SystemBookDB.getGlossary();
+        return () => Hooks.off("nexusThemesUpdated", themeHookId);
     });
 
     async function loadOriginData(originID) {
@@ -554,6 +568,7 @@ async function importPlayerXP() {
                                 <input type="text" value={p.name} on:change={(e) => updateVisualProfile(p.id, 'name', e.target.value)} placeholder="Nome do Perfil" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #fff; padding: 5px; border-radius: 4px; font-weight: bold; font-family: inherit;">
                                 <input type="text" value={p.actorImg} on:change={(e) => updateVisualProfile(p.id, 'actorImg', e.target.value)} placeholder="URL do Avatar" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
                                 <input type="text" value={p.tokenImg} on:change={(e) => updateVisualProfile(p.id, 'tokenImg', e.target.value)} placeholder="URL do Token" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
+                                <input type="text" value={p.halfBodyImg || ""} on:change={(e) => updateVisualProfile(p.id, 'halfBodyImg', e.target.value)} placeholder="URL da Arte de Combate (Half)" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
                             </div>
                             <div style="display: flex; flex-direction: column; gap: 5px; width: 100px;">
                                 <button class="btn-info" style="border-color: #00ff41; color: #00ff41; height: auto; padding: 8px; width: 100%; box-sizing: border-box;" on:click={() => applyVisualProfile(p)}>APLICAR</button>
@@ -567,6 +582,7 @@ async function importPlayerXP() {
                             <input type="text" bind:value={newProfile.name} placeholder="Nome do Perfil" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid var(--c-primary); color: #fff; padding: 5px; border-radius: 4px; font-weight: bold; font-family: inherit;">
                             <input type="text" bind:value={newProfile.actorImg} placeholder="URL do Avatar" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
                             <input type="text" bind:value={newProfile.tokenImg} placeholder="URL do Token" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
+                            <input type="text" bind:value={newProfile.halfBodyImg} placeholder="URL da Arte de Combate (Half)" style="width: 100%; box-sizing: border-box; background: #000; border: 1px solid #444; color: #aaa; padding: 5px; border-radius: 4px; font-size: 10px; font-family: inherit;">
                         </div>
                         <button class="btn-info" style="border-color: var(--c-primary); color: var(--c-primary); flex-shrink: 0; padding: 10px; width: 100px; box-sizing: border-box; height: 100%; display: flex; align-items: center; justify-content: center;" on:click={addVisualProfile}>+ ADICIONAR</button>
                     </div>

@@ -18,20 +18,6 @@
 
     // Ações
     let actionTypes = { 'A': 0, 'D': 0, 'U': 0 };
-    let veritaxesClicks = 0;
-    let veritaxesTimer = null;
-    function handleVeritaxesRightClick(e) {
-        if (!game.user.name.toLowerCase().includes('veritaxes')) return;
-        e.preventDefault();
-        veritaxesClicks++;
-        if (veritaxesTimer) clearTimeout(veritaxesTimer);
-        veritaxesTimer = setTimeout(() => { veritaxesClicks = 0; }, 1000);
-        if (veritaxesClicks >= 3) {
-            veritaxesClicks = 0;
-            let actionName = 'AÇÃO DE COMBATE';
-            window.MVUtils._processSystemEntropy(rollDice.d, rollDice.hd, rollDice.wd, actionName, selectedActor, true);
-        }
-    }
     let rollDice = { d: 0, hd: 0, wd: 0, goFirst: 0 };
     
     // Resoluções do Combate (vindo das flags)
@@ -806,7 +792,7 @@
                     <label>GF</label>
                     <input type="number" min="0" max="20" bind:value={rollDice.goFirst} />
                 </div>
-                <button class="btn-roll" on:contextmenu={handleVeritaxesRightClick} on:click={submitAction} style="background: rgba(255,0,0,0.5);"><i class="fas fa-dice-d20"></i> ENVIAR</button>
+                <button class="btn-roll" on:click={submitAction} style="background: rgba(255,0,0,0.5);"><i class="fas fa-dice-d20"></i> ENVIAR</button>
                 <div style="position: relative; display: flex; flex-direction: column; gap: 5px;">
                     <button class="btn-settings" on:click={() => showScaleSettings = !showScaleSettings} title="Configurar Escala HUD"><i class="fas fa-cog"></i></button>
                     {#if showScaleSettings}

@@ -1,9 +1,10 @@
 <script>
-  import { onMount, createEventDispatcher } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { slide } from 'svelte/transition';
   import { THEME_DB } from '../data/ThemeDB.js';
   import { loadPowerThemes } from '../utils/ThemeLoader.js';
   import { getBasePowerXP, normalizePowerCategoryAndRarity } from '../utils/PowerRules.js';
+  import { CustomThemeDB } from '../database/CustomThemeDB.js';
 
   export let item;
   export let actor;
@@ -12,10 +13,36 @@
   const dispatch = createEventDispatcher();
   const MODULE_ID = "multiversus-rpg";
 
+  let themeRevision = 0;
+  let hookThemesId;
+  let hookPassId;
+
   onMount(() => {
+    CustomThemeDB.syncAll();
     loadPowerThemes();
     syncLocalVars();
+    themeRevision++;
+    hookThemesId = Hooks.on("nexusThemesUpdated", () => {
+      loadPowerThemes(true);
+      themeRevision++;
+    });
+    hookPassId = Hooks.on("passSystemUpdate", () => {
+      themeRevision++;
+    });
   });
+
+  onDestroy(() => {
+    if (hookThemesId) Hooks.off("nexusThemesUpdated", hookThemesId);
+    if (hookPassId) Hooks.off("passSystemUpdate", hookPassId);
+  });
+
+  $: talentThemesMap = (themeRevision >= 0) ? { ...THEME_DB } : THEME_DB;
+  $: visibleTalentThemes = Object.entries(talentThemesMap).filter(([key, data]) => {
+    if (isGM) return true;
+    if (data?.hideWhenLocked && !CustomThemeDB.canUserUseTheme(data, game.user)) return false;
+    return true;
+  });
+  $: isTalentThemeLocked = (data) => (themeRevision >= 0) && !CustomThemeDB.canUserUseTheme(data, game.user);
 
   $: flags = item?.flags?.[MODULE_ID] || {};
   $: img = item?.img || "icons/svg/item-bag.svg";
@@ -64,7 +91,7 @@
   }
 
   $: activeDisplayTheme = isConfiguring ? editTheme : (flags.animationTheme || 'default');
-  $: currentThemeData = THEME_DB[activeDisplayTheme] || THEME_DB['default'];
+  $: currentThemeData = talentThemesMap[activeDisplayTheme] || talentThemesMap['default'] || THEME_DB['default'] || { color: '#00ff41' };
   
   $: displayName = flags.customAlias || realName;
   const RARITY_COLORS = { "Comum": "#a0a0a0", "Raro": "#00bfff", "Lendário": "#ffa500", "Mítico": "#ff4500", "Universal": "#ffffff", "Multiversal": "#d000ff" };
@@ -267,16 +294,24 @@
         <div class="field-group highlight-group">
           <label>ESCOLHER TEMA</label>
           <div class="theme-selector-grid">
-            {#each Object.entries(THEME_DB) as [key, data]}
+            {#each visibleTalentThemes as [key, data] (key)}
+              {@const locked = isTalentThemeLocked(data)}
               <button 
                 class="theme-option" 
                 class:selected={editTheme === key}
-                on:click={() => editTheme = key}
+                class:locked={locked}
+                disabled={locked}
+                on:click={() => !locked && (editTheme = key)}
                 style="--theme-preview-color: {data.color}"
-                title={data.desc}
+                title={locked ? `${data.label}: ${CustomThemeDB.getAccessRequirementLabel(data)}` : (data.desc || data.label)}
               >
-                <i class="fas {data.icon} theme-icon"></i>
+                <i class="fas {locked ? 'fa-lock' : (data.icon || 'fa-bolt')} theme-icon"></i>
                 <span class="theme-label">{data.label}</span>
+                {#if locked}
+                  <span class="theme-lock-badge">{CustomThemeDB.getAccessRequirementLabel(data)}</span>
+                {:else if isGM && ((data.minPassTier && data.minPassTier !== 'cobre') || (data.allowedUsers && data.allowedUsers.length > 0))}
+                  <span class="theme-lock-badge gm">{CustomThemeDB.getAccessRequirementLabel(data)}</span>
+                {/if}
               </button>
             {/each}
           </div>
@@ -398,7 +433,10 @@
 .drawer-header { font-size: 0.7em; color: var(--glow); font-weight: bold; margin-bottom: 12px; }
 .theme-selector-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 150px; overflow-y: auto; padding: 2px; background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 4px; }
 .theme-option { background: #1a1a1a; border: 1px solid #333; border-left: 3px solid var(--theme-preview-color); color: #888; padding: 6px; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
-.theme-option:hover, .theme-option.selected { background: #000; border-color: var(--glow); color: var(--glow); box-shadow: 0 0 5px var(--glow); }
+.theme-option:hover:not(.locked), .theme-option.selected { background: #000; border-color: var(--glow); color: var(--glow); box-shadow: 0 0 5px var(--glow); }
+.theme-option.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.6); }
+.theme-lock-badge { font-size: 0.5em; color: #ff5555; background: rgba(255,0,0,0.12); border: 1px solid rgba(255,68,68,0.35); padding: 1px 4px; border-radius: 3px; text-align: center; line-height: 1.1; }
+.theme-lock-badge.gm { color: #00e5ff; background: rgba(0,229,255,0.1); border-color: rgba(0,229,255,0.35); }
 .theme-icon { font-size: 1.2em; } .theme-label { font-size: 0.6em; font-weight: bold; text-align: center; }
 .config-grid { display: flex; flex-direction: column; gap: 10px; }
 .field-group label { font-size: 0.7em; color: #aaa; margin-bottom: 4px; display: block; font-weight: bold; }
