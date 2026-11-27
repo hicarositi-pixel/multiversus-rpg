@@ -157,4 +157,78 @@ export const CombatThemes = {
             }
         `
     },
+
+    "vampire": {
+        name: "NOSFERATU (Sangue)",
+        vars: {
+            "--c-primary": "#dc143c",     // Carmesim Sangue
+            "--c-bg": "#080103",          // Preto Abissal
+            "--c-panel": "rgba(18, 2, 5, 0.95)",
+            "--c-border": "#8a0303",      // Borda Sangue Seco
+            "--c-shock": "#f59e0b",       // Âmbar / Amarelo Dourado (Shock)
+            "--c-kill": "#ff002b",        // Vermelho Vivo (Killing)
+            "--f-main": "'Cinzel Decorative', serif",
+            "--r-node": "8px",
+            "--r-slot": "0 50% 50% 50%"   // Formato base de gota
+        },
+        css: `
+            @keyframes blood-pulse {
+                0%, 100% { box-shadow: 0 0 6px rgba(255, 0, 43, 0.6), inset 0 0 4px #ff6b81; }
+                50%      { box-shadow: 0 0 14px rgba(255, 0, 43, 1), inset 0 0 8px #ffffff; }
+            }
+
+            /* Card do Membro (Relicário Gótico) */
+            .limb-node { 
+                border: 1px solid #d4af37 !important; 
+                background: radial-gradient(circle at top, #240309 0%, #070102 100%) !important;
+                box-shadow: inset 0 0 18px rgba(138, 3, 3, 0.45), 0 4px 12px rgba(0, 0, 0, 0.9) !important;
+                position: relative;
+            }
+
+            /* Nome do Membro */
+            .loc-tag { 
+                color: #d4af37 !important; 
+                font-weight: bold !important; 
+                letter-spacing: 1.5px !important;
+                text-transform: uppercase !important;
+                text-shadow: 0 0 6px rgba(220, 20, 60, 0.8) !important;
+                border-bottom: 1px solid rgba(212, 175, 55, 0.3) !important;
+            }
+
+            /* Espaçamento extra na grade para a ponta da gota não cortar */
+            .hp-grid { 
+                padding: 8px 6px !important; 
+                gap: 8px !important; 
+            }
+
+            /* VIDA CHEIA: GOTA PRETA (Obsidiana / Sangue Coagulado) */
+            .hp-slot { 
+                border-radius: 0 50% 50% 50% !important;
+                transform: rotate(45deg) scale(0.92) !important;
+                margin: 3px !important;
+                background: radial-gradient(circle at 35% 35%, #2b2b2b 0%, #050505 80%) !important; 
+                border: 1px solid #555555 !important; 
+                box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.9), 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+                transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            }
+            .hp-slot:hover {
+                transform: rotate(45deg) scale(1.12) !important;
+                border-color: #d4af37 !important;
+            }
+
+            /* DANO NÃO-LETAL (SHOCK): GOTA AMARELA (Icor / Brasa) */
+            .hp-slot.shock, .hp-slot.bashing { 
+                background: radial-gradient(circle at 35% 35%, #fef08a 0%, #eab308 55%, #854d0e 100%) !important; 
+                border: 1px solid #fef08a !important; 
+                box-shadow: 0 0 8px rgba(234, 179, 8, 0.75), inset 0 0 4px rgba(255, 255, 255, 0.5) !important; 
+            }
+
+            /* DANO LETAL (KILLING): GOTA VERMELHA (Sangue Fresco Pulsante) */
+            .hp-slot.kill, .hp-slot.lethal, .hp-slot.killing { 
+                background: radial-gradient(circle at 35% 35%, #ff8fa3 0%, #dc143c 55%, #590202 100%) !important; 
+                border: 1px solid #ff4d6d !important; 
+                animation: blood-pulse 1.8s infinite ease-in-out !important;
+            }
+        `
+    },
 };
